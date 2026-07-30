@@ -248,20 +248,28 @@
     document.body.appendChild(wrap);
   }
 
+  // 로그인은 됐는데 더 못 가는 경우 — 로딩 화면에 갇히지 않게 이유를 보여준다
+  function stuck(msg) {
+    if (gateMsg) { gateMsg.textContent = msg; return; }
+    if (gate) gate.remove();
+    gate = null;
+    showSetup(msg + '<br><br><b>README.md</b> 의 “처음 한 번만 하는 설정” 을 확인해 주세요.');
+  }
+
   async function openApp() {
     var row;
     try {
       row = await fetchRow();
     } catch (e) {
-      if (gateMsg) gateMsg.textContent = '데이터를 읽지 못했어요. schema.sql 을 실행했는지 확인해 주세요';
+      stuck('데이터를 읽지 못했어요. schema.sql 을 실행했는지 확인해 주세요.');
       return;
     }
     if (!row) {
       // 첫 접속 — 처음 데이터를 만들어 둔다
       var seeded = seedFn ? seedFn() : {};
       var ins = await sb.from('family_state').insert({ id: ROW_ID, doc: seeded, rev: 1 }).select('doc,rev').maybeSingle();
-      if (ins.error) {
-        if (gateMsg) gateMsg.textContent = '이 계정은 우리 가족 목록에 없어요 (family_allow 확인)';
+      if (ins.error || !ins.data) {
+        stuck('이 계정은 아직 우리 가족 명단에 없어요 (family_allow 표에 이메일 넣기).');
         return;
       }
       row = ins.data;
