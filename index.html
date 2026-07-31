@@ -443,12 +443,20 @@ input,button,textarea,select{font-family:inherit;}
           <div style="font-size:14px;margin:8px 0;line-height:1.5;">{{ po.txt }}</div>
           <sc-if value="{{ po.hasPhoto }}" hint-placeholder-val="{{ false }}"><div style="width:100%;height:220px;border-radius:14px;margin-bottom:8px;background-image:url('{{ po.photo }}');background-size:cover;background-position:center;"></div></sc-if>
           <sc-if value="{{ po.hasFcard }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;align-items:center;gap:12px;border-radius:14px;margin-bottom:8px;padding:12px 14px;background-image:{{ po.fcBg }};border:2px solid rgba(255,255,255,.65);font-family:'Jua',system-ui,sans-serif;">
-              <span style="font-size:42px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));">{{ po.fcIcon }}</span>
-              <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
-                <span style="font-size:16px;color:#fff;text-shadow:0 2px 4px rgba(4,32,62,.6);">{{ po.fcSpecies }} · {{ po.fcLen }}</span>
-                <span style="font-size:12px;letter-spacing:1px;">{{ po.fcStars }}</span>
-                <span style="font-size:10.5px;font-style:italic;font-weight:700;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(4,32,62,.6);">KF {{ po.fcNo }}</span>
+            <div style="width:180px;margin-bottom:8px;border-radius:16px;padding:3px;background-image:linear-gradient(125deg,#FFE9A8,#FFD166,#C8F0FF,#FFB8E0,#FFE9A8);background-size:200% 100%;animation:holo 7s linear infinite;box-shadow:0 6px 13px rgba(6,34,66,.16);font-family:'Jua',system-ui,sans-serif;">
+              <div style="border-radius:13px;overflow:hidden;background:var(--card,#fff);">
+                <div style="position:relative;height:104px;display:flex;align-items:center;justify-content:center;background-image:{{ po.fcBg }};">
+                  <span style="position:absolute;inset:0;background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.14) 0 10px,rgba(255,255,255,0) 10px 22px);"></span>
+                  <span style="position:relative;font-size:48px;line-height:1;filter:drop-shadow(0 5px 7px rgba(6,40,76,.45));">{{ po.fcIcon }}</span>
+                </div>
+                <div style="padding:8px 10px 10px;">
+                  <div style="display:flex;align-items:baseline;gap:4px;">
+                    <span style="font-size:15px;font-weight:800;">{{ po.fcSpecies }}</span>
+                    <span style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);">{{ po.fcLen }}</span>
+                  </div>
+                  <div style="font-size:10px;color:#E0A73B;margin-top:2px;letter-spacing:1px;">{{ po.fcStars }}</div>
+                  <div style="font-size:10px;font-style:italic;font-weight:700;color:var(--sub,#8A8177);margin-top:3px;">KF {{ po.fcNo }}</div>
+                </div>
               </div>
             </div>
           </sc-if>
