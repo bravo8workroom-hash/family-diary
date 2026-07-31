@@ -3150,6 +3150,9 @@ class Component extends DCLogic {
     const softChip=(act)=>act?{bg:sk.soft,fg:sk.tx,bd:sk.ac}:{bg:sk.card,fg:sk.sub,bd:sk.line};
     const evByDate={};D.events.forEach(ev=>{(evByDate[ev.d]=evByDate[ev.d]||[]).push(ev);});
     const mcol=id=>((D.profiles.find(p=>p.id===id)||{}).color)||this.MCOLOR[id]||'';
+    // 일정 색: 대상이 특정 가족이면 그 사람 색, '가족 모두'면 일정을 만든 사람 색
+    const evCol=ev=>{const m0=String(ev.m||'').split(',')[0];
+      return (m0&&m0!=='fam'&&mcol(m0))||(ev.by&&mcol(ev.by))||this.MCOLOR.fam;};
     const V={
       loading:false,noUser:!u,hasUser:!!u,f,on,
       skinBg:sk.bg,skinCard:sk.card,skinAc:sk.ac,skinOn:sk.on,skinSoft:sk.soft,skinLine:sk.line,skinTx:sk.tx,skinSub:sk.sub,
@@ -3228,7 +3231,7 @@ class Component extends DCLogic {
     V.weekV=[...Array(7)].map((_,i)=>{const d=new Date(ws);d.setDate(ws.getDate()+i);const ds=this.iso(d);const evs=evByDate[ds]||[];
       return{day:this.DAYS[i],dayColor:i===0?'#E5484D':(i===6?'#3B82F6':sk.sub),num:d.getDate(),
         bg:ds===S.selDate?sk.ac:(ds===t?sk.soft:'transparent'),fg:ds===S.selDate?sk.on:sk.tx,
-        dots:evs.slice(0,3).map(ev=>({c:mcol(String(ev.m||'').split(',')[0])||'#999'})),sel:()=>this.setState({selDate:ds})};});
+        dots:evs.slice(0,3).map(ev=>({c:evCol(ev)})),sel:()=>this.setState({selDate:ds})};});
     V.selLabel=this.dLabel(S.selDate);
     const mName=id=>({mom:'엄마',dad:'아빠',fam:'가족'}[id]||(D.profiles.find(p=>p.id===id)||{}).name||'');
     const evFlash=msg=>{this.setState({evMsg:msg});setTimeout(()=>this.setState({evMsg:''}),2500);};
@@ -3240,7 +3243,7 @@ class Component extends DCLogic {
       this.mut(d=>{const x=d.events.find(y=>y.id===evId);const ci=x&&(x.cl||[]).find(z=>z.id===ciId);
         if(ci){ci.dn=done;if(done){ci.db=u.id;ci.da=Date.now();}else{delete ci.db;delete ci.da;}}});};
     V.dayEventsV=dayEvs.map(ev=>{const canEdit=!ev.by||ev.by===u.id;
-      return{title:ev.t,time:ev.time||'종일',memo:ev.memo||'',hasMemo:!!(ev.memo||'').trim(),c:mcol(String(ev.m||'').split(',')[0])||'#999',who:String(ev.m||'fam').split(',').map(mName).filter(Boolean).join('·'),canEdit,
+      return{title:ev.t,time:ev.time||'종일',memo:ev.memo||'',hasMemo:!!(ev.memo||'').trim(),c:evCol(ev),who:String(ev.m||'fam').split(',').map(mName).filter(Boolean).join('·'),canEdit,
       imp:!!ev.imp,hasCl:clMine(ev)&&(ev.cl||[]).some(c=>!c.dn),
       clV:clMine(ev)?(ev.cl||[]).filter(c=>!c.dn).map(c=>({t:c.t,tog:e=>{e.stopPropagation();clSet(ev.id,c.id,true);}})):[],
       open:()=>{if(ev.qid){const qq=this.qFind(D,ev.qid);
@@ -3316,7 +3319,7 @@ class Component extends DCLogic {
     V.calNext=()=>this.setState({calM:this.shiftM(S.calM,1)});
     const fdByDate={};D.feed.forEach(po=>{(fdByDate[po.d]=fdByDate[po.d]||[]).push(po);});
     V.calCellsV=this.grid(S.calM).map(c=>{
-      const evs=(evByDate[c.ds]||[]).map(ev=>({t:ev.t,bg:(mcol(String(ev.m||'').split(',')[0])||'#999999')+'2E',fg:sk.tx}));
+      const evs=(evByDate[c.ds]||[]).map(ev=>({t:ev.t,bg:evCol(ev)+'2E',fg:sk.tx}));
       const fds=(fdByDate[c.ds]||[]).filter(po=>!po.fcard).map(po=>({t:'📸 '+((po.txt||'').trim()||'사진'),bg:sk.line+'66',fg:sk.sub}));
       const items=evs.concat(fds); // 피드 이야기는 항상 일정 아래
       return{num:c.num,bg:c.ds===S.selDate?sk.soft:'transparent',fg:c.ds===t?sk.ac:(c.inM?sk.tx:sk.line),
