@@ -6,6 +6,6 @@
 //   실제 데이터는 로그인한 가족만 볼 수 있게 서버에서 막아둡니다.)
 // ─────────────────────────────────────────────────────────────
 window.FAMILY_CONFIG = {
-  url: '',      // 예: https://abcdefghijk.supabase.co
-  anonKey: ''   // 예: sb_publishable_xxxxxxxxxxxxxxxxxxxx
+  url: 'https://bpwuyrhnntlbjgkqilho.supabase.co',      // 예: https://abcdefghijk.supabase.co
+  anonKey: 'sb_publishable_ULOt_kHQlZhQ8f13PA9-0g_Wnb85ocQ'   // 예: sb_publishable_xxxxxxxxxxxxxxxxxxxx
 };
