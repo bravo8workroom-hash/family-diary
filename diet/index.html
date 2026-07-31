@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script src="../store.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&amp;display=swap">
+<style>
+body{margin:0;background:#E9E8E3;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#17A673}a:hover{color:#0E8A5F}
+input,button,select,textarea{font-family:inherit}
+::-webkit-scrollbar{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;min-height:39px}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+</style>
+</helmet>
+<div style="max-width:430px;margin:0 auto;height:100dvh;background:{{appBg}};position:relative;display:flex;flex-direction:column;overflow:hidden;color:#1F1E1A">
+
+  <div style="height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid {{cardBorder}};z-index:5">
+    <div style="display:flex;align-items:center;gap:8px">
+      <a href="../" style="text-decoration:none;font-size:19px;line-height:1;padding:6px 2px;min-width:24px" title="우리집 다이어리로 돌아가기">🏠</a>
+      <span style="font-family:'Baloo 2',sans-serif;font-size:27px;font-weight:800;letter-spacing:0.5px;color:{{accent}}">BRAVO</span>
+    </div>
+    <span style="font-size:12px;font-weight:700;padding:5px 11px;border-radius:99px;background:{{modeBg}};color:{{modeColor}}">{{modeLabel}} 모드</span>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;padding:14px 16px 110px;display:flex;flex-direction:column;gap:14px">
+
+    <sc-if value="{{isHome}}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="홈" style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <sc-if value="{{hasGoal}}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="font-size:26px;font-weight:800;letter-spacing:-0.5px;color:{{accent}}">{{ddayText}}</div>
+              <div style="font-size:12.5px;color:#8B887C;margin-top:2px">목표일 {{goalDateText}}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{noGoal}}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:15px;font-weight:700">목표일이 아직 없어요</div>
+              <div style="font-size:12.5px;color:#8B887C;margin-top:2px">설정에서 목표일을 정해 보세요 <a href="#" onClick="{{gotoSettings}}" style="font-weight:700">설정하기</a></div>
+            </div>
+          </sc-if>
+          <div style="display:flex;background:{{chipBg}};border-radius:{{radS}};padding:3px;flex:none">
+            <button onClick="{{setDiet}}" style="border:0;cursor:pointer;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;background:{{dietBtnBg}};color:{{dietBtnColor}};box-shadow:{{dietBtnShadow}}">다이어트</button>
+            <button onClick="{{setMaint}}" style="border:0;cursor:pointer;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;background:{{maintBtnBg}};color:{{maintBtnColor}};box-shadow:{{maintBtnShadow}}">유지</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <sc-for list="{{wStats}}" as="s" hint-placeholder-count="4">
+            <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radM}};padding:12px 6px;text-align:center">
+              <div style="font-size:11px;color:#8B887C;font-weight:600">{{s.label}}</div>
+              <div style="font-size:16px;font-weight:800;margin-top:4px;color:{{s.color}}">{{s.val}}</div>
+              <div style="font-size:10px;color:#B5B2A6">kg</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">오늘 점수</div>
+          <sc-if value="{{hasTodayLog}}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px">
+              <div style="display:flex;align-items:baseline;gap:3px">
+                <span style="font-size:42px;font-weight:800;letter-spacing:-1px;line-height:1;color:{{modeColor}}">{{todayScore}}</span>
+                <span style="font-size:15px;font-weight:700;color:#8B887C">점</span>
+              </div>
+              <div style="font-size:13px;color:#8B887C;font-weight:600">{{todayKcal}} / {{goalKcal}} kcal</div>
+            </div>
+            <div style="display:flex;height:10px;border-radius:99px;overflow:hidden;background:{{chipBg}}">
+              <div style="width:{{segC}}%;background:#E9A23B"></div>
+              <div style="width:{{segP}}%;background:#E4618C"></div>
+              <div style="width:{{segF}}%;background:#5B8DEF"></div>
+            </div>
+            <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap">
+              <sc-for list="{{macroLegend}}" as="m" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:5px;font-size:12px">
+                  <span style="width:8px;height:8px;border-radius:99px;background:{{m.color}}"></span>
+                  <span style="font-weight:700">{{m.name}}</span>
+                  <span style="color:#1F1E1A;font-weight:600">{{m.a}}%</span>
+                  <span style="color:#B5B2A6">/ 목표 {{m.g}}%</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{noTodayLog}}" hint-placeholder-val="{{ false }}">
+            <div style="padding:18px 0;text-align:center;color:#B5B2A6;font-size:14px">{{emptyScoreMsg}}</div>
+          </sc-if>
+        </div>
+
+        <div ref="{{stripRef}}" onPointerDown="{{stripDown}}" onPointerMove="{{stripMove}}" onPointerUp="{{stripUp}}" onPointerCancel="{{stripUp}}" onClickCapture="{{stripClick}}" style="display:flex;gap:8px;overflow-x:auto;padding:2px 2px 4px;margin:0 -2px;scrollbar-width:none;cursor:grab;touch-action:pan-x">
+          <sc-for list="{{strip}}" as="d" hint-placeholder-count="14">
+            <div onClick="{{d.go}}" style="flex:none;width:46px;cursor:pointer;text-align:center;padding:8px 0 7px;border-radius:{{radS}};background:{{d.bg}};border:1px solid {{d.border}}">
+              <div style="font-size:10.5px;color:{{d.dowColor}};font-weight:600">{{d.dow}}</div>
+              <div style="font-size:15px;font-weight:800;margin-top:2px;color:{{d.numColor}}">{{d.num}}</div>
+              <div style="height:6px;display:flex;justify-content:center;margin-top:3px">
+                <sc-if value="{{d.dot}}" hint-placeholder-val="{{ false }}">
+                  <span style="width:5px;height:5px;border-radius:99px;background:{{d.dotColor}}"></span>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:13px;font-weight:700;color:#8B887C">💪 오늘 운동</div>
+            <div style="font-size:15px;font-weight:800;color:{{woTotalColor}}">{{woTotal}}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <sc-for list="{{woGroups}}" as="g" hint-placeholder-count="2">
+              <div style="font-size:11px;font-weight:800;color:{{g.color}};margin-top:4px;letter-spacing:.5px">{{g.name}}</div>
+              <sc-for list="{{g.rows}}" as="w" hint-placeholder-count="3">
+                <div>
+                  <button onClick="{{w.toggle}}" style="width:100%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;background:{{w.bg}};border-radius:{{radS}};padding:11px 13px;box-sizing:border-box">
+                    <span style="font-size:13px;font-weight:700;color:#1F1E1A">{{w.emoji}} {{w.name}}</span>
+                    <span style="font-size:13px;font-weight:800;color:{{w.timeColor}}">{{w.timeLabel}} {{w.chev}}</span>
+                  </button>
+                  <sc-if value="{{w.open}}" hint-placeholder-val="{{ false }}">
+                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:8px 2px 8px">
+                      <sc-for list="{{w.opts}}" as="o" hint-placeholder-count="9">
+                        <button onClick="{{o.pick}}" style="border:0;cursor:pointer;border-radius:99px;padding:8px 0;font-size:12px;font-weight:700;background:{{o.bg}};color:{{o.color}}">{{o.label}}</button>
+                      </sc-for>
+                      <input value="{{w.dIn}}" onChange="{{w.onD}}" onKeyDown="{{w.onKey}}" onBlur="{{w.commitBlur}}" placeholder="직접" title="예: 1:37 또는 97 (분) · Enter로 저장" style="width:100%;box-sizing:border-box;padding:7px 2px;border:1.5px solid #E3E0D8;border-radius:99px;font-size:12px;font-weight:700;text-align:center;background:#FBFAF7;outline-color:{{accent}}">
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;color:#B5B2A6;margin-top:10px;text-align:center">시간을 고르면 달력에 💪+운동시간으로 기록돼요</div>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">⭐ 모아보기</div>
+          <sc-if value="{{hasStarred}}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:8px;overflow-x:auto;margin:0 -4px;padding:0 4px 2px;scrollbar-width:none">
+              <sc-for list="{{starred}}" as="p" hint-placeholder-count="4">
+                <div onClick="{{p.open}}" style="flex:none;width:96px;height:96px;border-radius:{{radM}};cursor:pointer;overflow:hidden;background:{{p.bg}};display:flex;align-items:center;justify-content:center;font-size:34px;position:relative">
+                  {{p.emoji}}
+                  <sc-if value="{{p.textOnly}}" hint-placeholder-val="{{ false }}">
+                    <span style="position:absolute;inset:0;background:#FBFAF6;padding:8px;font-size:10px;color:#6B6858;line-height:1.45;overflow:hidden;box-sizing:border-box">{{p.preview}}</span>
+                  </sc-if>
+                  <span style="position:absolute;top:5px;right:5px;font-size:12px">⭐</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{noStarred}}" hint-placeholder-val="{{ false }}">
+            <div style="padding:12px 0;text-align:center;color:#B5B2A6;font-size:13px">게시물에서 ☆를 눌러 모아보세요</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isLog}}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="기록" style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <button onClick="{{prevDay}}" style="border:0;background:{{chipBg}};width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:14px;color:#5C594E">◀</button>
+          <label style="position:relative;display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 14px;border-radius:99px;background:{{chipBg}}">
+            <span style="font-size:15px;font-weight:800">{{selLabel}}</span>
+            <span style="font-size:13px;opacity:.55">📅</span>
+            <input type="date" value="{{selDate}}" max="{{todayStr}}" onChange="{{onDatePick}}" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+          </label>
+          <button onClick="{{nextDay}}" disabled="{{nextDisabled}}" style="border:0;background:{{chipBg}};width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:14px;color:{{nextColor}};opacity:{{nextOpacity}}">▶</button>
+        </div>
+
+        <label style="display:flex;align-items:center;justify-content:center;gap:8px;background:{{accent}};color:#fff;border-radius:{{radM}};padding:14px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px {{accentShadow}}">
+          <input type="file" accept="image/*" onChange="{{onPhotoPick}}" style="display:none">
+          📷 AI 자동 기록
+        </label>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:14px 18px">
+        <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">트레이너 칼로리표</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="text-align:center"><div style="font-size:11px;color:#8B887C;font-weight:600">kcal</div><div style="font-size:16px;font-weight:800">{{dayKcal}}</div></div>
+          <div style="width:1px;height:26px;background:{{chipBg}}"></div>
+          <div style="text-align:center"><div style="font-size:11px;color:#E9A23B;font-weight:700">탄수화물</div><div style="font-size:15px;font-weight:800">{{dayC}}g</div></div>
+          <div style="text-align:center"><div style="font-size:11px;color:#E4618C;font-weight:700">단백질</div><div style="font-size:15px;font-weight:800">{{dayP}}g</div></div>
+          <div style="text-align:center"><div style="font-size:11px;color:#5B8DEF;font-weight:700">지방</div><div style="font-size:15px;font-weight:800">{{dayF}}g</div></div>
+        </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;padding:0 4px">
+          <span style="font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:{{dayModeBg}};color:{{dayModeColor}}">{{dayModeLabel}}</span>
+          <sc-if value="{{dayHasLog}}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:14px;font-weight:800">{{dayScore}}점</span>
+          </sc-if>
+          <sc-if value="{{dayNoLog}}" hint-placeholder-val="{{ false }}">
+            <span style="font-size:13px;color:#B5B2A6">{{emptyScoreMsg}}</span>
+          </sc-if>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <button onClick="{{soberYes}}" style="border:0;border-radius:99px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;background:{{soberYesBg}};color:{{soberYesColor}}">🍀 금주 성공</button>
+            <button onClick="{{soberNo}}" style="border:0;border-radius:99px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;background:{{soberNoBg}};color:{{soberNoColor}}">🍺 실패</button>
+          </div>
+        </div>
+
+        <sc-for list="{{meals}}" as="m" hint-placeholder-count="4">
+          <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:14px 18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span style="font-size:14.5px;font-weight:800">{{m.name}}</span>
+                <span style="font-size:12px;color:#8B887C;font-weight:600">{{m.kcalLabel}}</span>
+              </div>
+              <button onClick="{{m.add}}" style="border:0;background:{{chipBg}};color:#5C594E;border-radius:99px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">＋ 추가</button>
+            </div>
+            <sc-if value="{{m.empty}}" hint-placeholder-val="{{ false }}">
+              <div style="padding:8px 0 4px;color:#B5B2A6;font-size:13px">{{emptyMealMsg}}</div>
+            </sc-if>
+            <sc-for list="{{m.items}}" as="it" hint-placeholder-count="2">
+              <div onClick="{{it.open}}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #F7F6F2;cursor:pointer">
+                <div style="min-width:0">
+                  <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{it.name}} <span style="font-weight:500;color:#8B887C;font-size:12.5px">{{it.amt}}</span></div>
+                  <div style="font-size:11.5px;margin-top:2px;color:#8B887C"><span style="color:#E9A23B;font-weight:700">탄 {{it.c}}</span> · <span style="color:#E4618C;font-weight:700">단 {{it.p}}</span> · <span style="color:#5B8DEF;font-weight:700">지 {{it.f}}</span> g</div>
+                </div>
+                <span style="font-size:13.5px;font-weight:800;flex:none">{{it.kcal}} kcal</span><button onClick="{{it.del}}" style="border:0;background:none;color:#B5B2A6;font-size:14px;cursor:pointer;flex:none;padding:6px 0 6px 6px">✕</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:14px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">이 날의 게시물</div>
+          <div style="display:flex;gap:8px;overflow-x:auto">
+            <sc-for list="{{dayPosts}}" as="p" hint-placeholder-count="2">
+              <div onClick="{{p.open}}" style="flex:none;width:60px;height:60px;border-radius:{{radS}};cursor:pointer;overflow:hidden;background:{{p.bg}};display:flex;align-items:center;justify-content:center;font-size:24px;position:relative">
+                {{p.emoji}}
+                <sc-if value="{{p.textOnly}}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute;inset:0;background:#FBFAF6;padding:6px;font-size:8.5px;color:#6B6858;line-height:1.4;overflow:hidden">{{p.preview}}</span>
+                </sc-if>
+              </div>
+            </sc-for>
+            <button onClick="{{newPostLog}}" style="flex:none;width:60px;height:60px;border-radius:{{radS}};border:1.5px dashed #D8D5CB;background:none;color:#B5B2A6;font-size:20px;cursor:pointer">＋</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isCal}}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="달력" style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <button onClick="{{calPrev}}" style="border:0;background:{{chipBg}};width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:14px;color:#5C594E">◀</button>
+          <span style="font-size:15px;font-weight:800">{{calLabel}}</span>
+          <button onClick="{{calNext}}" style="border:0;background:{{chipBg}};width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:14px;color:#5C594E">▶</button>
+        </div>
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:14px">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px">
+            <sc-for list="{{calDows}}" as="w" hint-placeholder-count="7">
+              <div style="text-align:center;font-size:10.5px;font-weight:700;color:{{w.color}}">{{w.t}}</div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
+            <sc-for list="{{calCells}}" as="c" hint-placeholder-count="35">
+              <div onClick="{{c.go}}" style="min-height:54px;border-radius:10px;background:{{c.bg}};border:1px solid {{c.border}};padding:5px 2px 4px;text-align:center;cursor:{{c.cursor}};opacity:{{c.opacity}}">
+                <div style="font-size:11px;font-weight:700;color:{{c.numColor}}">{{c.num}}</div>
+                <div style="font-size:9.5px;font-weight:700;color:{{c.kcalColor}};margin-top:2px;min-height:12px">{{c.kcal}}</div>
+                <div style="font-size:11px;min-height:14px">{{c.mark}}</div>
+                <div style="font-size:8.5px;font-weight:800;color:{{c.woColor}};min-height:11px">{{c.wo}}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:12px;font-size:11px;color:#8B887C;font-weight:600;flex-wrap:wrap">
+            <span>🍀 금주 성공</span><span>🍺 금주 실패</span><span>💪 운동시간</span><span>숫자 = 총 kcal</span>
+          </div>
+        </div>
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">이번 달 요약</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+            <div style="background:{{chipBg}};border-radius:{{radM}};padding:12px;text-align:center"><div style="font-size:11px;color:#8B887C;font-weight:600">총 칼로리</div><div style="font-size:16px;font-weight:800;margin-top:2px">{{calTotal}} <span style="font-size:10.5px;color:#8B887C">kcal</span></div></div>
+            <div style="background:{{chipBg}};border-radius:{{radM}};padding:12px;text-align:center"><div style="font-size:11px;color:#8B887C;font-weight:600">기록일 평균</div><div style="font-size:16px;font-weight:800;margin-top:2px">{{calAvg}} <span style="font-size:10.5px;color:#8B887C">kcal</span></div></div>
+            <div style="background:{{chipBg}};border-radius:{{radM}};padding:12px;text-align:center"><div style="font-size:11px;color:#17A673;font-weight:700">🍀 금주 성공</div><div style="font-size:16px;font-weight:800;margin-top:2px">{{calOk}}일</div></div>
+            <div style="background:{{chipBg}};border-radius:{{radM}};padding:12px;text-align:center"><div style="font-size:11px;color:#E5484D;font-weight:700">🍺 금주 실패</div><div style="font-size:16px;font-weight:800;margin-top:2px">{{calNo}}일</div></div>
+          </div>
+        </div>
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:18px;text-align:center">
+          <div style="font-size:26px">🍀</div>
+          <div style="font-size:15.5px;font-weight:800;margin-top:5px">지금까지 총 <span style="color:{{accent}}">{{soberTotal}}일</span> 금주 성공!</div>
+          <div style="font-size:12.5px;color:#8B887C;margin-top:4px">{{soberPraise}}</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isFeed}}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="피드" style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:18px">
+          <div style="display:flex;align-items:center;gap:16px">
+            <label style="width:62px;height:62px;border-radius:99px;background:{{avatarBg}};color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex:none;cursor:pointer;position:relative;overflow:visible">
+              <input type="file" accept="image/*" onChange="{{onAvatarPick}}" style="display:none">{{avatarGlyph}}
+              <span style="position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:99px;background:{{cardBg}};border:1px solid {{cardBorder}};display:flex;align-items:center;justify-content:center;font-size:10px">📷</span>
+            </label>
+            <div style="flex:1;display:flex;justify-content:space-around;text-align:center">
+              <div><div style="font-size:17px;font-weight:800">{{feedPostCount}}</div><div style="font-size:11.5px;color:#8B887C">게시물</div></div>
+              <div><div style="font-size:17px;font-weight:800">{{feedPhotoCount}}</div><div style="font-size:11.5px;color:#8B887C">사진</div></div>
+              <div><div style="font-size:17px;font-weight:800">{{feedAvgScore}}</div><div style="font-size:11.5px;color:#8B887C">평균점수</div></div>
+            </div>
+          </div>
+          <sc-if value="{{hasGoal}}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:12px;text-align:center;font-size:12.5px;color:#8B887C;font-weight:600">목표일까지 <span style="color:{{accent}};font-weight:800">{{ddayText}}</span> · {{goalDateText}}</div>
+          </sc-if>
+          <button onClick="{{newPostFeed}}" style="margin-top:12px;width:100%;border:0;background:#1F1E1A;color:#fff;border-radius:{{radS}};padding:11px;font-size:14px;font-weight:700;cursor:pointer">＋ 새 게시물</button>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button onClick="{{filterAll}}" style="border:0;cursor:pointer;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:700;background:{{fAllBg}};color:{{fAllColor}}">전체</button>
+          <button onClick="{{filterStar}}" style="border:0;cursor:pointer;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:700;background:{{fStarBg}};color:{{fStarColor}}">⭐ 모아보기</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <sc-for list="{{feedCells}}" as="c" hint-placeholder-count="6">
+            <div onClick="{{c.open}}" style="cursor:pointer">
+              <div style="aspect-ratio:1;border-radius:{{radM}};overflow:hidden;position:relative;background:{{c.bg}};display:flex;align-items:center;justify-content:center">
+                <span style="font-size:44px">{{c.emoji}}</span>
+                <sc-if value="{{c.textOnly}}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute;inset:0;background:#FBFAF6;padding:12px;font-size:12px;color:#6B6858;line-height:1.5;overflow:hidden">❝ {{c.preview}}</span>
+                </sc-if>
+                <div style="position:absolute;top:7px;right:8px;display:flex;gap:4px;align-items:center">
+                  <sc-if value="{{c.multi}}" hint-placeholder-val="{{ false }}">
+                    <span style="background:rgba(0,0,0,.45);color:#fff;font-size:10px;font-weight:700;border-radius:99px;padding:2px 7px">⧉ {{c.photoCount}}</span>
+                  </sc-if>
+                  <sc-if value="{{c.starred}}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:13px">⭐</span>
+                  </sc-if>
+                </div>
+                <sc-if value="{{c.hasScore}}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute;bottom:7px;left:8px;background:rgba(255,255,255,.92);border-radius:99px;padding:2px 9px;font-size:11px;font-weight:800;color:{{c.scoreColor}}">{{c.score}}점</span>
+                </sc-if>
+              </div>
+              <div style="padding:7px 3px 0">
+                <div style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700">
+                  <span style="width:7px;height:7px;border-radius:99px;background:{{c.modeColor}};flex:none"></span>
+                  <span>{{c.dateLabel}}</span>
+                  <span style="color:#B5B2A6;font-weight:600;font-size:11px">{{c.ddayLabel}}</span>
+                  <span style="color:#B5B2A6;font-weight:600;margin-left:auto">💬 {{c.commentCount}}</span>
+                </div>
+                <div style="font-size:11px;color:#8B887C;margin-top:2px">{{c.metaLine}}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{feedEmpty}}" hint-placeholder-val="{{ false }}">
+          <div style="padding:30px 0;text-align:center;color:#B5B2A6;font-size:13.5px">{{emptyFeedMsg}}</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isSet}}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="설정" style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">AI 사용량 (이번 달)</div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <div style="font-size:20px;font-weight:800">{{aiSpent}}원 <span style="font-size:13px;color:#8B887C;font-weight:600">/ {{aiBudget}}원</span></div>
+            <div style="font-size:12.5px;color:#8B887C;font-weight:600">호출 {{aiCalls}}회</div>
+          </div>
+          <div style="height:8px;border-radius:99px;background:{{chipBg}};margin-top:10px;overflow:hidden">
+            <div style="height:100%;width:{{aiPct}}%;background:{{aiBarColor}};border-radius:99px"></div>
+          </div>
+          <sc-if value="{{aiWarn}}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:8px;font-size:12px;color:#E5484D;font-weight:700">⚠ 예산의 {{aiPct}}%를 사용했어요</div>
+          </sc-if>
+          <div style="margin-top:12px;border:1px solid {{cardBorder}};border-radius:{{radM}};overflow:hidden">
+            <button onClick="{{apiToggle}}" style="width:100%;border:0;background:{{chipBg}};display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;text-align:left">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zM12 3.6v1.9M12 18.5v1.9M3.6 12h1.9M18.5 12h1.9M6.1 6.1l1.3 1.3M16.6 16.6l1.3 1.3M17.9 6.1l-1.3 1.3M7.4 16.6l-1.3 1.3"></path></svg>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:800">API 설정</div>
+                <div style="font-size:11.5px;color:#8B887C;margin-top:1px">{{apiSubLabel}}</div>
+              </div>
+              <span style="font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:{{apiLockBg}};color:{{apiLockColor}}">{{apiLockLabel}}</span>
+              <span style="font-size:11px;color:#B5B2A6">{{apiChevron}}</span>
+            </button>
+            <sc-if value="{{apiOpen}}" hint-placeholder-val="{{ false }}">
+              <div style="padding:14px;display:flex;flex-direction:column;gap:10px;border-top:1px solid {{cardBorder}}">
+                <sc-if value="{{apiLocked}}" hint-placeholder-val="{{ true }}">
+                  <div style="text-align:center;font-size:30px">🔒</div>
+                  <div style="text-align:center;font-size:12.5px;color:#8B887C">비밀번호를 입력하면 API 키를 편집할 수 있어요</div>
+                  <input type="password" inputMode="numeric" value="{{apiPassInput}}" onChange="{{onApiPass}}" onKeyDown="{{onApiPassKey}}" placeholder="비밀번호" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid {{apiPassBorder}};border-radius:{{radS}};font-size:16px;text-align:center;letter-spacing:6px;background:#FBFAF7;outline-color:{{accent}}">
+                  <sc-if value="{{apiPassErr}}" hint-placeholder-val="{{ false }}"><div style="text-align:center;font-size:12px;color:#E5484D;font-weight:700">비밀번호가 올바르지 않아요</div></sc-if>
+                  <button onClick="{{apiUnlock}}" style="border:0;background:{{accent}};color:#fff;border-radius:{{radM}};padding:12px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px {{accentShadow}}">🔓 잠금 해제</button>
+                  <div style="text-align:center;font-size:11px;color:#B5B2A6">{{apiPassHint}}</div>
+                </sc-if>
+                <sc-if value="{{apiEditable}}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">실행할 AI</div>
+                    <div style="display:flex;background:{{chipBg}};border-radius:{{radS}};padding:3px">
+                      <button onClick="{{setProvGemini}}" style="flex:1;border:0;cursor:pointer;padding:9px 0;border-radius:{{radS}};font-size:13px;font-weight:700;background:{{provGeminiBg}};color:{{provGeminiColor}};box-shadow:{{provGeminiShadow}}">Gemini · 무료</button>
+                      <button onClick="{{setProvClaude}}" style="flex:1;border:0;cursor:pointer;padding:9px 0;border-radius:{{radS}};font-size:13px;font-weight:700;background:{{provClaudeBg}};color:{{provClaudeColor}};box-shadow:{{provClaudeShadow}}">Claude</button>
+                    </div>
+                    <div style="font-size:11.5px;color:#B5B2A6;margin-top:5px">{{provHint}}</div>
+                  </div>
+                  <div>
+                    <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">Gemini API 키 <span style="color:#17A673">무료</span></div>
+                    <input type="password" defaultValue="{{sGeminiKey}}" onChange="{{onGeminiKey}}" placeholder="AIza…" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid {{keyBorder}};border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}">
+                    <div style="font-size:11.5px;color:#B5B2A6;margin-top:5px">{{keyHint}}</div>
+                  </div>
+                  <div>
+                    <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">Claude API 키</div>
+                    <input type="password" defaultValue="{{sClaudeKey}}" onChange="{{onClaudeKey}}" placeholder="sk-ant-…" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid {{claudeBorder}};border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}">
+                    <div style="font-size:11.5px;color:#B5B2A6;margin-top:5px">{{claudeHint}}</div>
+                  </div>
+                  <div>
+                    <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">비밀번호 변경</div>
+                    <input type="password" inputMode="numeric" defaultValue="{{sApiPass}}" onChange="{{onApiPassChange}}" placeholder="새 비밀번호" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}">
+                  </div>
+                  <button onClick="{{apiLock}}" style="border:0;background:{{chipBg}};color:#5C594E;border-radius:{{radM}};padding:11px;font-size:13.5px;font-weight:700;cursor:pointer">🔒 잠그기</button>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+          <div style="margin-top:12px">
+            <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">월 예산 (원)</div>
+            <input inputMode="numeric" defaultValue="{{sBudget}}" onChange="{{onBudget}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:10px;font-size:14px;background:#FBFAF7;outline-color:{{accent}}">
+            <div style="font-size:11.5px;color:#B5B2A6;margin-top:5px">예산을 넘으면 AI 기능이 자동으로 중지돼요</div>
+          </div>
+          <div style="margin-top:14px;border-top:1px solid {{chipBg}};padding-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="font-size:12px;font-weight:700;color:#8B887C">AI 대기열 · 자동 호출 안 함</div>
+              <div style="font-size:12px;font-weight:800;color:{{accent}}">{{aiQueueCount}}건</div>
+            </div>
+            <sc-if value="{{aiQueueEmpty}}" hint-placeholder-val="{{ true }}">
+              <div style="font-size:12px;color:#B5B2A6;line-height:1.6;margin-bottom:10px">대기 중인 작업이 없어요. 사진 인식·코치 댓글 요청은 여기에 모였다가 버튼 한 번, 호출 1회로 처리돼요.</div>
+            </sc-if>
+            <sc-if value="{{aiQueueHas}}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+                <sc-for list="{{aiQueueItems}}" as="q" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:8px;background:{{chipBg}};border-radius:10px;padding:8px 10px">
+                    <span style="font-size:13px">{{q.icon}}</span>
+                    <span style="flex:1;font-size:12.5px;font-weight:600">{{q.label}}</span>
+                    <button onClick="{{q.remove}}" style="border:0;background:none;color:#B5B2A6;font-size:11px;cursor:pointer;padding:2px">✕</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <button onClick="{{runAIQueue}}" disabled="{{aiQueueEmpty}}" style="width:100%;border:0;background:{{aiRunBg}};color:{{aiRunColor}};border-radius:{{radM}};padding:12px;font-size:14px;font-weight:800;cursor:{{aiRunCursor}};box-shadow:{{aiRunShadow}}">⚡ 한번에 불러오기{{aiRunSuffix}}</button>
+          </div>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C">기본</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">목표일</div>
+            
+<input type="date" defaultValue="{{sGoalDate}}" onChange="{{onGoalDate}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">시작 체중 (kg)</div>
+              <input inputMode="decimal" defaultValue="{{sStartW}}" onChange="{{onStartW}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}">
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">목표 체중 (kg)</div>
+              <input inputMode="decimal" defaultValue="{{sGoalW}}" onChange="{{onGoalW}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}">
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">모드</div>
+            <div style="display:flex;background:{{chipBg}};border-radius:{{radS}};padding:3px">
+              <button onClick="{{setDiet}}" style="flex:1;border:0;cursor:pointer;padding:9px 0;border-radius:{{radS}};font-size:13px;font-weight:700;background:{{dietBtnBg}};color:{{dietBtnColor}};box-shadow:{{dietBtnShadow}}">다이어트</button>
+              <button onClick="{{setMaint}}" style="flex:1;border:0;cursor:pointer;padding:9px 0;border-radius:{{radS}};font-size:13px;font-weight:700;background:{{maintBtnBg}};color:{{maintBtnColor}};box-shadow:{{maintBtnShadow}}">유지</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:8px">체중 기록 (오늘부터 3주)</div>
+          <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:2px;font-size:11.5px;color:#B5B2A6;font-weight:700;padding:4px 0;border-bottom:1px solid {{chipBg}}">
+            <span>날짜</span><span style="text-align:center">목표</span><span style="text-align:center">실제</span><span style="text-align:right">차이</span>
+          </div>
+          <div style="max-height:300px;overflow-y:auto">
+            <sc-for list="{{wRows}}" as="r" hint-placeholder-count="10">
+              <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:2px;align-items:center;padding:7px 0;border-bottom:1px solid #F7F6F2;font-size:13.5px">
+                <span style="color:#8B887C;font-weight:600;font-size:12.5px">{{r.label}}</span>
+                <sc-if value="{{r.editT}}" hint-placeholder-val="{{ false }}">
+                  <input defaultValue="{{r.tRaw}}" autoFocus="{{ true }}" inputMode="decimal" onBlur="{{r.commitT}}" onKeyDown="{{r.keyDown}}" style="width:100%;box-sizing:border-box;text-align:center;font-size:13.5px;font-weight:700;padding:4px 2px;border:1.5px solid {{accent}};border-radius:8px;outline:none">
+                </sc-if>
+                <sc-if value="{{r.showT}}" hint-placeholder-val="{{ true }}">
+                  <span onClick="{{r.editTgt}}" style="text-align:center;font-weight:700;cursor:pointer;color:{{r.tColor}};text-decoration:underline dotted #D8D5CB;text-underline-offset:3px">{{r.tText}}</span>
+                </sc-if>
+                <sc-if value="{{r.editA}}" hint-placeholder-val="{{ false }}">
+                  <input defaultValue="{{r.aRaw}}" autoFocus="{{ true }}" inputMode="decimal" onBlur="{{r.commitA}}" onKeyDown="{{r.keyDown}}" style="width:100%;box-sizing:border-box;text-align:center;font-size:13.5px;font-weight:700;padding:4px 2px;border:1.5px solid {{accent}};border-radius:8px;outline:none">
+                </sc-if>
+                <sc-if value="{{r.showA}}" hint-placeholder-val="{{ true }}">
+                  <span onClick="{{r.editAct}}" style="text-align:center;font-weight:700;cursor:pointer;color:{{r.aColor}};text-decoration:underline dotted #D8D5CB;text-underline-offset:3px">{{r.aText}}</span>
+                </sc-if>
+                <span style="text-align:right;font-weight:800;color:{{r.diffColor}};font-size:12.5px">{{r.diffText}}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;color:#B5B2A6;margin-top:8px;text-align:center">아래로 스크롤하면 3주 후까지 볼 수 있어요 · 숫자를 눌러 수정</div>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:{{dietColor}};margin-bottom:10px">다이어트 목표</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <div><div style="font-size:11px;font-weight:700;color:#8B887C;margin-bottom:4px">kcal</div><input inputMode="numeric" defaultValue="{{sDietKcal}}" onChange="{{onDietKcal}}" style="width:100%;box-sizing:border-box;padding:9px 6px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13px;text-align:center;background:#FBFAF7;outline-color:{{accent}}"></div>
+            <div><div style="font-size:11px;font-weight:700;color:#E9A23B;margin-bottom:4px">탄 %</div><input inputMode="numeric" defaultValue="{{sDietC}}" onChange="{{onDietC}}" style="width:100%;box-sizing:border-box;padding:9px 6px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13px;text-align:center;background:#FBFAF7;outline-color:{{accent}}"></div>
+            <div><div style="font-size:11px;font-weight:700;color:#E4618C;margin-bottom:4px">단 %</div><input inputMode="numeric" defaultValue="{{sDietP}}" onChange="{{onDietP}}" style="width:100%;box-sizing:border-box;padding:9px 6px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13px;text-align:center;background:#FBFAF7;outline-color:{{accent}}"></div>
+            <div><div style="font-size:11px;font-weight:700;color:#5B8DEF;margin-bottom:4px">지 %</div><input inputMode="numeric" defaultValue="{{sDietF}}" onChange="{{onDietF}}" style="width:100%;box-sizing:border-box;padding:9px 6px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13px;text-align:center;background:#FBFAF7;outline-color:{{accent}}"></div>
+          </div>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:{{maintColor}};margin-bottom:10px">유지 목표</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <div><div style="font-size:11px;font-weight:700;color:#8B887C;margin-bottom:4px">kcal</div><input inputMode="numeric" defaultValue="{{sMaintKcal}}" onChange="{{onMaintKcal}}" style="width:100%;box-sizing:border-box;padding:9px 6px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13px;text-align:center;background:#FBFAF7;outline-color:{{accent}}"></div>
+            <div><div style="font-size:11px;font-weight:700;color:#E9A23B;margin-bottom:4px">탄 %</div><input inputMode="numeric" defaultValue="{{sMaintC}}" onChange="{{onMaintC}}" style="width:100%;box-sizing:border-box;padding:9px 6px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13px;text-align:center;background:#FBFAF7;outline-color:{{accent}}"></div>
+            <div><div style="font-size:11px;font-weight:700;color:#E4618C;margin-bottom:4px">단 %</div><input inputMode="numeric" defaultValue="{{sMaintP}}" onChange="{{onMaintP}}" style="width:100%;box-sizing:border-box;padding:9px 6px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13px;text-align:center;background:#FBFAF7;outline-color:{{accent}}"></div>
+            <div><div style="font-size:11px;font-weight:700;color:#5B8DEF;margin-bottom:4px">지 %</div><input inputMode="numeric" defaultValue="{{sMaintF}}" onChange="{{onMaintF}}" style="width:100%;box-sizing:border-box;padding:9px 6px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13px;text-align:center;background:#FBFAF7;outline-color:{{accent}}"></div>
+          </div>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:8px">데이터 관리</div>
+          <div style="font-size:12.5px;color:#8B887C;line-height:1.5;margin-bottom:12px">모든 기록은 이 기기 안에만 저장돼요. 초기화하면 예시 데이터를 포함한 모든 기록이 지워져요. (설정 값은 유지)</div>
+          <sc-if value="{{resetAskOff}}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{askReset}}" style="width:100%;border:1px solid #F0C4C7;background:none;color:#E5484D;border-radius:{{radM}};padding:12px;font-size:13.5px;font-weight:700;cursor:pointer">모든 데이터 초기화</button>
+          </sc-if>
+          <sc-if value="{{resetAsk}}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:8px">
+              <button onClick="{{cancelReset}}" style="flex:1;border:0;background:{{chipBg}};color:#5C594E;border-radius:{{radM}};padding:12px;font-size:13.5px;font-weight:700;cursor:pointer">취소</button>
+              <button onClick="{{doReset}}" style="flex:1;border:0;background:#E5484D;color:#fff;border-radius:{{radM}};padding:12px;font-size:13.5px;font-weight:800;cursor:pointer">전부 삭제</button>
+            </div>
+          </sc-if>
+        </div>
+
+        <button onClick="{{saveSettings}}" style="border:0;background:{{accent}};color:#fff;border-radius:{{radM}};padding:14px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px {{accentShadow}}">저장</button>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-top:1px solid {{cardBorder}};display:grid;grid-template-columns:repeat(5,1fr);padding:8px 10px 20px;z-index:20">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+      <button onClick="{{t.go}}" style="border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{t.color}}" stroke-width="{{t.sw}}" stroke-linecap="round" stroke-linejoin="round"><path d="{{t.path}}"></path></svg>
+        <span style="font-size:10.5px;font-weight:700;color:{{t.color}}">{{t.label}}</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{aiBusy}}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(31,30,26,.45);z-index:50;display:flex;align-items:center;justify-content:center">
+      <div style="background:{{cardBg}};border-radius:{{radL}};padding:28px 32px;text-align:center;width:230px">
+        <div style="width:36px;height:36px;border:3.5px solid {{chipBg}};border-top-color:{{accent}};border-radius:99px;margin:0 auto;animation:spin .8s linear infinite"></div>
+        <div style="font-size:15px;font-weight:800;margin-top:14px">AI가 음식을 인식 중…</div>
+        <div style="font-size:12.5px;color:#8B887C;margin-top:4px">보통 10~30초 걸려요</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{fmOn}}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:40">
+      <div onClick="{{fmCancel}}" style="position:absolute;inset:0;background:rgba(31,30,26,.45)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;background:{{cardBg}};border-radius:{{radL}} {{radL}} 0 0;padding:20px 20px 28px;max-height:82%;overflow-y:auto;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:16px;font-weight:800">{{fmTitle}}</span>
+          <sc-if value="{{fmIsEdit}}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{fmAskDel}}" style="border:0;background:none;color:#E5484D;font-size:13px;font-weight:700;cursor:pointer">삭제</button>
+          </sc-if>
+        </div>
+        <sc-if value="{{fmConfirm}}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#FDECEC;border-radius:{{radS}};padding:10px 12px">
+            <span style="font-size:13px;font-weight:700;color:#E5484D">정말 삭제할까요?</span>
+            <div style="display:flex;gap:6px">
+              <button onClick="{{fmDoDel}}" style="border:0;background:#E5484D;color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">삭제</button>
+              <button onClick="{{fmNoDel}}" style="border:0;background:#fff;color:#5C594E;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">아니요</button>
+            </div>
+          </div>
+        </sc-if>
+        <div style="display:flex;background:{{chipBg}};border-radius:{{radS}};padding:3px">
+          <sc-for list="{{fmMeals}}" as="mm" hint-placeholder-count="4">
+            <button onClick="{{mm.pick}}" style="flex:1;border:0;cursor:pointer;padding:8px 0;border-radius:{{radS}};font-size:12.5px;font-weight:700;background:{{mm.bg}};color:{{mm.color}};box-shadow:{{mm.shadow}}">{{mm.name}}</button>
+          </sc-for>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">이름 *</div>
+          <input value="{{fmName}}" onChange="{{onFmName}}" placeholder="예: 닭가슴살 샐러드" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid {{fmNameBorder}};border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}">
+        </div>
+        <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px">
+          <div><div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">양</div><input inputMode="decimal" value="{{fmAmt}}" onChange="{{onFmAmt}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}"></div>
+          <div><div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">단위</div><select value="{{fmUnit}}" onChange="{{onFmUnit}}" style="width:100%;box-sizing:border-box;padding:10px 8px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}"><option value="g">g</option><option value="ml">ml</option><option value="개">개</option><option value="인분">인분</option></select></div>
+          <div><div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">kcal</div><input inputMode="numeric" value="{{fmKcal}}" onChange="{{onFmKcal}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div><div style="font-size:12px;font-weight:700;color:#E9A23B;margin-bottom:5px">탄수화물 g</div><input inputMode="decimal" value="{{fmC}}" onChange="{{onFmC}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}"></div>
+          <div><div style="font-size:12px;font-weight:700;color:#E4618C;margin-bottom:5px">단백질 g</div><input inputMode="decimal" value="{{fmP}}" onChange="{{onFmP}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}"></div>
+          <div><div style="font-size:12px;font-weight:700;color:#5B8DEF;margin-bottom:5px">지방 g</div><input inputMode="decimal" value="{{fmF}}" onChange="{{onFmF}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button onClick="{{fmCancel}}" style="flex:1;border:0;background:{{chipBg}};color:#5C594E;border-radius:{{radM}};padding:13px;font-size:14px;font-weight:700;cursor:pointer">취소</button>
+          <button onClick="{{fmSave}}" style="flex:2;border:0;background:{{accent}};color:#fff;border-radius:{{radM}};padding:13px;font-size:14px;font-weight:800;cursor:pointer">저장</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{pmOn}}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:45">
+      <div onClick="{{pmClose}}" style="position:absolute;inset:0;background:rgba(31,30,26,.5)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;top:6%;background:{{appBg}};border-radius:{{radL}} {{radL}} 0 0;display:flex;flex-direction:column;overflow:hidden">
+        <div style="flex:none;background:{{cardBg}};border-bottom:1px solid {{cardBorder}};padding:12px 14px;display:flex;align-items:center;gap:8px;position:relative">
+          <button onClick="{{pmClose}}" style="border:0;background:{{chipBg}};width:30px;height:30px;border-radius:99px;cursor:pointer;font-size:12px;color:#5C594E;flex:none">✕</button>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:14.5px;font-weight:800">{{pmDate}}</span>
+              <span style="font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:99px;background:{{pmModeBg}};color:{{pmModeColor}}">{{pmModeLabel}}</span>
+            </div>
+            <div style="font-size:11.5px;color:#8B887C;margin-top:1px">{{pmScoreText}}</div>
+          </div>
+          <button onClick="{{pmStarToggle}}" style="border:0;background:none;font-size:20px;cursor:pointer;flex:none">{{pmStarIcon}}</button>
+          <sc-if value="{{pmShowMenuBtn}}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{pmMenuToggle}}" style="border:0;background:none;font-size:18px;cursor:pointer;color:#5C594E;padding:4px;flex:none">⋯</button>
+          </sc-if>
+          <sc-if value="{{pmMenu}}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:50px;right:12px;background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radS}};box-shadow:0 8px 24px rgba(0,0,0,.14);overflow:hidden;z-index:5;display:flex;flex-direction:column;min-width:130px">
+              <button onClick="{{pmEdit}}" style="border:0;background:none;padding:12px 16px;text-align:left;font-size:13.5px;font-weight:600;cursor:pointer">수정</button>
+              <button onClick="{{pmAskDel}}" style="border:0;background:none;padding:12px 16px;text-align:left;font-size:13.5px;font-weight:600;color:#E5484D;cursor:pointer;border-top:1px solid {{cardBorder}}">삭제</button>
+            </div>
+          </sc-if>
+        </div>
+        <sc-if value="{{pmConfirm}}" hint-placeholder-val="{{ false }}">
+          <div style="flex:none;display:flex;align-items:center;justify-content:space-between;background:#FDECEC;padding:10px 16px">
+            <span style="font-size:13px;font-weight:700;color:#E5484D">게시물을 삭제할까요?</span>
+            <div style="display:flex;gap:6px">
+              <button onClick="{{pmDoDel}}" style="border:0;background:#E5484D;color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">삭제</button>
+              <button onClick="{{pmNoDel}}" style="border:0;background:#fff;color:#5C594E;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">취소</button>
+            </div>
+          </div>
+        </sc-if>
+        
+        <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+          <sc-if value="{{pmViewMode}}" hint-placeholder-val="{{ true }}">
+            <sc-if value="{{pmHasPhotos}}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;gap:8px;overflow-x:auto">
+                <sc-for list="{{pmPhotos}}" as="ph" hint-placeholder-count="2">
+                  <div style="position:relative;flex:none">
+                    <div style="width:180px;height:180px;border-radius:{{radM}};background:{{ph.bg}};display:flex;align-items:center;justify-content:center;font-size:64px">{{ph.e}}</div>
+                    <button onClick="{{ph.likeToggle}}" style="position:absolute;bottom:8px;right:8px;border:0;background:rgba(255,255,255,.9);border-radius:99px;padding:8px 12px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);color:#E4618C">{{ph.likeLabel}}</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{pmHasText}}" hint-placeholder-val="{{ true }}">
+              <div style="font-size:14.5px;line-height:1.65;white-space:pre-wrap">{{pmText}}</div>
+            </sc-if>
+            <div style="font-size:12px;color:#8B887C;font-weight:600">{{pmMetaLine}}</div>
+          </sc-if>
+          <sc-if value="{{pmEditMode}}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:6px">
+              <sc-for list="{{pmDraftPhotos}}" as="dp" hint-placeholder-count="2">
+                <div style="position:relative;width:76px;height:76px;border-radius:{{radM}};background:{{dp.bg}};display:flex;align-items:center;justify-content:center;font-size:30px">{{dp.e}}
+                  <button onClick="{{dp.del}}" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:99px;border:0;background:#1F1E1A;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+                </div>
+              </sc-for>
+              <label style="width:76px;height:76px;border-radius:{{radM}};border:1.5px dashed #D8D5CB;color:#B5B2A6;font-size:11px;font-weight:700;cursor:pointer;line-height:1.5;display:flex;align-items:center;justify-content:center;text-align:center;box-sizing:border-box">
+                <input type="file" accept="image/*" multiple="" onChange="{{pmPickPhotos}}" style="display:none">＋ 사진<br>추가</label>
+            </div>
+            <textarea value="{{pmDraftText}}" onChange="{{onPmText}}" rows="5" placeholder="오늘의 이야기를 적어 보세요" style="width:100%;box-sizing:border-box;border:1px solid {{cardBorder}};border-radius:{{radM}};padding:12px;font-size:14px;line-height:1.6;resize:none;outline-color:{{accent}};background:{{cardBg}}"></textarea>
+            <div style="display:flex;gap:8px">
+              <button onClick="{{pmCancelEdit}}" style="flex:1;border:0;background:{{chipBg}};color:#5C594E;border-radius:{{radM}};padding:13px;font-size:14px;font-weight:700;cursor:pointer">취소</button>
+              <button onClick="{{pmDone}}" style="flex:2;border:0;background:{{accent}};color:#fff;border-radius:{{radM}};padding:13px;font-size:14px;font-weight:800;cursor:pointer">완료</button>
+            </div>
+          </sc-if>
+          <div style="border-top:1px solid {{cardBorder}};padding-top:12px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:13px;font-weight:800">댓글 {{pmCommentCount}}</div>
+            <sc-for list="{{pmComments}}" as="cm" hint-placeholder-count="2">
+              <div style="display:flex;gap:8px;margin-left:{{cm.indent}}">
+                <div style="width:28px;height:28px;border-radius:99px;flex:none;background:{{cm.avBg}};display:flex;align-items:center;justify-content:center;font-size:{{cm.avSize}};color:#fff;font-weight:800">{{cm.av}}</div>
+                <div style="min-width:0;flex:1">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span style="font-size:12px;font-weight:800">{{cm.author}}</span>
+                    <sc-if value="{{cm.hasMbti}}" hint-placeholder-val="{{ false }}"><span style="font-size:9px;font-weight:800;letter-spacing:.4px;padding:1px 5px;border-radius:99px;background:{{cm.mbtiBg}};color:{{cm.mbtiColor}}">{{cm.mbti}}</span></sc-if>
+                    <span style="font-size:10.5px;color:#B5B2A6">{{cm.time}}</span>
+                  </div>
+                  <div style="margin-top:3px;background:{{cm.bubble}};border-radius:4px {{radM}} {{radM}} {{radM}};padding:8px 11px;font-size:13px;line-height:1.55;display:inline-block">{{cm.text}}</div>
+                  <sc-if value="{{cm.canReply}}" hint-placeholder-val="{{ false }}">
+                    <div><button onClick="{{cm.reply}}" style="border:0;background:none;color:#8B887C;font-size:11px;font-weight:700;cursor:pointer;padding:3px 0">답글</button></div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+            <sc-if value="{{aiReplying}}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:8px;align-items:center;margin-left:36px">
+                <div style="width:28px;height:28px;border-radius:99px;flex:none;background:{{chipBg}};display:flex;align-items:center;justify-content:center;font-size:14px">🤖</div>
+                <div style="display:flex;gap:3px;padding:10px 12px;background:{{chipBg}};border-radius:{{radM}}">
+                  <span style="width:6px;height:6px;border-radius:99px;background:#B5B2A6;animation:blink 1.2s infinite"></span>
+                  <span style="width:6px;height:6px;border-radius:99px;background:#B5B2A6;animation:blink 1.2s infinite;animation-delay:.2s"></span>
+                  <span style="width:6px;height:6px;border-radius:99px;background:#B5B2A6;animation:blink 1.2s infinite;animation-delay:.4s"></span>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+        <div style="flex:none;background:{{cardBg}};border-top:1px solid {{cardBorder}};padding:10px 14px 20px">
+          <sc-if value="{{replyTagOn}}" hint-placeholder-val="{{ false }}">
+            <div style="display:inline-flex;align-items:center;gap:6px;background:{{chipBg}};border-radius:99px;padding:4px 10px;margin-bottom:8px;font-size:11.5px;font-weight:700;color:#5C594E">{{replyTagText}}<button onClick="{{replyCancel}}" style="border:0;background:none;cursor:pointer;font-size:10px;color:#8B887C;padding:0">✕</button></div>
+          </sc-if>
+          <div style="display:flex;gap:8px">
+            <input value="{{cInput}}" onChange="{{onCInput}}" onKeyDown="{{onCKey}}" placeholder="댓글을 입력하세요" style="flex:1;border:1px solid {{cardBorder}};border-radius:99px;padding:10px 16px;font-size:13.5px;outline-color:{{accent}};background:{{chipBg}}">
+            <button onClick="{{onSend}}" style="border:0;background:{{accent}};color:#fff;border-radius:99px;padding:0 16px;font-size:13px;font-weight:800;cursor:pointer">전송</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{toastOn}}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:#1F1E1A;color:#fff;padding:10px 18px;border-radius:99px;font-size:13px;font-weight:600;z-index:60;animation:pop .25s ease;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.25)">{{toastMsg}}</div>
+  </sc-if>
+</div>
+<template id="__bundler_thumbnail" data-bg-color="#FDF1F6">
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<rect x="30" y="30" width="60" height="60" rx="18" fill="#E85D9F"></rect>
+<text x="60" y="74" text-anchor="middle" font-family="sans-serif" font-size="34" font-weight="800" fill="#fff">다</text>
+</svg>
+</template></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:900},
+&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;공주님 핑크&quot;,&quot;클린 그린&quot;,&quot;선셋 오렌지&quot;],&quot;default&quot;:&quot;공주님 핑크&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;분위기&quot;},
+&quot;shape&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;몽글몽글&quot;,&quot;기본&quot;,&quot;각지게&quot;],&quot;default&quot;:&quot;몽글몽글&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;분위기&quot;},
+&quot;tone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;공주님 말투&quot;,&quot;담백하게&quot;],&quot;default&quot;:&quot;공주님 말투&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;분위기&quot;}}">
+class Component extends DCLogic {
+  constructor(p){
+    super(p);
+    const d=o=>{const t=new Date(2026,6,18);t.setDate(t.getDate()-o);const z=n=>String(n).padStart(2,'0');return t.getFullYear()+'-'+z(t.getMonth()+1)+'-'+z(t.getDate())};
+    this.d=d;this.TODAY=d(0);this.seq=100;
+    this.CAST=[
+      {name:'요시 관장',av:'🥋',mbti:'ESTJ',coach:true,ban:true,tone:'추성훈 스타일의 한본인 관장. 터프하지만 정 많은 반말(챔프·곤죠·오츠카레).'},
+      {name:'달밤일기',av:'🌙',mbti:'INFP',tone:'감성 일기러. 하루의 기분과 마음 이야기를 좋아함. 잔잔한 해요체.'},
+      {name:'민초단장',av:'🍫',mbti:'ENTP',ban:true,tone:'장난기 많은 드립러. 음식 취향 논쟁(민초단)을 즐김. 친한 친구 반말에 ㅋㅋ 자주 씀.'},
+      {name:'한입만',av:'🐑',mbti:'ESFP',ban:true,tone:'세상에서 먹는 게 제일 좋은 먹보. 맛 얘기부터 꺼냄. 신난 반말.'},
+      {name:'곰손요리사',av:'🐻',mbti:'ISFP',tone:'요리에 도전하지만 맨날 망하는 곰손. 남의 레시피에 관심 많음. 수줍은 해요체.'},
+      {name:'그래프덕후',av:'📊',mbti:'INTJ',tone:'숫자와 그래프 덕후. 추세·평균으로 말하지만 딱딱하지 않음. 차분한 존댓말.'},
+      {name:'옆집언니',av:'👑',mbti:'ENFJ',ban:true,tone:'오지랖 넓은 동네 언니. 물·잠·끼니 챙기는 잔소리. 푸근한 반말.'},
+      {name:'1호팬',av:'🎯',mbti:'ESTP',ban:true,tone:'사용자의 열성팬. 뭘 해도 최애 찬양, 팬덤 용어 사용. 호들갑 반말.'},
+      {name:'새벽세시',av:'🕯️',mbti:'INFJ',tone:'새벽에 나타나는 사색가. 위로와 여운이 있는 말. 조용한 해요체.'},
+      {name:'플래너요정',av:'📎',mbti:'ISTJ',tone:'플래너 덕후. 루틴과 체크리스트로 말함. 깍듯하지만 다정한 존댓말.'},
+      {name:'햇살한스푼',av:'☀️',mbti:'ENFP',tone:'긍정 그 자체. 뭐든 좋은 면을 찾아냄. 밝은 해요체.'},
+      {name:'시크냥',av:'🐱',mbti:'ISTP',ban:true,tone:'무심한 척 다 챙겨보는 츤데레. 짧고 무뚝뚝한 반말, 속마음은 따뜻함.'},
+      {name:'체스마스터',av:'♟️',mbti:'ENTJ',tone:'전략가. 체스 비유와 효율을 좋아함. 단정한 존댓말.'},
+      {name:'이불속',av:'🧸',mbti:'ISFJ',tone:'엄마처럼 몸 상할까 건강 걱정. 다정한 존댓말.'},
+      {name:'반짝반짝',av:'✨',mbti:'ESFJ',tone:'리액션 부자 수다쟁이. 칭찬 머신. 호들갑 해요체.'},
+      {name:'우주덕후',av:'🎈',mbti:'INTP',ban:true,tone:'엉뚱한 상상러. 음식에 이상한 가설을 세움. 혼잣말 같은 반말.'},
+      {name:'헬스중독',av:'🔥',mbti:'ESTP',ban:true,tone:'헬스 중독. 뭐든 운동과 연결함. 화끈한 반말.'},
+      {name:'찻잔속',av:'🍵',mbti:'INFJ',tone:'차와 명상을 좋아함. 천천히 꼭꼭 씹어 먹기 전도사. 조용한 존댓말.'},
+      {name:'응원단장님',av:'📣',mbti:'ENFJ',ban:true,tone:'응원 구호로 말하는 응원단장. 느낌표 가득한 힘찬 반말.'},
+      {name:'소심한독자',av:'🍃',mbti:'ISFP',tone:'댓글 달까 말까 고민하다 조심스레 다는 소심이. 말끝을 흐리는 해요체.'}];
+    this.VOICE={
+      '달밤일기':{g:['{d} 보니까 오늘 하루가 잘 마무리되는 기분이에요 🌙','오늘 일기에 적어두고 싶네요. {d}, 뭔가 뿌듯한 날','{d}… 이런 날은 자기 전 기분이 좋더라고요'],b:['{d} 있었지만, 그런 날의 기록도 소중해요','괜찮아요, {d} 정도는요. 오늘 마음은 어땠어요?','{d}… 저도 그런 날 있어요. 토닥토닥 🫶']},
+      '민초단장':{g:['{d}? 인정ㅋㅋ 근데 디저트로 민초 안 먹은 건 아쉽네','오 {d} 이거 좀 치는데? 반박 불가다ㅋㅋ','{d} 봐라~ 오늘은 내가 졌다, 인정'],b:['{d} 발견ㅋㅋ 근데 치킨은 죄가 없다, 시킨 사람이 문제지','{d}? 오히려 좋아. 내일 반전 드라마 각본 나왔네','팩트체크: {d} 맞음ㅋㅋ 근데 하루쯤이야 뭐']},
+      '한입만':{g:['{d}!! 근데 그거 맛있었어?? 그게 제일 중요해ㅋㅋ','와 {d} 대박!! 맛있게 먹고 관리도 되면 개이득이지 🎉','{d} 짱이다!! 나 지금 메뉴 보고 배고파졌잖아ㅋㅋ'],b:['{d}? 맛있었으면 된 거야!! 낼 조금 덜 먹으면 되지~','에이 {d} 그럴 수 있지! 맛있는 건 못 참잖아ㅋㅋ','{d} 있어도 괜찮아~ 다음엔 맛있고 가벼운 메뉴 같이 찾자!!']},
+      '곰손요리사':{g:['{d}… 대단해요. 저는 어제 계란찜도 태웠는데…','{d} 부러워요… 혹시 레시피 알려주실 수 있어요? 🥺','오늘 {d}, 손맛이 좋으신가 봐요…'],b:['{d} 있어도 직접 챙겨 드신 게 어디예요… 저는 맨날 시켜 먹는데','{d}… 괜찮아요, 저는 요리 망해서 두 번 해 먹은 적도 있어요','{d} 정도는… 밥 챙기다 보면 그럴 수 있죠 뭐…']},
+      '그래프덕후':{g:['{d}. 최근 추세로 보면 확실히 우상향이에요 📊','{d} — 이 정도면 유의미한 변화예요. 관리 잘하고 계시네요','오늘 {d}. 기록이 쌓일수록 그래프가 예뻐지고 있어요'],b:['{d} 있지만 주간 평균으로 보면 오차범위예요. 걱정 마세요','{d}. 데이터는 하루가 아니라 추세를 봐야죠. 흐름은 좋아요','{d} — 내일 한 끼면 충분히 보정되는 수치예요']},
+      '옆집언니':{g:['{d} 잘했네~ 근데 물은 충분히 마셨어? 👑','아이고 {d} 좀 봐, 언니가 다 뿌듯하네','{d}!! 잘 챙겨 먹었네~ 오늘 잠도 푹 자야 된다?'],b:['{d} 있었어도 굶는 것보단 백배 나아. 끼니는 꼭 챙겨','아이고 {d}? 괜찮아~ 언니도 어제 야식 먹었어ㅋㅋ 낼 같이 잘하자','{d} 그거 갖고 속상해하지 마. 스트레스가 더 살쪄!']},
+      '1호팬':{g:['{d} 미쳤다 진짜!! 역시 내 최애야 🎯','아니 {d}?? 이걸 해낸다고?? 팬 그만두질 못하겠네','{d} 실화냐!! 오늘도 폼 미쳤다!!'],b:['{d} 있으면 뭐 어때!! 최애는 흔들려도 최애다!!','{d}?? 노노 이건 다음 화 떡밥임. 반등 서사 시작이지','내 최애가 {d} 정도로 무너질 사람이야? 아니잖아!!']},
+      '새벽세시':{g:['{d}… 오늘 스스로에게 좋은 선물을 하셨네요 🕯️','새벽에 이 기록을 보는데 {d}, 괜히 뭉클하네요','{d}. 조용히 잘 살아낸 하루라는 증거 같아요'],b:['{d} 있었지만, 그럴 만한 하루였을 거예요. 새벽엔 다 용서돼요','{d}… 완벽하지 않아서 사람인 거죠. 오늘도 수고했어요','괜찮아요. {d}보다 이 시간까지 기록하는 마음이 더 커요']},
+      '플래너요정':{g:['{d} ✅ 오늘 체크리스트 완벽해요. 이 루틴 그대로 가요','{d} — 계획표에 초록불 켜드릴게요. 잘하셨어요','{d}, 이렇게 3일만 더 하면 습관 칸에 도장 찍어드릴게요 📎'],b:['{d} 있었네요. 내일 플랜에 살짝 반영해두면 됩니다','{d} 정도는 계획 수정 사유일 뿐, 실패가 아니에요. 다시 짜면 되죠','{d} 체크. 대신 기록은 빠짐없이 하셨으니 절반은 성공이에요']},
+      '햇살한스푼':{g:['우와 {d}!! 오늘 진짜 반짝반짝하네요 ☀️','{d} 보니까 저까지 기분 좋아졌어요! 좋은 기운 나눠주세요~','{d}!! 이런 날은 셀프 칭찬 필수예요!'],b:['{d}? 괜찮아요! 내일 더 잘할 이유가 생긴 거잖아요','{d} 있어도 오늘 기록한 것만으로 충분히 멋져요','에이 {d} 정도는요! 긍정 회로 풀가동하면 아무것도 아니에요 ✨']},
+      '시크냥':{g:['{d}. …뭐, 나쁘지 않네','{d}? 흥, 좀 하는데. 딱히 감동한 건 아니고','오늘 {d}. …계속 이러면 인정해줄지도'],b:['{d}. 별거 아니니까 신경 꺼','{d} 있던데. …뭐, 내일 고치면 되잖아. 걱정한 건 아니고','흥, {d}? 그 정도로 무너질 거면 시작도 안 했겠지']},
+      '체스마스터':{g:['{d}. 좋은 수였어요. 체스로 치면 선공을 잡은 셈이죠 ♟️','{d} — 전략적으로 완벽한 선택이에요. 이대로면 결과는 정해져 있어요','오늘 {d}. 군더더기 없는 운영이었어요'],b:['{d} 확인. 한 수 물렸을 뿐, 판세는 여전히 유리해요','{d} 정도는 전술적 후퇴로 봅시다. 다음 끼니에서 만회하면 그만이에요','{d} — 장기전에선 이런 변수도 계산에 넣어두는 겁니다']},
+      '이불속':{g:['{d} 잘 챙겨 먹었네요, 몸이 고마워할 거예요 🧸','{d} 보니 마음이 놓여요. 오늘도 고생 많았어요','{d}, 이렇게 스스로 아끼는 모습이 제일 예뻐요'],b:['{d} 있었지만 너무 애쓰진 마요. 몸 상하는 게 제일 걱정이에요','괜찮아요, {d}보다 오늘 하루 잘 버틴 게 더 대단해요','{d}… 따뜻한 물 한 잔 마시고 일찍 자요. 내일 같이 잘해봐요']},
+      '반짝반짝':{g:['어머어머 {d}!! 이건 자랑해야 돼요 진짜 💕','{d} 보고 소리 질렀잖아요!! 어떻게 이렇게 잘해요?','{d}!! 오늘의 베스트 식단상 드립니다 🥳'],b:['{d} 있었어도 어때요~ 기록한 것만으로 박수예요!','{d}? 어머 괜찮아요, 다 그러면서 예뻐지는 거죠','걱정 말아요 {d} 정도는! 내가 옆에서 챙겨줄게요']},
+      '우주덕후':{g:['{d}라… 이거 우주 식량으로 제출해도 되겠는데 🎈','오 {d}. 만약 한 달 내내 이러면 어떻게 될지 궁금해지는데','{d} 흥미롭네. 이 조합 특허 내야 하는 거 아냐?ㅋㅋ'],b:['{d} 관찰됨. 가설: 어제 잠이 부족했던 게 아닐까','{d}라… 근데 생각해보면 치팅도 우주의 균형이지','흠 {d}. 이게 실험이라면 꽤 유의미한 데이터인데']},
+      '헬스중독':{g:['{d} 좋다!! 이제 스쿼트만 하면 완벽한 하루다 🔥','오 {d}!! 이러면 근손실 걱정 끝이지','{d} 나이스!! 잘 먹는 것도 운동의 일부다 진짜'],b:['{d}? 괜찮아, 내일 유산소 20분이면 다 태워','{d} 있으면 뭐 어때, 오늘 계단으로만 다니면 퉁이야','{d} 그까짓 거!! 몸은 하루로 안 무너져, 꾸준함이 근육이야']},
+      '찻잔속':{g:['{d}, 천천히 잘 챙기셨네요. 차 한 잔 하며 쉬어요 🍵','{d} — 서두르지 않은 게 느껴져서 좋아요','오늘 {d}. 몸도 마음도 편안했겠어요'],b:['{d} 있었지만 괜찮아요. 다음 끼니는 조금 천천히, 꼭꼭 씹어봐요','{d}… 혹시 급하게 드신 날 아니었나요? 물 한 잔 먼저, 기억해요','{d} 정도는 흘려보내요. 조급함이 제일 큰 적이에요']},
+      '응원단장님':{g:['{d}!! 박수 삼창 준비!! 짝짝짝 📣','좋아 {d}!! 오늘의 MVP는 바로 너다!!','{d} 봤냐!! 이게 바로 클래스지!! 가자!!'],b:['{d}쯤이야!! 진짜 승부는 내일이다, 가자!!','괜찮아 {d} 그까짓 거!! 응원단은 끝까지 남는다!!','{d}? 삐끗한 것도 경기의 일부야!! 다시 일어나면 돼!!']},
+      '소심한독자':{g:['{d}… 저기, 진짜 잘하신 것 같아요…','{d} 너무 좋아서… 살짝 댓글 남기고 가요 🍃','우와… {d}, 저도 본받고 싶어요…'],b:['{d} 있어도… 저는 잘하셨다고 생각해요…','저, 저기… {d} 너무 신경 쓰지 마세요. 저도 맨날 그래요…','{d}… 괜찮아요… (조용히 응원하고 갑니다)']}};
+    const F={};
+    F[d(0)]=[{id:1,meal:'아침',name:'그릭요거트 볼',amt:1,unit:'개',kcal:320,c:38,p:22,f:9},{id:2,meal:'점심',name:'닭가슴살 샐러드',amt:1,unit:'인분',kcal:420,c:28,p:42,f:14},{id:3,meal:'간식',name:'아메리카노',amt:355,unit:'ml',kcal:10,c:2,p:0,f:0}];
+    F[d(1)]=[{id:4,meal:'아침',name:'오트밀',amt:60,unit:'g',kcal:230,c:40,p:8,f:5},{id:5,meal:'점심',name:'연어 포케',amt:1,unit:'인분',kcal:520,c:52,p:34,f:18},{id:6,meal:'저녁',name:'두부면 파스타',amt:1,unit:'인분',kcal:380,c:30,p:28,f:16}];
+    F[d(2)]=[{id:7,meal:'점심',name:'비빔밥',amt:1,unit:'인분',kcal:620,c:88,p:20,f:18},{id:8,meal:'저녁',name:'삼겹살',amt:200,unit:'g',kcal:660,c:4,p:34,f:56}];
+    F[d(4)]=[{id:9,meal:'아침',name:'바나나',amt:1,unit:'개',kcal:105,c:27,p:1,f:0},{id:10,meal:'점심',name:'참치김밥',amt:1,unit:'인분',kcal:480,c:72,p:14,f:14},{id:11,meal:'저녁',name:'닭가슴살 스테이크',amt:150,unit:'g',kcal:250,c:6,p:38,f:8}];
+    F[d(6)]=[{id:12,meal:'점심',name:'에그 샌드위치',amt:1,unit:'개',kcal:390,c:44,p:18,f:15}];
+    F[d(9)]=[{id:13,meal:'저녁',name:'후라이드 치킨',amt:1,unit:'인분',kcal:720,c:36,p:48,f:40}];
+    const W={};
+    W[d(0)]={t:63.0,a:63.2};W[d(1)]={t:63.1,a:63.4};W[d(2)]={t:63.3,a:63.3};W[d(3)]={t:63.4,a:null};W[d(4)]={t:63.6,a:63.9};W[d(5)]={t:63.7,a:64.1};W[d(6)]={t:63.9,a:64.0};
+    const DM={};DM[d(0)]='diet';DM[d(1)]='diet';DM[d(2)]='maint';DM[d(4)]='diet';DM[d(6)]='diet';DM[d(9)]='maint';
+    const P=[
+      {id:'p1',date:d(0),photos:[{e:'🥗',c1:'#FFE9F2',c2:'#FFD1E4'},{e:'🍓',c1:'#FFF2E4',c2:'#FFDFC2'}],text:'점심은 닭가슴살 샐러드! 드레싱 반만 넣었더니 생각보다 괜찮았다 🌱',starred:true,comments:[
+        {id:'c1',ai:true,author:'코치 미미',av:'🤖',time:'2시간 전',text:'단백질 42g 아주 훌륭해요! 저녁은 조금 가볍게 가면 점수가 더 오를 거예요.'},
+        {id:'c2',ai:false,author:'나',time:'1시간 전',text:'저녁 뭐 먹을지 추천해줘!',replyTo:'c1'},
+        {id:'c3',ai:true,author:'코치 미미',av:'🤖',time:'1시간 전',text:'두부면 파스타 어때요? 어제도 잘 드셨잖아요 😊',replyTo:'c1'}]},
+      {id:'p2',date:d(1),photos:[{e:'🍜',c1:'#EDE9FF',c2:'#D8CFFF'}],text:'두부면 파스타 도전. 식감이 은근 좋다!',starred:false,comments:[{id:'c4',ai:true,author:'코치 단단',av:'🧠',time:'어제',text:'탄수 비율이 목표에 딱 맞았어요. 이 조합 저장해 두세요!'}]},
+      {id:'p3',date:d(2),photos:[],text:'오늘은 유지 모드. 회식이라 삼겹살 먹었지만 후회는 없다. 내일부터 다시!',starred:true,comments:[]},
+      {id:'p4',date:d(4),photos:[{e:'🍱',c1:'#E4F6EE',c2:'#C6EBD9'},{e:'🥑',c1:'#FFF6DC',c2:'#FFE9AE'},{e:'🍗',c1:'#FFE9E0',c2:'#FFD2C0'}],text:'하루 세 끼 전부 기록 성공!',starred:false,comments:[{id:'c5',ai:true,author:'코치 미미',av:'🤖',time:'4일 전',text:'꾸준함이 최고의 다이어트예요. 3일 연속 기록 달성! 🎉'}]},
+      {id:'p5',date:d(6),photos:[{e:'🥪',c1:'#EAF2FF',c2:'#CFE0FF'}],text:'',starred:false,comments:[]},
+      {id:'p6',date:d(9),photos:[{e:'🍗',c1:'#FFF0E0',c2:'#FFD9B8'}],text:'치팅데이 🍗',starred:true,comments:[{id:'c6',ai:true,author:'코치 단단',av:'🧠',time:'9일 전',text:'가끔은 괜찮아요. 다음 날 리셋이 중요해요!'}]}];
+    const SB={};SB[d(1)]=true;SB[d(2)]=false;SB[d(3)]=true;SB[d(4)]=true;SB[d(6)]=true;SB[d(9)]=false;
+    const WO={};WO[d(1)]={'하체':40,'유산소':30};WO[d(2)]={'유산소':60};WO[d(4)]={'등':50,'유산소':30};
+    this.state={tab:'home',mode:'diet',selDate:this.TODAY,feedFilter:'all',sober:SB,calM:this.TODAY.slice(0,7),
+      set:{goalDate:'2026-08-10',startW:68.5,goalW:60,budget:10000,provider:'gemini',geminiKey:'',claudeKey:'',apiPass:'0000',diet:{kcal:1500,c:40,p:30,f:30},maint:{kcal:2000,c:50,p:25,f:25}},
+      ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
+      editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
+  }
+  fmt(n){return (n==null||n===''||isNaN(+n))?'—':(+n).toLocaleString('ko-KR')}
+  royal(){return (this.props.tone??'공주님 말투')==='공주님 말투'}
+  say(plain,r){return this.royal()?r:plain}
+  toast(m){clearTimeout(this._tt);this.setState({toastMsg:m});this._tt=setTimeout(()=>this.setState({toastMsg:null}),2400)}
+  sums(dt){return (this.state.foods[dt]||[]).reduce((a,x)=>({kcal:a.kcal+(+x.kcal||0),c:a.c+(+x.c||0),p:a.p+(+x.p||0),f:a.f+(+x.f||0)}),{kcal:0,c:0,p:0,f:0})}
+  goalFor(dt){const m=this.state.dayMode[dt]||this.state.mode;return Object.assign({m},m==='diet'?this.state.set.diet:this.state.set.maint)}
+  score(dt){const fs=this.state.foods[dt]||[];if(!fs.length)return null;const s=this.sums(dt),g=this.goalFor(dt);let sc=100-Math.min(55,Math.abs(s.kcal-g.kcal)/Math.max(1,g.kcal)*90);const tot=s.c*4+s.p*4+s.f*9;if(tot>0)sc-=Math.min(35,(Math.abs(s.c*4/tot*100-g.c)+Math.abs(s.p*4/tot*100-g.p)+Math.abs(s.f*9/tot*100-g.f))/2);return Math.max(5,Math.round(sc))}
+  lbl(ds){const dt=new Date(ds+'T00:00:00');return (dt.getMonth()+1)+'.'+dt.getDate()+' ('+['일','월','화','수','목','금','토'][dt.getDay()]+')'}
+  addFoods(dt,items){const F={...this.state.foods};const DM={...this.state.dayMode};if(!(F[dt]||[]).length&&!DM[dt])DM[dt]=this.state.mode;F[dt]=[...(F[dt]||[]),...items];let P=this.state.posts;if(!P.some(p=>p.date===dt)){P=[{id:'p'+(this.seq++),date:dt,photos:[],text:'',auto:true,starred:false,comments:[]},...P]}this.setState({foods:F,dayMode:DM,posts:P})}
+  praiseFor(){
+    const A=['오늘도','또 한 번','변함없이','묵묵히','스스로와의 약속대로','작은 유혹에도','흔들림 없이','기특하게도','꾸준하게','한결같이','조용히','당당하게','부지런히','성실하게','침착하게','기분 좋게','가볍게','씩씩하게','야무지게','단단하게'];
+    const B=['금주를 지켜냈어요','절제에 성공했어요','유혹을 이겨냈어요','목표를 향해 한 걸음 나아갔어요','건강한 하루를 완성했어요','자신을 잘 다스렸어요','약속을 지켜냈어요','좋은 선택을 했어요','페이스를 잘 유지했어요','습관을 하나 더 쌓았어요','몸을 아껴줬어요','오늘의 나를 이겼어요','계획대로 잘 해냈어요','흐름을 잘 이어갔어요','컨디션을 잘 챙겼어요'];
+    const C=['정말 멋져요!','이 기세 그대로 가요 💪','스스로를 칭찬해 주세요 🍀','내일은 더 가벼울 거예요','당신은 충분히 잘하고 있어요','조금씩 쌓인 게 큰 힘이 돼요','몸이 먼저 알아줄 거예요','이런 하루가 모여 결과가 돼요','지금 이대로면 완벽해요 ✨','오늘의 선택이 자랑스러워요','작은 성공이 큰 변화를 만들어요','계속 응원할게요!','당신의 꾸준함이 최고예요','이 마음 오래 기억해요','내일도 함께 해봐요 🌱'];
+    const seed=(()=>{const t=new Date();return (t.getFullYear()*372+(t.getMonth()+1)*31+t.getDate())})();
+    const r=(n,off)=>{let x=Math.sin(seed*97.13+off*3.71)*10000;x=x-Math.floor(x);return Math.floor(x*n)};
+    return A[r(A.length,1)]+' '+B[r(B.length,2)]+'. '+C[r(C.length,3)];
+  }
+  openDayFeed(ds){let P=this.state.posts;let post=P.find(p=>p.date===ds);if(!post){post={id:'p'+(this.seq++),date:ds,photos:[],text:'',auto:true,starred:false,comments:[]};P=[post,...P]}this.setState({tab:'feed',posts:P,pm:{id:post.id,editing:false,isNew:false,menu:false,confirm:false,draft:null},replyTo:null,cInput:''})}
+  commitW(ds,f,v){const n=parseFloat(String(v).replace(/,/g,''));const W={...this.state.weights};W[ds]=Object.assign({t:null,a:null},W[ds],{[f]:isNaN(n)?null:n});this.setState({weights:W,editW:null});if(!isNaN(n))this.toast(this.say('저장했어요 ✓','저장했사와요 👑'))}
+  shiftDay(n){const dt=new Date(this.state.selDate+'T00:00:00');dt.setDate(dt.getDate()+n);const z=x=>String(x).padStart(2,'0');const ds=dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate());if(ds<=this.TODAY)this.setState({selDate:ds})}
+  openPost(id,edit){const p=this.state.posts.find(x=>x.id===id);this.setState({pm:{id,editing:!!edit,isNew:false,menu:false,confirm:false,draft:edit?{photos:[...p.photos],text:p.text}:null},replyTo:null,cInput:''})}
+  newPost(date){this.setState({pm:{id:null,editing:true,isNew:true,date,menu:false,confirm:false,draft:{photos:[],text:''}},replyTo:null,cInput:''})}
+  pmPatch(o){this.setState({pm:{...this.state.pm,...o}})}
+  genAIComments(postId){this.setState({aiReplying:true});setTimeout(()=>{const pool=[['코치 미미','🤖','오늘도 기록 완료! 이 페이스면 목표일까지 충분해요 💪'],['코치 단단','🧠','사진 속 채소 비율이 좋네요. 단백질을 한 줌만 더 챙겨 보세요.']];const posts=this.state.posts.map(p=>p.id!==postId?p:{...p,comments:[...p.comments,...pool.map((c,i)=>({id:'c'+(this.seq++),ai:true,author:c[0],av:c[1],time:'방금',text:c[2]}))]});this.setState({posts,aiReplying:false});this.toast(this.say('댓글 2개가 달렸어요 💬','댓글 2개가 달렸답니다 💌'))},1800)}
+  botLikes(postId){const pool=this.CAST.slice();for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}const bots=pool.slice(0,3+Math.floor(Math.random()*3));setTimeout(()=>{const post=this.state.posts.find(p=>p.id===postId);if(!post)return;const targets=post.photos.map((ph,i)=>(ph.likes||[]).every(n=>n==='나')?i:-1).filter(i=>i>=0);if(!targets.length)return;bots.forEach((b,i)=>setTimeout(()=>{this.setState({posts:this.state.posts.map(p=>p.id!==postId?p:{...p,photos:p.photos.map((ph,pi)=>targets.includes(pi)&&!(ph.likes||[]).includes(b.name)?{...ph,likes:[...(ph.likes||[]),b.name]}:ph)})})},i*600));setTimeout(()=>this.toast(bots[0].av+' '+bots[0].name+' 외 '+(bots.length-1)+'명이 하트를 눌렀어요 ❤️'),bots.length*600)},1000)}
+  queueAI(job){const q=this.state.aiQueue;if(job.type==='comment'&&q.some(j=>j.type==='comment'&&j.postId===job.postId))return;this.setState({aiQueue:[...q,{id:'q'+(this.seq++),...job}]});this.toast(this.say('AI 대기열에 담았어요 🧺 설정에서 한번에!','대기열에 담아 두었어요 🧺'))}
+  pick(a){return a[Math.floor(Math.random()*a.length)]}
+  detailPool(ev){const f=n=>this.fmt(Math.round(n));const g=[],b=[];if(!ev){return {good:true,g:['오늘도 남긴 기록'],b:[]}}const cp=Math.round(ev.cp),pp=Math.round(ev.pp),fp=Math.round(ev.fp);
+    if(ev.balanced)g.push('탄단지 '+cp+'·'+pp+'·'+fp+'% 밸런스');if(ev.highProtein)g.push('단백질 '+pp+'%');if(ev.clean)g.push('가공식품 없는 자연식 위주 식단');if(!ev.overeat)g.push('목표 안에 든 '+f(ev.s.kcal)+'kcal');if(!g.length)g.push('빠짐없는 기록');
+    if(ev.processed)b.push('섞여 있는 가공식품');if(ev.lowProtein)b.push('조금 부족한 단백질('+pp+'%)');if(ev.highFat)b.push('살짝 높은 지방('+fp+'%)');if(ev.highCarb)b.push('조금 많은 탄수('+cp+'%)');if(ev.overeat)b.push('목표보다 +'+f(ev.overKcal)+'kcal');
+    return {good:b.length===0,g,b}}
+  coachLine(ev,d0){const dp=this.detailPool(ev),good=dp.good,d=d0||this.pick(good?dp.g:dp.b);
+    const go=['챔프!','자, 봐라~','좋아 좋아,','으음, 나쁘지 않아.','오케이 챔프,'];
+    const gd=[d+' 이거 아주 곤죠(근성) 넘친다',d+', 딱 봐도 프로네','오늘 '+d+' 완전 나이스다이 💪','이야 '+d+', 스승이 다 뿌듯하다'];
+    const gt=['이 페이스면 목표는 시간문제야. 오츠카레(수고)!','계속 이렇게 조지자, 알겠지? 👊','오늘 밤은 편히 쉬어. 잘했어 챔프','내일도 이대로만. 화이또! 🔥'];
+    const bo=['야~ 챔프,','자자 진정하고,','괜찮아 임마,','들어봐,'];
+    const bd=[d+' 이건 살짝 아쉽다','오늘 '+d+', 다음엔 조심하자','솔직히 '+d+' 걸리네','음... '+d+' 있었어'];
+    const bt=['근데 자책은 노노. 낼 다시 조지면 돼! 💪','기록한 것만으로 절반은 성공이야. 오츠카레!','스승 믿고 딱 한 끼만 바꿔보자. 화이또 🔥','괜찮아, 챔프는 원래 이겨내는 사람이잖아 👊'];
+    return good?(this.pick(go)+' '+this.pick(gd)+'. '+this.pick(gt)):(this.pick(bo)+' '+this.pick(bd)+'. '+this.pick(bt))}
+  personaLine(persona,ev,d0){if(persona.coach)return this.coachLine(ev,d0);const dp=this.detailPool(ev),good=dp.good,d=d0||this.pick(good?dp.g:dp.b);const v=this.VOICE[persona.name]||this.VOICE['달밤일기'];return this.pick(good?v.g:v.b).replace('{d}',d)}
+  mkComments(ev){const others=this.CAST.filter(p=>!p.coach).slice();for(let i=others.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[others[i],others[j]]=[others[j],others[i]]}
+    const count=3+Math.floor(Math.random()*2);const chosen=[];if(Math.random()<0.72)chosen.push(this.CAST.find(p=>p.coach));for(const p of others){if(chosen.length>=count)break;chosen.push(p)}
+    for(let i=chosen.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[chosen[i],chosen[j]]=[chosen[j],chosen[i]]}
+    const dp=this.detailPool(ev),pool=(dp.good?dp.g:dp.b).slice();for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+    return chosen.map((p,i)=>({id:'c'+(this.seq++),ai:true,author:p.name,av:p.av,mbti:p.mbti,time:'방금',text:this.personaLine(p,ev,pool.length?pool[i%pool.length]:null)}))}
+  replyFallback(p){if(p.coach)return this.pick(['좋은 질문이야 챔프! 낼 아침은 단백질부터 조지자 💪','내가 봤을 땐 지금 페이스면 충분해. 화이또! 🔥','고민 말고 물 한 잔 먼저 마셔. 그담에 얘기하자 👊','오츠카레~ 딱 한 끼만 바꿔보자. 넌 할 수 있어 챔프']);if(p.ban)return this.pick(['오 좋은 질문인데ㅋㅋ 낼 아침은 단백질부터 가보자','내가 볼 땐 지금 페이스 충분해. 걱정 노노','고민되면 일단 물 한 잔 마시고 생각하자ㅋㅋ','두부면이나 포케 어때? 나 요즘 그거 꽂혔음','한 끼만 살짝 바꿔봐. 지금도 잘하고 있어']);return this.pick(['좋은 질문이에요! 내일 아침은 단백질 위주로 가볍게 시작해봐요 🌱','음~ 제 생각엔 물 한 잔 먼저 하고 천천히 정하면 좋을 것 같아요','오 그거요? 저는 두부면이나 포케 추천해요 ㅎㅎ','고민되면 채소부터 반 접시! 나머진 자유롭게 가요 ✨','좋아요 그 마음! 무리 말고 딱 한 끼만 바꿔봐요 🤝'])}
+  activeProvider(){return this.state.set.provider||'gemini'}
+  activeKey(){return ((this.activeProvider()==='claude'?this.state.set.claudeKey:this.state.set.geminiKey)||'').trim()}
+  async callAI(text,opts){opts=opts||{};if(this.activeProvider()==='claude')return this.callClaude(text,opts.image,opts.mime,opts.wantJson);const parts=[{text}];if(opts.image)parts.push({inline_data:{mime_type:opts.mime||'image/jpeg',data:opts.image}});return this.callGemini(parts,opts.wantJson)}
+  async callClaude(text,image,mime,wantJson){
+    const key=(this.state.set.claudeKey||'').trim();if(!key)throw new Error('키 없음');
+    const content=[];if(image)content.push({type:'image',source:{type:'base64',media_type:mime||'image/jpeg',data:image}});
+    content.push({type:'text',text:wantJson?(text+'\n\nJSON 배열로만, 코드펜스 없이 답하세요.'):text});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2048,messages:[{role:'user',content}]})});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const j=await res.json();return (j.content&&j.content.map(b=>b.text||'').join(''))||'';
+  }
+  async callGemini(parts,wantJson){
+    const key=(this.state.set.geminiKey||'').trim();if(!key)throw new Error('키 없음');
+    const body={contents:[{parts}]};if(wantJson)body.generationConfig={responseMimeType:'application/json'};
+    const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const j=await res.json();const c=j.candidates&&j.candidates[0];
+    return (c&&c.content&&c.content.parts&&c.content.parts.map(p=>p.text||'').join(''))||'';
+  }
+  parseFoods(txt){try{let t=String(txt).trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();const j=JSON.parse(t);return Array.isArray(j)?j:(j.foods||j.items||[])}catch(_){return[]}}
+  foodTags(name){const s=String(name||'').replace(/\s/g,'');const proc=['튀김','치킨','라면','과자','햄버거','버거','피자','삼겹살','곱창','케이크','도넛','아이스크림','콜라','사이다','탕수육','떡볶이','핫도그','소시지','베이컨','칩','초콜릿','젤리','마카롱','크림','가공','스팸','너겟','짜장','짬뽕','국물떡','양념','강정'];const good=['샐러드','닭가슴살','두부','오트밀','요거트','채소','현미','고구마','계란','달걀','연어','나물','브로콜리','아보카도','견과','토마토','바나나','사과','단호박','귀리','퀴노아','미역','버섯','시금치','포케','두부면'];let p=false,g=false;proc.forEach(k=>{if(s.includes(k))p=true});good.forEach(k=>{if(s.includes(k))g=true});return {proc:p,good:g}}
+  evaluateDay(date,fmap){const items=((fmap||this.state.foods)[date])||[];if(!items.length)return null;const s=items.reduce((a,x)=>({kcal:a.kcal+(+x.kcal||0),c:a.c+(+x.c||0),p:a.p+(+x.p||0),f:a.f+(+x.f||0)}),{kcal:0,c:0,p:0,f:0});const g=this.goalFor(date);const tot=s.c*4+s.p*4+s.f*9;const cp=tot?s.c*4/tot*100:0,pp=tot?s.p*4/tot*100:0,fp=tot?s.f*9/tot*100:0;let procN=0,goodN=0;items.forEach(it=>{const t=this.foodTags(it.name);if(t.proc)procN++;if(t.good)goodN++});const over=s.kcal-g.kcal;return {s,g,cp,pp,fp,procN,goodN,overKcal:over,balanced:Math.abs(cp-g.c)<=8&&Math.abs(pp-g.p)<=8&&Math.abs(fp-g.f)<=8,highProtein:pp>=g.p,lowProtein:pp<g.p-6,highFat:fp>=g.f+8,highCarb:cp>=g.c+10,clean:goodN>0&&procN===0,processed:procN>0,overeat:over>g.kcal*0.12}}
+  makeCoachComment(ev){
+    const R=this.royal(),P=a=>a[Math.floor(Math.random()*a.length)],f=n=>this.fmt(Math.round(n));
+    const cp=Math.round(ev.cp),pp=Math.round(ev.pp),fp=Math.round(ev.fp);
+    const dGood=[];
+    if(ev.balanced)dGood.push('탄단지 '+cp+'·'+pp+'·'+fp+'%로 목표 비율에 딱 맞았어요');
+    if(ev.highProtein)dGood.push('단백질 비중('+pp+'%)이 충분해서 포만감이 오래가요');
+    if(ev.clean)dGood.push('가공식품 없이 자연식 위주라 다이어트에 딱이에요');
+    if(!ev.overeat)dGood.push('칼로리도 목표 안('+f(ev.s.kcal)+'kcal)에서 잘 지켰어요');
+    if(!dGood.length)dGood.push('오늘도 빠짐없이 기록했어요');
+    const dCau=[];
+    if(ev.processed)dCau.push('가공식품이 섞여 있어요');
+    if(ev.lowProtein)dCau.push('단백질 비중('+pp+'%)이 목표보다 부족해요');
+    if(ev.highFat)dCau.push('지방 비율('+fp+'%)이 조금 높아요');
+    if(ev.highCarb)dCau.push('탄수화물 비율('+cp+'%)이 다소 많아요');
+    if(ev.overeat)dCau.push('목표보다 '+f(ev.overKcal)+'kcal 더 먹었어요');
+    const good=dCau.length===0;
+    const RPO=['어머, 오늘 식단 정말 훌륭하세요 👑','공주님, 완벽에 가까운 한 끼예요 ✨','우와, 이건 칭찬 안 할 수가 없답니다','오늘의 선택 아주 마음에 들어요 💖','기록을 보니 제가 다 흐뭇하답니다','역시 공주님, 오늘도 야무지세요','이 정도면 모범 식단이라 불러도 되겠어요','오늘은 특히 예쁘게 드셨네요 🎀','스스로가 자랑스러우실 거예요','완벽하게 잘 챙기셨어요','제 마음에 쏙 드는 하루예요','오늘의 식단, 백 점 드리고 싶어요','정말 잘하고 계세요 🌸','기특해서 어쩔 줄 모르겠어요','오늘도 멋지게 해내셨어요'];
+    const PPO=['오늘 식단 훌륭해요','아주 좋은 선택이에요','이대로면 완벽해요','기록 보니 흐뭇하네요','오늘은 특히 잘 드셨어요','모범적인 한 끼예요','흠잡을 데가 없네요','오늘도 잘 챙겼어요','깔끔한 식단이에요','아주 잘하고 있어요','이런 하루가 쌓이면 결과가 나와요','오늘의 선택 좋아요','밸런스가 훌륭해요','기분 좋은 기록이에요','계속 이렇게만 가요'];
+    const RPT=['이 기세로 목표일까지 가시죠 💪','스스로를 마음껏 칭찬하셔요 🍀','내일은 더 가벼우실 거예요','몸이 먼저 알아줄 거예요 ✨','이 마음 오래 기억해 주셔요','제가 끝까지 응원할게요 👑','오늘의 나를 꼭 칭찬해 주셔요','작은 성공이 큰 변화를 만든답니다','내일도 함께 해봐요 🌱','이대로면 목표는 시간문제예요','참 잘하고 계세요, 뿌듯해요','계속 이 페이스 유지해요 💖','오늘 밤은 든든하게 주무셔요','당신의 꾸준함이 최고랍니다','한 걸음 더 가까워졌어요'];
+    const PPT=['이 기세로 계속 가요 💪','스스로를 칭찬해 주세요 🍀','내일은 더 가벼울 거예요','몸이 먼저 알아줄 거예요','이 마음 오래 기억해요','끝까지 응원할게요','작은 성공이 큰 변화를 만들어요','내일도 함께 해봐요 🌱','이대로면 목표는 시간문제예요','참 잘하고 있어요','계속 이 페이스 유지해요','오늘의 선택이 자랑스러워요','한 걸음 더 가까워졌어요','좋은 습관이 쌓이고 있어요','내일도 기대할게요'];
+    const RCO=['공주님, 잠깐만요 🙏','오늘은 살짝 아쉬운 점이 있어요','조금만 신경 쓰면 완벽하겠어요','괜찮아요, 이것만 기억하셔요','다정하게 한 말씀 드릴게요','오늘은 여기만 보완하면 돼요','너무 자책은 마시고요','작은 팁 하나 드릴게요 🍀','거의 다 왔는데 한 가지만요','오늘의 숙제를 살짝 알려드릴게요','조심스레 말씀드리면요','이 부분만 챙기면 훨씬 좋아요'];
+    const PCO=['잠깐, 이건 체크해요','오늘은 살짝 아쉬워요','조금만 보완하면 완벽해요','괜찮아요, 이것만 기억해요','한 가지만 신경 써요','오늘은 여기만 고치면 돼요','자책은 금물이에요','작은 팁 하나요','거의 좋은데 한 가지만요','이 부분만 챙겨요','다음 끼니에 참고해요','살짝 조정하면 좋아요'];
+    const RCT=['다음 끼니에서 균형을 맞추면 된답니다 🍀','내일 아침은 가볍게 시작해 보셔요','그래도 기록하신 것만으로 훌륭하세요','조금씩 고쳐가면 충분해요 💪','완벽하지 않아도 괜찮답니다','오늘 하루도 충분히 잘하셨어요','제가 도와드릴 테니 걱정 마셔요','내일은 분명 더 나아질 거예요 🌱','작은 조정이 큰 차이를 만든답니다','너무 애쓰지 말고 천천히 가요','그래도 꾸준함이 제일 중요해요 👑','다음엔 꼭 성공하실 거예요'];
+    const PCT=['다음 끼니에서 균형을 맞추면 돼요','내일 아침은 가볍게 시작해요','그래도 기록한 것만으로 훌륭해요','조금씩 고쳐가면 충분해요','완벽하지 않아도 괜찮아요','오늘도 충분히 잘했어요','같이 고쳐가면 돼요, 걱정 마요','내일은 더 나아질 거예요 🌱','작은 조정이 큰 차이를 만들어요','천천히 가도 괜찮아요','그래도 꾸준함이 제일 중요해요','다음엔 꼭 성공할 거예요'];
+    const open=good?(R?RPO:PPO):(R?RCO:PCO),tail=good?(R?RPT:PPT):(R?RCT:PCT),det=good?P(dGood):P(dCau);
+    return P(open)+' '+det+'. '+P(tail);
+  }
+  async aiReply(postId,userText,target){const post=this.state.posts.find(p=>p.id===postId);
+    let persona=null;if(target&&target.author)persona=this.CAST.find(p=>p.name===target.author);if(!persona)persona=this.CAST.find(p=>p.coach);
+    const key=this.activeKey();let text='';
+    try{if(key&&post){const g=this.goalFor(post.date),s=this.sums(post.date);text=(await this.callAI('당신은 다이어트 앱 피드의 캐릭터 "'+persona.name+'"입니다. 캐릭터 설정: '+(persona.tone||'친근하고 다정한 해요체.')+' 오늘 섭취 '+s.kcal+'kcal, 목표 '+g.kcal+'kcal. 사용자 댓글: "'+userText+'". 이 캐릭터가 실제 SNS 친구처럼 1~2문장으로 짧게 답글을 답니다. 캐릭터의 말투(반말/존댓말)와 관심사를 반드시 유지하고, 설명조·상담사 말투·기계적인 표현은 금지. 본문만 출력.',{})).trim()}}catch(_){}
+    if(!text)text=this.replyFallback(persona);
+    this.setState({posts:this.state.posts.map(x=>x.id!==postId?x:{...x,comments:[...x.comments,{id:'c'+(this.seq++),ai:true,author:persona.name,av:persona.av,mbti:persona.mbti,time:'방금',text,replyTo:target?target.id:undefined}]}),aiReplying:false});
+    if(key)this.setState({ai:{...this.state.ai,calls:this.state.ai.calls+1}})}
+  async runAIQueue(){
+    const q=this.state.aiQueue;if(!q.length)return;
+    const key=this.activeKey();
+    this.setState({aiBusy:true});let calls=0;
+    try{
+      for(const job of q){
+        if(job.type==='photo'){
+          let items=null;
+          if(key&&job.image){try{const txt=await this.callAI('식단 기록 사진을 분석하세요. 다이어트 앱 화면 캡처(아침/점심/저녁/간식 제목 아래 음식 목록)이면 각 음식이 속한 구역 제목을 meal로 기록하고, 일반 음식 사진이면 meal은 null로 하세요. 화면에 보이는 숫자(용량 g·ml, kcal, 탄·단·지)는 그대로 옮기고, 개별 음식의 kcal·탄단지가 안 보이면 음식명과 용량으로 추정하되 끼니별 합계가 화면에 표시된 끼니 kcal·탄단지와 맞아야 합니다. 브랜드·부연 문구(예: 테라 라이트, Cu)는 name에서 빼세요. 아래 JSON 배열로만 답하세요(설명·코드펜스 금지). 각 원소 키: meal("아침"|"점심"|"저녁"|"간식"|null), name(한국어 음식명), amt(숫자), unit("g"|"ml"|"개"|"인분"), kcal(정수), c(탄수화물g), p(단백질g), f(지방g). 예:[{"meal":"점심","name":"현미밥","amt":210,"unit":"g","kcal":310,"c":68,"p":6,"f":2}]',{image:job.image,mime:job.mime||'image/jpeg',wantJson:true});items=this.parseFoods(txt);calls++}catch(_){}}
+          if(!items||!items.length)items=[{name:'제육볶음',amt:1,unit:'인분',kcal:480,c:24,p:32,f:28},{name:'현미밥',amt:210,unit:'g',kcal:310,c:68,p:6,f:2},{name:'미역국',amt:1,unit:'인분',kcal:90,c:6,p:7,f:4}];
+          items=items.map(x=>({id:'f'+(this.seq++),meal:['아침','점심','저녁','간식'].includes(x.meal)?x.meal:job.meal,name:String(x.name||'음식'),amt:+x.amt||0,unit:x.unit||'g',kcal:Math.round(+x.kcal||0),c:+x.c||0,p:+x.p||0,f:+x.f||0}));
+          const St=this.state,F={...St.foods},DM={...St.dayMode};
+          if(!(F[job.date]||[]).length&&!DM[job.date])DM[job.date]=St.mode;
+          F[job.date]=[...(F[job.date]||[]),...items];
+          const ev=this.evaluateDay(job.date,F);
+          const newComments=this.mkComments(ev);
+          const photoObj=job.image?{src:await window.FamilyStore.putPhoto('data:'+(job.mime||'image/jpeg')+';base64,'+job.image)}:{e:'🍽',c1:'#F3F1EA',c2:'#E7E4DA'};
+          let posts=St.posts.slice();const idx=posts.findIndex(p=>p.date===job.date);
+          if(idx>=0)posts[idx]={...posts[idx],photos:[...posts[idx].photos,photoObj],comments:[...posts[idx].comments,...newComments]};
+          else posts=[{id:'p'+(this.seq++),date:job.date,photos:[photoObj],text:'',auto:true,starred:false,comments:newComments},...posts];
+          this.setState({foods:F,dayMode:DM,posts});this.botLikes(idx>=0?posts[idx].id:posts[0].id);
+        }else{
+          const post=this.state.posts.find(p=>p.id===job.postId);if(!post)continue;
+          const ev=this.evaluateDay(post.date);
+          const newComments=this.mkComments(ev);
+          this.setState({posts:this.state.posts.map(p=>p.id!==job.postId?p:{...p,comments:[...p.comments,...newComments]})});
+        }
+      }
+      const n=q.length,used=key?Math.max(1,calls):0;
+      this.setState({aiQueue:[],aiBusy:false,ai:{...this.state.ai,calls:this.state.ai.calls+used}});
+      this.toast(this.say('호출 '+used+'회로 '+n+'건 처리 · 코치 피드백까지 완료 ⚡','호출 '+used+'회로 '+n+'건 처리했답니다 ⚡'));
+    }catch(err){this.setState({aiBusy:false});this.toast('AI 처리 중 문제가 생겼어요 · '+(err.message||'네트워크'))}
+  }
+  stripRef=React.createRef();
+  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar'];
+  idb(){return new Promise((res,rej)=>{const q=indexedDB.open('dietgram',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
+  async dbGet(k){try{const db=await this.idb();return await new Promise((res,rej)=>{const t=db.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error)})}catch(_){try{const s=localStorage.getItem('dgm_'+k);return s?JSON.parse(s):null}catch(e){return null}}}
+  // 기록은 가족 저장소(Supabase)에 둔다 — family_state 문서의 diet 칸 하나를 쓴다.
+  snapshot(){const o={seq:this.seq};for(const k of this.DBK)o[k]=this.state[k];return o}
+  adopt(o,cb){const done=()=>{this._saved=JSON.stringify(this.snapshot());if(cb)cb()};
+    if(!o||typeof o!=='object')return done();
+    const p={};for(const k of this.DBK)if(o[k]!==undefined)p[k]=o[k];if(+o.seq>this.seq)this.seq=+o.seq;
+    this.setState(p,done)}
+  persist(){clearTimeout(this._pt);this._pt=setTimeout(()=>{if(!this._loaded)return;
+    const o=this.snapshot(),s=JSON.stringify(o);
+    if(s===this._saved)return;   // 서버에서 방금 받은 걸 그대로 되돌려 보내지 않게
+    this._saved=s;this._doc.diet=o;
+    window.FamilyStore.save(this._doc,fresh=>{fresh.diet=o})},400)}
+  componentDidUpdate(){this.persist()}
+  shrink(f,max,q){return new Promise(res=>{const r=new FileReader();r.onload=()=>{const raw=String(r.result);const img=new Image();img.onload=()=>{const sc=Math.min(1,max/Math.max(img.width,img.height));if(sc>=1&&f.size<400000)return res(raw);const cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(img.width*sc));cv.height=Math.max(1,Math.round(img.height*sc));cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);res(cv.toDataURL('image/jpeg',q||0.8))};img.onerror=()=>res(raw);img.src=raw};r.readAsDataURL(f)})}
+  componentDidMount(){const el=this.stripRef.current;if(el)el.scrollLeft=el.scrollWidth;
+    this._doc={};
+    window.FamilyStore.start({seed:()=>({}),onRemote:doc=>{this._doc=doc;this.adopt(doc.diet)}}).then(async doc=>{
+      this._doc=doc||{};
+      let o=this._doc.diet,moved=false;
+      if(!o){o=await this.importLocal();moved=!!o}
+      this.adopt(o,()=>{this._loaded=true;if(moved){this._saved='';this.persist()}})})}
+  // 예전에 이 기기 안(IndexedDB)에만 있던 기록을 첫 실행 때 한 번 옮겨온다.
+  // 사진은 저장소로 올린다 — 문서 안에 원본을 넣으면 저장할 때마다 통째로 다시 올라간다.
+  async importLocal(){
+    let o=null;try{o=await this.dbGet('state')}catch(_){}
+    if(!o||typeof o!=='object')return null;
+    const up=async s=>(typeof s==='string'&&s.indexOf('data:')===0)?await window.FamilyStore.putPhoto(s):s;
+    for(const p of (o.posts||[]))for(const ph of (p.photos||[]))if(ph&&ph.src)ph.src=await up(ph.src);
+    if(o.avatar)o.avatar=await up(o.avatar);
+    return o}
+  stripDown=e=>{const el=this.stripRef.current;if(!el)return;this._sd={x:e.clientX,sl:el.scrollLeft,moved:false};try{el.setPointerCapture(e.pointerId)}catch(_){}}
+  stripMove=e=>{const sd=this._sd;if(!sd)return;const dx=e.clientX-sd.x;if(Math.abs(dx)>5)sd.moved=true;this.stripRef.current.scrollLeft=sd.sl-dx}
+  stripUp=e=>{if(this._sd&&this._sd.moved){this._noClick=true;setTimeout(()=>{this._noClick=false},60)}this._sd=null}
+  stripClick=e=>{if(this._noClick){e.stopPropagation();e.preventDefault()}}
+  renderVals(){
+    const S=this.state,pr=this.props;
+    const themes={
+      '공주님 핑크':{accent:'#E85D9F',accent2:'#F5A8CC',appBg:'#FDF1F6',cardBg:'#FFFFFF',cardBorder:'#F6D9E7',chipBg:'#F8ECF2',diet:'#E85D9F',dietSoft:'#FBE3EE',maint:'#9B7BD8',maintSoft:'#EFE9FA',logo:'🎀'},
+      '클린 그린':{accent:'#17A673',accent2:'#7BD0AC',appBg:'#F5F4F0',cardBg:'#FFFFFF',cardBorder:'#ECEAE4',chipBg:'#F1F0EB',diet:'#17A673',dietSoft:'#DDF2E9',maint:'#5B8DEF',maintSoft:'#E1EAFD',logo:'D'},
+      '선셋 오렌지':{accent:'#E8703A',accent2:'#F2B389',appBg:'#FBF2EA',cardBg:'#FFFFFF',cardBorder:'#F3DFCE',chipBg:'#F5EBE0',diet:'#E8703A',dietSoft:'#FBE7D8',maint:'#4A9DA8',maintSoft:'#DDEFF2',logo:'☀'}};
+    const th=themes[pr.theme]||themes['공주님 핑크'];
+    const shp={'몽글몽글':[24,18,14],'기본':[16,13,10],'각지게':[6,5,4]}[pr.shape??'몽글몽글']||[24,18,14];
+    const radL=shp[0]+'px',radM=shp[1]+'px',radS=shp[2]+'px';
+    const royal=this.royal();
+    const fmt=n=>this.fmt(n);
+    const modeC=m=>m==='diet'?th.diet:th.maint,modeB=m=>m==='diet'?th.dietSoft:th.maintSoft,modeL=m=>m==='diet'?'다이어트':'유지';
+    const gset=S.set,hasGoal=!!gset.goalDate;
+    let ddayText='',goalDateText='';
+    if(hasGoal){const diff=Math.round((new Date(gset.goalDate+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5);ddayText=diff>0?'D-'+diff:diff===0?'D-Day':'D+'+(-diff);const gd=new Date(gset.goalDate+'T00:00:00');goalDateText=(gd.getMonth()+1)+'월 '+gd.getDate()+'일'}
+    let cur=gset.startW;for(let i=0;i<14;i++){const w=S.weights[this.d(i)];if(w&&w.a!=null){cur=w.a;break}}
+    const lost=+(gset.startW-cur).toFixed(1);
+    const wStats=[{label:'시작',val:fmt(gset.startW),color:'#1F1E1A'},{label:'현재',val:fmt(cur),color:th.accent},{label:'감량',val:(lost>=0?'-':'+')+fmt(Math.abs(lost)),color:lost>=0?'#5B8DEF':'#E5484D'},{label:'목표',val:fmt(gset.goalW),color:'#1F1E1A'}];
+    const tSc=this.score(this.TODAY),tSum=this.sums(this.TODAY),tGoal=this.goalFor(this.TODAY);
+    const tot=tSum.c*4+tSum.p*4+tSum.f*9,pct=v=>tot>0?Math.round(v/tot*100):0;
+    const segC=pct(tSum.c*4),segP=pct(tSum.p*4),segF=pct(tSum.f*9);
+    const macroLegend=[{name:'탄수화물',color:'#E9A23B',a:segC,g:tGoal.c},{name:'단백질',color:'#E4618C',a:segP,g:tGoal.p},{name:'지방',color:'#5B8DEF',a:segF,g:tGoal.f}];
+    const strip=[];
+    const macroColor=ds=>{const s=this.sums(ds);const arr=[[s.c*4,'#E9A23B'],[s.p*4,'#E4618C'],[s.f*9,'#5B8DEF']];arr.sort((a,b)=>b[0]-a[0]);return arr[0][0]>0?arr[0][1]:'#B5B2A6'};
+    for(let i=13;i>=0;i--){const ds=this.d(i);const dt=new Date(ds+'T00:00:00');const has=(S.foods[ds]||[]).length>0;const isT=i===0;const dm=S.dayMode[ds]||'diet';
+      strip.push({dow:['일','월','화','수','목','금','토'][dt.getDay()],num:dt.getDate(),dot:has,dotColor:macroColor(ds),bg:isT?modeC(S.mode):th.cardBg,border:isT?modeC(S.mode):th.cardBorder,dowColor:isT?'rgba(255,255,255,.8)':'#B5B2A6',numColor:isT?'#fff':'#1F1E1A',go:()=>this.openDayFeed(ds)})}
+    const wRows=[];
+    for(let i=0;i<21;i++){const ds=this.d(-i);const w=S.weights[ds]||{};const ew=S.editW;const eT=!!(ew&&ew.d===ds&&ew.f==='t'),eA=!!(ew&&ew.d===ds&&ew.f==='a');
+      const t=w.t,a=w.a;const diff=(t!=null&&a!=null)?+(a-t).toFixed(1):null;
+      wRows.push({label:this.lbl(ds),editT:eT,showT:!eT,tRaw:t??'',tText:t!=null?fmt(t):'—',tColor:t!=null?'#1F1E1A':'#B5B2A6',editA:eA,showA:!eA,aRaw:a??'',aText:a!=null?fmt(a):'—',aColor:a!=null?'#1F1E1A':'#B5B2A6',
+        editTgt:()=>this.setState({editW:{d:ds,f:'t'}}),editAct:()=>this.setState({editW:{d:ds,f:'a'}}),
+        commitT:e=>this.commitW(ds,'t',e.target.value),commitA:e=>this.commitW(ds,'a',e.target.value),
+        keyDown:e=>{if(e.key==='Enter')e.target.blur()},
+        diffText:diff==null?'—':(diff>0?'+':'')+diff.toFixed(1),diffColor:diff==null?'#B5B2A6':diff>0?'#E5484D':diff<0?'#5B8DEF':'#8B887C'})}
+    const phBg=ph=>!ph?'linear-gradient(135deg,#F3F1EA,#E7E4DA)':ph.src?('url("'+ph.src+'") center/cover no-repeat'):('linear-gradient(135deg,'+ph.c1+','+ph.c2+')');
+    const mkThumb=p=>({emoji:p.photos[0]?(p.photos[0].src?'':p.photos[0].e):'📝',bg:phBg(p.photos[0]),textOnly:!p.photos.length,preview:p.text||'글 게시물',open:()=>this.openPost(p.id)});
+    const starredPosts=S.posts.filter(p=>p.starred);
+    const dSum=this.sums(S.selDate),dSc=this.score(S.selDate),dGoal=this.goalFor(S.selDate);
+    const meals=['아침','점심','저녁','간식'].map(nm=>{const items=(S.foods[S.selDate]||[]).filter(x=>x.meal===nm);const k=items.reduce((a,x)=>a+(+x.kcal||0),0);
+      return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',confirm:false,nameErr:false}}),
+        items:items.map(it=>({name:it.name,amt:fmt(it.amt)+it.unit,c:fmt(it.c),p:fmt(it.p),f:fmt(it.f),kcal:fmt(it.kcal),open:()=>this.setState({fm:{...it,confirm:false,nameErr:false}}),del:e=>{e.stopPropagation();const F={...S.foods};F[S.selDate]=(F[S.selDate]||[]).filter(x=>x.id!==it.id);this.setState({foods:F});this.toast(this.say('삭제했어요','삭제했사와요'))}}))}});
+    const dayPosts=S.posts.filter(p=>p.date===S.selDate).map(mkThumb);
+    const fm=S.fm;
+    const fmSet=(k)=>e=>this.setState({fm:{...this.state.fm,[k]:e.target.value,nameErr:false}});
+    const photoPool=[{e:'🍚',c1:'#FFF6E3',c2:'#FFE9BC'},{e:'🥦',c1:'#E7F6E4',c2:'#CBEAC4'},{e:'🍅',c1:'#FFE9E4',c2:'#FFCFC2'},{e:'🍤',c1:'#FFEFE0',c2:'#FFD9B5'}];
+    const filtered=(S.feedFilter==='star'?S.posts.filter(p=>p.starred):S.posts).slice().sort((a,b)=>b.date<a.date?-1:1);
+    const ddayOf=ds=>{if(!hasGoal)return '';const diff=Math.round((new Date(gset.goalDate+'T00:00:00')-new Date(ds+'T00:00:00'))/864e5);return diff>0?'D-'+diff:diff===0?'D-Day':'D+'+(-diff)};
+    const feedCells=filtered.map(p=>{const sm=this.sums(p.date);const st=sm.c*4+sm.p*4+sm.f*9;const sc=this.score(p.date);const dm=S.dayMode[p.date]||'diet';
+      return {...mkThumb(p),multi:p.photos.length>1,photoCount:p.photos.length,starred:p.starred,hasScore:sc!=null,score:sc,scoreColor:modeC(dm),modeColor:modeC(dm),dateLabel:this.lbl(p.date),ddayLabel:ddayOf(p.date),commentCount:p.comments.length,
+        metaLine:st>0?('탄'+Math.round(sm.c*4/st*100)+'·단'+Math.round(sm.p*4/st*100)+'·지'+Math.round(sm.f*9/st*100)+'% · '+fmt(sm.kcal)+' kcal'):'식단 기록 없음'}});
+    const scored=S.posts.map(p=>this.score(p.date)).filter(x=>x!=null);
+    const pm=S.pm;let pmv={};
+    if(pm){const post=pm.isNew?{id:null,date:pm.date,photos:[],text:'',starred:false,comments:[]}:S.posts.find(x=>x.id===pm.id)||{date:this.TODAY,photos:[],text:'',starred:false,comments:[]};
+      const psc=this.score(post.date);const pdm=S.dayMode[post.date]||'diet';const psum=this.sums(post.date);const pst=psum.c*4+psum.p*4+psum.f*9;
+      const flat=[];post.comments.filter(c=>!c.replyTo).forEach(c=>{flat.push({c,ind:false});post.comments.filter(r=>r.replyTo===c.id).forEach(r=>flat.push({c:r,ind:true}))});
+      pmv={pmOn:true,pmDate:this.lbl(post.date),pmModeBg:modeB(pdm),pmModeColor:modeC(pdm),pmModeLabel:modeL(pdm),
+        pmScoreText:psc!=null?psc+'점':this.say('점수 없음','아직 점수가 없어요'),
+        pmStarIcon:post.starred?'⭐':'☆',pmStarToggle:()=>{if(pm.isNew)return;this.setState({posts:S.posts.map(x=>x.id===post.id?{...x,starred:!x.starred}:x)})},
+        pmShowMenuBtn:!pm.editing,pmMenu:pm.menu,pmMenuToggle:()=>this.pmPatch({menu:!pm.menu}),
+        pmEdit:()=>this.pmPatch({editing:true,menu:false,draft:{photos:[...post.photos],text:post.text}}),
+        pmAskDel:()=>this.pmPatch({confirm:true,menu:false}),pmConfirm:pm.confirm,pmNoDel:()=>this.pmPatch({confirm:false}),
+        pmDoDel:()=>{this.setState({posts:S.posts.filter(x=>x.id!==post.id),pm:null});this.toast(this.say('게시물을 삭제했어요','게시물을 삭제했사와요'))},
+        pmClose:()=>{this.setState({pm:null,replyTo:null,cInput:''})},
+        pmViewMode:!pm.editing,pmEditMode:pm.editing,
+        pmHasPhotos:post.photos.length>0,pmPhotos:post.photos.map((ph,phi)=>({e:ph.src?'':ph.e,bg:phBg(ph),likeLabel:((ph.likes||[]).includes('나')?'❤️':'🤍')+((ph.likes||[]).length?' '+(ph.likes||[]).length:''),likeToggle:()=>{this.setState({posts:this.state.posts.map(x=>x.id!==post.id?x:{...x,photos:x.photos.map((q,qi)=>qi!==phi?q:{...q,likes:(q.likes||[]).includes('나')?q.likes.filter(n=>n!=='나'):[...(q.likes||[]),'나']})})})}})),pmHasText:!!post.text,pmText:post.text,
+        pmMetaLine:pst>0?(fmt(psum.kcal)+' kcal · 탄 '+fmt(psum.c)+'g · 단 '+fmt(psum.p)+'g · 지 '+fmt(psum.f)+'g'):'이 날의 식단 기록이 없어요',
+        pmDraftPhotos:(pm.draft?pm.draft.photos:[]).map((ph,i)=>({e:ph.src?'':ph.e,bg:phBg(ph),del:()=>this.pmPatch({draft:{...pm.draft,photos:pm.draft.photos.filter((_,j)=>j!==i)}})})),
+        pmPickPhotos:e=>{const files=Array.from(e.target.files||[]);e.target.value='';if(!files.length)return;Promise.all(files.map(f=>this.shrink(f,1280).then(src=>window.FamilyStore.putPhoto(src)).then(src=>({src})))).then(nps=>{const cpm=this.state.pm;if(!cpm||!cpm.draft)return;this.pmPatch({draft:{...cpm.draft,photos:[...cpm.draft.photos,...nps]}})})},
+        pmDraftText:pm.draft?pm.draft.text:'',onPmText:e=>this.pmPatch({draft:{...pm.draft,text:e.target.value}}),
+        pmCancelEdit:()=>{if(pm.isNew)this.setState({pm:null});else this.pmPatch({editing:false,draft:null})},
+        pmDone:()=>{const dr=pm.draft;if(pm.isNew){if(!dr.photos.length&&!dr.text.trim()){this.setState({pm:null});return}const id='p'+(this.seq++);this.setState({posts:[{id,date:pm.date,photos:dr.photos,text:dr.text,starred:false,comments:[]},...S.posts],pm:{id,editing:false,isNew:false,menu:false,confirm:false,draft:null}});this.queueAI({type:'comment',postId:id,label:'AI 코치 댓글 · 새 게시물'});this.botLikes(id)}else{this.setState({posts:S.posts.map(x=>x.id===post.id?{...x,photos:dr.photos,text:dr.text}:x),pm:{...pm,editing:false,draft:null}});this.queueAI({type:'comment',postId:post.id,label:'AI 코치 댓글 · 게시물 수정'});this.botLikes(post.id)}},
+        pmCommentCount:post.comments.length,
+        pmComments:flat.map(({c,ind})=>({author:c.author,time:c.time,text:c.text,hasMbti:!!c.mbti,mbti:c.mbti||'',mbtiBg:th.chipBg,mbtiColor:'#8B887C',indent:ind?'34px':'0px',av:c.ai?c.av:(S.avatar?'':'나'),avSize:c.ai?'14px':'10px',avBg:c.ai?th.chipBg:(S.avatar?('url("'+S.avatar+'") center/cover no-repeat'):th.accent),bubble:c.ai?th.chipBg:(c.replyTo||!c.ai?modeB(S.mode):th.chipBg),canReply:!!c.ai&&!pm.editing,reply:()=>this.setState({replyTo:{id:c.id,author:c.author}})})),
+        replyTagOn:!!S.replyTo,replyTagText:S.replyTo?('@'+S.replyTo.author+'에게 답글'):'',replyCancel:()=>this.setState({replyTo:null}),
+        onSend:()=>{const t=S.cInput.trim();if(!t)return;const rt=S.replyTo;const posts=S.posts.map(x=>x.id!==post.id?x:{...x,comments:[...x.comments,{id:'c'+(this.seq++),ai:false,author:'나',time:'방금',text:t,replyTo:S.replyTo?S.replyTo.id:undefined}]});this.setState({posts,cInput:'',replyTo:null,aiReplying:true});this.aiReply(post.id,t,rt)}};
+    }else{pmv={pmOn:false,pmComments:[],pmPhotos:[],pmDraftPhotos:[]}}
+    const setUpd=(path)=>e=>{const v=e.target.value;const set={...this.state.set,diet:{...this.state.set.diet},maint:{...this.state.set.maint}};const seg=path.split('.');if(seg.length===1)set[seg[0]]=isNaN(+v)||v===''?v:+v;else set[seg[0]][seg[1]]=+v||0;this.setState({set})};
+    const aiPct=Math.min(100,Math.round(S.ai.spent/Math.max(1,gset.budget)*100));
+    const sbv=S.sober[S.selDate];
+    const setSober=v=>()=>{const so={...this.state.sober};if(so[S.selDate]===v)delete so[S.selDate];else so[S.selDate]=v;this.setState({sober:so});if(so[S.selDate]===v)this.toast(v?this.say('금주 성공! 🍀','금주 성공이시라니 멋져요 🍀'):this.say('괜찮아요, 내일 다시 도전 🍀','내일은 꼭 성공해요 🍀'))};
+    const pad2=n=>String(n).padStart(2,'0');
+    const fmtT=m=>Math.floor(m/60)+':'+pad2(m%60);
+    const woMin=ds=>Object.values(S.workouts[ds]||{}).reduce((a,b)=>a+b,0);
+    const woDay=S.workouts[this.TODAY]||{};
+    const woLbl=m=>m===0?'안 함':m<60?m+'분':fmtT(m);
+    const setWo=(k,m,msg)=>{const W2={...this.state.workouts};const day={...(W2[this.TODAY]||{})};if(m<=0)delete day[k];else day[k]=m;if(Object.keys(day).length)W2[this.TODAY]=day;else delete W2[this.TODAY];this.setState({workouts:W2,woOpen:null});if(m>0)this.toast(msg)};
+    const mkWoRow=(k,em)=>{const v=woDay[k]||0;const open=S.woOpen===k;
+      const parseD=t=>{t=String(t||'').trim();if(!t)return null;if(t.includes(':')){const[h,m]=t.split(':');return (parseInt(h,10)||0)*60+(parseInt(m,10)||0)}return parseInt(t,10)||0};
+      const commit=()=>{const m=parseD(this.state.woD);if(m==null)return;setWo(k,m,this.say(k+' '+woLbl(m||0)+' 기록 완료 💪',k+' '+woLbl(m||0)+' 기록했사와요 💪'))};
+      return {name:k,emoji:em,open,toggle:()=>this.setState({woOpen:open?null:k,woD:''}),
+        dIn:open?S.woD:'',onD:e=>this.setState({woD:e.target.value}),onKey:e=>{if(e.key==='Enter')e.target.blur()},commitBlur:()=>commit(),
+        bg:v>0?th.dietSoft:th.chipBg,timeLabel:v>0?fmtT(v):'시간 선택',timeColor:v>0?th.accent:'#B5B2A6',chev:open?'▴':'▾',
+        opts:[0,15,30,45,60,75,90,105,120].map(m=>({label:woLbl(m),bg:m===v?th.accent:th.cardBg,color:m===v?'#fff':'#5C594E',
+          pick:()=>setWo(k,m,this.say(k+' '+woLbl(m)+' 기록 완료 💪 달력에서 확인!',k+' '+woLbl(m)+' 기록했사와요 💪'))}))}};
+    const woGroups=[{name:'근력',color:th.accent,rows:[mkWoRow('하체','🦵'),mkWoRow('등','🏋️'),mkWoRow('가슴+어깨','💪')]},{name:'유산소',color:'#5B8DEF',rows:[mkWoRow('유산소','🏃')]}];
+    const woTotalToday=woMin(this.TODAY);
+    const [cy,cmn]=S.calM.split('-').map(Number);
+    const mdays=new Date(cy,cmn,0).getDate(),fdow=new Date(cy,cmn-1,1).getDay();
+    const calCells=[];for(let i=0;i<fdow;i++)calCells.push({num:'',bg:'transparent',border:'transparent',kcal:'',mark:'',wo:'',woColor:'#B5B2A6',numColor:'#B5B2A6',kcalColor:'#8B887C',cursor:'default',opacity:1,go:null});
+    let mKcal=0,mLogged=0,sOk=0,sNo=0;
+    for(let dd=1;dd<=mdays;dd++){const ds=cy+'-'+pad2(cmn)+'-'+pad2(dd);const sm=this.sums(ds);const sv=S.sober[ds];const fut=ds>this.TODAY;const isT=ds===this.TODAY;
+      if(sm.kcal>0){mKcal+=sm.kcal;mLogged++}if(sv===true)sOk++;if(sv===false)sNo++;
+      calCells.push({num:dd,bg:isT?th.accent:th.chipBg,border:isT?th.accent:'transparent',numColor:isT?'#fff':fut?'#D8D5CB':'#5C594E',kcal:sm.kcal>0?fmt(sm.kcal):'',kcalColor:isT?'#fff':th.accent,mark:sv===true?'🍀':sv===false?'🍺':'',wo:woMin(ds)>0?'💪'+fmtT(woMin(ds)):'',woColor:isT?'#fff':th.accent,cursor:fut?'default':'pointer',opacity:fut?.55:1,go:fut?null:()=>this.setState({selDate:ds,tab:'log'})})}
+    return {
+      accent:th.accent,accent2:th.accent2,accentShadow:th.accent+'40',appBg:th.appBg,cardBg:th.cardBg,cardBorder:th.cardBorder,chipBg:th.chipBg,radL,radM,radS,logoGlyph:th.logo,dietColor:th.diet,maintColor:th.maint,
+      emptyScoreMsg:royal?'기록하시면 점수가 나온답니다 👑':'기록하면 점수가 나와요 🙂',
+      emptyMealMsg:royal?'아직 아무것도 안 드셨어요':'기록 없음',
+      emptyStarMsg:royal?'게시물에서 ⭐를 누르면 여기 모인답니다':'게시물에서 ⭐를 눌러 모아보세요',
+      emptyFeedMsg:royal?'아직 게시물이 없어요':'아직 게시물이 없어요',
+      modeLabel:modeL(S.mode),modeColor:modeC(S.mode),modeBg:modeB(S.mode),
+      isHome:S.tab==='home',isLog:S.tab==='log',isFeed:S.tab==='feed',isSet:S.tab==='set',isCal:S.tab==='cal',
+      calLabel:cy+'년 '+cmn+'월',calCells,
+      calPrev:()=>this.setState({calM:(cmn===1?cy-1:cy)+'-'+pad2(cmn===1?12:cmn-1)}),
+      calNext:()=>this.setState({calM:(cmn===12?cy+1:cy)+'-'+pad2(cmn===12?1:cmn+1)}),
+      calDows:['일','월','화','수','목','금','토'].map((t,i)=>({t,color:i===0?'#E5484D':i===6?'#5B8DEF':'#8B887C'})),
+      calTotal:fmt(mKcal),calAvg:mLogged?fmt(Math.round(mKcal/mLogged)):'—',calOk:sOk,calNo:sNo,
+      soberTotal:Object.values(S.sober).filter(v=>v===true).length,
+      soberPraise:Object.values(S.sober).filter(v=>v===true).length===0?'오늘부터 첫 🍀를 모아 볼까요?':this.praiseFor(),
+      soberYes:setSober(true),soberNo:setSober(false),
+      soberYesBg:sbv===true?'#17A673':th.chipBg,soberYesColor:sbv===true?'#fff':'#8B887C',
+      soberNoBg:sbv===false?'#E5484D':th.chipBg,soberNoColor:sbv===false?'#fff':'#8B887C',
+      hasGoal,noGoal:!hasGoal,ddayText,goalDateText,gotoSettings:e=>{e.preventDefault();this.setState({tab:'set'})},
+      setDiet:()=>{if(S.mode!=='diet'){this.setState({mode:'diet'});this.toast(this.say('다이어트 모드로 전환했어요','다이어트 모드로 모시겠습니다 🎀'))}},
+      setMaint:()=>{if(S.mode!=='maint'){this.setState({mode:'maint'});this.toast(this.say('유지 모드로 전환했어요','유지 모드로 모시겠습니다 🪞'))}},
+      dietBtnBg:S.mode==='diet'?th.cardBg:'transparent',dietBtnColor:S.mode==='diet'?th.diet:'#8B887C',dietBtnShadow:S.mode==='diet'?'0 1px 4px rgba(0,0,0,.12)':'none',
+      maintBtnBg:S.mode==='maint'?th.cardBg:'transparent',maintBtnColor:S.mode==='maint'?th.maint:'#8B887C',maintBtnShadow:S.mode==='maint'?'0 1px 4px rgba(0,0,0,.12)':'none',
+      stripRef:this.stripRef,stripDown:this.stripDown,stripMove:this.stripMove,stripUp:this.stripUp,stripClick:this.stripClick,
+      woGroups,woTotal:woTotalToday>0?'총 '+fmtT(woTotalToday):'0:00',woTotalColor:woTotalToday>0?th.accent:'#B5B2A6',
+      wStats,hasTodayLog:tSc!=null,noTodayLog:tSc==null,todayScore:tSc,todayKcal:fmt(tSum.kcal),goalKcal:fmt(tGoal.kcal),segC,segP,segF,macroLegend,strip,wRows,
+      hasStarred:starredPosts.length>0,noStarred:!starredPosts.length,starred:starredPosts.map(mkThumb),
+      selLabel:this.lbl(S.selDate),selDate:S.selDate,todayStr:this.TODAY,
+      prevDay:()=>this.shiftDay(-1),nextDay:()=>this.shiftDay(1),
+      nextDisabled:S.selDate>=this.TODAY,nextColor:S.selDate>=this.TODAY?'#D8D5CB':'#5C594E',nextOpacity:S.selDate>=this.TODAY?.5:1,
+      onDatePick:e=>{const v=e.target.value;if(v&&v<=this.TODAY)this.setState({selDate:v})},
+      onPhotoPick:e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;const h=new Date().getHours();const meal=h<10?'아침':h<15?'점심':h<20?'저녁':'간식';this.shrink(f,1568,0.85).then(res=>{const b64=res.slice(res.indexOf(',')+1);const mime=res.slice(5,res.indexOf(';'))||'image/jpeg';this.queueAI({type:'photo',date:S.selDate,meal,image:b64,mime,label:'사진 인식 · '+this.lbl(S.selDate)+' '+meal})})},
+      dayKcal:fmt(dSum.kcal),dayC:fmt(dSum.c),dayP:fmt(dSum.p),dayF:fmt(dSum.f),
+      dayModeBg:modeB(dGoal.m),dayModeColor:modeC(dGoal.m),dayModeLabel:modeL(dGoal.m),
+      dayHasLog:dSc!=null,dayNoLog:dSc==null,dayScore:dSc,
+      meals,dayPosts,newPostLog:()=>this.newPost(S.selDate),
+      fmOn:!!fm,fmTitle:fm&&fm.id?'음식 수정':'음식 추가',fmIsEdit:!!(fm&&fm.id),fmConfirm:!!(fm&&fm.confirm),
+      fmMeals:['아침','점심','저녁','간식'].map(nm=>({name:nm,pick:()=>this.setState({fm:{...this.state.fm,meal:nm}}),bg:fm&&fm.meal===nm?th.cardBg:'transparent',color:fm&&fm.meal===nm?th.accent:'#8B887C',shadow:fm&&fm.meal===nm?'0 1px 4px rgba(0,0,0,.12)':'none'})),
+      fmName:fm?fm.name:'',fmAmt:fm?fm.amt:'',fmUnit:fm?fm.unit:'g',fmKcal:fm?fm.kcal:'',fmC:fm?fm.c:'',fmP:fm?fm.p:'',fmF:fm?fm.f:'',
+      fmNameBorder:fm&&fm.nameErr?'#E5484D':'#E3E0D8',
+      onFmName:fmSet('name'),onFmAmt:fmSet('amt'),onFmUnit:fmSet('unit'),onFmKcal:fmSet('kcal'),onFmC:fmSet('c'),onFmP:fmSet('p'),onFmF:fmSet('f'),
+      fmCancel:()=>this.setState({fm:null}),
+      fmAskDel:()=>this.setState({fm:{...fm,confirm:true}}),fmNoDel:()=>this.setState({fm:{...fm,confirm:false}}),
+      fmDoDel:()=>{const F={...S.foods};F[S.selDate]=(F[S.selDate]||[]).filter(x=>x.id!==fm.id);this.setState({foods:F,fm:null});this.toast(this.say('삭제했어요','삭제했사와요'))},
+      fmSave:()=>{if(!fm.name.trim()){this.setState({fm:{...fm,nameErr:true}});this.toast('이름을 입력해 주세요');return}
+        const item={id:fm.id||'f'+(this.seq++),meal:fm.meal,name:fm.name.trim(),amt:+fm.amt||0,unit:fm.unit,kcal:+fm.kcal||0,c:+fm.c||0,p:+fm.p||0,f:+fm.f||0};
+        if(fm.id){const F={...S.foods};F[S.selDate]=(F[S.selDate]||[]).map(x=>x.id===fm.id?item:x);this.setState({foods:F,fm:null})}else{this.addFoods(S.selDate,[item]);this.setState({fm:null})}
+        this.toast(this.say('저장했어요 ✓','저장했사와요 👑'))},
+      avatarBg:S.avatar?('url("'+S.avatar+'") center/cover no-repeat'):('linear-gradient(135deg,'+th.accent+','+th.accent2+')'),
+      avatarGlyph:S.avatar?'':'다',
+      onAvatarPick:e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;this.shrink(f,512).then(src=>window.FamilyStore.putPhoto(src)).then(src=>{this.setState({avatar:src});this.toast(this.say('프로필 사진을 바꿨어요 ✓','프로필 사진을 바꿔 두었어요 ✨'))})},
+      feedPostCount:fmt(S.posts.length),feedPhotoCount:fmt(S.posts.reduce((a,p)=>a+p.photos.length,0)),
+      feedAvgScore:scored.length?fmt(Math.round(scored.reduce((a,b)=>a+b,0)/scored.length)):'—',
+      newPostFeed:()=>this.newPost(this.TODAY),
+      filterAll:()=>this.setState({feedFilter:'all'}),filterStar:()=>this.setState({feedFilter:'star'}),
+      fAllBg:S.feedFilter==='all'?'#1F1E1A':th.chipBg,fAllColor:S.feedFilter==='all'?'#fff':'#5C594E',
+      fStarBg:S.feedFilter==='star'?'#1F1E1A':th.chipBg,fStarColor:S.feedFilter==='star'?'#fff':'#5C594E',
+      feedCells,feedEmpty:!feedCells.length,
+      aiSpent:fmt(S.ai.spent),aiBudget:fmt(gset.budget),aiCalls:fmt(S.ai.calls),aiPct,aiBarColor:aiPct>=90?'#E5484D':th.accent,aiWarn:aiPct>=90,
+      sBudget:gset.budget,onBudget:setUpd('budget'),sGoalDate:gset.goalDate,onGoalDate:setUpd('goalDate'),
+      sGeminiKey:gset.geminiKey,onGeminiKey:setUpd('geminiKey'),keyBorder:(gset.geminiKey||'').trim()?th.accent:'#E3E0D8',keyHint:(gset.geminiKey||'').trim()?'연결됨 ✓ Gemini 2.5 Flash 무료 등급 사용 중':'aistudio.google.com/apikey 에서 무료로 발급받아 붙여넣으세요. 없어도 데모로 동작해요.',
+      apiOpen:S.apiOpen,apiLocked:!S.apiUnlocked,apiEditable:S.apiUnlocked,
+      sClaudeKey:gset.claudeKey,onClaudeKey:setUpd('claudeKey'),claudeBorder:(gset.claudeKey||'').trim()?th.accent:'#E3E0D8',claudeHint:(gset.claudeKey||'').trim()?'연결됨 ✓ Claude Sonnet 4 사용 중':'console.anthropic.com 에서 발급 후 붙여넣으세요. 없어도 데모로 동작해요.',
+      setProvGemini:()=>{this.setState({set:{...this.state.set,provider:'gemini'}});this.toast(this.say('Gemini(무료)로 실행해요','제미나이로 모시겠습니다 🌱'))},
+      setProvClaude:()=>{this.setState({set:{...this.state.set,provider:'claude'}});this.toast(this.say('Claude로 실행해요','클로드로 모시겠습니다 ✨'))},
+      provGeminiBg:(gset.provider||'gemini')==='gemini'?th.cardBg:'transparent',provGeminiColor:(gset.provider||'gemini')==='gemini'?th.accent:'#8B887C',provGeminiShadow:(gset.provider||'gemini')==='gemini'?'0 1px 4px rgba(0,0,0,.12)':'none',
+      provClaudeBg:gset.provider==='claude'?th.cardBg:'transparent',provClaudeColor:gset.provider==='claude'?th.accent:'#8B887C',provClaudeShadow:gset.provider==='claude'?'0 1px 4px rgba(0,0,0,.12)':'none',
+      provHint:gset.provider==='claude'?'Claude 키로 처리해요 · 유료(사용량 과금)':'무료 등급으로 사진 인식·코치 댓글을 처리해요',
+      resetAsk:!!S.resetAsk,resetAskOff:!S.resetAsk,askReset:()=>this.setState({resetAsk:true}),cancelReset:()=>this.setState({resetAsk:false}),
+      doReset:()=>{this.setState({foods:{},weights:{},dayMode:{},posts:[],sober:{},workouts:{},avatar:null,ai:{spent:0,calls:0},resetAsk:false,pm:null,fm:null,editW:null},()=>this.persist());this.toast(this.say('모든 기록을 지웠어요. 새로 시작!','깨끗이 비웠사와요. 새 출발이에요 👑'))},
+      apiToggle:()=>this.setState({apiOpen:!S.apiOpen,apiPassErr:false,apiPassInput:''}),
+      apiSubLabel:S.apiUnlocked?('실행 중: '+(gset.provider==='claude'?'Claude':'Gemini 무료')):((gset.provider==='claude'?'Claude':'Gemini 무료')+' API · 비밀번호로 잠금'),
+      apiLockLabel:S.apiUnlocked?'해제됨':'잠금',apiLockBg:S.apiUnlocked?th.dietSoft:th.chipBg,apiLockColor:S.apiUnlocked?th.accent:'#8B887C',
+      apiChevron:S.apiOpen?'▲':'▼',
+      apiPassInput:S.apiPassInput,onApiPass:e=>this.setState({apiPassInput:e.target.value,apiPassErr:false}),
+      onApiPassKey:e=>{if(e.key==='Enter'){if(String(S.apiPassInput)===String(gset.apiPass))this.setState({apiUnlocked:true,apiPassInput:'',apiPassErr:false});else this.setState({apiPassErr:true})}},
+      apiPassBorder:S.apiPassErr?'#E5484D':'#E3E0D8',apiPassErr:S.apiPassErr,
+      apiUnlock:()=>{if(String(S.apiPassInput)===String(gset.apiPass))this.setState({apiUnlocked:true,apiPassInput:'',apiPassErr:false});else this.setState({apiPassErr:true})},
+      apiLock:()=>this.setState({apiUnlocked:false,apiPassInput:'',apiPassErr:false}),
+      apiPassHint:String(gset.apiPass)==='0000'?'기본 비밀번호는 0000 이에요':'설정한 비밀번호를 입력하세요',
+      sApiPass:gset.apiPass,onApiPassChange:e=>{const set={...this.state.set,apiPass:String(e.target.value||'')};this.setState({set});this.toast(this.say('비밀번호를 바꿨어요 ✓','비밀번호를 바꿔 두었어요 🔐'))},
+      sStartW:gset.startW,onStartW:setUpd('startW'),sGoalW:gset.goalW,onGoalW:setUpd('goalW'),
+      sDietKcal:gset.diet.kcal,onDietKcal:setUpd('diet.kcal'),sDietC:gset.diet.c,onDietC:setUpd('diet.c'),sDietP:gset.diet.p,onDietP:setUpd('diet.p'),sDietF:gset.diet.f,onDietF:setUpd('diet.f'),
+      sMaintKcal:gset.maint.kcal,onMaintKcal:setUpd('maint.kcal'),sMaintC:gset.maint.c,onMaintC:setUpd('maint.c'),sMaintP:gset.maint.p,onMaintP:setUpd('maint.p'),sMaintF:gset.maint.f,onMaintF:setUpd('maint.f'),
+      saveSettings:()=>this.toast(this.say('설정을 저장했어요 ✓','설정을 저장했사와요 👑')),
+      aiBusy:S.aiBusy,aiReplying:S.aiReplying,
+      aiQueueCount:S.aiQueue.length,aiQueueEmpty:!S.aiQueue.length,aiQueueHas:S.aiQueue.length>0,
+      aiQueueItems:S.aiQueue.map(j=>({label:j.label,icon:j.type==='photo'?'📷':'💬',remove:()=>this.setState({aiQueue:this.state.aiQueue.filter(x=>x.id!==j.id)})})),
+      runAIQueue:()=>this.runAIQueue(),
+      aiRunBg:S.aiQueue.length?th.accent:th.chipBg,aiRunColor:S.aiQueue.length?'#fff':'#B5B2A6',
+      aiRunCursor:S.aiQueue.length?'pointer':'default',aiRunShadow:S.aiQueue.length?('0 4px 14px '+th.accent+'40'):'none',
+      aiRunSuffix:S.aiQueue.length?(' ('+S.aiQueue.length+'건 · 호출 1회)'):' (대기 0건)',
+      cInput:S.cInput,onCInput:e=>this.setState({cInput:e.target.value}),
+      onCKey:e=>{if(e.key==='Enter'&&pmv.onSend)pmv.onSend()},
+      toastOn:!!S.toastMsg,toastMsg:S.toastMsg,
+      tabs:[{k:'home',path:'M4.5 11.2 12 4.8l7.5 6.4M6.5 10v8a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-8',label:'홈'},{k:'log',path:'M5.5 18.5l.9-3.6L16.6 4.7a2 2 0 0 1 2.8 2.8L9.2 17.7l-3.7.8z',label:'기록'},{k:'cal',path:'M4.5 8.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zM4.5 10.5h15M8.5 3.5v3M15.5 3.5v3M8.5 14h.01M12 14h.01M15.5 14h.01',label:'달력'},{k:'feed',path:'M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zM5 15.5l3.5-3 3.5 3 3-2.5 4 3M9 8.5h.01',label:'피드'},{k:'set',path:'M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zM12 3.6v1.9M12 18.5v1.9M3.6 12h1.9M18.5 12h1.9M6.1 6.1l1.3 1.3M16.6 16.6l1.3 1.3M17.9 6.1l-1.3 1.3M7.4 16.6l-1.3 1.3',label:'설정'}].map(t=>({path:t.path,label:t.label,go:()=>this.setState({tab:t.k}),color:S.tab===t.k?th.accent:'#B5B2A6',sw:S.tab===t.k?2.4:2})),
+      ...pmv};
+  }
+}
+</script>
+</body>
+</html>

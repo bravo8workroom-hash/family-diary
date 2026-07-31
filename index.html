@@ -975,9 +975,9 @@ input,button,textarea,select{font-family:inherit;}
         </div>
       </sc-if>
       <sc-if value="{{ parentOpen }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;gap:7px;">
+        <div style="display:flex;gap:7px;overflow-x:auto;">
           <sc-for list="{{ pviewsV }}" as="pv" hint-placeholder-count="3">
-            <button onClick="{{ pv.go }}" style="background:{{ pv.bg }};color:{{ pv.fg }};border:1px solid {{ pv.bd }};border-radius:99px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;">{{ pv.label }}</button>
+            <button onClick="{{ pv.go }}" style="background:{{ pv.bg }};color:{{ pv.fg }};border:1px solid {{ pv.bd }};border-radius:99px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;flex:none;white-space:nowrap;">{{ pv.label }}</button>
           </sc-for>
         </div>
 
@@ -3663,7 +3663,9 @@ class Component extends DCLogic {
       V.parentLocked=false;
       V.parentOpen=S.tab==='parent';
       V.unlockParent=()=>{if((f.ppw||'')===D.settings.parentPw)this.setState({parentOk:true,pwErr:'',f:{...f,ppw:''}});else this.setState({pwErr:'비밀번호가 틀렸어요 (기본: 0000)'});};
-      V.pviewsV=[{id:'kids',label:'👧 자녀 일정'},{id:'stk',label:'🌟 스티커'},{id:'money',label:'💳 가계부'},{id:'set',label:'⚙️ 설정'}].map(pv=>({...pv,...chip(S.pview===pv.id),go:()=>this.setState({pview:pv.id})}));
+      V.pviewsV=[{id:'kids',label:'👧 자녀 일정'},{id:'stk',label:'🌟 스티커'},{id:'money',label:'💳 가계부'},{id:'set',label:'⚙️ 설정'}].map(pv=>({...pv,...chip(S.pview===pv.id),go:()=>this.setState({pview:pv.id})}))
+        // 다이어트 일기는 같은 저장소의 별도 페이지(diet/)다 — 화면 전환이 아니라 이동
+        .concat([{id:'diet',label:'🥗 다이어트 일기',...chip(false),go:()=>{location.href='diet/';}}]);
       V.pvKids=S.pview==='kids';V.pvMoney=S.pview==='money';V.pvSet=S.pview==='set';V.pvSetOrKids=V.pvKids||V.pvSet;
       V.pvStk=S.pview==='stk';
       V.pErrBal=this.errAvail(D,u.id);
