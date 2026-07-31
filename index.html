@@ -442,9 +442,17 @@ input,button,textarea,select{font-family:inherit;}
     <div data-screen-label="가족 피드" style="padding:0 16px;display:flex;flex-direction:column;gap:14px;">
       <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
         <textarea value="{{ f.fdText }}" onChange="{{ on.fdText }}" placeholder="오늘 우리 가족의 순간을 남겨보세요 ✨" rows="2" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;resize:none;"></textarea>
-        <sc-if value="{{ hasFeedPhoto }}" hint-placeholder-val="{{ false }}"><div style="width:100%;height:180px;border-radius:12px;margin-top:8px;background-image:url('{{ feedPhoto }}');background-size:cover;background-position:center;"></div></sc-if>
+        <sc-if value="{{ hasFeedPhoto }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">
+            <sc-for list="{{ feedPhotosV }}" as="fp" hint-placeholder-count="1">
+              <div style="position:relative;width:84px;height:84px;border-radius:12px;background-image:url('{{ fp.u }}');background-size:cover;background-position:center;">
+                <button onClick="{{ fp.rm }}" title="이 사진 빼기" style="position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;font-size:11px;line-height:1;cursor:pointer;padding:0;">✕</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
         <div style="display:flex;gap:8px;margin-top:10px;">
-          <label style="background:var(--soft,#F7EAD2);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:800;cursor:pointer;">📷 사진<input type="file" accept="image/*" onChange="{{ pickFeedPhoto }}" style="display:none;"></label>
+          <label style="background:var(--soft,#F7EAD2);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:800;cursor:pointer;">📷 사진<input type="file" accept="image/*" multiple onChange="{{ pickFeedPhoto }}" style="display:none;"></label>
           <button onClick="{{ addFeed }}" style="flex:1;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:800;cursor:pointer;">올리기</button>
         </div>
       </div>
@@ -469,7 +477,11 @@ input,button,textarea,select{font-family:inherit;}
             <button onClick="{{ po.del }}" style="background:none;border:none;color:var(--sub,#8A8177);cursor:pointer;font-size:13px;">✕</button>
           </div>
           <div style="font-size:14px;margin:8px 0;line-height:1.5;">{{ po.txt }}</div>
-          <sc-if value="{{ po.hasPhoto }}" hint-placeholder-val="{{ false }}"><div style="width:100%;height:220px;border-radius:14px;margin-bottom:8px;background-image:url('{{ po.photo }}');background-size:cover;background-position:center;"></div></sc-if>
+          <sc-if value="{{ po.hasPhoto }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
+              <sc-for list="{{ po.photosV }}" as="pp" hint-placeholder-count="1"><div style="width:100%;height:220px;border-radius:14px;background-image:url('{{ pp.u }}');background-size:cover;background-position:center;"></div></sc-for>
+            </div>
+          </sc-if>
           <sc-if value="{{ po.hasFcard }}" hint-placeholder-val="{{ false }}">
             <div style="width:180px;margin-bottom:8px;border-radius:16px;padding:3px;background-image:linear-gradient(125deg,#FFE9A8,#FFD166,#C8F0FF,#FFB8E0,#FFE9A8);background-size:200% 100%;animation:holo 7s linear infinite;box-shadow:0 6px 13px rgba(6,34,66,.16);font-family:'Jua',system-ui,sans-serif;">
               <div style="border-radius:13px;overflow:hidden;background:var(--card,#fff);">
@@ -2017,7 +2029,11 @@ input,button,textarea,select{font-family:inherit;}
         <span style="flex:1;font-size:15px;font-weight:800;">{{ fvBy }} <span style="color:var(--sub,#8A8177);font-weight:600;font-size:12px;">{{ fvDate }}</span></span>
         <button onClick="{{ closeModal }}" style="background:none;border:none;font-size:16px;color:var(--sub,#8A8177);cursor:pointer;">✕</button>
       </div>
-      <sc-if value="{{ fvHasPhoto }}" hint-placeholder-val="{{ false }}"><div style="width:100%;height:220px;border-radius:14px;background-image:url('{{ fvPhoto }}');background-size:cover;background-position:center;margin-bottom:10px;"></div></sc-if>
+      <sc-if value="{{ fvHasPhoto }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">
+          <sc-for list="{{ fvPhotosV }}" as="fpv" hint-placeholder-count="1"><div style="width:100%;height:220px;border-radius:14px;background-image:url('{{ fpv.u }}');background-size:cover;background-position:center;"></div></sc-for>
+        </div>
+      </sc-if>
       <div style="font-size:14px;line-height:1.6;">{{ fvTxt }}</div>
       <button onClick="{{ fvGoFeed }}" style="margin-top:14px;width:100%;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;">피드에서 자세히 보기 →</button>
     </div>
@@ -2542,7 +2558,7 @@ input,button,textarea,select{font-family:inherit;}
 const FMOTTOS=['서로 선은 넘지 맙시다. 나는 갯바위에서, 너는 바다 속에서!','오늘의 신사 협정: 찌가 가라앉으면 정당하게 협상 개시.','잡아도 칭찬, 놓쳐도 미소, 꽝 쳐도 품격 유지!','바늘은 거들 뿐, 승부는 신사답게.','물고기는 매너 입질, 낚시꾼은 안전 퇴근!','오늘의 서약: 바늘 끝엔 예의, 발 밑엔 안전.','손맛은 묵직하게, 쓰레기는 싹 다 가볍게!','잡혀줘서 고맙고, 살아서 돌아가니 반갑다!','용왕님도 인정하는 페어플레이 낚시꾼.','바다와의 비즈니스: 꽝 쳐도 절대 투정 금지!','No Trash, No Risk, Just Fishing.','안전 조행 100%, 매너 입질 100%.','물고기에겐 미안함, 바다에겐 고마움.','손맛 낚고, 추억 담고, 무사 귀가.','격식 있는 챔질, 매너 있는 귀가.','바다 위 신사들의 정당한 한판승부.','안전이 우선, 매너가 기본.','바다를 아끼는 진짜 낚시꾼의 품격.','찌끝에 담은 예의, 발끝에 둔 안전.','클린 캐스팅, 리스펙트 조행.','바다가 내어준 선물, 감사함으로 되돌려줍니다.','물고기와 나눈 짧은 대화, 긴 여운으로 남기는 하루.','파도 소리에 감사를, 바람 소리에 안녕을.','자연이 준 소중한 손맛, 내가 지키는 안전한 조행.','바다를 닮은 넓은 마음으로 낚시합니다.','내가 떠난 자리는 바다의 눈물 없이 깨끗하게.','작은 물고기 한 마리에도 경건함을 담아.','바다와 사람이 같이 웃는 소중한 순간.','무사히 집으로 다녀오는 것이 가장 큰 조과입니다.','푸른 바다 위, 나만의 신사적 낭만.','어종 불문, 크기 불문! 안전과 매너는 절대 성역.','발 밑은 조심조심, 바다 속엔 신사답게.','잡는 기쁨보다 지키는 보람을 낚습니다.','바다의 규칙을 지키는 자가 진짜 꾼이다.','나를 지키는 구명조끼, 바다를 지키는 클린마인드.','어린 생명은 놓아주고, 내 쓰레기는 가져오고.','바다 생명과의 약속, 신사적인 라이벌의 대결.','너와 나의 매너가 만날 때 완벽한 조행이 완성된다.','나도 무사히 집으로, 너도 무사히 바다로!','오늘도 신사답게 던지고, 정직하게 낚았습니다.'];
 
 class Component extends DCLogic {
-  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',mview:'list',parentOk:false,modal:null,editMode:false,calM:'',budM:'',selDate:'',budSel:'',stKid:'kid1',ttKid:'kid1',feedPhoto:null,rcThumb:null,aiBusy:false,aiMsg:'',pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',qz:null,now:0,qMsg:'',qbKid:'',qbSubj:'engw',qbLv:2,qbRwE:'🌟',qbRwN:2,qbFeeE:'🌟',qbFeeN:1,qbItems:[],qbMsg:'',qbAi:false,qbEditId:null};
+  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',mview:'list',parentOk:false,modal:null,editMode:false,calM:'',budM:'',selDate:'',budSel:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],rcThumb:null,aiBusy:false,aiMsg:'',pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',qz:null,now:0,qMsg:'',qbKid:'',qbSubj:'engw',qbLv:2,qbRwE:'🌟',qbRwN:2,qbFeeE:'🌟',qbFeeN:1,qbItems:[],qbMsg:'',qbAi:false,qbEditId:null};
   KEY = 'famdiary_v1';
   KART={'가자미':{i:'🐟',a:'#E2D3B4',b:'#7D6746'},'우럭':{i:'🐠',a:'#B9C6AD',b:'#43533F'},'볼락':{i:'🐡',a:'#FFC0AC',b:'#A3392A'},'쥐노래미':{i:'🐟',a:'#DBE4AC',b:'#66743A'},'고등어':{i:'🐟',a:'#C8E7F5',b:'#25587A'},'전갱이':{i:'🐠',a:'#E2F2F8',b:'#54798F'},'학꽁치':{i:'🐟',a:'#EAF5FC',b:'#7691A6'},'보리멸':{i:'🐟',a:'#F6ECD4',b:'#A08554'},'황어':{i:'🐟',a:'#FFE7AD',b:'#94741F'},'삼치':{i:'🐟',a:'#D3E7F2',b:'#37627F'},'붕장어':{i:'🐍',a:'#E0D1B8',b:'#645440'},'장어':{i:'🐍',a:'#DCCFBA',b:'#5B4C3A'},'방어':{i:'🐠',a:'#FFE6B0',b:'#A5761D'},'광어':{i:'🐟',a:'#E6EEF6',b:'#5A6A79'},'감성돔':{i:'🐟',a:'#DFE9F2',b:'#41576B'},'참돔':{i:'🐠',a:'#FFD6D4',b:'#A4413C'}};
   KFISH={'장어':{len:68,diff:5},'삼치':{len:52,diff:3},'방어':{len:74,diff:4},'볼락':{len:24,diff:2},'광어':{len:45,diff:3},'감성돔':{len:31,diff:3},'참돔':{len:38,diff:4}};
@@ -2579,6 +2595,7 @@ class Component extends DCLogic {
   DECO = ['🎀','🌸','⭐','💖','🍓','🐰','🦋','✨','🌈','🍑','🫧','🐻','⚽','🎮','🎧','🍀','🌙','💜','🧸','🍒','😎','🤙','🔥','💫'];
   DSTK = ['img:ham1','img:ham2','img:ham3','img:chick1','img:chick2','img:chick3','img:chick4','img:chick5','img:petit1','img:petit2','img:petit3','img:petit4','img:bear','img:fish','img:star','img:rainbow','img:cake','img:flower','🥰','🎉','👍','💖','🍀','⚽'];
   dv(s){s=String(s);return s.slice(0,4)==='img:'?{isImg:true,isEmo:false,img:'assets/stickers/'+s.slice(4)+'.png'}:{isImg:false,isEmo:true,e:s};}
+  phl(po){return (po.photos&&po.photos.length)?po.photos:(po.photo?[po.photo]:[]);}   // 예전 글은 photo 한 장, 새 글은 photos 배열
 
   iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
   today(){return this.iso(new Date());}
@@ -2612,9 +2629,10 @@ class Component extends DCLogic {
   componentDidMount(){
     this.qTimer=setInterval(()=>this.qTick(),500);
     this.feedPaste=async e=>{const S=this.state;if(S.tab!=='feed'||!S.user||S.modal)return;
-      const it=Array.from((e.clipboardData||{}).items||[]).find(x=>x.type&&x.type.indexOf('image/')===0);if(!it)return;
-      e.preventDefault();const file=it.getAsFile();if(!file)return;
-      const url=await window.FamilyStore.putPhoto(await this.compress(file,640));this.setState({feedPhoto:url});};
+      const its=Array.from((e.clipboardData||{}).items||[]).filter(x=>x.type&&x.type.indexOf('image/')===0);if(!its.length)return;
+      e.preventDefault();const files=its.map(x=>x.getAsFile()).filter(Boolean);if(!files.length)return;
+      const urls=[];for(const file of files)urls.push(await window.FamilyStore.putPhoto(await this.compress(file,640)));
+      this.setState({feedPhotos:this.state.feedPhotos.concat(urls)});};
     document.addEventListener('paste',this.feedPaste);
     window.FamilyStore.start({
       seed:()=>this.seed(),
@@ -2677,6 +2695,140 @@ class Component extends DCLogic {
   clearF(keys){const f={...this.state.f};keys.forEach(k=>delete f[k]);this.setState({f});}
 
   compress(file,max){return new Promise(res=>{const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.72));};img.src=rd.result;};rd.readAsDataURL(file);});}
+
+  // 피싱 카드를 캔버스에 그려 사진(dataURL)으로 만든다 — 피드에 카드 모습 그대로 올리기 위해
+  async drawFishCard(l){
+    const KA=this.KART[String(l.species||'').trim()]||{i:'🐟',a:'#D3E7F2',b:'#37627F'};
+    const dif=Math.max(1,Math.min(5,Number(l.diff)||3));
+    const stars='⭐'.repeat(dif)+'☆'.repeat(5-dif);
+    let ph=null;
+    if(l.photo){try{ph=await new Promise((res,rej)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>res(im);im.onerror=rej;im.src=l.photo;});}catch(e){ph=null;}}
+    try{await document.fonts.load('700 20px Jua');await document.fonts.ready;}catch(e){}
+    const W=360,H=520,SC=2,c=document.createElement('canvas');c.width=W*SC;c.height=H*SC;
+    const x=c.getContext('2d');x.scale(SC,SC);x.textBaseline='middle';
+    const FT=(s,it)=>((it?'italic ':'')+s+'px Jua,"Malgun Gothic",sans-serif');
+    const rr=(a,b,w,h,r)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();};
+    const fit=(s,f,mw)=>{x.font=f;s=String(s==null?'':s);if(x.measureText(s).width<=mw)return s;while(s.length&&x.measureText(s+'…').width>mw)s=s.slice(0,-1);return s+'…';};
+    const wrap=(s,f,mw,ml)=>{x.font=f;const out=[];let cur='';for(const ch of String(s||'')){if(x.measureText(cur+ch).width>mw&&cur){out.push(cur);cur=ch;}else cur+=ch;}
+      if(cur)out.push(cur);if(out.length>ml){out.length=ml;out[ml-1]=fit(out[ml-1]+'…',f,mw);}return out;};
+    // 금박 테두리
+    let g=x.createLinearGradient(0,0,W,H);
+    [[0,'#FFF8D9'],[.14,'#E8C765'],[.27,'#B8892B'],[.38,'#FFF3C4'],[.52,'#D9AE45'],[.66,'#A97C22'],[.78,'#FFEFB8'],[.9,'#CFA03A'],[1,'#8F6A1C']].forEach(s=>g.addColorStop(s[0],s[1]));
+    rr(0,0,W,H,20);x.fillStyle=g;x.fill();
+    rr(1.5,1.5,W-3,H-3,18);x.strokeStyle='rgba(255,255,255,.55)';x.lineWidth=2;x.stroke();
+    rr(5,5,W-10,H-10,15);x.strokeStyle='rgba(140,100,25,.35)';x.lineWidth=2;x.stroke();
+    // 속지 + 은은한 홀로그램
+    rr(10,10,W-20,H-20,11);x.fillStyle='rgba(255,255,255,.78)';x.fill();
+    x.save();rr(10,10,W-20,H-20,11);x.clip();
+    g=x.createLinearGradient(0,0,W,120);
+    ['rgba(255,120,190,.13)','rgba(255,200,105,.13)','rgba(140,235,190,.13)','rgba(120,195,255,.13)','rgba(190,155,255,.13)','rgba(255,120,190,.13)'].forEach((cc,i,a2)=>g.addColorStop(i/(a2.length-1),cc));
+    x.fillStyle=g;x.fillRect(10,10,W-20,H-20);
+    g=x.createLinearGradient(0,0,W,H*.6);
+    g.addColorStop(.3,'rgba(255,255,255,0)');g.addColorStop(.47,'rgba(255,255,255,.45)');g.addColorStop(.53,'rgba(255,255,255,.45)');g.addColorStop(.7,'rgba(255,255,255,0)');
+    x.fillStyle=g;x.fillRect(10,10,W-20,H-20);
+    x.restore();
+    rr(10.5,10.5,W-21,H-21,11);x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=1;x.stroke();
+    const L=21,R=339;
+    // 머리글: 어종 (길이 cm) · 물 종류
+    const water=l.water||'바다';
+    x.font=FT(13);const rightW=x.measureText(water).width+6+24;
+    x.font=FT(20);const spW=x.measureText(l.species).width;
+    x.font=FT(13);const lenW=x.measureText('('+l.len+' cm)').width;
+    const hy=33,hx=Math.max(L,L+((R-rightW-6)-L)/2-(spW+4+lenW)/2);
+    x.fillStyle='#2B2013';x.font=FT(20);x.fillText(fit(l.species,FT(20),R-rightW-6-hx-lenW-4),hx,hy);
+    x.fillStyle='#6D4C12';x.font=FT(13);x.fillText('('+l.len+' cm)',hx+spW+4,hy+2);
+    x.fillStyle='#17324A';x.fillText(water,R-rightW,hy);
+    g=x.createRadialGradient(R-16,hy-4,2,R-12,hy,14);
+    g.addColorStop(0,'#BFE8FF');g.addColorStop(.55,'#2F7FC0');g.addColorStop(1,'#10456F');
+    x.beginPath();x.arc(R-12,hy,12,0,7);x.fillStyle=g;x.fill();
+    x.strokeStyle='rgba(255,255,255,.88)';x.lineWidth=2;x.stroke();
+    x.font='11px sans-serif';x.textAlign='center';x.fillText('💧',R-12,hy+1);x.textAlign='left';
+    // 금색 리본
+    const evo=dif>=4?(l.species+' 자어에서 대물로 진화'):('기본 단계 · '+l.species+' 계열');
+    const grade=dif>=4?'1단계 대물 👑':'기본 단계 🐟';
+    x.font=FT(10.5);const gx2=R-(x.measureText(grade).width+25);
+    g=x.createLinearGradient(0,53,0,73);g.addColorStop(0,'#FFF4D4');g.addColorStop(.58,'#ECCB74');g.addColorStop(1,'#D0A43C');
+    x.fillStyle=g;
+    x.beginPath();x.moveTo(L,53);x.lineTo(gx2-5,53);x.lineTo(gx2-14,73);x.lineTo(L,73);x.closePath();x.fill();
+    x.beginPath();x.moveTo(gx2+9,53);x.lineTo(R,53);x.lineTo(R,73);x.lineTo(gx2,73);x.closePath();x.fill();
+    x.fillStyle='#5A3F0D';x.font='12px sans-serif';x.fillText(KA.i,L+9,63.5);
+    x.font=FT(10.5);x.fillText(fit(evo,FT(10.5),gx2-14-L-34),L+25,63.5);
+    x.fillText(grade,gx2+16,63.5);
+    // 물고기 아트
+    g=x.createLinearGradient(L,80,R,230);
+    g.addColorStop(0,'rgba(255,255,255,.72)');g.addColorStop(.45,'rgba(234,241,248,.6)');g.addColorStop(1,'rgba(207,221,233,.6)');
+    rr(L,80,R-L,150,10);x.fillStyle=g;x.fill();
+    x.save();rr(L+4,84,R-L-8,142,7);x.clip();
+    if(ph){const s2=Math.max((R-L-8)/ph.width,142/ph.height);
+      x.drawImage(ph,L+4+((R-L-8)-ph.width*s2)/2,84+(142-ph.height*s2)/2,ph.width*s2,ph.height*s2);
+    }else{
+      g=x.createRadialGradient(180,95,10,180,125,215);
+      g.addColorStop(0,KA.a);g.addColorStop(1,KA.b);
+      x.fillStyle=g;x.fillRect(L+4,84,R-L-8,142);
+      x.save();x.translate(180,155);x.rotate(-.44);x.fillStyle='rgba(255,255,255,.14)';
+      for(let sx=-260;sx<260;sx+=22)x.fillRect(sx,-170,10,340);
+      x.restore();
+      x.textAlign='center';
+      x.shadowColor='rgba(6,40,76,.45)';x.shadowBlur=10;x.shadowOffsetY=8;
+      x.font='68px sans-serif';x.fillText(KA.i,180,140);
+      x.shadowColor='rgba(6,34,66,.65)';x.shadowBlur=5;x.shadowOffsetY=2;
+      x.font=FT(15);x.fillStyle='#fff';x.fillText(l.species+' 도감 일러스트',180,193);
+      x.shadowColor='transparent';x.shadowBlur=0;x.shadowOffsetY=0;x.textAlign='left';
+    }
+    x.restore();
+    // 월척의 기록
+    rr(L,237,R-L,66,14);x.fillStyle='rgba(255,255,255,.5)';x.fill();
+    x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=1.5;x.stroke();
+    x.textAlign='center';x.font=FT(19);x.fillStyle='#B41D12';x.fillText('월척의 기록',180,254);
+    const dl=wrap('“'+(l.diary||'오늘의 손맛을 기록해 보세요.')+'”',FT(12),R-L-24,2);
+    x.font=FT(12);x.fillStyle='#2F3B47';
+    dl.forEach((s2,i)=>x.fillText(s2,180,(dl.length===1?282:275)+i*15));
+    x.textAlign='left';
+    // 미끼
+    rr(L,310,R-L,46,14);x.fillStyle='rgba(255,255,255,.5)';x.fill();
+    x.strokeStyle='rgba(255,255,255,.92)';x.lineWidth=1;x.stroke();
+    x.fillStyle='#5A3F0D';x.font='18px sans-serif';x.fillText('🪱',L+10,333);
+    x.font=FT(12);const stW=x.measureText(stars).width;
+    const midX=(L+36+R-14-stW)/2;x.textAlign='center';
+    x.font=FT(15);x.fillStyle='#26313D';x.fillText('미끼',midX,325);
+    x.font=FT(12);x.fillStyle='#47586A';x.fillText(fit(l.bait,FT(12),R-L-130),midX,341);
+    x.textAlign='left';x.fillStyle='#D9962A';x.fillText(stars,R-10-stW,333);
+    // 환경
+    rr(L,363,R-L,36,14);x.fillStyle='rgba(255,255,255,.5)';x.fill();
+    x.strokeStyle='rgba(255,255,255,.92)';x.lineWidth=1;x.stroke();
+    g=x.createRadialGradient(L+18,376,2,L+22,381,14);
+    g.addColorStop(0,'#D8F0FF');g.addColorStop(.6,'#3F8FD0');g.addColorStop(1,'#14568C');
+    x.beginPath();x.arc(L+22,381,12,0,7);x.fillStyle=g;x.fill();
+    x.strokeStyle='rgba(255,255,255,.85)';x.lineWidth=2;x.stroke();
+    x.font='12px sans-serif';x.textAlign='center';x.fillStyle='#fff';x.fillText('🌊',L+22,382);x.textAlign='left';
+    x.font=FT(14);x.fillStyle='#26313D';x.fillText('환경',L+40,381);
+    const env='풍량 '+(l.wind||'-')+' · 파도 '+(l.wave||'-')+' · '+(l.time==='낮'?'☀️ 낮':'🌙 밤');
+    x.font=FT(11.5);x.fillStyle='#3D4A57';x.fillText(env,R-10-x.measureText(env).width,381);
+    // 포인트 · 날짜
+    x.font=FT(10.5);const when='📅 '+(l.when||'');const whW=x.measureText(when).width+18;
+    x.fillStyle='rgba(255,255,255,.52)';x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=1.5;
+    rr(L,406,R-L-whW-5,26,12);x.fill();x.stroke();
+    rr(R-whW,406,whW,26,12);x.fill();x.stroke();
+    x.fillStyle='#2F3B47';x.fillText(fit('📍 '+(l.point||'-'),FT(10.5),R-L-whW-23),L+9,419.5);
+    x.fillText(when,R-whW+9,419.5);
+    // 장비 · 스팟
+    x.font=FT(10);const spot2='🏝️ '+(l.spot||'-');const spW2=x.measureText(spot2).width+18;
+    x.fillStyle='rgba(255,255,255,.48)';
+    rr(L,439,R-L-spW2-5,20,4);x.fill();rr(R-spW2,439,spW2,20,4);x.fill();
+    x.fillStyle='#46392A';x.fillText(fit('🎣 '+(l.gear||'-'),FT(10),R-L-spW2-23),L+9,449.5);
+    x.fillText(spot2,R-spW2+9,449.5);
+    // 발급자 · 번호 · 문구
+    x.font=FT(9.5,1);x.fillStyle='#4A5B6B';x.fillText('Illus. '+(l.byLabel||''),L,474);
+    x.font=FT(9);const kfW=x.measureText('KF').width+10;
+    rr(L,481,kfW,13,3);x.fillStyle='#2F3B47';x.fill();
+    x.fillStyle='#fff';x.fillText('KF',L+5,488);
+    x.font=FT(10.5,1);x.fillStyle='#2F3B47';x.fillText(l.no||'',L+kfW+5,488);
+    const ml2=wrap(l.motto,FT(11),190,2);
+    x.font=FT(11);x.fillStyle='#4A5B6B';x.textAlign='right';
+    ml2.forEach((s2,i)=>x.fillText(s2,R,(ml2.length===1?488:481)+i*14));
+    x.textAlign='left';
+    return c.toDataURL('image/jpeg',0.88);
+  }
 
   // 캡처 읽기는 담당(VS코드)에게 맡긴다 — 정리된 내역이 이 화면에 자동으로 올라온다
   async receipt(e){
@@ -3072,7 +3224,7 @@ class Component extends DCLogic {
     V.dayFeedV=dayFds.map(po=>({emoji:(D.profiles.find(p=>p.id===po.by)||{emoji:'🙂'}).emoji,by:mName(po.by),txt:(po.txt||'').trim()||'사진 이야기',
       open:()=>this.setState({modal:null,tab:'feed'})}));
     if(S.modal&&S.modal.t==='feedview'){const po=D.feed.find(x=>x.id===S.modal.id)||{};const a2=D.profiles.find(p=>p.id===po.by)||{name:'?',emoji:'🙂'};
-      V.fvEmoji=a2.emoji;V.fvBy=a2.name;V.fvDate=this.dShort(po.d||'');V.fvTxt=po.txt||'';V.fvPhoto=po.photo;V.fvHasPhoto=!!po.photo;V.fvGoFeed=()=>this.setState({modal:null,tab:'feed'});}
+      V.fvEmoji=a2.emoji;V.fvBy=a2.name;V.fvDate=this.dShort(po.d||'');V.fvTxt=po.txt||'';V.fvPhotosV=this.phl(po).map(u2=>({u:u2}));V.fvHasPhoto=V.fvPhotosV.length>0;V.fvGoFeed=()=>this.setState({modal:null,tab:'feed'});}
     V.evModalTitle=(S.modal&&S.modal.t==='event'&&S.modal.id)?'일정 수정':'일정 추가';
     V.modalDay=!!(S.modal&&S.modal.t==='day');
     // 달력 꾸미기 스티커 — 달력 카드 위 아무 곳에나 자유 배치, 그 달에만 표시
@@ -3271,11 +3423,13 @@ class Component extends DCLogic {
     }
 
     // FEED
-    V.feedPhoto=S.feedPhoto;V.hasFeedPhoto=!!S.feedPhoto;
-    V.pickFeedPhoto=async e=>{const file=e.target.files[0];if(!file)return;e.target.value='';const url=await window.FamilyStore.putPhoto(await this.compress(file,640));this.setState({feedPhoto:url});};
-    V.addFeed=()=>{if(!(f.fdText||'').trim()&&!S.feedPhoto)return;this.mut(d=>{d.feed.unshift({id:this.uid(),by:u.id,d:t,txt:(f.fdText||'').trim(),photo:S.feedPhoto,likes:{'❤️':0,'👏':0,'😆':0,'🥹':0}});});this.setState({feedPhoto:null});this.clearF(['fdText']);};
+    V.feedPhotosV=S.feedPhotos.map((u2,i)=>({u:u2,rm:()=>this.setState({feedPhotos:this.state.feedPhotos.filter((_,j)=>j!==i)})}));
+    V.hasFeedPhoto=S.feedPhotos.length>0;
+    V.pickFeedPhoto=async e=>{const files=Array.from(e.target.files||[]);if(!files.length)return;e.target.value='';const urls=[];for(const file of files)urls.push(await window.FamilyStore.putPhoto(await this.compress(file,640)));this.setState({feedPhotos:this.state.feedPhotos.concat(urls)});};
+    V.addFeed=()=>{if(!(f.fdText||'').trim()&&!S.feedPhotos.length)return;const phs=S.feedPhotos.slice();this.mut(d=>{d.feed.unshift({id:this.uid(),by:u.id,d:t,txt:(f.fdText||'').trim(),photo:phs[0]||null,photos:phs,likes:{'❤️':0,'👏':0,'😆':0,'🥹':0}});});this.setState({feedPhotos:[]});this.clearF(['fdText']);};
     V.feedV=D.feed.map(po=>{const author=D.profiles.find(p=>p.id===po.by);const cms=po.comments||[];const ck='cm_'+po.id;
-      return{emoji:byName(po.by).emoji,by:byName(po.by).name,date:this.dShort(po.d),txt:po.txt,photo:po.photo,hasPhoto:!!po.photo,
+      const phs=this.phl(po);
+      return{emoji:byName(po.by).emoji,by:byName(po.by).name,date:this.dShort(po.d),txt:po.txt,photosV:phs.map(u2=>({u:u2})),hasPhoto:phs.length>0,
       hasFcard:!!po.fcard,fcIcon:po.fcard?po.fcard.icon:'',fcBg:po.fcard?po.fcard.bg:'',
       fcSpecies:po.fcard?po.fcard.species:'',fcLen:po.fcard?po.fcard.len+'cm':'',
       fcStars:po.fcard?po.fcard.stars:'',fcNo:po.fcard?po.fcard.no:'',
