@@ -64,7 +64,33 @@ exception
 end $$;
 
 
--- ── 3) 사진 보관함 ───────────────────────────────────────────
+-- ── 3) AI 부탁 대기열 ────────────────────────────────────────
+--  가족이 앱에서 "캡처 정리해줘" / "퀴즈 만들어줘" 를 누르면 여기 쌓입니다.
+--  사용자님이 VS코드에서 담당(/family-diary)을 부르면 대기 중인 것을
+--  읽어 처리하고 결과를 family_state 에 넣은 뒤 완료로 바꿉니다.
+create table if not exists family_jobs (
+  id         bigint generated always as identity primary key,
+  kind       text        not null,                  -- receipt(가계부 캡처) | quiz(퀴즈 만들기)
+  payload    jsonb       not null default '{}'::jsonb,
+  status     text        not null default '대기',    -- 대기 | 완료 | 실패
+  note       text,                                   -- 결과 또는 실패 이유 한 줄
+  asked_by   text,                                   -- 부탁한 사람 (프로필 이름)
+  created_at timestamptz not null default now(),
+  done_at    timestamptz
+);
+
+create index if not exists family_jobs_waiting on family_jobs (status, created_at);
+
+alter table family_jobs enable row level security;
+
+drop policy if exists family_jobs_all on family_jobs;
+create policy family_jobs_all on family_jobs
+  for all to authenticated
+  using (exists (select 1 from family_allow a where a.email = (auth.jwt() ->> 'email')))
+  with check (exists (select 1 from family_allow a where a.email = (auth.jwt() ->> 'email')));
+
+
+-- ── 4) 사진 보관함 ───────────────────────────────────────────
 --  피드 사진과 낚시 사진이 여기 들어갑니다.
 --  public = false → 주소를 알아도 로그인 없이는 못 엽니다.
 insert into storage.buckets (id, name, public)

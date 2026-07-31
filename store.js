@@ -172,6 +172,39 @@
     }
   }
 
+  // ── AI 부탁 대기열 ─────────────────────────────────────────
+  // 앱에서 부탁을 걸어두면, VS코드에서 담당(/family-diary)이 처리해
+  // 결과를 데이터에 직접 넣는다. 그래서 여기서는 "맡기기"까지만 한다.
+  async function ask(kind, payload, photos, askedBy) {
+    if (!sb) return { ok: false };
+    try {
+      var paths = [];
+      for (var i = 0; i < (photos || []).length; i++) {
+        var u = await putPhoto(photos[i]);
+        var p = pathOf.get(u);
+        if (p) paths.push(p.slice(5));
+      }
+      var r = await sb.from('family_jobs').insert({
+        kind: kind,
+        payload: Object.assign({}, payload, { photos: paths }),
+        asked_by: askedBy || ''
+      });
+      if (r.error) throw r.error;
+      return { ok: true };
+    } catch (e) {
+      return { ok: false };
+    }
+  }
+
+  // 아직 처리되지 않은 부탁이 몇 건인지 (화면에 알려주기 위해)
+  async function waiting() {
+    if (!sb) return 0;
+    try {
+      var r = await sb.from('family_jobs').select('id', { count: 'exact', head: true }).eq('status', '대기');
+      return r.count || 0;
+    } catch (e) { return 0; }
+  }
+
   // ── 로그인 화면 ────────────────────────────────────────────
   var gate, gateMsg, resolveReady;
   var ready = new Promise(function (r) { resolveReady = r; });
@@ -290,6 +323,8 @@
     },
     save: save,
     putPhoto: putPhoto,
+    ask: ask,
+    waiting: waiting,
     reset: async function (doc) {
       if (!sb) return;
       var r = await sb.from('family_state')

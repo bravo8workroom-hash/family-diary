@@ -1362,9 +1362,9 @@ input,button,textarea,select{font-family:inherit;}
           <sc-if value="{{ mvList }}" hint-placeholder-val="{{ true }}">
             <div style="background:linear-gradient(135deg,var(--soft,#F7EAD2),var(--card,#fff));border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
               <div style="font-size:15px;font-weight:800;">🤖 캡처로 통장 자동 정리</div>
-              <div style="font-size:12px;color:var(--sub,#8A8177);margin:4px 0 10px;">영수증·카드 알림·계좌 내역 캡처를 한꺼번에 올리면 AI가 모든 거래를 읽어 저장하고, 내 계좌끼리 옮긴 돈은 계좌간 이체로 자동 분류해요</div>
+              <div style="font-size:12px;color:var(--sub,#8A8177);margin:4px 0 10px;">영수증·카드 알림·계좌 내역 캡처를 한꺼번에 올려두면, 거래를 읽어 이 화면 내역에 넣어드려요. 내 계좌끼리 옮긴 돈은 계좌간 이체로 분류돼요</div>
               <label style="display:block;text-align:center;background:var(--card,#fff);border:1.5px dashed var(--ac,#F59E0B);border-radius:14px;padding:14px;font-size:14px;font-weight:800;color:var(--ac,#F59E0B);cursor:pointer;">📷 캡처 사진 올리기 (여러 장 가능)<input type="file" accept="image/*" multiple onChange="{{ onReceipt }}" style="display:none;"></label>
-              <sc-if value="{{ aiBusy }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:800;margin-top:10px;text-align:center;">🤖 AI가 읽는 중이에요... {{ aiProg }}</div></sc-if>
+              <sc-if value="{{ aiBusy }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:800;margin-top:10px;text-align:center;">📮 맡기는 중이에요... {{ aiProg }}</div></sc-if>
               <sc-if value="{{ hasAiMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:800;margin-top:10px;text-align:center;">{{ aiMsg }}</div></sc-if>
             </div>
             <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
@@ -2366,7 +2366,7 @@ input,button,textarea,select{font-family:inherit;}
       </div>
       <div style="border-top:1px solid var(--line,#EFE4CF);padding-top:14px;">
         <div style="font-size:13px;font-weight:800;">🤖 AI와 함께 문제 만들기</div>
-        <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 8px;line-height:1.5;">범위만 알려주면 문제·정답·오답 설명까지 만들어 줘요. 만든 뒤 직접 고칠 수 있어요.</div>
+        <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 8px;line-height:1.5;">범위만 알려주면 부탁으로 걸어둬요. 처리되면 아래 퀴즈 목록에 올라오고, 그때 고치거나 지울 수 있어요.</div>
         <div style="display:flex;gap:6px;margin-bottom:8px;">
           <input value="{{ f.qbAiTopic }}" onChange="{{ on.qbAiTopic }}" placeholder="범위 (예: 초등 5학년 3단원 학교생활 단어)" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
           <input value="{{ f.qbAiN }}" onChange="{{ on.qbAiN }}" type="number" style="width:56px;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
@@ -2419,7 +2419,7 @@ input,button,textarea,select{font-family:inherit;}
 const FMOTTOS=['서로 선은 넘지 맙시다. 나는 갯바위에서, 너는 바다 속에서!','오늘의 신사 협정: 찌가 가라앉으면 정당하게 협상 개시.','잡아도 칭찬, 놓쳐도 미소, 꽝 쳐도 품격 유지!','바늘은 거들 뿐, 승부는 신사답게.','물고기는 매너 입질, 낚시꾼은 안전 퇴근!','오늘의 서약: 바늘 끝엔 예의, 발 밑엔 안전.','손맛은 묵직하게, 쓰레기는 싹 다 가볍게!','잡혀줘서 고맙고, 살아서 돌아가니 반갑다!','용왕님도 인정하는 페어플레이 낚시꾼.','바다와의 비즈니스: 꽝 쳐도 절대 투정 금지!','No Trash, No Risk, Just Fishing.','안전 조행 100%, 매너 입질 100%.','물고기에겐 미안함, 바다에겐 고마움.','손맛 낚고, 추억 담고, 무사 귀가.','격식 있는 챔질, 매너 있는 귀가.','바다 위 신사들의 정당한 한판승부.','안전이 우선, 매너가 기본.','바다를 아끼는 진짜 낚시꾼의 품격.','찌끝에 담은 예의, 발끝에 둔 안전.','클린 캐스팅, 리스펙트 조행.','바다가 내어준 선물, 감사함으로 되돌려줍니다.','물고기와 나눈 짧은 대화, 긴 여운으로 남기는 하루.','파도 소리에 감사를, 바람 소리에 안녕을.','자연이 준 소중한 손맛, 내가 지키는 안전한 조행.','바다를 닮은 넓은 마음으로 낚시합니다.','내가 떠난 자리는 바다의 눈물 없이 깨끗하게.','작은 물고기 한 마리에도 경건함을 담아.','바다와 사람이 같이 웃는 소중한 순간.','무사히 집으로 다녀오는 것이 가장 큰 조과입니다.','푸른 바다 위, 나만의 신사적 낭만.','어종 불문, 크기 불문! 안전과 매너는 절대 성역.','발 밑은 조심조심, 바다 속엔 신사답게.','잡는 기쁨보다 지키는 보람을 낚습니다.','바다의 규칙을 지키는 자가 진짜 꾼이다.','나를 지키는 구명조끼, 바다를 지키는 클린마인드.','어린 생명은 놓아주고, 내 쓰레기는 가져오고.','바다 생명과의 약속, 신사적인 라이벌의 대결.','너와 나의 매너가 만날 때 완벽한 조행이 완성된다.','나도 무사히 집으로, 너도 무사히 바다로!','오늘도 신사답게 던지고, 정직하게 낚았습니다.'];
 
 class Component extends DCLogic {
-  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',mview:'list',parentOk:false,modal:null,editMode:false,calM:'',budM:'',selDate:'',budSel:'',stKid:'jihye',ttKid:'jihye',feedPhoto:null,rcThumb:null,aiBusy:false,aiMsg:'',pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',qz:null,now:0,qMsg:'',qbKid:'',qbSubj:'engw',qbLv:2,qbRwE:'🌟',qbRwN:2,qbFeeE:'🌟',qbFeeN:1,qbItems:[],qbMsg:'',qbAi:false,qbEditId:null};
+  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',mview:'list',parentOk:false,modal:null,editMode:false,calM:'',budM:'',selDate:'',budSel:'',stKid:'kid1',ttKid:'kid1',feedPhoto:null,rcThumb:null,aiBusy:false,aiMsg:'',pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',qz:null,now:0,qMsg:'',qbKid:'',qbSubj:'engw',qbLv:2,qbRwE:'🌟',qbRwN:2,qbFeeE:'🌟',qbFeeN:1,qbItems:[],qbMsg:'',qbAi:false,qbEditId:null};
   KEY = 'famdiary_v1';
   KART={'가자미':{i:'🐟',a:'#E2D3B4',b:'#7D6746'},'우럭':{i:'🐠',a:'#B9C6AD',b:'#43533F'},'볼락':{i:'🐡',a:'#FFC0AC',b:'#A3392A'},'쥐노래미':{i:'🐟',a:'#DBE4AC',b:'#66743A'},'고등어':{i:'🐟',a:'#C8E7F5',b:'#25587A'},'전갱이':{i:'🐠',a:'#E2F2F8',b:'#54798F'},'학꽁치':{i:'🐟',a:'#EAF5FC',b:'#7691A6'},'보리멸':{i:'🐟',a:'#F6ECD4',b:'#A08554'},'황어':{i:'🐟',a:'#FFE7AD',b:'#94741F'},'삼치':{i:'🐟',a:'#D3E7F2',b:'#37627F'},'붕장어':{i:'🐍',a:'#E0D1B8',b:'#645440'},'장어':{i:'🐍',a:'#DCCFBA',b:'#5B4C3A'},'방어':{i:'🐠',a:'#FFE6B0',b:'#A5761D'},'광어':{i:'🐟',a:'#E6EEF6',b:'#5A6A79'},'감성돔':{i:'🐟',a:'#DFE9F2',b:'#41576B'},'참돔':{i:'🐠',a:'#FFD6D4',b:'#A4413C'}};
   KFISH={'장어':{len:68,diff:5},'삼치':{len:52,diff:3},'방어':{len:74,diff:4},'볼락':{len:24,diff:2},'광어':{len:45,diff:3},'감성돔':{len:31,diff:3},'참돔':{len:38,diff:4}};
@@ -2450,7 +2450,7 @@ class Component extends DCLogic {
     choco:{name:'코코아 무스',bg:'#F5EFEA',card:'#FFFFFF',ac:'#8B5E3C',on:'#FFFFFF',soft:'#EADCCE',line:'#E2D5C6',tx:'#3B2F26',sub:'#93826F'}
   };
   CATS = ['식비','생활/마트','교육','교통','의료','쇼핑','문화/여가','여행','이체','기타'];
-  MCOLOR = {mom:'#F97316',dad:'#3B82F6',jihye:'#EC4899',junsun:'#10B981',fam:'#8B5CF6'};
+  MCOLOR = {mom:'#F97316',dad:'#3B82F6',kid1:'#EC4899',kid2:'#10B981',fam:'#8B5CF6'};
   DAYS = ['일','월','화','수','목','금','토'];
   STK = ['🌟','💖','🏆','🍀','🦄','🔥','👍','🐥','🍩','🎀','🌈','💎'];
   DECO = ['🎀','🌸','⭐','💖','🍓','🐰','🦋','✨','🌈','🍑','🫧','🐻','⚽','🎮','🎧','🍀','🌙','💜','🧸','🍒','😎','🤙','🔥','💫'];
@@ -2467,159 +2467,20 @@ class Component extends DCLogic {
   grid(m){const[y,mo]=m.split('-').map(Number);const first=new Date(y,mo-1,1);const start=new Date(first);start.setDate(1-first.getDay());const out=[];for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);out.push({ds:this.iso(d),num:d.getDate(),inM:d.getMonth()===mo-1});}return out;}
 
   seed(){
-    const m=this.today().slice(0,7), r=this.rel.bind(this), u=this.uid.bind(this);
-    const pm=(()=>{const[y,mo]=m.split('-').map(Number);const d=new Date(y,mo-2,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
-    const checks={jihye:{},junsun:{}};
-    checks.jihye[r(-1)]={t1:true,t2:true,t3:true,t4:true};
-    checks.jihye[r(0)]={t1:true,t2:true};
-    checks.junsun[r(-1)]={t5:true,t6:true,t7:true,t8:true};
-    checks.junsun[r(0)]={t5:true};
     return {
       profiles:[
         {id:'mom',name:'엄마',role:'parent',emoji:'🌷',photo:null,pw:'',skin:'cream',deco:[]},
-        {id:'dad',name:'아빠',role:'parent',emoji:'🐻',photo:null,pw:'',skin:'midnight',deco:[]},
-        {id:'jihye',name:'지혜',role:'kid',emoji:'🐰',photo:null,pw:'',skin:'pink',deco:[{e:'🎀',x:8,y:62,r:-15,s:1.2},{e:'🌸',x:88,y:10,r:10,s:1},{e:'✨',x:64,y:60,r:0,s:.9},{e:'🫧',x:88,y:55,r:8,s:1}]},
-        {id:'junsun',name:'준선',role:'kid',emoji:'⚽',photo:null,pw:'',skin:'mint',deco:[{e:'🔥',x:82,y:14,r:12,s:1.1},{e:'🎮',x:8,y:55,r:-10,s:1},{e:'🤙',x:70,y:58,r:6,s:.9}]}
+        {id:'dad',name:'아빠',role:'parent',emoji:'🐻',photo:null,pw:'',skin:'sky',deco:[]},
+        {id:'kid1',name:'첫째',role:'kid',emoji:'🐰',photo:null,pw:'',skin:'pink',deco:[]},
+        {id:'kid2',name:'둘째',role:'kid',emoji:'⚽',photo:null,pw:'',skin:'mint',deco:[]}
       ],
       settings:{useTT:true,parentPw:String(this.props.parentPassword??'0000')},
-      events:[
-        {id:u(),d:r(0),t:'지혜 피아노 레슨',m:'jihye',time:'16:00'},
-        {id:u(),d:r(1),t:'가족 외식 🍕',m:'fam',time:'18:30'},
-        {id:u(),d:r(2),t:'준선 축구 경기',m:'junsun',time:'10:00'},
-        {id:u(),d:r(4),t:'아빠 출장',m:'dad',time:''},
-        {id:u(),d:r(9),t:'할머니 생신',m:'fam',time:'12:00'},
-        {id:u(),d:r(-2),t:'엄마 병원',m:'mom',time:'14:00'},
-        {id:u(),d:r(0),t:'📝 퀴즈: 3단원 영어 단어 6개',m:'junsun',time:'19:00',qid:'q1',memo:'목표 80점 · 성공하면 🌟×2 자동 지급'},
-        {id:u(),d:r(0),t:'📝 퀴즈: 영어 문장 고르기 4문제',m:'jihye',time:'19:30',qid:'q2',memo:'목표 75점 · 성공하면 💖×2 자동 지급'},
-        {id:u(),d:r(1),t:'📝 퀴즈: 과학 · 물의 상태 변화 3문제',m:'junsun',time:'19:00',qid:'q3',memo:'목표 70점 · 성공하면 🏅×1 자동 지급'}
-      ],
-      ddays:[{id:u(),t:'가족 제주 여행',d:'2026-08-29',e:'✈️'},{id:u(),t:'지혜 피아노 콩쿠르',d:'2026-08-15',e:'🎹'},{id:u(),t:'준선 2학기 개학',d:'2026-08-24',e:'🏫'}],
-      todos:[
-        {id:'t1',k:'jihye',t:'수학 문제집 2쪽',e:'✏️'},{id:'t2',k:'jihye',t:'독서 20분',e:'📚'},{id:'t3',k:'jihye',t:'피아노 연습 30분',e:'🎹'},{id:'t4',k:'jihye',t:'방 정리하기',e:'🧺'},
-        {id:'t5',k:'junsun',t:'영어 단어 30개',e:'🔤'},{id:'t6',k:'junsun',t:'수학 학원 숙제',e:'✏️'},{id:'t7',k:'junsun',t:'운동 30분',e:'⚽'},{id:'t8',k:'junsun',t:'독서 20분',e:'📚'}
-      ],
-      checks,
-      journal:[
-        {id:u(),k:'jihye',d:r(0),s:'수학',min:40,txt:'분수의 나눗셈을 배웠다. 뒤집어서 곱하는 게 처음엔 헷갈렸는데 문제 풀다 보니 재밌었다!'},
-        {id:u(),k:'jihye',d:r(-1),s:'독서',min:30,txt:'<샬롯의 거미줄> 다 읽었다. 샬롯이 너무 착해서 눈물 날 뻔..'},
-        {id:u(),k:'junsun',d:r(-1),s:'영어',min:50,txt:'관계대명사 which/who 정리. 학원 숙제까지 끝!'},
-        {id:u(),k:'junsun',d:r(-2),s:'수학',min:60,txt:'일차함수 그래프 그리기 연습. 기울기 개념은 이제 확실히 알겠다.'}
-      ],
-      scores:[
-        {id:u(),k:'junsun',d:r(-6),s:'영어',n:'단어시험',v:92},
-        {id:u(),k:'junsun',d:r(-12),s:'수학',n:'단원평가',v:85},
-        {id:u(),k:'jihye',d:r(-8),s:'수학',n:'단원평가',v:95},
-        {id:u(),k:'jihye',d:r(-15),s:'국어',n:'받아쓰기',v:100}
-      ],
-      stlog:[
-        {id:u(),k:'jihye',e:'🌟',msg:'할일 올클리어!',from:'엄마',d:r(-1)},{id:u(),k:'jihye',e:'💖',msg:'동생 잘 챙겨줘서 고마워',from:'아빠',d:r(-2)},{id:u(),k:'jihye',e:'🏆',msg:'받아쓰기 100점!',from:'엄마',d:r(-15)},
-        {id:u(),k:'jihye',e:'🌈',msg:'피아노 연습 성실왕',from:'엄마',d:r(-4)},{id:u(),k:'jihye',e:'🍀',msg:'',from:'아빠',d:r(-6)},{id:u(),k:'jihye',e:'🦄',msg:'',from:'엄마',d:r(-8)},
-        {id:u(),k:'jihye',e:'🌟',msg:'',from:'엄마',d:r(-10)},{id:u(),k:'jihye',e:'🎀',msg:'',from:'엄마',d:r(-12)},{id:u(),k:'jihye',e:'🐥',msg:'',from:'아빠',d:r(-13)},
-        {id:u(),k:'jihye',e:'💖',msg:'',from:'엄마',d:r(-16)},{id:u(),k:'jihye',e:'🌟',msg:'',from:'엄마',d:r(-18)},{id:u(),k:'jihye',e:'🍩',msg:'',from:'아빠',d:r(-20)},
-        {id:u(),k:'junsun',e:'🔥',msg:'축구 경기 MVP!',from:'아빠',d:r(-2)},{id:u(),k:'junsun',e:'🏆',msg:'영어 단어시험 92점',from:'엄마',d:r(-6)},{id:u(),k:'junsun',e:'👍',msg:'',from:'엄마',d:r(-7)},
-        {id:u(),k:'junsun',e:'🌟',msg:'',from:'아빠',d:r(-9)},{id:u(),k:'junsun',e:'💎',msg:'',from:'엄마',d:r(-11)},{id:u(),k:'junsun',e:'🍀',msg:'',from:'엄마',d:r(-14)},
-        {id:u(),k:'junsun',e:'🌟',msg:'',from:'아빠',d:r(-17)},{id:u(),k:'junsun',e:'🔥',msg:'',from:'엄마',d:r(-19)},{id:u(),k:'junsun',e:'👍',msg:'',from:'엄마',d:r(-21)}
-      ],
-      exch:[{id:u(),k:'jihye',d:r(-9),name:'주말 아이스크림',cost:8}],
-      fishlog:[
-        {id:u(),by:'dad',species:'감성돔',len:'34',water:'바다',diff:4,bait:'지렁이',wind:'강함',wave:'보통',time:'밤',spot:'방파제',gear:'릴 낚시 세트',point:'부산 기장 학리 방파제',tm:'19:30',diary:'퇴근 후 던졌는데 30분 만에 묵직한 손맛!',no:'#042/180 SR',photo:null,likes:['mom','jihye'],d:r(-3)},
-        {id:u(),by:'mom',species:'광어',len:'47',water:'바다',diff:3,bait:'오징어',wind:'보통',wave:'거침',time:'낮',spot:'해변',gear:'지깅 로드 2호',point:'통영 욕지도 남단',tm:'06:10',diary:'드랙 소리 3분… 팔 빠지는 줄 알았어요.',no:'#118/180 HR',photo:null,likes:['dad'],d:r(-12)},
-        {id:u(),by:'jihye',species:'고등어',len:'26',water:'바다',diff:2,bait:'고등어',wind:'약함',wave:'잔잔',time:'밤',spot:'기수지역',gear:'카고 채비',point:'인천 소무의도',tm:'21:40',diary:'첫 바다낚시! 세 마리나 나왔다.',no:'#007/180 R',photo:null,likes:['dad','mom'],d:r(-25)}
-      ],
-      err:[{id:u(),k:'jihye',d:r(-14),a:5,memo:'심부름 스티커 지급',from:'엄마'},{id:u(),k:'junsun',d:r(-14),a:5,memo:'심부름 스티커 지급',from:'엄마'}],
-      trades:[{id:u(),doer:'jihye',giver:'junsun',task:'한 시간 같이 놀아주기',cost:3,st:'pw',by:'jihye',cur:'star',d:r(0)},
-        {id:u(),doer:'junsun',giver:'jihye',task:'내 방 정리 도와주기',cost:2,st:'done',by:'jihye',cur:'star',d:r(-6),doneD:r(-5)},
-        {id:u(),doer:'mom',giver:'jihye',task:'주말에 도서관 데려가 주기',cost:2,st:'pw',by:'jihye',cur:'err',d:r(-1)}],
-      quizzes:[
-        {id:'q1',k:'junsun',subj:'engw',mode:'spell',lv:2,title:'3단원 영어 단어 6개',goal:80,tries:3,think:25,cool:10,rw:{e:'🌟',n:2},fee:{e:'🌟',n:1},d:r(0),items:[
-          {id:'q1a',q:'도서관',a:'library',ex:'I borrow books at the ___.',note:'li-bra-ry, 세 덩어리로 끊어 읽으며 써 보자. r이 두 번 들어가는 걸 자주 빠뜨려. 비슷한 장소 bookstore(서점)와 구분해서 기억해!'},
-          {id:'q1b',q:'수요일',a:'wednesday',ex:'We have music class on ___.',note:'소리는 웬즈데이인데 스펠링엔 d가 숨어 있어: Wed-nes-day. 일부러 웨드-네스-데이라고 또박또박 읽으면 안 틀려. 요일은 첫 글자를 대문자로 써.'},
-          {id:'q1c',q:'가장 좋아하는',a:'favorite',ex:'Soccer is my ___ sport.',note:'fa-vo-rite. 가운데 o를 빠뜨리기 쉬워(favrite 는 틀림). 페이보릿의 보가 o라고 생각하면 기억하기 쉬워.'},
-          {id:'q1d',q:'맛있는',a:'delicious',ex:'This pizza is so ___!',note:'de-li-cious. 끝이 -cious(셔스) 소리야. 같은 꼴인 precious와 짝지어 외우면 -cious가 자연스럽게 기억돼.'},
-          {id:'q1e',q:'산',a:'mountain',ex:'We climbed the ___ last Sunday.',note:'moun-tain. 끝은 -tain이야(-tan 은 틀림). fountain(분수)과 짝지어 외우면 좋아.'},
-          {id:'q1f',q:'빌리다',a:'borrow',ex:'Can I ___ your pencil?',note:'r이 두 개(bo-rr-ow)! 빌려주는 건 lend, 빌려오는 건 borrow. 내가 가져오면 borrow로 기억하자.'}
-        ]},
-        {id:'q2',k:'jihye',subj:'engs',mode:'choice',lv:2,title:'영어 문장 고르기 4문제',goal:75,tries:3,think:30,cool:15,rw:{e:'💖',n:2},fee:{e:'🌟',n:1},d:r(0),items:[
-          {id:'q2a',q:'빈칸에 알맞은 말은? She ___ to school every day.',a:'goes',opts:['go','going','went'],note:'주어가 She(3인칭 단수)이고 every day처럼 반복되는 일이면 현재형에 -es를 붙여 goes가 돼. went는 지나간 일(과거)에 써.'},
-          {id:'q2b',q:'나는 어제 숙제를 했어 를 영어로?',a:'I did my homework yesterday.',opts:['I do my homework yesterday.','I am doing my homework yesterday.','I will do my homework yesterday.'],note:'yesterday(어제)가 있으니 과거형 did를 써야 해. 문장 속 시간 표현이 시제를 알려주는 열쇠야.'},
-          {id:'q2c',q:'빈칸에 알맞은 말은? There ___ two cats on the sofa.',a:'are',opts:['is','am','be'],note:'two cats는 둘 이상(복수)이니까 are를 써. 하나면 There is a cat이 돼.'},
-          {id:'q2d',q:'창문을 열어 줄래? 에 가장 알맞은 표현은?',a:'Can you open the window?',opts:['You open the window.','Do you opened the window?','Are you open the window?'],note:'부탁할 때는 Can you ~? 로 시작하고 뒤에는 동사 원형(open)이 와. 더 공손하게 말하려면 Could you ~? 를 써.'}
-        ]},
-        {id:'q3',k:'junsun',subj:'sci',mode:'choice',lv:2,title:'과학 · 물의 상태 변화 3문제',goal:70,tries:3,think:35,cool:10,rw:{e:'🏅',n:1},fee:{e:'🌟',n:2},d:r(1),items:[
-          {id:'q3a',q:'물이 끓어서 수증기가 되는 현상을 무엇이라고 할까?',a:'기화',opts:['응결','융해','승화'],note:'액체에서 기체로 바뀌는 건 기화(증발)야. 반대로 기체에서 액체로 바뀌는 건 응결. 냄비 뚜껑에 물방울이 생기는 게 응결이야.'},
-          {id:'q3b',q:'얼음이 물이 되는 온도는?',a:'0도',opts:['10도','100도','영하 10도'],note:'얼음이 녹는 온도(녹는점)는 0도, 물이 끓는 온도(끓는점)는 100도야. 두 숫자를 짝으로 외워 두자.'},
-          {id:'q3c',q:'다음 중 승화의 예는?',a:'드라이아이스가 하얀 연기처럼 사라진다',opts:['물이 끓는다','얼음이 녹는다','유리창에 김이 서린다'],note:'승화는 액체 단계를 건너뛰고 고체와 기체가 바로 바뀌는 것. 드라이아이스와 겨울철 성에가 대표 예시야.'}
-        ]}
-      ],
-      qruns:[],
-      stkRate:{jihye:200,junsun:300},
-      rewards:[{id:u(),k:'jihye',name:'소원권 1장',e:'🏅',cost:5,desc:'하고 싶은 것 한 가지 들어주기'},
-        {id:u(),k:'jihye',name:'주말 아이스크림',e:'💖',cost:3,desc:'좋아하는 아이스크림 사주기'},
-        {id:u(),k:'junsun',name:'게임 30분 추가',e:'🏅',cost:4,desc:'주말에 게임 30분 더 하기'},
-        {id:u(),k:'junsun',name:'놀이공원 가기',e:'🏆',cost:8,desc:'토요일에 놀이공원 데려가기'}],
-      allow:[
-        {id:u(),k:'jihye',d:r(-7),ty:'in',a:10000,memo:'7월 용돈'},{id:u(),k:'jihye',d:r(-3),ty:'out',a:1500,memo:'떡볶이'},{id:u(),k:'jihye',d:r(-1),ty:'out',a:2000,memo:'다이소 스티커'},
-        {id:u(),k:'junsun',d:r(-7),ty:'in',a:15000,memo:'7월 용돈'},{id:u(),k:'junsun',d:r(-4),ty:'out',a:4500,memo:'편의점'},{id:u(),k:'junsun',d:r(-2),ty:'in',a:2000,memo:'스티커 보상'}
-      ],
-      tx:[
-        ...[1,2,3,4,5].flatMap(k=>{const mk=(()=>{const[y,mo]=m.split('-').map(Number);const dd=new Date(y,mo-1-k,1);return dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0');})();
-          const j=(k*37)%11;
-          return[
-            {id:u(),d:mk+'-01',ty:'in',a:4200000,c:'기타',memo:'월급',pay:'bank'},
-            {id:u(),d:mk+'-05',ty:'out',a:720000,c:'교육',memo:'학원비',pay:'bank'},
-            {id:u(),d:mk+'-08',ty:'out',a:320000+j*9000,c:'식비',memo:'장보기·외식',pay:'card'},
-            {id:u(),d:mk+'-13',ty:'out',a:240000+j*7000,c:'생활/마트',memo:'생활용품',pay:'card'},
-            {id:u(),d:mk+'-18',ty:'out',a:96000+j*4000,c:'교통',memo:'주유·교통',pay:'card'},
-            {id:u(),d:mk+'-21',ty:'out',a:52000+j*6000,c:'문화/여가',memo:'주말 나들이',pay:'card'},
-            {id:u(),d:mk+'-24',ty:'out',a:285000,c:'생활/마트',memo:'아파트 관리비',pay:'bank'},
-            {id:u(),d:mk+'-27',ty:'out',a:60000+j*3000,c:'의료',memo:'병원·약국',pay:'cash'}
-          ];}),
-        {id:u(),d:m+'-01',ty:'in',a:4200000,c:'기타',memo:'월급',pay:'bank'},
-        {id:u(),d:m+'-03',ty:'out',a:86500,c:'생활/마트',memo:'이마트 장보기',pay:'card'},
-        {id:u(),d:m+'-05',ty:'out',a:340000,c:'교육',memo:'지혜 피아노 학원비',pay:'bank'},
-        {id:u(),d:m+'-05',ty:'out',a:380000,c:'교육',memo:'준선 영어 학원비',pay:'bank'},
-        {id:u(),d:m+'-11',ty:'out',a:52300,c:'식비',memo:'가족 외식 (파스타)',pay:'card'},
-        {id:u(),d:m+'-14',ty:'out',a:23800,c:'문화/여가',memo:'영화관',pay:'card'},
-        {id:u(),d:m+'-18',ty:'out',a:112000,c:'생활/마트',memo:'코스트코',pay:'card'},
-        {id:u(),d:m+'-22',ty:'out',a:35000,c:'의료',memo:'지혜 치과',pay:'cash'},
-        {id:u(),d:m+'-25',ty:'out',a:200000,c:'여행',memo:'제주 숙소 예약금',pay:'bank'},
-        {id:u(),d:m+'-27',ty:'out',a:48200,c:'식비',memo:'주말 배달',pay:'card'}
-      ],
-      budgets:[
-        {id:u(),name:'이번 달 식비',kind:'m',c:'식비',a:400000},
-        {id:u(),name:'이번 달 마트·생활',kind:'m',c:'생활/마트',a:500000},
-        {id:u(),name:'제주 여행 자금',kind:'g',c:'여행',a:1500000}
-      ],
-      fixed:[
-        {id:'fx1',name:'아파트 관리비',pay:'bank',c:'생활/마트',freq:'m',day:25,a:285000,vary:1},
-        {id:'fx2',name:'통신비 (가족결합)',pay:'card',c:'기타',freq:'m',day:15,a:142000,vary:0},
-        {id:'fx3',name:'지혜 피아노 학원',pay:'bank',c:'교육',freq:'m',day:5,a:340000,vary:0},
-        {id:'fx4',name:'준선 영어 학원',pay:'bank',c:'교육',freq:'m',day:5,a:380000,vary:0},
-        {id:'fx5',name:'자동차 보험',pay:'card',c:'기타',freq:'y',mo:Number(m.slice(5,7)),day:10,a:1180000,vary:0},
-        {id:'fx6',name:'넷플릭스·유튜브',pay:'card',c:'문화/여가',freq:'m',day:8,a:26500,vary:0},
-        {id:'fx7',name:'전기·수도',pay:'card',c:'생활/마트',freq:'m',day:20,a:78000,vary:1},
-        {id:'fx8',name:'주말 시장 생활비',pay:'cash',c:'생활/마트',freq:'w',wd:6,a:40000,vary:1},
-        {id:'fx9',name:'아이들 학습지',pay:'cash',c:'교육',freq:'h',mo:Number(m.slice(5,7)),day:12,a:220000,vary:0}
-      ],
-      fixedPaid:{
-        [pm]:{fx1:{a:271000},fx2:{a:142000},fx3:{a:340000},fx4:{a:380000},fx5:{a:98000},fx6:{a:26500},fx7:{a:64000},fx8:{a:150000}},
-        [m]:{fx6:{a:26500},fx7:{a:81400},fx8:{a:180000}}
-      },
-      accounts:[
-        {id:u(),kind:'bank',name:'급여 통장',org:'국민은행',amt:3820000,day:'',purp:'salary'},
-        {id:u(),kind:'bank',name:'생활비 통장',org:'카카오뱅크',amt:640000,day:'',purp:'living'},
-        {id:u(),kind:'card',name:'아빠 신용카드',org:'신한카드',amt:872400,day:'14'},
-        {id:u(),kind:'card',name:'엄마 신용카드',org:'현대카드',amt:415300,day:'25'}
-      ],
-      feed:[
-        {id:u(),by:'jihye',d:r(0),txt:'피아노 연습 끝! 콩쿠르 파이팅 🎹✨',photo:null,likes:{'❤️':2,'👏':1,'😆':0,'🥹':0},comments:[{id:u(),by:'mom',txt:'우리 딸 최고야! 콩쿠르 응원해 💕',d:r(0)}]},
-        {id:u(),by:'mom',d:r(-1),txt:'주말에 한강 나들이 🌿 우리 가족 최고!',photo:null,likes:{'❤️':3,'👏':0,'😆':1,'🥹':1},comments:[{id:u(),by:'junsun',txt:'담엔 자전거 타요!',d:r(-1)},{id:u(),by:'dad',txt:'좋았지 ㅎㅎ 담주에 또 가자',d:r(-1)}]}
-      ],
-      tt:[
-        {id:u(),k:'jihye',day:1,time:'16:00',name:'피아노'},{id:u(),k:'jihye',day:3,time:'16:00',name:'피아노'},
-        {id:u(),k:'jihye',day:2,time:'15:00',name:'수학학원'},{id:u(),k:'jihye',day:4,time:'15:00',name:'수학학원'},
-        {id:u(),k:'junsun',day:1,time:'17:00',name:'영어학원'},{id:u(),k:'junsun',day:4,time:'17:00',name:'영어학원'},{id:u(),k:'junsun',day:6,time:'10:00',name:'축구클럽'}
-      ]
+      events:[], ddays:[], todos:[], checks:{kid1:{},kid2:{}},
+      journal:[], scores:[], stlog:[], exch:[], fishlog:[], err:[], trades:[],
+      quizzes:[], qruns:[], stkRate:{kid1:200,kid2:200},
+      rewards:[], allow:[], tx:[], budgets:[], fixed:[], fixedPaid:{},
+      accounts:[], feed:[], tt:[],
+      rwV2:1, histSeeded:1, kfV2:1
     };
   }
 
@@ -2686,31 +2547,23 @@ class Component extends DCLogic {
 
   compress(file,max){return new Promise(res=>{const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.72));};img.src=rd.result;};rd.readAsDataURL(file);});}
 
+  // 캡처 읽기는 담당(VS코드)에게 맡긴다 — 정리된 내역이 이 화면에 자동으로 올라온다
   async receipt(e){
     const files=Array.from(e.target.files||[]);if(!files.length)return;e.target.value='';
-    if(!window.claude||!window.claude.complete){this.setState({aiMsg:'🤖 캡처 자동 정리는 지금 꺼져 있어요. 아래에서 직접 입력해 주세요'});return;}
     this.setState({aiBusy:true,aiMsg:'',aiProg:files.length>1?'(0/'+files.length+')':''});
-    const found=[];let fail=0;
+    const shots=[];
     for(let i=0;i<files.length;i++){
       this.setState({aiProg:files.length>1?'('+(i+1)+'/'+files.length+')':''});
-      try{
-        const url=await this.compress(files[i],1100);
-        const thumb=await this.compress(files[i],320);
-        const txt=await window.claude.complete({model:'claude-haiku-4-5',max_tokens:1600,messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:url.split(',')[1]}},
-          {type:'text',text:'이건 영수증, 카드 결제 알림, 또는 은행 계좌·통장 거래내역 캡처야.\n우리 가족 통장 목록(성향 포함): '+((this.state.data.accounts||[]).filter(a=>a.kind==='bank').map(a=>a.name+'('+(a.purp==='custom'?(a.purpTxt||'일반'):({salary:'급여',living:'생활비',saving:'저축',emergency:'비상금',invest:'투자'}[a.purp]||'일반'))+(a.org?', '+a.org:'')+')').join(', ')||'없음')+'. 이 목록의 통장 이름·은행이 이미지에 보이면 어느 통장 거래인지 참고하고, 저축·비상금·투자 성향 통장으로 보낸 돈은 지출이 아니라 transfer로 분류해. 이미지에 보이는 모든 거래를 JSON 배열 하나로만 출력해. 다른 말 금지.\n[{"date":"YYYY-MM-DD","amount":숫자(원단위 정수),"desc":"상호명이나 내용 요약","category":"식비|생활/마트|교육|교통|의료|쇼핑|문화/여가|여행|기타 중 하나","type":"out|in|transfer","pay":"bank|card|cash"}]\npay: 은행·통장 거래내역이면 bank, 카드 결제(신용/체크카드 승인 알림)면 card, 현금영수증·현금 결제면 cash.\ntype: 돈이 나가면 out, 들어오면 in, 본인 계좌끼리 옮긴 것으로 보이면(내계좌 이체, 예금주와 같은 이름의 송금 등) transfer.\n날짜를 알 수 없으면 date는 빈 문자열로.'}
-        ]}]});
-        const mch=txt.match(/\[[\s\S]*\]/);
-        JSON.parse(mch[0]).forEach(j=>{if(j&&j.amount)found.push({d:j.date||this.today(),a:Math.abs(Number(j.amount)),ty:j.type==='in'?'in':(j.type==='transfer'?'tr':'out'),c:j.type==='transfer'?'이체':(this.CATS.includes(j.category)?j.category:'기타'),memo:j.desc||'-',pay:['bank','card','cash'].includes(j.pay)?j.pay:'bank',photo:files.length===1?thumb:null});});
-      }catch(err){fail++;}
+      shots.push(await this.compress(files[i],1100));
     }
-    // 계좌간 이체 자동 매칭: 금액이 같고 3일 이내인 출금+입금 쌍은 이체로 묶기
-    for(let i=0;i<found.length;i++){const o=found[i];if(o.ty!=='out')continue;
-      for(let k=0;k<found.length;k++){const n=found[k];if(n.ty!=='in'||n.a!==o.a)continue;
-        if(Math.abs(new Date(o.d)-new Date(n.d))<=3*864e5){o.ty='tr';n.ty='tr';o.c='이체';n.c='이체';break;}}}
-    const trN=found.filter(x=>x.ty==='tr').length;
-    if(found.length)this.mut(d=>{found.forEach(x=>d.tx.push({id:this.uid(),d:x.d,ty:x.ty,a:x.a,c:x.c,memo:x.memo,pay:x.pay,photo:x.photo}));});
-    this.setState({aiBusy:false,aiProg:'',aiMsg:found.length?('✅ '+found.length+'건 저장 완료'+(trN?' · 계좌간 이체 '+trN+'건 자동 분류':'')+(fail?' · '+fail+'장 인식 실패':'')+' — 잘못 읽은 건 ✎로 고쳐주세요'):'😢 인식에 실패했어요. 직접 입력해 주세요'});
+    const S=this.state;
+    const me=(S.data.profiles.find(p=>p.id===S.user)||{}).name||'';
+    const accs=(S.data.accounts||[]).filter(a=>a.kind==='bank')
+      .map(a=>({name:a.name,org:a.org||'',purp:a.purp||'',purpTxt:a.purpTxt||''}));
+    const r=await window.FamilyStore.ask('receipt',{accounts:accs,cats:this.CATS},shots,me);
+    this.setState({aiBusy:false,aiProg:'',aiMsg:r.ok
+      ?('📮 '+files.length+'장 맡겨뒀어요 — 정리되면 아래 내역에 자동으로 올라와요')
+      :'😢 맡기지 못했어요. 인터넷 연결을 확인해 주세요'});
   }
 
   streak(kid){
@@ -2777,22 +2630,22 @@ class Component extends DCLogic {
   qClose(){const S=this.state;
     if(S.qz&&S.qz.phase==='play'){if(!confirm('지금 나가면 이번 도전이 기록돼요. 나갈까요?'))return;this.qFinish();return;}
     this.setState({qz:null,qMsg:''});}
+  // 문제 만들기는 담당(VS코드)에게 맡긴다 — 완성된 퀴즈가 아래 목록에 올라온다
   async qbGenerate(subj,mode,lv,topic,n){
-    const sub=this.qSubj(subj);
-    if(!window.claude||!window.claude.complete){this.setState({qbMsg:'AI를 쓸 수 없어요. 문제를 직접 넣어 주세요'});return;}
+    const S=this.state,f=S.f||{},sub=this.qSubj(subj);
+    const kid=S.qbKid||((S.data.profiles.find(p=>p.role==='kid')||{}).id||'');
+    if(!kid){this.setState({qbMsg:'먼저 어느 아이의 퀴즈인지 골라 주세요'});return;}
     this.setState({qbAi:true,qbMsg:''});
-    const spec=mode==='spell'
-      ?'영어 단어 암기 퀴즈. 각 문항: q=한국어 뜻, a=영어 단어(소문자 한 단어), ex=그 단어가 들어간 짧은 영어 예문(단어 자리는 ___), note=아이가 틀렸을 때 읽을 2~3문장 한국어 학습 설명(스펠링 기억 팁, 헷갈리는 단어 구분, 함께 쓰는 표현).'
-      :'4지선다 퀴즈. 각 문항: q=문제, a=정답 보기 텍스트, opts=오답 보기 3개 배열, note=아이가 틀렸을 때 읽을 2~3문장 한국어 해설(왜 정답인지, 헷갈린 보기와의 차이).';
-    const p='초등·중학생 아이용 학습 퀴즈를 만들어줘.\n과목: '+sub.l+'\n범위: '+(topic||'교과 기본 내용')+'\n난이도: '+(lv===1?'쉬움':(lv===3?'어려움':'보통'))+'\n문항 수: '+Math.max(1,Math.min(12,n||6))+'\n'+spec+'\n설명은 아이에게 말하듯 다정하게. 반드시 JSON만 출력: {"items":[{"q":"","a":"","ex":"","opts":[],"note":""}]}';
-    try{
-      const txt=await window.claude.complete({model:'claude-haiku-4-5',max_tokens:2400,messages:[{role:'user',content:[{type:'text',text:p}]}]});
-      const m=String(txt).match(/\{[\s\S]*\}/);const js=JSON.parse(m?m[0]:txt);
-      const items=(js.items||[]).slice(0,12).map(x=>{const it={id:this.uid(),q:String(x.q||'').trim(),a:String(x.a||'').trim(),ex:String(x.ex||'').trim(),note:String(x.note||'').trim()};
-        if(mode!=='spell')it.opts=(x.opts||[]).map(String).slice(0,3);return it;}).filter(x=>x.q&&x.a);
-      if(!items.length)throw new Error('empty');
-      this.setState(s=>({qbItems:(s.qbItems||[]).concat(items),qbAi:false,qbMsg:'🤖 '+items.length+'문항을 만들었어요. 확인하고 저장해 주세요'}));
-    }catch(e){this.setState({qbAi:false,qbMsg:'AI가 문제를 만들지 못했어요. 다시 시도하거나 직접 넣어 주세요'});}}
+    const me=(S.data.profiles.find(p=>p.id===S.user)||{}).name||'';
+    const r=await window.FamilyStore.ask('quiz',{
+      kid,subj,subjLabel:sub.l,mode,lv,topic:String(topic||''),n:Math.max(1,Math.min(12,n||6)),
+      title:String(f.qbTitle||''),goal:Number(f.qbGoal||80),tries:Number(f.qbTries||3),
+      think:Number(f.qbThink||25),cool:Number(f.qbCool||10),
+      rw:{e:S.qbRwE,n:S.qbRwN},fee:{e:S.qbFeeE,n:S.qbFeeN},date:f.qbDate||this.today()
+    },[],me);
+    this.setState({qbAi:false,qbMsg:r.ok
+      ?'📮 부탁해뒀어요 — 만들어지면 아래 퀴즈 목록에 올라와요. 그때 고치거나 지울 수 있어요'
+      :'😢 맡기지 못했어요. 인터넷 연결을 확인해 주세요'});}
   qbEdit(q){this.setState(s=>({modal:{t:'qbuild'},qbEditId:q.id,qbKid:q.k,qbSubj:q.subj,qbLv:q.lv||2,qbRwE:q.rw.e,qbRwN:q.rw.n,qbFeeE:q.fee.e,qbFeeN:q.fee.n,qbItems:q.items.slice(),qbMsg:'',
     f:{...s.f,qbTitle:q.title,qbGoal:String(q.goal),qbTries:String(q.tries||3),qbThink:String(q.think),qbCool:String(q.cool),qbDate:q.d||this.today(),qbQ:'',qbA:'',qbEx:'',qbNote:'',qbO1:'',qbO2:'',qbO3:''}}));}
 
@@ -2949,7 +2802,7 @@ class Component extends DCLogic {
         if(it.opts.length<2){this.setState({qbMsg:'객관식은 오답 보기를 2개 이상 넣어 주세요'});return;}}
       this.setState({qbItems:items.concat([it]),qbMsg:''});this.clearF(['qbQ','qbA','qbEx','qbNote','qbO1','qbO2','qbO3']);};
     V.qbHasMsg=!!S.qbMsg;V.qbMsg=S.qbMsg;
-    V.qbAiLabel=S.qbAi?'🤖 문제를 만들고 있어요...':'🤖 AI에게 문제 만들어 달라고 하기';
+    V.qbAiLabel=S.qbAi?'🤖 부탁하는 중...':'🤖 AI에게 문제 만들어 달라고 부탁하기';
     V.qbAi=()=>{if(S.qbAi)return;this.qbGenerate(subj,mode,lv,(f.qbAiTopic||'').trim(),Number(f.qbAiN||6));};
     V.qbSave=()=>{
       if(!items.length){this.setState({qbMsg:'문제를 1개 이상 넣어 주세요'});return;}
