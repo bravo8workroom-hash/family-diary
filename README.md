@@ -106,7 +106,7 @@
 | `store.js` | 가족 공유 저장소 — 로그인, 서버 읽기/쓰기, 사진 업로드 |
 | `config.js` | Supabase 주소와 키 (사용자가 채우는 곳) |
 | `schema.sql` | Supabase에 한 번 실행하는 표·권한 설정 |
-| `assets/` | 낚시도감 지도 이미지 |
+| `assets/` | 낚시도감 지도 이미지 · 캘린더/피드 꾸미기 스티커 |
 | `tools/jobs.mjs` | AI 부탁 대기열을 읽고 결과를 앱에 넣는 도구 |
 | `.claude/skills/family-diary/` | VS코드 담당(`/family-diary`) 지시서 |
 | `.env.local` | 담당이 쓸 가족 계정 (git에 안 올라감) |

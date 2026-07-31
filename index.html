@@ -411,6 +411,16 @@ input,button,textarea,select{font-family:inherit;}
           </div>
           <div style="font-size:14px;margin:8px 0;line-height:1.5;">{{ po.txt }}</div>
           <sc-if value="{{ po.hasPhoto }}" hint-placeholder-val="{{ false }}"><div style="width:100%;height:220px;border-radius:14px;margin-bottom:8px;background-image:url('{{ po.photo }}');background-size:cover;background-position:center;"></div></sc-if>
+          <sc-if value="{{ po.hasFcard }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:12px;border-radius:14px;margin-bottom:8px;padding:12px 14px;background-image:{{ po.fcBg }};border:2px solid rgba(255,255,255,.65);font-family:'Jua',system-ui,sans-serif;">
+              <span style="font-size:42px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));">{{ po.fcIcon }}</span>
+              <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+                <span style="font-size:16px;color:#fff;text-shadow:0 2px 4px rgba(4,32,62,.6);">{{ po.fcSpecies }} · {{ po.fcLen }}</span>
+                <span style="font-size:12px;letter-spacing:1px;">{{ po.fcStars }}</span>
+                <span style="font-size:10.5px;font-style:italic;font-weight:700;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(4,32,62,.6);">KF {{ po.fcNo }}</span>
+              </div>
+            </div>
+          </sc-if>
           <div style="display:flex;gap:6px;">
             <sc-for list="{{ po.reacts }}" as="rc" hint-placeholder-count="4">
               <button onClick="{{ rc.tap }}" style="background:{{ rc.bg }};border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:5px 11px;font-size:13px;font-weight:700;cursor:pointer;color:inherit;">{{ rc.e }} {{ rc.n }}</button>
@@ -2079,9 +2089,6 @@ input,button,textarea,select{font-family:inherit;}
         <button onClick="{{ fcEdit }}" style="flex:1;padding:13px 0;border-radius:24px;cursor:pointer;border:3px solid #fff;background-image:linear-gradient(180deg,#fff,#D8E7F4);box-shadow:0 5px 0 #A9C4DA;font-size:15px;color:#16528C;font-family:inherit;">✏️ 수정</button>
       </sc-if>
       <sc-if value="{{ fcMine }}" hint-placeholder-val="{{ true }}">
-        <button onClick="{{ fcBrag }}" style="flex:1.4;padding:13px 0;border-radius:24px;cursor:pointer;border:3px solid #fff;background-image:linear-gradient(180deg,#FFE07A,#F0930F);box-shadow:0 5px 0 #A4640C;font-size:15px;color:#6D3703;font-family:inherit;">{{ fcBragLabel }}</button>
-      </sc-if>
-      <sc-if value="{{ fcMine }}" hint-placeholder-val="{{ true }}">
         <button onClick="{{ fcDel }}" style="flex:none;padding:13px 16px;border-radius:24px;cursor:pointer;border:3px solid #fff;background-image:linear-gradient(180deg,#FFB3AB,#D63B2C);box-shadow:0 5px 0 #8D1B0F;font-size:15px;color:#fff;font-family:inherit;">🗑</button>
       </sc-if>
       <sc-if value="{{ fcGuest }}" hint-placeholder-val="{{ false }}">
@@ -3127,11 +3134,6 @@ class Component extends DCLogic {
       V.fcLikeBg=liked?'linear-gradient(180deg,#FFC3CF,#F58BA6)':'linear-gradient(180deg,#FFF0F3,#FFC3CF)';
       V.fcLike=()=>this.mut(d=>{const x=d.fishlog.find(y=>y.id===l.id);if(!x)return;x.likes=x.likes||[];
         const i=x.likes.indexOf(u.id);if(i>=0)x.likes.splice(i,1);else x.likes.push(u.id);});
-      V.fcBragged=!!(S.fBrag&&S.fBrag[l.id]);
-      V.fcBragLabel=(S.fBrag&&S.fBrag[l.id])?'📸 자랑 완료 ✓':'📸 피드에 자랑';
-      V.fcBrag=()=>{if(S.fBrag&&S.fBrag[l.id])return;
-        this.mut(d=>{d.feed.unshift({id:this.uid(),by:u.id,d:t,txt:'🎣 '+l.species+' '+(l.len||'')+'cm 낚았다! ('+(l.point||'')+')',photo:l.photo||null,likes:{'❤️':0,'👏':0,'😆':0,'🥹':0},comments:[]});});
-        this.setState({fBrag:{...(S.fBrag||{}),[l.id]:true}});};
       V.fcDel=()=>{this.mut(d=>{d.fishlog=(d.fishlog||[]).filter(x=>x.id!==l.id);});this.setState({modal:null});};
       V.fcEdit=()=>{const inBait=this.KGROUPS[1].o.indexOf(l.bait)>=0,inSpot=this.KGROUPS[5].o.indexOf(l.spot)>=0;
         this.setState({modal:{t:'fcatch',id:l.id},fishPhoto:l.photo||null,
@@ -3171,9 +3173,12 @@ class Component extends DCLogic {
         if(eid){this.mut(d=>{const x=d.fishlog.find(y=>y.id===eid);if(x)Object.assign(x,rec);});done(eid);return;}
         const nid=this.uid();
         const grade=diff>=5?'SSR':(diff>=4?'SR':(diff>=3?'HR':'R'));
+        const no='#'+String(Math.floor(Math.random()*179)+1).padStart(3,'0')+'/180 '+grade;
         this.mut(d=>{d.fishlog=d.fishlog||[];
-          d.fishlog.unshift(Object.assign({id:nid,by:u.id,d:t,tm:hhmm(),likes:[],
-            no:'#'+String(Math.floor(Math.random()*179)+1).padStart(3,'0')+'/180 '+grade},rec));});
+          d.fishlog.unshift(Object.assign({id:nid,by:u.id,d:t,tm:hhmm(),likes:[],no:no},rec));
+          d.feed.unshift({id:this.uid(),by:u.id,d:t,txt:'🎣 '+rec.species+' '+rec.len+'cm 낚았다! ('+rec.point+')',photo:rec.photo,
+            fcard:{species:rec.species,len:rec.len,stars:kstars(diff),icon:kart(rec.species).i,bg:kbg(rec.species),no:no},
+            likes:{'❤️':0,'👏':0,'😆':0,'🥹':0},comments:[]});});
         done(nid);};
     }
 
@@ -3183,6 +3188,9 @@ class Component extends DCLogic {
     V.addFeed=()=>{if(!(f.fdText||'').trim()&&!S.feedPhoto)return;this.mut(d=>{d.feed.unshift({id:this.uid(),by:u.id,d:t,txt:(f.fdText||'').trim(),photo:S.feedPhoto,likes:{'❤️':0,'👏':0,'😆':0,'🥹':0}});});this.setState({feedPhoto:null});this.clearF(['fdText']);};
     V.feedV=D.feed.map(po=>{const author=D.profiles.find(p=>p.id===po.by);const cms=po.comments||[];const ck='cm_'+po.id;
       return{emoji:byName(po.by).emoji,by:byName(po.by).name,date:this.dShort(po.d),txt:po.txt,photo:po.photo,hasPhoto:!!po.photo,
+      hasFcard:!!po.fcard,fcIcon:po.fcard?po.fcard.icon:'',fcBg:po.fcard?po.fcard.bg:'',
+      fcSpecies:po.fcard?po.fcard.species:'',fcLen:po.fcard?po.fcard.len+'cm':'',
+      fcStars:po.fcard?po.fcard.stars:'',fcNo:po.fcard?po.fcard.no:'',
       del:()=>this.mut(d=>{d.feed=d.feed.filter(x=>x.id!==po.id);}),
       stkV:(po.stks||[]).map(x=>({...this.dv(x.s),x:x.x+'%',y:x.y+'%',rot:'rotate('+x.r+'deg)',
         take:()=>{if(x.by!==u.id&&po.by!==u.id)return;
