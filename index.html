@@ -230,7 +230,7 @@ input,button,textarea,select{font-family:inherit;}
           </div>
         </div>
       </sc-if>
-      <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
+      <div style="position:relative;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <button onClick="{{ calPrev }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">‹</button>
           <div style="font-size:15px;font-weight:800;">{{ calLabel }}</div>
@@ -243,11 +243,6 @@ input,button,textarea,select{font-family:inherit;}
           <sc-for list="{{ calCellsV }}" as="c" hint-placeholder-count="35">
             <button onClick="{{ c.sel }}" style="background:{{ c.bg }};border:none;border-radius:10px;padding:4px 2px;display:flex;flex-direction:column;align-items:stretch;gap:2px;cursor:pointer;min-height:54px;min-width:0;overflow:hidden;">
               <span style="font-size:12px;font-weight:700;color:{{ c.fg }};text-align:center;">{{ c.num }}</span>
-              <sc-if value="{{ c.hasStks }}" hint-placeholder-val="{{ false }}">
-                <span style="display:flex;justify-content:center;align-items:center;gap:1px;flex-wrap:wrap;">
-                  <sc-for list="{{ c.stksV }}" as="cs" hint-placeholder-count="0"><sc-if value="{{ cs.isImg }}" hint-placeholder-val="{{ false }}"><span style="width:14px;height:14px;background-image:url('{{ cs.img }}');background-size:contain;background-repeat:no-repeat;background-position:center;"></span></sc-if><sc-if value="{{ cs.isEmo }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;line-height:1.3;">{{ cs.e }}</span></sc-if></sc-for>
-                </span>
-              </sc-if>
               <sc-for list="{{ c.items }}" as="ci" hint-placeholder-count="0">
                 <span style="display:block;background:{{ ci.bg }};color:{{ ci.fg }};border-radius:4px;padding:1px 3px;font-size:9px;font-weight:700;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;">{{ ci.t }}</span>
               </sc-for>
@@ -255,6 +250,34 @@ input,button,textarea,select{font-family:inherit;}
             </button>
           </sc-for>
         </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+          <div style="font-size:11px;color:var(--sub,#8A8177);">달력 위 아무 데나 스티커를 붙여보세요</div>
+          <button onClick="{{ calStkToggle }}" style="background:var(--soft,#F7EAD2);border:none;border-radius:99px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;color:inherit;">🧸 스티커</button>
+        </div>
+        <sc-if value="{{ calStkOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:8px;background:var(--bg,#FAF6EF);border-radius:14px;padding:10px 12px;animation:pop .25s;">
+            <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:7px;">스티커를 고른 뒤, 달력 위 원하는 곳을 콕!</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <sc-for list="{{ calStkPickV }}" as="cp" hint-placeholder-count="12">
+                <button onClick="{{ cp.pick }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:12px;width:44px;height:44px;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;">
+                  <sc-if value="{{ cp.isImg }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:32px;height:32px;background-image:url('{{ cp.img }}');background-size:contain;background-repeat:no-repeat;background-position:center;"></span></sc-if>
+                  <sc-if value="{{ cp.isEmo }}" hint-placeholder-val="{{ false }}"><span style="font-size:24px;line-height:1;">{{ cp.e }}</span></sc-if>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-for list="{{ calDecoV }}" as="cd" hint-placeholder-count="0">
+          <button onClick="{{ cd.take }}" title="내가 붙인 스티커는 누르면 떨어져요" style="position:absolute;left:{{ cd.x }};top:{{ cd.y }};transform:translate(-50%,-50%) {{ cd.rot }};background:none;border:none;padding:0;cursor:pointer;z-index:3;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18));">
+            <sc-if value="{{ cd.isImg }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:42px;height:42px;background-image:url('{{ cd.img }}');background-size:contain;background-repeat:no-repeat;background-position:center;"></span></sc-if>
+            <sc-if value="{{ cd.isEmo }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:30px;line-height:1;">{{ cd.e }}</span></sc-if>
+          </button>
+        </sc-for>
+        <sc-if value="{{ calStkMode }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ calPlaceTap }}" style="position:absolute;inset:0;z-index:4;border:2px dashed var(--ac,#F59E0B);border-radius:20px;background:rgba(245,158,11,.05);cursor:crosshair;"></div>
+          <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:5;background:var(--ac,#F59E0B);color:var(--on,#fff);border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800;pointer-events:none;white-space:nowrap;">원하는 곳을 콕! 누르면 붙어요</div>
+          <button onClick="{{ calPlaceCancel }}" style="position:absolute;top:6px;right:6px;z-index:5;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:28px;height:28px;font-size:12px;cursor:pointer;padding:0;color:inherit;">✕</button>
+        </sc-if>
       </div>
     </div>
   </sc-if>
@@ -428,11 +451,16 @@ input,button,textarea,select{font-family:inherit;}
       <sc-for list="{{ feedV }}" as="po" hint-placeholder-count="2">
         <div style="position:relative;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
           <sc-for list="{{ po.stkV }}" as="fs" hint-placeholder-count="0">
-            <button onClick="{{ fs.take }}" title="내가 붙인 스티커는 누르면 떨어져요" style="position:absolute;left:{{ fs.x }};top:{{ fs.y }};transform:{{ fs.rot }};background:none;border:none;padding:0;cursor:pointer;z-index:2;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18));">
+            <button onClick="{{ fs.take }}" title="내가 붙인 스티커는 누르면 떨어져요" style="position:absolute;left:{{ fs.x }};top:{{ fs.y }};transform:translate(-50%,-50%) {{ fs.rot }};background:none;border:none;padding:0;cursor:pointer;z-index:2;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18));">
               <sc-if value="{{ fs.isImg }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:46px;height:46px;background-image:url('{{ fs.img }}');background-size:contain;background-repeat:no-repeat;background-position:center;"></span></sc-if>
               <sc-if value="{{ fs.isEmo }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:34px;line-height:1;">{{ fs.e }}</span></sc-if>
             </button>
           </sc-for>
+          <sc-if value="{{ po.placing }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ po.placeTap }}" style="position:absolute;inset:0;z-index:4;border:2px dashed var(--ac,#F59E0B);border-radius:20px;background:rgba(245,158,11,.05);cursor:crosshair;"></div>
+            <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:5;background:var(--ac,#F59E0B);color:var(--on,#fff);border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800;pointer-events:none;white-space:nowrap;">원하는 곳을 콕! 누르면 붙어요</div>
+            <button onClick="{{ po.placeCancel }}" style="position:absolute;top:6px;right:6px;z-index:5;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:28px;height:28px;font-size:12px;cursor:pointer;padding:0;color:inherit;">✕</button>
+          </sc-if>
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="font-size:24px;">{{ po.emoji }}</span>
             <span style="font-size:14px;font-weight:800;">{{ po.by }}</span>
@@ -471,7 +499,7 @@ input,button,textarea,select{font-family:inherit;}
           </div>
           <sc-if value="{{ po.stkOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top:10px;background:var(--bg,#FAF6EF);border-radius:14px;padding:10px 12px;animation:pop .25s;">
-              <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:7px;">스티커를 고르면 글 위에 콕! 붙어요 · 내가 붙인 건 눌러서 떼기</div>
+              <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:7px;">스티커를 고른 뒤, 글 위 원하는 곳을 콕! · 내가 붙인 건 눌러서 떼기</div>
               <div style="display:flex;flex-wrap:wrap;gap:6px;">
                 <sc-for list="{{ po.stkPickV }}" as="sp" hint-placeholder-count="12">
                   <button onClick="{{ sp.put }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:12px;width:44px;height:44px;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;">
@@ -2275,36 +2303,6 @@ input,button,textarea,select{font-family:inherit;}
         </sc-for>
       </div>
       <sc-if value="{{ hasEvMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);margin-top:8px;">{{ evMsg }}</div></sc-if>
-      <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:14px;padding-top:12px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);">🧸 이 날의 스티커</div>
-          <button onClick="{{ dayStkToggle }}" style="background:var(--soft,#F7EAD2);border:none;border-radius:99px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;color:inherit;">{{ dayStkBtn }}</button>
-        </div>
-        <sc-if value="{{ dayStksShow }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">
-            <sc-for list="{{ dayStksV }}" as="dst" hint-placeholder-count="0">
-              <button onClick="{{ dst.take }}" style="background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:12px;width:44px;height:44px;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;">
-                <sc-if value="{{ dst.isImg }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:32px;height:32px;background-image:url('{{ dst.img }}');background-size:contain;background-repeat:no-repeat;background-position:center;"></span></sc-if>
-                <sc-if value="{{ dst.isEmo }}" hint-placeholder-val="{{ false }}"><span style="font-size:24px;line-height:1;">{{ dst.e }}</span></sc-if>
-              </button>
-            </sc-for>
-          </div>
-          <div style="font-size:11px;color:var(--sub,#8A8177);margin-top:6px;">내가 붙인 스티커는 누르면 떨어져요</div>
-        </sc-if>
-        <sc-if value="{{ dayStkOpen }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:10px;background:var(--bg,#FAF6EF);border-radius:14px;padding:10px 12px;animation:pop .25s;">
-            <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:7px;">어떤 스티커를 붙일까요?</div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;">
-              <sc-for list="{{ dayStkPickV }}" as="dsp" hint-placeholder-count="12">
-                <button onClick="{{ dsp.put }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:12px;width:44px;height:44px;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;">
-                  <sc-if value="{{ dsp.isImg }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:32px;height:32px;background-image:url('{{ dsp.img }}');background-size:contain;background-repeat:no-repeat;background-position:center;"></span></sc-if>
-                  <sc-if value="{{ dsp.isEmo }}" hint-placeholder-val="{{ false }}"><span style="font-size:24px;line-height:1;">{{ dsp.e }}</span></sc-if>
-                </button>
-              </sc-for>
-            </div>
-          </div>
-        </sc-if>
-      </div>
       <sc-if value="{{ dayFeedShow }}" hint-placeholder-val="{{ false }}">
         <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:14px;padding-top:12px;display:flex;flex-direction:column;gap:6px;">
           <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);">📸 이 날의 피드 이야기</div>
@@ -2579,7 +2577,7 @@ class Component extends DCLogic {
   DAYS = ['일','월','화','수','목','금','토'];
   STK = ['🌟','💖','🏆','🍀','🦄','🔥','👍','🐥','🍩','🎀','🌈','💎'];
   DECO = ['🎀','🌸','⭐','💖','🍓','🐰','🦋','✨','🌈','🍑','🫧','🐻','⚽','🎮','🎧','🍀','🌙','💜','🧸','🍒','😎','🤙','🔥','💫'];
-  DSTK = ['img:bear','img:fish','img:star','img:rainbow','img:cake','img:flower','🥰','🎉','👍','💖','🍀','⚽'];
+  DSTK = ['img:ham1','img:ham2','img:ham3','img:chick1','img:chick2','img:chick3','img:chick4','img:chick5','img:petit1','img:petit2','img:petit3','img:petit4','img:bear','img:fish','img:star','img:rainbow','img:cake','img:flower','🥰','🎉','👍','💖','🍀','⚽'];
   dv(s){s=String(s);return s.slice(0,4)==='img:'?{isImg:true,isEmo:false,img:'assets/stickers/'+s.slice(4)+'.png'}:{isImg:false,isEmo:true,e:s};}
 
   iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -2606,7 +2604,7 @@ class Component extends DCLogic {
       journal:[], scores:[], stlog:[], exch:[], fishlog:[], err:[], trades:[],
       quizzes:[], qruns:[], stkRate:{kid1:200,kid2:200},
       rewards:[], allow:[], tx:[], budgets:[], fixed:[], fixedPaid:{},
-      accounts:[], feed:[], tt:[], calStk:{},
+      accounts:[], feed:[], tt:[], calDeco:[],
       rwV2:1, histSeeded:1, kfV2:1
     };
   }
@@ -2631,7 +2629,7 @@ class Component extends DCLogic {
       if(!data.histSeeded){const cm=this.today().slice(0,7);data.tx=data.tx.concat(this.seed().tx.filter(x=>x.d.slice(0,7)!==cm));data.histSeeded=1;}
       if(!data.quizzes){const sd=this.seed();data.quizzes=sd.quizzes;data.qruns=[];data.events=data.events.concat(sd.events.filter(x=>x.qid));}
       if(!data.qruns)data.qruns=[];
-      if(!data.calStk)data.calStk={};
+      if(!data.calDeco)data.calDeco=[];
       if(!data.kfV2){data.fishlog=this.seed().fishlog;data.kfV2=1;}
       const t=this.today();
       this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),selDate:t,budSel:t});
@@ -3069,7 +3067,7 @@ class Component extends DCLogic {
     V.doneClV=doneCl.slice(0,30).map(({ev,c})=>({t:c.t,src:ev.t+' · '+this.dShort(ev.d)+(c.db?' · '+mName(c.db):''),
       undo:()=>clSet(ev.id,c.id,false)}));
     const fdByDay={};D.feed.forEach(po=>{(fdByDay[po.d]=fdByDay[po.d]||[]).push(po);});
-    const dayFds=fdByDay[S.selDate]||[];
+    const dayFds=(fdByDay[S.selDate]||[]).filter(po=>!po.fcard); // 낚시 카드는 피드에만
     V.dayFeedShow=dayFds.length>0;
     V.dayFeedV=dayFds.map(po=>({emoji:(D.profiles.find(p=>p.id===po.by)||{emoji:'🙂'}).emoji,by:mName(po.by),txt:(po.txt||'').trim()||'사진 이야기',
       open:()=>this.setState({modal:null,tab:'feed'})}));
@@ -3077,16 +3075,18 @@ class Component extends DCLogic {
       V.fvEmoji=a2.emoji;V.fvBy=a2.name;V.fvDate=this.dShort(po.d||'');V.fvTxt=po.txt||'';V.fvPhoto=po.photo;V.fvHasPhoto=!!po.photo;V.fvGoFeed=()=>this.setState({modal:null,tab:'feed'});}
     V.evModalTitle=(S.modal&&S.modal.t==='event'&&S.modal.id)?'일정 수정':'일정 추가';
     V.modalDay=!!(S.modal&&S.modal.t==='day');
-    // 날짜 스티커 — 다이어리처럼 그 날에 붙이는 꾸미기 스티커
-    const daySt=(D.calStk||{})[S.selDate]||[];
-    V.dayStksShow=daySt.length>0;
-    V.dayStksV=daySt.map(x=>({...this.dv(x.s),take:()=>{if(x.by!==u.id)return;
-      this.mut(d=>{d.calStk=d.calStk||{};d.calStk[S.selDate]=(d.calStk[S.selDate]||[]).filter(y=>y.id!==x.id);});}}));
-    V.dayStkOpen=!!S.dayStkOpen;
-    V.dayStkToggle=()=>this.setState({dayStkOpen:!S.dayStkOpen});
-    V.dayStkBtn=S.dayStkOpen?'닫기':'+ 붙이기';
-    V.dayStkPickV=this.DSTK.map(s=>({...this.dv(s),put:()=>{
-      this.mut(d=>{d.calStk=d.calStk||{};(d.calStk[S.selDate]=d.calStk[S.selDate]||[]).push({id:this.uid(),s,by:u.id});});}}));
+    // 달력 꾸미기 스티커 — 달력 카드 위 아무 곳에나 자유 배치, 그 달에만 표시
+    V.calDecoV=(D.calDeco||[]).filter(x=>x.m===S.calM).map(x=>({...this.dv(x.s),x:x.x+'%',y:x.y+'%',rot:'rotate('+x.r+'deg)',
+      take:()=>{if(x.by!==u.id)return;this.mut(d=>{d.calDeco=(d.calDeco||[]).filter(y2=>y2.id!==x.id);});}}));
+    V.calStkOpen=!!S.calStkOpen;
+    V.calStkToggle=()=>this.setState({calStkOpen:!S.calStkOpen,calStkSel:null});
+    V.calStkMode=!!S.calStkSel;
+    V.calStkPickV=this.DSTK.map(s=>({...this.dv(s),pick:()=>this.setState({calStkSel:s,calStkOpen:false})}));
+    V.calPlaceTap=e=>{const s=S.calStkSel;if(!s)return;const r=e.currentTarget.getBoundingClientRect();
+      const px=Math.round((e.clientX-r.left)/r.width*1000)/10,py=Math.round((e.clientY-r.top)/r.height*1000)/10;
+      this.mut(d=>{(d.calDeco=d.calDeco||[]).push({id:this.uid(),m:S.calM,s,x:px,y:py,r:Math.round(-15+Math.random()*30),by:u.id});});
+      this.setState({calStkSel:null});};
+    V.calPlaceCancel=()=>this.setState({calStkSel:null});
     Object.assign(V,this.qKidVals(D,u,sk,f,S,t));
     Object.assign(V,this.qPlayVals(D,u,sk,f,S,t));
     Object.assign(V,this.qParentVals(D,u,sk,f,S,t));
@@ -3128,12 +3128,10 @@ class Component extends DCLogic {
     const fdByDate={};D.feed.forEach(po=>{(fdByDate[po.d]=fdByDate[po.d]||[]).push(po);});
     V.calCellsV=this.grid(S.calM).map(c=>{
       const evs=(evByDate[c.ds]||[]).map(ev=>({t:ev.t,bg:(this.MCOLOR[String(ev.m||'').split(',')[0]]||'#999999')+'2E',fg:sk.tx}));
-      const fds=(fdByDate[c.ds]||[]).map(po=>({t:'📸 '+((po.txt||'').trim()||'사진'),bg:sk.line+'66',fg:sk.sub}));
+      const fds=(fdByDate[c.ds]||[]).filter(po=>!po.fcard).map(po=>({t:'📸 '+((po.txt||'').trim()||'사진'),bg:sk.line+'66',fg:sk.sub}));
       const items=evs.concat(fds); // 피드 이야기는 항상 일정 아래
-      const cstks=(D.calStk||{})[c.ds]||[];
       return{num:c.num,bg:c.ds===S.selDate?sk.soft:'transparent',fg:c.ds===t?sk.ac:(c.inM?sk.tx:sk.line),
         items:items.slice(0,3),hasMore:items.length>3,more:String(items.length-3),
-        hasStks:cstks.length>0,stksV:cstks.slice(0,4).map(x=>this.dv(x.s)),
         sel:()=>this.setState({selDate:c.ds,modal:{t:'day'}})};});
     V.feedHomeShow=(this.props.showFeedOnHome??true)&&D.feed.length>0;
     const byName=id=>(D.profiles.find(p=>p.id===id)||{name:'?',emoji:'🙂'});
@@ -3286,11 +3284,14 @@ class Component extends DCLogic {
         take:()=>{if(x.by!==u.id&&po.by!==u.id)return;
           this.mut(d=>{const p2=d.feed.find(z=>z.id===po.id);if(p2)p2.stks=(p2.stks||[]).filter(y=>y.id!==x.id);});}})),
       stkOpen:S.stkPick===po.id,
-      stkToggle:()=>this.setState({stkPick:S.stkPick===po.id?null:po.id}),
-      stkPickV:this.DSTK.map(s=>({...this.dv(s),put:()=>{
-        const px=Math.round(6+Math.random()*70),py=Math.round(6+Math.random()*36),pr=Math.round(-18+Math.random()*36);
-        this.mut(d=>{const p2=d.feed.find(z=>z.id===po.id);if(p2)(p2.stks=p2.stks||[]).push({id:this.uid(),s,x:px,y:py,r:pr,by:u.id});});
-        this.setState({stkPick:null});}})),
+      stkToggle:()=>this.setState({stkPick:S.stkPick===po.id?null:po.id,fdStkSel:null}),
+      stkPickV:this.DSTK.map(s=>({...this.dv(s),put:()=>this.setState({stkPick:null,fdStkSel:{pid:po.id,s}})})),
+      placing:!!(S.fdStkSel&&S.fdStkSel.pid===po.id),
+      placeTap:e=>{const sel=S.fdStkSel;if(!sel||sel.pid!==po.id)return;const r=e.currentTarget.getBoundingClientRect();
+        const px=Math.round((e.clientX-r.left)/r.width*1000)/10,py=Math.round((e.clientY-r.top)/r.height*1000)/10;
+        this.mut(d=>{const p2=d.feed.find(z=>z.id===po.id);if(p2)(p2.stks=p2.stks||[]).push({id:this.uid(),s:sel.s,x:px,y:py,r:Math.round(-15+Math.random()*30),by:u.id});});
+        this.setState({fdStkSel:null});},
+      placeCancel:()=>this.setState({fdStkSel:null}),
       reacts:['❤️','👏','😆','🥹'].map(e=>({e,n:(po.likes&&po.likes[e])||0,bg:((po.likes&&po.likes[e])||0)>0?sk.soft:sk.card,
         tap:()=>this.mut(d=>{const p2=d.feed.find(x=>x.id===po.id);p2.likes=p2.likes||{};p2.likes[e]=(p2.likes[e]||0)+1;})})),
       canPraise:u.role==='parent'&&author&&author.role==='kid'&&po.by!==u.id,
