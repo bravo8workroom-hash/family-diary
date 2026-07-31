@@ -482,23 +482,8 @@ input,button,textarea,select{font-family:inherit;}
               <sc-for list="{{ po.photosV }}" as="pp" hint-placeholder-count="1"><div style="width:100%;height:220px;border-radius:14px;background-image:url('{{ pp.u }}');background-size:cover;background-position:center;"></div></sc-for>
             </div>
           </sc-if>
-          <sc-if value="{{ po.hasFcard }}" hint-placeholder-val="{{ false }}">
-            <div style="width:180px;margin-bottom:8px;border-radius:16px;padding:3px;background-image:linear-gradient(125deg,#FFE9A8,#FFD166,#C8F0FF,#FFB8E0,#FFE9A8);background-size:200% 100%;animation:holo 7s linear infinite;box-shadow:0 6px 13px rgba(6,34,66,.16);font-family:'Jua',system-ui,sans-serif;">
-              <div style="border-radius:13px;overflow:hidden;background:var(--card,#fff);">
-                <div style="position:relative;height:104px;display:flex;align-items:center;justify-content:center;background-image:{{ po.fcBg }};">
-                  <span style="position:absolute;inset:0;background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.14) 0 10px,rgba(255,255,255,0) 10px 22px);"></span>
-                  <span style="position:relative;font-size:48px;line-height:1;filter:drop-shadow(0 5px 7px rgba(6,40,76,.45));">{{ po.fcIcon }}</span>
-                </div>
-                <div style="padding:8px 10px 10px;">
-                  <div style="display:flex;align-items:baseline;gap:4px;">
-                    <span style="font-size:15px;font-weight:800;">{{ po.fcSpecies }}</span>
-                    <span style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);">{{ po.fcLen }}</span>
-                  </div>
-                  <div style="font-size:10px;color:#E0A73B;margin-top:2px;letter-spacing:1px;">{{ po.fcStars }}</div>
-                  <div style="font-size:10px;font-style:italic;font-weight:700;color:var(--sub,#8A8177);margin-top:3px;">KF {{ po.fcNo }}</div>
-                </div>
-              </div>
-            </div>
+          <sc-if value="{{ po.hasFcImg }}" hint-placeholder-val="{{ false }}">
+            <div style="width:216px;height:312px;margin-bottom:8px;border-radius:16px;background-image:url('{{ po.fcImg }}');background-size:cover;background-position:center;box-shadow:0 7px 16px rgba(6,34,66,.2);"></div>
           </sc-if>
           <div style="display:flex;gap:6px;">
             <sc-for list="{{ po.reacts }}" as="rc" hint-placeholder-count="4">
@@ -584,6 +569,15 @@ input,button,textarea,select{font-family:inherit;}
               <span style="display:flex;gap:4px;"><span style="width:16px;height:16px;border-radius:50%;background:{{ mk.c1 }};"></span><span style="width:16px;height:16px;border-radius:50%;background:{{ mk.c2 }};"></span><span style="width:16px;height:16px;border-radius:50%;background:{{ mk.c3 }};"></span></span>
               <span style="font-size:13px;font-weight:800;color:{{ mk.fg }};">{{ mk.name }} {{ mk.on }}</span>
             </button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
+        <div style="font-size:15px;font-weight:800;">🎨 내 일정 색</div>
+        <div style="font-size:12px;color:var(--sub,#8A8177);line-height:1.7;margin:4px 0 12px;">달력과 일정 목록에서 내 일정에 쓰이는 색이에요. 가족마다 다르게 고르면 한눈에 구분돼요.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <sc-for list="{{ myColorsV }}" as="mc" hint-placeholder-count="12">
+            <button onClick="{{ mc.pick }}" style="width:44px;height:44px;border-radius:50%;background:{{ mc.c }};border:3px solid {{ mc.bd }};color:#fff;font-size:16px;font-weight:900;line-height:1;padding:0;cursor:pointer;">{{ mc.on }}</button>
           </sc-for>
         </div>
       </div>
@@ -2590,6 +2584,7 @@ class Component extends DCLogic {
   };
   CATS = ['식비','생활/마트','교육','교통','의료','쇼핑','문화/여가','여행','이체','기타'];
   MCOLOR = {mom:'#F97316',dad:'#3B82F6',kid1:'#EC4899',kid2:'#10B981',fam:'#8B5CF6'};
+  PCOLORS = ['#F97316','#EF4444','#EC4899','#A855F7','#8B5CF6','#3B82F6','#0EA5E9','#14B8A6','#10B981','#84CC16','#EAB308','#78716C'];
   DAYS = ['일','월','화','수','목','금','토'];
   STK = ['🌟','💖','🏆','🍀','🦄','🔥','👍','🐥','🍩','🎀','🌈','💎'];
   DECO = ['🎀','🌸','⭐','💖','🍓','🐰','🦋','✨','🌈','🍑','🫧','🐻','⚽','🎮','🎧','🍀','🌙','💜','🧸','🍒','😎','🤙','🔥','💫'];
@@ -2650,7 +2645,7 @@ class Component extends DCLogic {
       if(!data.calDeco)data.calDeco=[];
       if(!data.kfV2){data.fishlog=this.seed().fishlog;data.kfV2=1;}
       const t=this.today();
-      this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),selDate:t,budSel:t});
+      this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),selDate:t,budSel:t},()=>this.fcBackfill());
     });
   }
   componentWillUnmount(){if(this.qTimer)clearInterval(this.qTimer);if(this.feedPaste)document.removeEventListener('paste',this.feedPaste);}
@@ -2828,6 +2823,31 @@ class Component extends DCLogic {
     ml2.forEach((s2,i)=>x.fillText(s2,R,(ml2.length===1?488:481)+i*14));
     x.textAlign='left';
     return c.toDataURL('image/jpeg',0.88);
+  }
+
+  // 카드 그림을 만들어, 그 카드가 올라간 피드 글에 붙인다
+  async fcPaint(l){
+    try{
+      const p=((this.state.data||{}).profiles||[]).find(x=>x.id===l.by)||{};
+      const img=await this.drawFishCard(Object.assign({},l,{
+        when:this.dShort(l.d||this.today())+' '+(l.tm||''),
+        byLabel:((p.emoji||'')+' '+(p.name||'')).trim()}));
+      const url=await window.FamilyStore.putPhoto(img);
+      this.mut(d=>{const po=(d.feed||[]).find(z=>z.fcid===l.id);if(po)po.fcimg=url;});
+    }catch(e){}
+  }
+
+  // 카드 그림이 없던 예전 글에도 그림을 만들어 붙인다 (한 번만)
+  fcBackfill(){
+    const D=this.state.data;if(!D||this._fcBf)return;this._fcBf=1;
+    const jobs=[];
+    (D.feed||[]).forEach(po=>{
+      if(po.fcimg)return;
+      const l=(D.fishlog||[]).find(x=>po.fcid?x.id===po.fcid:(po.fcard&&x.no===po.fcard.no));
+      if(l)jobs.push({fid:po.id,l:l});});
+    if(!jobs.length)return;
+    this.mut(d=>{jobs.forEach(j=>{const p=(d.feed||[]).find(z=>z.id===j.fid);if(p)p.fcid=j.l.id;});});
+    jobs.forEach(j=>this.fcPaint(j.l));
   }
 
   // 캡처 읽기는 담당(VS코드)에게 맡긴다 — 정리된 내역이 이 화면에 자동으로 올라온다
@@ -3118,6 +3138,7 @@ class Component extends DCLogic {
     const chip=(act)=>act?{bg:sk.ac,fg:sk.on,bd:sk.ac}:{bg:sk.card,fg:sk.tx,bd:sk.line};
     const softChip=(act)=>act?{bg:sk.soft,fg:sk.tx,bd:sk.ac}:{bg:sk.card,fg:sk.sub,bd:sk.line};
     const evByDate={};D.events.forEach(ev=>{(evByDate[ev.d]=evByDate[ev.d]||[]).push(ev);});
+    const mcol=id=>((D.profiles.find(p=>p.id===id)||{}).color)||this.MCOLOR[id]||'';
     const V={
       loading:false,noUser:!u,hasUser:!!u,f,on,
       skinBg:sk.bg,skinCard:sk.card,skinAc:sk.ac,skinOn:sk.on,skinSoft:sk.soft,skinLine:sk.line,skinTx:sk.tx,skinSub:sk.sub,
@@ -3128,9 +3149,9 @@ class Component extends DCLogic {
       profilesV:D.profiles.map(p=>({
         name:p.name,emoji:p.emoji,photo:p.photo,hasPhoto:!!p.photo,noPhoto:!p.photo,
         hasPing:(D.pings||[]).filter(x=>x.to===p.id&&!x.read).length>0,pingN:(D.pings||[]).filter(x=>x.to===p.id&&!x.read).length,
-        lock:p.pw?'🔒':'',tint:this.MCOLOR[p.id]?this.MCOLOR[p.id]+'22':'#eee',
+        lock:p.pw?'🔒':'',tint:mcol(p.id)?mcol(p.id)+'22':'#eee',
         bd:S.editMode?sk.ac:sk.line,
-        roleLabel:p.role==='parent'?'부모':'아이',roleBg:p.role==='parent'?'#8B5CF6':this.MCOLOR[p.id]||'#F59E0B',
+        roleLabel:p.role==='parent'?'부모':'아이',roleBg:p.role==='parent'?'#8B5CF6':mcol(p.id)||'#F59E0B',
         open:()=>{
           if(S.editMode){this.setState({modal:{t:'profile',id:p.id},f:{...S.f,pfName:p.name,pfEmoji:p.emoji,pfPw:p.pw}});return;}
           if(p.pw)this.setState({modal:{t:'pw',id:p.id},pwErr:'',f:{...S.f,pw:''}});
@@ -3166,6 +3187,9 @@ class Component extends DCLogic {
     V.hasMeMsg=!!S.meMsg;V.meMsg=S.meMsg;
     V.skinsV=Object.entries(this.SKINS).map(([id,s2])=>({name:s2.name,bg:s2.bg,fg:s2.tx,c1:s2.ac,c2:s2.soft,c3:s2.card,bd:u.skin===id?s2.ac:sk.line,on:u.skin===id?'✓':'',
       pick:()=>this.mut(d=>{d.profiles.find(p=>p.id===u.id).skin=id;})}));
+    const myCol=mcol(u.id);
+    V.myColorsV=this.PCOLORS.map(c2=>({c:c2,bd:myCol===c2?sk.tx:'transparent',on:myCol===c2?'✓':'',
+      pick:()=>this.mut(d=>{d.profiles.find(p=>p.id===u.id).color=c2;})}));
     V.goFeed=()=>this.setState({tab:'feed'});
     // PING (호출)
     const myPings=(D.pings||[]).filter(x=>x.to===u.id&&!x.read);
@@ -3193,25 +3217,27 @@ class Component extends DCLogic {
     V.weekV=[...Array(7)].map((_,i)=>{const d=new Date(ws);d.setDate(ws.getDate()+i);const ds=this.iso(d);const evs=evByDate[ds]||[];
       return{day:this.DAYS[i],dayColor:i===0?'#E5484D':(i===6?'#3B82F6':sk.sub),num:d.getDate(),
         bg:ds===S.selDate?sk.ac:(ds===t?sk.soft:'transparent'),fg:ds===S.selDate?sk.on:sk.tx,
-        dots:evs.slice(0,3).map(ev=>({c:this.MCOLOR[String(ev.m||'').split(',')[0]]||'#999'})),sel:()=>this.setState({selDate:ds})};});
+        dots:evs.slice(0,3).map(ev=>({c:mcol(String(ev.m||'').split(',')[0])||'#999'})),sel:()=>this.setState({selDate:ds})};});
     V.selLabel=this.dLabel(S.selDate);
     const mName=id=>({mom:'엄마',dad:'아빠',fam:'가족'}[id]||(D.profiles.find(p=>p.id===id)||{}).name||'');
     const evFlash=msg=>{this.setState({evMsg:msg});setTimeout(()=>this.setState({evMsg:''}),2500);};
     V.hasEvMsg=!!S.evMsg;V.evMsg=S.evMsg;
     const dayEvs=(evByDate[S.selDate]||[]).slice().sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
     V.dayEmpty=!dayEvs.length;
-    const clSet=(evId,ciId,done)=>this.mut(d=>{const x=d.events.find(y=>y.id===evId);const ci=x&&(x.cl||[]).find(z=>z.id===ciId);
-      if(ci){ci.dn=done;if(done){ci.db=u.id;ci.da=Date.now();}else{delete ci.db;delete ci.da;}}});
+    const clMine=ev=>!ev.by||ev.by===u.id; // 체크리스트는 일정을 만든 사람에게만 보이고, 그 사람만 체크한다
+    const clSet=(evId,ciId,done)=>{const ev0=D.events.find(y=>y.id===evId);if(ev0&&!clMine(ev0))return;
+      this.mut(d=>{const x=d.events.find(y=>y.id===evId);const ci=x&&(x.cl||[]).find(z=>z.id===ciId);
+        if(ci){ci.dn=done;if(done){ci.db=u.id;ci.da=Date.now();}else{delete ci.db;delete ci.da;}}});};
     V.dayEventsV=dayEvs.map(ev=>{const canEdit=!ev.by||ev.by===u.id;
-      return{title:ev.t,time:ev.time||'종일',memo:ev.memo||'',hasMemo:!!(ev.memo||'').trim(),c:this.MCOLOR[String(ev.m||'').split(',')[0]]||'#999',who:String(ev.m||'fam').split(',').map(mName).filter(Boolean).join('·'),canEdit,
-      imp:!!ev.imp,hasCl:(ev.cl||[]).some(c=>!c.dn),
-      clV:(ev.cl||[]).filter(c=>!c.dn).map(c=>({t:c.t,tog:e=>{e.stopPropagation();clSet(ev.id,c.id,true);}})),
+      return{title:ev.t,time:ev.time||'종일',memo:ev.memo||'',hasMemo:!!(ev.memo||'').trim(),c:mcol(String(ev.m||'').split(',')[0])||'#999',who:String(ev.m||'fam').split(',').map(mName).filter(Boolean).join('·'),canEdit,
+      imp:!!ev.imp,hasCl:clMine(ev)&&(ev.cl||[]).some(c=>!c.dn),
+      clV:clMine(ev)?(ev.cl||[]).filter(c=>!c.dn).map(c=>({t:c.t,tog:e=>{e.stopPropagation();clSet(ev.id,c.id,true);}})):[],
       open:()=>{if(ev.qid){const qq=this.qFind(D,ev.qid);
         if(qq&&u.role==='kid'&&qq.k===u.id){this.setState({modal:null});this.qOpen(qq);return;}
         if(qq&&u.role!=='kid'){this.setState({modal:null,tab:'parent',pview:'kids',qbKid:qq.k});return;}}
       if(canEdit)this.setState({modal:{t:'event',id:ev.id},f:{...f,evTitle:ev.t,evTime:ev.time||'',evMemo:ev.memo||'',evMembers:String(ev.m||'fam').split(','),evImp:!!ev.imp,evCl:(ev.cl||[]).map(x=>({...x})),evClItem:''}});else evFlash('🔒 '+(mName(ev.by)||'작성한 사람')+'만 수정할 수 있어요');},
       del:e=>{e.stopPropagation();this.mut(d=>{d.events=d.events.filter(x=>x.id!==ev.id);});}};});
-    const doneCl=[];D.events.forEach(ev=>(ev.cl||[]).forEach(c=>{if(c.dn)doneCl.push({ev,c});}));
+    const doneCl=[];D.events.forEach(ev=>{if(!clMine(ev))return;(ev.cl||[]).forEach(c=>{if(c.dn)doneCl.push({ev,c});});});
     doneCl.sort((a,b)=>(b.c.da||0)-(a.c.da||0));
     V.hasDoneCl=doneCl.length>0;V.doneClN=doneCl.length;
     V.doneClOpen=!!S.doneClOpen;V.doneClArrow=S.doneClOpen?'접기 ▲':'펼치기 ▼';
@@ -3279,7 +3305,7 @@ class Component extends DCLogic {
     V.calNext=()=>this.setState({calM:this.shiftM(S.calM,1)});
     const fdByDate={};D.feed.forEach(po=>{(fdByDate[po.d]=fdByDate[po.d]||[]).push(po);});
     V.calCellsV=this.grid(S.calM).map(c=>{
-      const evs=(evByDate[c.ds]||[]).map(ev=>({t:ev.t,bg:(this.MCOLOR[String(ev.m||'').split(',')[0]]||'#999999')+'2E',fg:sk.tx}));
+      const evs=(evByDate[c.ds]||[]).map(ev=>({t:ev.t,bg:(mcol(String(ev.m||'').split(',')[0])||'#999999')+'2E',fg:sk.tx}));
       const fds=(fdByDate[c.ds]||[]).filter(po=>!po.fcard).map(po=>({t:'📸 '+((po.txt||'').trim()||'사진'),bg:sk.line+'66',fg:sk.sub}));
       const items=evs.concat(fds); // 피드 이야기는 항상 일정 아래
       return{num:c.num,bg:c.ds===S.selDate?sk.soft:'transparent',fg:c.ds===t?sk.ac:(c.inM?sk.tx:sk.line),
@@ -3367,7 +3393,7 @@ class Component extends DCLogic {
       V.fcGear=l.gear||'-';V.fcSpot=l.spot||'-';
       V.fcBy=byName(l.by).emoji+' '+byName(l.by).name;V.fcNo=l.no||'#000/180 R';
       if(this._fcFor!==l.id){this._fcFor=l.id;this._fcMotto=FMOTTOS[Math.floor(Math.random()*FMOTTOS.length)];}
-      V.fcMotto=this._fcMotto;
+      V.fcMotto=l.motto||this._fcMotto;
       V.fcMine=mine;V.fcGuest=!mine;
       const liked=(l.likes||[]).indexOf(u.id)>=0;
       V.fcLikes=(l.likes||[]).length;
@@ -3410,16 +3436,19 @@ class Component extends DCLogic {
           diary:(f.kfDiary||'').trim(),photo:S.fishPhoto||null};
         const done=id=>{this.setState({modal:{t:'fcard',id:id},fishPhoto:null});
           this.clearF(['kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDiff','kfWater','kfBait','kfWind','kfWave','kfTime','kfSpot']);};
-        if(eid){this.mut(d=>{const x=d.fishlog.find(y=>y.id===eid);if(x)Object.assign(x,rec);});done(eid);return;}
+        if(eid){let full=null;
+          this.mut(d=>{const x=d.fishlog.find(y=>y.id===eid);if(x){Object.assign(x,rec);full=JSON.parse(JSON.stringify(x));}});
+          done(eid);if(full)this.fcPaint(full);return;}
         const nid=this.uid();
         const grade=diff>=5?'SSR':(diff>=4?'SR':(diff>=3?'HR':'R'));
         const no='#'+String(Math.floor(Math.random()*179)+1).padStart(3,'0')+'/180 '+grade;
+        const full=Object.assign({id:nid,by:u.id,d:t,tm:hhmm(),likes:[],no:no,
+          motto:FMOTTOS[Math.floor(Math.random()*FMOTTOS.length)]},rec);
         this.mut(d=>{d.fishlog=d.fishlog||[];
-          d.fishlog.unshift(Object.assign({id:nid,by:u.id,d:t,tm:hhmm(),likes:[],no:no},rec));
-          d.feed.unshift({id:this.uid(),by:u.id,d:t,txt:'🎣 '+rec.species+' '+rec.len+'cm 낚았다! ('+rec.point+')',photo:rec.photo,
-            fcard:{species:rec.species,len:rec.len,stars:kstars(diff),icon:kart(rec.species).i,bg:kbg(rec.species),no:no},
+          d.fishlog.unshift(JSON.parse(JSON.stringify(full)));
+          d.feed.unshift({id:this.uid(),by:u.id,d:t,fcid:nid,txt:'🎣 '+rec.species+' '+rec.len+'cm 낚았다! ('+rec.point+')',photo:rec.photo,
             likes:{'❤️':0,'👏':0,'😆':0,'🥹':0},comments:[]});});
-        done(nid);};
+        done(nid);this.fcPaint(full);};
     }
 
     // FEED
@@ -3430,9 +3459,7 @@ class Component extends DCLogic {
     V.feedV=D.feed.map(po=>{const author=D.profiles.find(p=>p.id===po.by);const cms=po.comments||[];const ck='cm_'+po.id;
       const phs=this.phl(po);
       return{emoji:byName(po.by).emoji,by:byName(po.by).name,date:this.dShort(po.d),txt:po.txt,photosV:phs.map(u2=>({u:u2})),hasPhoto:phs.length>0,
-      hasFcard:!!po.fcard,fcIcon:po.fcard?po.fcard.icon:'',fcBg:po.fcard?po.fcard.bg:'',
-      fcSpecies:po.fcard?po.fcard.species:'',fcLen:po.fcard?po.fcard.len+'cm':'',
-      fcStars:po.fcard?po.fcard.stars:'',fcNo:po.fcard?po.fcard.no:'',
+      hasFcImg:!!po.fcimg,fcImg:po.fcimg||'',
       del:()=>this.mut(d=>{d.feed=d.feed.filter(x=>x.id!==po.id);}),
       stkV:(po.stks||[]).map(x=>({...this.dv(x.s),x:x.x+'%',y:x.y+'%',rot:'rotate('+x.r+'deg)',
         take:()=>{if(x.by!==u.id&&po.by!==u.id)return;
