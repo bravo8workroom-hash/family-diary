@@ -123,16 +123,47 @@ input,button,textarea,select{font-family:inherit;}
         <sc-if value="{{ dayEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--sub,#8A8177);padding:6px 0;">일정이 없어요. 여유로운 하루! ☁️</div></sc-if>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ dayEventsV }}" as="ev" hint-placeholder-count="2">
-            <div onClick="{{ ev.open }}" style="display:flex;align-items:center;gap:10px;background:var(--bg,#FAF6EF);border-radius:14px;padding:10px 12px;cursor:pointer;">
-              <span style="width:4px;height:26px;border-radius:4px;background:{{ ev.c }};"></span>
-              <span style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);min-width:38px;">{{ ev.time }}</span>
-              <span style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;"><span style="font-size:14px;font-weight:700;">{{ ev.title }}</span><sc-if value="{{ ev.hasMemo }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;color:var(--sub,#8A8177);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ev.memo }}</span></sc-if></span>
-              <span style="font-size:11px;font-weight:700;color:{{ ev.c }};">{{ ev.who }}</span>
-              <sc-if value="{{ ev.canEdit }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--sub,#8A8177);">✎</span><button onClick="{{ ev.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:14px;cursor:pointer;padding:2px;">✕</button></sc-if>
+            <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:10px 12px;">
+              <div onClick="{{ ev.open }}" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <span style="width:4px;height:26px;border-radius:4px;background:{{ ev.c }};"></span>
+                <span style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);min-width:38px;">{{ ev.time }}</span>
+                <span style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;"><span style="font-size:14px;font-weight:700;"><sc-if value="{{ ev.imp }}" hint-placeholder-val="{{ false }}"><span style="color:#E5484D;font-weight:900;">❗</span></sc-if>{{ ev.title }}</span><sc-if value="{{ ev.hasMemo }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;color:var(--sub,#8A8177);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ev.memo }}</span></sc-if></span>
+                <span style="font-size:11px;font-weight:700;color:{{ ev.c }};">{{ ev.who }}</span>
+                <sc-if value="{{ ev.canEdit }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--sub,#8A8177);">✎</span><button onClick="{{ ev.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:14px;cursor:pointer;padding:2px;">✕</button></sc-if>
+              </div>
+              <sc-if value="{{ ev.hasCl }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;margin-top:7px;border-top:1px dashed var(--line,#EFE4CF);padding-top:5px;">
+                  <sc-for list="{{ ev.clV }}" as="ci" hint-placeholder-count="0">
+                    <button onClick="{{ ci.tog }}" style="display:flex;align-items:center;gap:9px;background:none;border:none;padding:7px 0;cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%;">
+                      <span style="width:19px;height:19px;border-radius:6px;border:2px solid {{ ev.c }};box-sizing:border-box;flex-shrink:0;"></span>
+                      <span style="flex:1;font-size:13px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ci.t }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
             </div>
           </sc-for>
         </div>
         <sc-if value="{{ hasEvMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);margin-top:8px;">{{ evMsg }}</div></sc-if>
+        <sc-if value="{{ hasDoneCl }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:12px;padding-top:10px;">
+            <button onClick="{{ toggleDoneCl }}" style="width:100%;display:flex;align-items:center;gap:6px;background:none;border:none;padding:4px 0;cursor:pointer;color:var(--sub,#8A8177);font-family:inherit;">
+              <span style="font-size:12px;font-weight:800;">✅ 완료한 할일 {{ doneClN }}개</span>
+              <span style="font-size:11px;margin-left:auto;">{{ doneClArrow }}</span>
+            </button>
+            <sc-if value="{{ doneClOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;margin-top:4px;">
+                <sc-for list="{{ doneClV }}" as="dc" hint-placeholder-count="0">
+                  <button onClick="{{ dc.undo }}" title="누르면 체크가 풀려요" style="display:flex;align-items:center;gap:9px;background:none;border:none;padding:6px 0;cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%;">
+                    <span style="width:19px;height:19px;border-radius:6px;background:var(--ac,#F59E0B);color:var(--on,#fff);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;">✓</span>
+                    <span style="flex:1;font-size:13px;font-weight:600;color:var(--sub,#8A8177);text-decoration:line-through;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ dc.t }}</span>
+                    <span style="font-size:11px;color:var(--sub,#8A8177);flex-shrink:0;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ dc.src }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
         <sc-if value="{{ dayFeedShow }}" hint-placeholder-val="{{ false }}">
           <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:12px;padding-top:10px;display:flex;flex-direction:column;gap:6px;">
             <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);">📸 이 날의 피드 이야기</div>
@@ -1909,9 +1940,24 @@ input,button,textarea,select{font-family:inherit;}
     <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
       <div style="font-size:16px;font-weight:800;margin-bottom:14px;">🗓️ {{ selLabel }} {{ evModalTitle }}</div>
       <input value="{{ f.evTitle }}" onChange="{{ on.evTitle }}" placeholder="무슨 일정인가요?" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;margin-bottom:8px;">
-      <textarea value="{{ f.evMemo }}" onChange="{{ on.evMemo }}" placeholder="자세한 내용 · 장소, 준비물, 메모 등 (선택)" rows="2" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;margin-bottom:8px;resize:none;font-family:inherit;line-height:1.5;"></textarea>
+      <textarea value="{{ f.evMemo }}" onChange="{{ on.evMemo }}" placeholder="메모 (선택)" rows="2" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;margin-bottom:8px;resize:none;font-family:inherit;line-height:1.5;"></textarea>
+      <sc-if value="{{ evHasCl }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
+          <sc-for list="{{ evClV }}" as="eci" hint-placeholder-count="0">
+            <div style="display:flex;align-items:center;gap:8px;background:var(--bg,#FAF6EF);border-radius:10px;padding:8px 10px;">
+              <span style="font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">☑️ {{ eci.t }}</span>
+              <button onClick="{{ eci.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;padding:2px 4px;">✕</button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <input value="{{ f.evClItem }}" onChange="{{ on.evClItem }}" placeholder="체크리스트 · 준비물, 할일 (선택)" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
+        <button onClick="{{ addEvCl }}" style="background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;">+ 추가</button>
+      </div>
       <div style="display:flex;gap:8px;margin-bottom:10px;">
         <input value="{{ f.evTime }}" onChange="{{ on.evTime }}" type="time" style="width:110px;box-sizing:border-box;padding:11px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
+        <button onClick="{{ toggleEvImp }}" style="background:{{ evImpBg }};color:{{ evImpFg }};border:1px solid {{ evImpBd }};border-radius:12px;padding:11px 14px;font-size:13px;font-weight:800;cursor:pointer;">❗ 중요</button>
       </div>
       <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:6px;">참여하는 사람 · 여러 명 선택 가능</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
@@ -2199,12 +2245,24 @@ input,button,textarea,select{font-family:inherit;}
       <sc-if value="{{ dayEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--sub,#8A8177);padding:4px 0 8px;">일정이 없어요. 여유로운 하루! ☁️</div></sc-if>
       <div style="display:flex;flex-direction:column;gap:8px;">
         <sc-for list="{{ dayEventsV }}" as="ev" hint-placeholder-count="2">
-          <div onClick="{{ ev.open }}" style="display:flex;align-items:center;gap:10px;background:var(--bg,#FAF6EF);border-radius:14px;padding:11px 12px;cursor:pointer;">
-            <span style="width:4px;height:26px;border-radius:4px;background:{{ ev.c }};"></span>
-            <span style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);min-width:38px;">{{ ev.time }}</span>
-            <span style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;"><span style="font-size:14px;font-weight:700;">{{ ev.title }}</span><sc-if value="{{ ev.hasMemo }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;color:var(--sub,#8A8177);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ev.memo }}</span></sc-if></span>
-            <span style="font-size:11px;font-weight:700;color:{{ ev.c }};">{{ ev.who }}</span>
-            <sc-if value="{{ ev.canEdit }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--sub,#8A8177);">✎ 수정</span><button onClick="{{ ev.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:14px;cursor:pointer;padding:2px;">✕</button></sc-if>
+          <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:11px 12px;">
+            <div onClick="{{ ev.open }}" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <span style="width:4px;height:26px;border-radius:4px;background:{{ ev.c }};"></span>
+              <span style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);min-width:38px;">{{ ev.time }}</span>
+              <span style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;"><span style="font-size:14px;font-weight:700;"><sc-if value="{{ ev.imp }}" hint-placeholder-val="{{ false }}"><span style="color:#E5484D;font-weight:900;">❗</span></sc-if>{{ ev.title }}</span><sc-if value="{{ ev.hasMemo }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;color:var(--sub,#8A8177);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ev.memo }}</span></sc-if></span>
+              <span style="font-size:11px;font-weight:700;color:{{ ev.c }};">{{ ev.who }}</span>
+              <sc-if value="{{ ev.canEdit }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--sub,#8A8177);">✎ 수정</span><button onClick="{{ ev.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:14px;cursor:pointer;padding:2px;">✕</button></sc-if>
+            </div>
+            <sc-if value="{{ ev.hasCl }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;margin-top:7px;border-top:1px dashed var(--line,#EFE4CF);padding-top:5px;">
+                <sc-for list="{{ ev.clV }}" as="ci" hint-placeholder-count="0">
+                  <button onClick="{{ ci.tog }}" style="display:flex;align-items:center;gap:9px;background:none;border:none;padding:7px 0;cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%;">
+                    <span style="width:19px;height:19px;border-radius:6px;border:2px solid {{ ev.c }};box-sizing:border-box;flex-shrink:0;"></span>
+                    <span style="flex:1;font-size:13px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ci.t }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
         </sc-for>
       </div>
@@ -2885,7 +2943,7 @@ class Component extends DCLogic {
   renderVals(){
     const S=this.state,D=S.data;
     if(!D)return{loading:true,noUser:false,hasUser:false,skinBg:'#FAF6EF',skinCard:'#fff',skinAc:'#F59E0B',skinOn:'#fff',skinSoft:'#F7EAD2',skinLine:'#EFE4CF',skinTx:'#3F3A33',skinSub:'#8A8177',f:{},on:{},modalPw:false,modalEvent:false,modalDday:false,modalProfile:false,modalPing:false,hasPings:false,pingsV:[]};
-    const FL=['evTitle','evTime','evMemo','evMember','jSubj','jMin','jText','scSubj','scName','scScore','txDate','txAmt','txCat','txMemo','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','rwName','rwCost','fxName','fxAmt','fxDay','fxCat'];
+    const FL=['evTitle','evTime','evMemo','evClItem','evMember','jSubj','jMin','jText','scSubj','scName','scScore','txDate','txAmt','txCat','txMemo','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','rwName','rwCost','fxName','fxAmt','fxDay','fxCat'];
     const on={};FL.forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     ['qbTitle','qbGoal','qbTries','qbThink','qbCool','qbDate','qbQ','qbA','qbEx','qbNote','qbO1','qbO2','qbO3','qbAiTopic','qbAiN'].forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     const f=S.f,t=this.today(),W=this.won.bind(this);
@@ -2979,13 +3037,24 @@ class Component extends DCLogic {
     V.hasEvMsg=!!S.evMsg;V.evMsg=S.evMsg;
     const dayEvs=(evByDate[S.selDate]||[]).slice().sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
     V.dayEmpty=!dayEvs.length;
+    const clSet=(evId,ciId,done)=>this.mut(d=>{const x=d.events.find(y=>y.id===evId);const ci=x&&(x.cl||[]).find(z=>z.id===ciId);
+      if(ci){ci.dn=done;if(done){ci.db=u.id;ci.da=Date.now();}else{delete ci.db;delete ci.da;}}});
     V.dayEventsV=dayEvs.map(ev=>{const canEdit=!ev.by||ev.by===u.id;
       return{title:ev.t,time:ev.time||'종일',memo:ev.memo||'',hasMemo:!!(ev.memo||'').trim(),c:this.MCOLOR[String(ev.m||'').split(',')[0]]||'#999',who:String(ev.m||'fam').split(',').map(mName).filter(Boolean).join('·'),canEdit,
+      imp:!!ev.imp,hasCl:(ev.cl||[]).some(c=>!c.dn),
+      clV:(ev.cl||[]).filter(c=>!c.dn).map(c=>({t:c.t,tog:e=>{e.stopPropagation();clSet(ev.id,c.id,true);}})),
       open:()=>{if(ev.qid){const qq=this.qFind(D,ev.qid);
         if(qq&&u.role==='kid'&&qq.k===u.id){this.setState({modal:null});this.qOpen(qq);return;}
         if(qq&&u.role!=='kid'){this.setState({modal:null,tab:'parent',pview:'kids',qbKid:qq.k});return;}}
-      if(canEdit)this.setState({modal:{t:'event',id:ev.id},f:{...f,evTitle:ev.t,evTime:ev.time||'',evMemo:ev.memo||'',evMembers:String(ev.m||'fam').split(',')}});else evFlash('🔒 '+(mName(ev.by)||'작성한 사람')+'만 수정할 수 있어요');},
+      if(canEdit)this.setState({modal:{t:'event',id:ev.id},f:{...f,evTitle:ev.t,evTime:ev.time||'',evMemo:ev.memo||'',evMembers:String(ev.m||'fam').split(','),evImp:!!ev.imp,evCl:(ev.cl||[]).map(x=>({...x})),evClItem:''}});else evFlash('🔒 '+(mName(ev.by)||'작성한 사람')+'만 수정할 수 있어요');},
       del:e=>{e.stopPropagation();this.mut(d=>{d.events=d.events.filter(x=>x.id!==ev.id);});}};});
+    const doneCl=[];D.events.forEach(ev=>(ev.cl||[]).forEach(c=>{if(c.dn)doneCl.push({ev,c});}));
+    doneCl.sort((a,b)=>(b.c.da||0)-(a.c.da||0));
+    V.hasDoneCl=doneCl.length>0;V.doneClN=doneCl.length;
+    V.doneClOpen=!!S.doneClOpen;V.doneClArrow=S.doneClOpen?'접기 ▲':'펼치기 ▼';
+    V.toggleDoneCl=()=>this.setState({doneClOpen:!S.doneClOpen});
+    V.doneClV=doneCl.slice(0,30).map(({ev,c})=>({t:c.t,src:ev.t+' · '+this.dShort(ev.d)+(c.db?' · '+mName(c.db):''),
+      undo:()=>clSet(ev.id,c.id,false)}));
     const fdByDay={};D.feed.forEach(po=>{(fdByDay[po.d]=fdByDay[po.d]||[]).push(po);});
     const dayFds=fdByDay[S.selDate]||[];
     V.dayFeedShow=dayFds.length>0;
@@ -3012,11 +3081,19 @@ class Component extends DCLogic {
     V.ddRef=this.ddRef;
     V.ddPrev=()=>this.ddNudge(-1);V.ddNext=()=>this.ddNudge(1);
     V.ddDown=e=>this.ddDrag(e);
-    V.openEvent=()=>this.setState({modal:{t:'event'},f:{...f,evTitle:'',evTime:'',evMemo:'',evMembers:['fam']}});
+    V.openEvent=()=>this.setState({modal:{t:'event'},f:{...f,evTitle:'',evTime:'',evMemo:'',evMembers:['fam'],evImp:false,evCl:[],evClItem:''}});
+    V.toggleEvImp=()=>this.setF('evImp',!f.evImp);
+    V.evImpBg=f.evImp?'#E5484D':'var(--bg,#FAF6EF)';V.evImpFg=f.evImp?'#fff':'var(--sub,#8A8177)';V.evImpBd=f.evImp?'#E5484D':'var(--line,#eee)';
+    V.evHasCl=!!(f.evCl||[]).length;
+    V.evClV=(f.evCl||[]).map((c,i)=>({t:c.t,del:()=>this.setF('evCl',(f.evCl||[]).filter((_,j)=>j!==i))}));
+    V.addEvCl=()=>{const ct=(f.evClItem||'').trim();if(!ct)return;
+      this.setState({f:{...f,evCl:[...(f.evCl||[]),{id:this.uid(),t:ct,dn:false}],evClItem:''}});};
     V.addEvent=()=>{if(!(f.evTitle||'').trim())return;const eid=S.modal&&S.modal.id;
-      this.mut(d=>{if(eid){const x=d.events.find(y=>y.id===eid);if(x){x.t=f.evTitle.trim();x.m=(f.evMembers&&f.evMembers.length)?f.evMembers.join(','):x.m;x.time=f.evTime||'';x.memo=(f.evMemo||'').trim();}}
-        else d.events.push({id:this.uid(),d:S.selDate,t:f.evTitle.trim(),m:(f.evMembers&&f.evMembers.length?f.evMembers:['fam']).join(','),time:f.evTime||'',memo:(f.evMemo||'').trim(),by:u.id});});
-      this.setState({modal:null});};
+      const cl=(f.evCl||[]).slice();const pend=(f.evClItem||'').trim();if(pend)cl.push({id:this.uid(),t:pend,dn:false});
+      const imp=!!f.evImp;
+      this.mut(d=>{if(eid){const x=d.events.find(y=>y.id===eid);if(x){x.t=f.evTitle.trim();x.m=(f.evMembers&&f.evMembers.length)?f.evMembers.join(','):x.m;x.time=f.evTime||'';x.memo=(f.evMemo||'').trim();x.imp=imp;x.cl=cl;}}
+        else d.events.push({id:this.uid(),d:S.selDate,t:f.evTitle.trim(),m:(f.evMembers&&f.evMembers.length?f.evMembers:['fam']).join(','),time:f.evTime||'',memo:(f.evMemo||'').trim(),imp,cl,by:u.id});});
+      this.setState({modal:null});this.clearF(['evClItem']);};
     const selMs=Array.isArray(f.evMembers)&&f.evMembers.length?f.evMembers:['fam'];
     V.memberOptsV=[{v:'fam',label:'👨‍👩‍👧‍👦 가족 모두'},...D.profiles.map(p=>({v:p.id,label:p.emoji+' '+p.name}))].map(o=>{const onSel=selMs.includes(o.v);
       return{...o,bg:onSel?sk.ac:'var(--bg,#FAF6EF)',fg:onSel?sk.on:'inherit',bd:onSel?sk.ac:'var(--line,#eee)',
