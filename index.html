@@ -74,6 +74,9 @@ input,button,textarea,select{font-family:inherit;}
       <div style="font-size:12px;color:var(--sub,#8A8177);">{{ todayLabel }}</div>
     </div>
     <button onClick="{{ goMe }}" style="background:{{ meBtnBg }};border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">⚙️</button>
+    <sc-if value="{{ showDiet }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ goDiet }}" title="다이어트 일기" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">🥗</button>
+    </sc-if>
     <button onClick="{{ openPing }}" style="background:var(--soft,#F7EAD2);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:8px 12px;font-size:12px;font-weight:800;color:var(--tx,#3F3A33);cursor:pointer;">📣 호출</button>
     <button onClick="{{ logout }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:8px 13px;font-size:12px;font-weight:700;color:var(--sub,#8A8177);cursor:pointer;">프로필 전환</button>
   </div>
@@ -975,9 +978,9 @@ input,button,textarea,select{font-family:inherit;}
         </div>
       </sc-if>
       <sc-if value="{{ parentOpen }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;gap:7px;overflow-x:auto;">
+        <div style="display:flex;gap:7px;">
           <sc-for list="{{ pviewsV }}" as="pv" hint-placeholder-count="3">
-            <button onClick="{{ pv.go }}" style="background:{{ pv.bg }};color:{{ pv.fg }};border:1px solid {{ pv.bd }};border-radius:99px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;flex:none;white-space:nowrap;">{{ pv.label }}</button>
+            <button onClick="{{ pv.go }}" style="background:{{ pv.bg }};color:{{ pv.fg }};border:1px solid {{ pv.bd }};border-radius:99px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;">{{ pv.label }}</button>
           </sc-for>
         </div>
 
@@ -3191,6 +3194,8 @@ class Component extends DCLogic {
     V.tabsV=tabs.map(tb=>({...tb,...chip(S.tab===tb.id),go:()=>this.setState({tab:tb.id,pwErr:''})}));
     V.goMe=()=>this.setState({tab:'me',pwErr:'',meMsg:'',f:{...S.f,meName:u.name,meEmoji:u.emoji,mePw:u.pw||''}});
     V.meBtnBg=S.tab==='me'?sk.soft:sk.card;
+    // 다이어트 일기는 같은 저장소의 별도 페이지(diet/)다 — 화면 전환이 아니라 이동
+    V.showDiet=!isKid;V.goDiet=()=>{location.href='diet/';};
     V.tabHome=S.tab==='home';V.tabFeed=S.tab==='feed';V.tabFish=S.tab==='fish'&&!isKid;V.tabMy=(S.tab==='my'||S.tab==='sticker'||S.tab==='money')&&isKid;V.tabParent=S.tab==='parent'&&!isKid;V.tabMe=S.tab==='me';
     // MY SETTINGS (모든 프로필 공통)
     const meFlash=msg=>{this.setState({meMsg:msg});setTimeout(()=>this.setState({meMsg:''}),2500);};
@@ -3663,9 +3668,7 @@ class Component extends DCLogic {
       V.parentLocked=false;
       V.parentOpen=S.tab==='parent';
       V.unlockParent=()=>{if((f.ppw||'')===D.settings.parentPw)this.setState({parentOk:true,pwErr:'',f:{...f,ppw:''}});else this.setState({pwErr:'비밀번호가 틀렸어요 (기본: 0000)'});};
-      V.pviewsV=[{id:'kids',label:'👧 자녀 일정'},{id:'stk',label:'🌟 스티커'},{id:'money',label:'💳 가계부'},{id:'set',label:'⚙️ 설정'}].map(pv=>({...pv,...chip(S.pview===pv.id),go:()=>this.setState({pview:pv.id})}))
-        // 다이어트 일기는 같은 저장소의 별도 페이지(diet/)다 — 화면 전환이 아니라 이동
-        .concat([{id:'diet',label:'🥗 다이어트 일기',...chip(false),go:()=>{location.href='diet/';}}]);
+      V.pviewsV=[{id:'kids',label:'👧 자녀 일정'},{id:'stk',label:'🌟 스티커'},{id:'money',label:'💳 가계부'},{id:'set',label:'⚙️ 설정'}].map(pv=>({...pv,...chip(S.pview===pv.id),go:()=>this.setState({pview:pv.id})}));
       V.pvKids=S.pview==='kids';V.pvMoney=S.pview==='money';V.pvSet=S.pview==='set';V.pvSetOrKids=V.pvKids||V.pvSet;
       V.pvStk=S.pview==='stk';
       V.pErrBal=this.errAvail(D,u.id);
