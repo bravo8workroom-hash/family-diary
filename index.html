@@ -2605,6 +2605,11 @@ class Component extends DCLogic {
 
   componentDidMount(){
     this.qTimer=setInterval(()=>this.qTick(),500);
+    this.feedPaste=async e=>{const S=this.state;if(S.tab!=='feed'||!S.user||S.modal)return;
+      const it=Array.from((e.clipboardData||{}).items||[]).find(x=>x.type&&x.type.indexOf('image/')===0);if(!it)return;
+      e.preventDefault();const file=it.getAsFile();if(!file)return;
+      const url=await window.FamilyStore.putPhoto(await this.compress(file,640));this.setState({feedPhoto:url});};
+    document.addEventListener('paste',this.feedPaste);
     window.FamilyStore.start({
       seed:()=>this.seed(),
       onRemote:doc=>this.setState({data:doc})   // 다른 가족이 바꾸면 화면이 따라 바뀐다
@@ -2624,7 +2629,7 @@ class Component extends DCLogic {
       this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),selDate:t,budSel:t});
     });
   }
-  componentWillUnmount(){if(this.qTimer)clearInterval(this.qTimer);}
+  componentWillUnmount(){if(this.qTimer)clearInterval(this.qTimer);if(this.feedPaste)document.removeEventListener('paste',this.feedPaste);}
   qTick(){const S=this.state;if(!S.data)return;
     if(S.qz&&S.qz.phase==='play'&&!S.qz.fb&&S.qz.deadline&&Date.now()>S.qz.deadline){this.qAnswer(null);return;}
     if(S.qz||(S.tab==='my'&&S.kview==='quiz'))this.setState({now:Date.now()});
