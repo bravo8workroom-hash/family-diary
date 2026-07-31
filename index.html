@@ -2704,8 +2704,18 @@ class Component extends DCLogic {
     const FT=(s,it)=>((it?'italic ':'')+s+'px Jua,"Malgun Gothic",sans-serif');
     const rr=(a,b,w,h,r)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();};
     const fit=(s,f,mw)=>{x.font=f;s=String(s==null?'':s);if(x.measureText(s).width<=mw)return s;while(s.length&&x.measureText(s+'…').width>mw)s=s.slice(0,-1);return s+'…';};
-    const wrap=(s,f,mw,ml)=>{x.font=f;const out=[];let cur='';for(const ch of String(s||'')){if(x.measureText(cur+ch).width>mw&&cur){out.push(cur);cur=ch;}else cur+=ch;}
-      if(cur)out.push(cur);if(out.length>ml){out.length=ml;out[ml-1]=fit(out[ml-1]+'…',f,mw);}return out;};
+    const wrap=(s,f,mw,ml)=>{x.font=f;const out=[];let cur='';
+      for(const w of String(s||'').split(' ')){
+        const cand=cur?cur+' '+w:w;
+        if(x.measureText(cand).width<=mw){cur=cand;continue;}
+        if(cur){out.push(cur);cur='';}
+        if(x.measureText(w).width<=mw){cur=w;continue;}
+        let pc='';for(const ch of w){if(x.measureText(pc+ch).width>mw&&pc){out.push(pc);pc=ch;}else pc+=ch;}
+        cur=pc;}
+      if(cur)out.push(cur);
+      if(out.length>ml){out.length=ml;let ls=out[ml-1];
+        while(ls&&x.measureText(ls+'…').width>mw)ls=ls.slice(0,-1);out[ml-1]=ls+'…';}
+      return out;};
     // 금박 테두리
     let g=x.createLinearGradient(0,0,W,H);
     [[0,'#FFF8D9'],[.14,'#E8C765'],[.27,'#B8892B'],[.38,'#FFF3C4'],[.52,'#D9AE45'],[.66,'#A97C22'],[.78,'#FFEFB8'],[.9,'#CFA03A'],[1,'#8F6A1C']].forEach(s=>g.addColorStop(s[0],s[1]));
@@ -2775,7 +2785,8 @@ class Component extends DCLogic {
     rr(L,237,R-L,66,14);x.fillStyle='rgba(255,255,255,.5)';x.fill();
     x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=1.5;x.stroke();
     x.textAlign='center';x.font=FT(19);x.fillStyle='#B41D12';x.fillText('월척의 기록',180,254);
-    const dl=wrap('“'+(l.diary||'오늘의 손맛을 기록해 보세요.')+'”',FT(12),R-L-24,2);
+    const dl=wrap('“'+(l.diary||'오늘의 손맛을 기록해 보세요.'),FT(12),R-L-32,2);
+    dl[dl.length-1]+='”';
     x.font=FT(12);x.fillStyle='#2F3B47';
     dl.forEach((s2,i)=>x.fillText(s2,180,(dl.length===1?282:275)+i*15));
     x.textAlign='left';
@@ -2800,7 +2811,7 @@ class Component extends DCLogic {
     const env='풍량 '+(l.wind||'-')+' · 파도 '+(l.wave||'-')+' · '+(l.time==='낮'?'☀️ 낮':'🌙 밤');
     x.font=FT(11.5);x.fillStyle='#3D4A57';x.fillText(env,R-10-x.measureText(env).width,381);
     // 포인트 · 날짜
-    x.font=FT(10.5);const when='📅 '+(l.when||'');const whW=x.measureText(when).width+18;
+    x.font=FT(10.5);const when='📅 '+(l.when||(this.dShort(l.d||this.today())+' '+(l.tm||''))).trim();const whW=x.measureText(when).width+18;
     x.fillStyle='rgba(255,255,255,.52)';x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=1.5;
     rr(L,406,R-L-whW-5,26,12);x.fill();x.stroke();
     rr(R-whW,406,whW,26,12);x.fill();x.stroke();
@@ -3446,7 +3457,7 @@ class Component extends DCLogic {
           motto:FMOTTOS[Math.floor(Math.random()*FMOTTOS.length)]},rec);
         this.mut(d=>{d.fishlog=d.fishlog||[];
           d.fishlog.unshift(JSON.parse(JSON.stringify(full)));
-          d.feed.unshift({id:this.uid(),by:u.id,d:t,fcid:nid,txt:'🎣 '+rec.species+' '+rec.len+'cm 낚았다! ('+rec.point+')',photo:rec.photo,
+          d.feed.unshift({id:this.uid(),by:u.id,d:t,fcid:nid,txt:'🎣 '+rec.species+' '+rec.len+'cm 낚았다! ('+rec.point+')',
             likes:{'❤️':0,'👏':0,'😆':0,'🥹':0},comments:[]});});
         done(nid);this.fcPaint(full);};
     }
