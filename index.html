@@ -2122,7 +2122,7 @@ input,button,textarea,select{font-family:inherit;}
         <div style="position:relative;flex:none;height:150px;border-radius:10px;padding:4px;background-image:linear-gradient(160deg,rgba(255,255,255,.72),rgba(234,241,248,.6) 45%,rgba(207,221,233,.6));box-shadow:0 2px 6px rgba(20,50,80,.25),inset 0 0 0 1px rgba(255,255,255,.9);">
           <div style="position:relative;width:100%;height:100%;border-radius:7px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background-image:{{ fcArtBg }};">
             <sc-if value="{{ fcHasPhoto }}" hint-placeholder-val="{{ false }}">
-              <span style="position:absolute;inset:0;background-image:url('{{ fcPhoto }}');background-size:cover;background-position:center;"></span>
+              <span onClick="{{ fcZoomOpen }}" style="position:absolute;inset:0;background-image:url('{{ fcPhoto }}');background-size:cover;background-position:center;cursor:zoom-in;"></span>
             </sc-if>
             <sc-if value="{{ fcNoPhoto }}" hint-placeholder-val="{{ true }}">
               <span style="position:absolute;inset:0;background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.14) 0 10px,rgba(255,255,255,0) 10px 22px);"></span>
@@ -2190,6 +2190,13 @@ input,button,textarea,select{font-family:inherit;}
         <button onClick="{{ fcLike }}" style="flex:1;padding:13px 0;border-radius:24px;cursor:pointer;border:3px solid #fff;background-image:{{ fcLikeBg }};box-shadow:0 5px 0 #D2879A;font-size:15px;color:#A5265A;font-family:inherit;">❤️ 좋아요 {{ fcLikes }}</button>
       </sc-if>
     </div>
+
+    <sc-if value="{{ fcZoomOn }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ fcZoomClose }}" style="position:fixed;inset:0;z-index:60;background:rgba(2,14,30,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;box-sizing:border-box;cursor:zoom-out;">
+        <img src="{{ fcPhoto }}" style="max-width:100%;max-height:82vh;border-radius:16px;border:3px solid rgba(255,255,255,.85);box-shadow:0 18px 40px rgba(0,0,0,.6);">
+        <div style="font-size:13px;color:#CFE3F5;">{{ fcSpecies }} ({{ fcLen }} cm) · 화면을 누르면 닫혀요</div>
+      </div>
+    </sc-if>
   </div>
 </sc-if>
 
@@ -2257,9 +2264,9 @@ input,button,textarea,select{font-family:inherit;}
             <input value="{{ f.kfPoint }}" onChange="{{ on.kfPoint }}" style="width:100%;box-sizing:border-box;padding:10px 11px;font-size:14px;color:#14508C;border:2px solid #B9D6EC;border-radius:12px;background:#fff;outline:none;">
           </div>
           <div style="flex:none;width:132px;">
-            <div style="font-size:13px;color:#4D7BA6;margin-bottom:5px;">📅 일시 (자동)</div>
-            <div style="padding:11px;font-size:13px;color:#5D84A6;border:2px solid #CFE1F0;border-radius:12px;background:#EEF6FD;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ kNowLabel }}</div>
-          </div>
+            <div style="font-size:13px;color:#4D7BA6;margin-bottom:5px;">📅 일시</div>
+            <input type="date" value="{{ f.kfDate }}" onChange="{{ on.kfDate }}" style="width:100%;box-sizing:border-box;padding:9px 8px;font-size:13px;color:#14508C;border:2px solid #B9D6EC;border-radius:12px;background:#fff;outline:none;font-family:inherit;">
+            <input type="time" value="{{ f.kfTm }}" onChange="{{ on.kfTm }}" style="width:100%;box-sizing:border-box;margin-top:5px;padding:9px 8px;font-size:13px;color:#14508C;border:2px solid #B9D6EC;border-radius:12px;background:#fff;outline:none;font-family:inherit;">
         </div>
 
         <div style="margin-top:11px;">
@@ -2567,7 +2574,7 @@ class Component extends DCLogic {
     {n:'볼락',e:'🐡',left:'13%',top:'72%',fs:'30px',ring:'52px',dur:'3.6s',c:'#B8382A',lb:'볼락'},
     {n:'감성돔',e:'',left:'75%',top:'63%',fs:'0px',ring:'64px',dur:'4.4s',c:'#41576B',lb:''}
   ];
-  KGROUPS=[{k:'kfWater',label:'💧 속성',o:['바다','민물']},{k:'kfBait',label:'🪱 미끼',o:['오징어','지렁이','고등어','직접작성']},{k:'kfWind',label:'🌬️ 풍량',o:['약함','보통','강함']},{k:'kfWave',label:'🌊 파도',o:['잔잔','보통','거침']},{k:'kfTime',label:'☀️ 시간대',o:['낮','밤']},{k:'kfSpot',label:'🏝️ 장소 특이점',o:['방파제','해변','기수지역','직접작성']}];
+  KGROUPS=[{k:'kfWater',label:'💧 속성',o:['바다','민물']},{k:'kfBait',label:'🪱 미끼',o:['오징어','지렁이','고등어','직접작성']},{k:'kfWind',label:'🌬️ 풍량',o:['약함','보통','강함']},{k:'kfWave',label:'🌊 파도',o:['잔잔','보통','거침']},{k:'kfTime',label:'☀️ 시간대',o:['낮','밤']},{k:'kfSpot',label:'🏝️ 장소 특이점',o:['방파제','해변','기수지역','직접작성']},{k:'kfRank',label:'👑 등급',o:['기본 단계 🐟','1단계 대물 👑']}];
   tideInfo(){const base=Date.UTC(2000,0,6,18,14);const p=29.530588;const age=((((Date.now()-base)/86400000)%p)+p)%p;const ld=Math.floor(age)+1;const i=(ld+7)%15;return{ld,label:i===0?'조금':i+'물'};}
   ddRef = React.createRef();
   ddNudge(dir){const el=this.ddRef.current;if(!el)return;el.scrollLeft+=dir*126;}
@@ -2692,6 +2699,11 @@ class Component extends DCLogic {
     const x=(d.trades||[]).find(y=>y.id===tr.id);if(x){x.st='done';x.doneD=t;}});}
   clearF(keys){const f={...this.state.f};keys.forEach(k=>delete f[k]);this.setState({f});}
 
+  // 이 기기에서 한 번 맞게 입력한 프로필 비번은 30일간 기억한다 — 30일이 지나거나 비번이 바뀌면 다시 묻는다
+  unlockGet(){try{const m=JSON.parse(localStorage.getItem('famdiary_unlock')||'{}');const now=Date.now();const out={};
+    Object.keys(m).forEach(k=>{const v=m[k];if(v&&v.pw!=null&&now-(v.at||0)<30*86400000)out[k]=v.pw;});return out;}catch(e){return{};}}
+  unlockSet(id,pw){try{const m=JSON.parse(localStorage.getItem('famdiary_unlock')||'{}');m[id]={pw:pw,at:Date.now()};localStorage.setItem('famdiary_unlock',JSON.stringify(m));}catch(e){}}
+
   compress(file,max){return new Promise(res=>{const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.72));};img.src=rd.result;};rd.readAsDataURL(file);});}
 
   // 피싱 카드를 캔버스에 그려 사진(dataURL)으로 만든다 — 피드에 카드 모습 그대로 올리기 위해
@@ -2752,8 +2764,9 @@ class Component extends DCLogic {
     x.strokeStyle='rgba(255,255,255,.88)';x.lineWidth=2;x.stroke();
     x.font='11px sans-serif';x.textAlign='center';x.fillText('💧',R-12,hy+1);x.textAlign='left';
     // 금색 리본
-    const evo=dif>=4?(l.species+' 자어에서 대물로 진화'):('기본 단계 · '+l.species+' 계열');
-    const grade=dif>=4?'1단계 대물 👑':'기본 단계 🐟';
+    const big=l.rank?l.rank==='대물':(dif>=4);
+    const evo=big?(l.species+' 자어에서 대물로 진화'):('기본 단계 · '+l.species+' 계열');
+    const grade=big?'1단계 대물 👑':'기본 단계 🐟';
     x.font=FT(10.5);const gx2=R-(x.measureText(grade).width+25);
     g=x.createLinearGradient(0,53,0,73);g.addColorStop(0,'#FFF4D4');g.addColorStop(.58,'#ECCB74');g.addColorStop(1,'#D0A43C');
     x.fillStyle=g;
@@ -3140,7 +3153,7 @@ class Component extends DCLogic {
   renderVals(){
     const S=this.state,D=S.data;
     if(!D)return{loading:true,noUser:false,hasUser:false,skinBg:'#FAF6EF',skinCard:'#fff',skinAc:'#F59E0B',skinOn:'#fff',skinSoft:'#F7EAD2',skinLine:'#EFE4CF',skinTx:'#3F3A33',skinSub:'#8A8177',f:{},on:{},modalPw:false,modalEvent:false,modalDday:false,modalProfile:false,modalPing:false,hasPings:false,pingsV:[]};
-    const FL=['evTitle','evTime','evMemo','evClItem','evMember','jSubj','jMin','jText','scSubj','scName','scScore','txDate','txAmt','txCat','txMemo','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','rwName','rwCost','fxName','fxAmt','fxDay','fxCat'];
+    const FL=['evTitle','evTime','evMemo','evClItem','evMember','jSubj','jMin','jText','scSubj','scName','scScore','txDate','txAmt','txCat','txMemo','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDate','kfTm','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','rwName','rwCost','fxName','fxAmt','fxDay','fxCat'];
     const on={};FL.forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     ['qbTitle','qbGoal','qbTries','qbThink','qbCool','qbDate','qbQ','qbA','qbEx','qbNote','qbO1','qbO2','qbO3','qbAiTopic','qbAiN'].forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     const f=S.f,t=this.today(),W=this.won.bind(this);
@@ -3171,13 +3184,13 @@ class Component extends DCLogic {
         roleLabel:p.role==='parent'?'부모':'아이',roleBg:p.role==='parent'?'#8B5CF6':mcol(p.id)||'#F59E0B',
         open:()=>{
           if(S.editMode){this.setState({modal:{t:'profile',id:p.id},f:{...S.f,pfName:p.name,pfEmoji:p.emoji,pfPw:p.pw}});return;}
-          if(p.pw)this.setState({modal:{t:'pw',id:p.id},pwErr:'',f:{...S.f,pw:''}});
+          if(p.pw&&this.unlockGet()[p.id]!==p.pw)this.setState({modal:{t:'pw',id:p.id},pwErr:'',f:{...S.f,pw:''}});
           else this.setState({user:p.id,tab:'home',parentOk:false,editMode:false});
         }
       })),
     };
     if(S.modal&&S.modal.t==='pw'){const p=D.profiles.find(x=>x.id===S.modal.id);V.pwName=p.name;V.pwEmoji=p.emoji;
-      V.tryPw=()=>{if((f.pw||'')===p.pw)this.setState({user:p.id,tab:'home',parentOk:false,modal:null,pwErr:'',editMode:false,f:{...f,pw:''}});else this.setState({pwErr:'비밀번호가 틀렸어요 🥲'});};}
+      V.tryPw=()=>{if((f.pw||'')===p.pw){this.unlockSet(p.id,f.pw||'');this.setState({user:p.id,tab:'home',parentOk:false,modal:null,pwErr:'',editMode:false,f:{...f,pw:''}});}else this.setState({pwErr:'비밀번호가 틀렸어요 🥲'});};}
     else{V.pwName='';V.pwEmoji='';V.tryPw=()=>{};}
     if(S.modal&&S.modal.t==='profile'){const pid=S.modal.id;
       V.pickProfilePhoto=async e=>{const file=e.target.files[0];if(!file)return;const url=await this.compress(file,240);this.mut(d=>{d.profiles.find(x=>x.id===pid).photo=url;});};
@@ -3377,9 +3390,9 @@ class Component extends DCLogic {
     V.kAimText=aim?(aim+' 조준 중 — 낚았다! 를 눌러 카드 등록'):'물고기를 눌러 조준해 보세요';
     V.kGo=()=>{const nm=aim||'감성돔';const sp=this.KFISH[nm]||{len:30,diff:3};
       this.setState({modal:{t:'fcatch',id:null},fishPhoto:null,kTarget:null,
-        f:{...f,kfSpecies:nm,kfLen:String(sp.len),kfDiff:sp.diff,kfWater:'바다',kfBait:'지렁이',kfWind:'보통',kfWave:'보통',kfTime:(fhr>=6&&fhr<19)?'낮':'밤',kfSpot:'방파제',kfGear:'릴 낚시 세트',kfPoint:'부산 기장 학리 방파제 (GPS 자동)',kfDiary:'',kfEtc:''}});};
+        f:{...f,kfSpecies:nm,kfLen:String(sp.len),kfDiff:sp.diff,kfWater:'바다',kfBait:'지렁이',kfWind:'보통',kfWave:'보통',kfTime:(fhr>=6&&fhr<19)?'낮':'밤',kfSpot:'방파제',kfGear:'릴 낚시 세트',kfPoint:'부산 기장 학리 방파제 (GPS 자동)',kfDiary:'',kfEtc:'',kfDate:t,kfTm:hhmm(),kfRank:sp.diff>=4?'1단계 대물 👑':'기본 단계 🐟'}});};
     const kSort=KLOG.slice().sort((a,b)=>String(b.d).localeCompare(String(a.d)));
-    const kOpen=id=>()=>this.setState({modal:{t:'fcard',id:id}});
+    const kOpen=id=>()=>this.setState({modal:{t:'fcard',id:id},fcZoom:false});
     V.fBragV=kSort.slice(0,3).map(l=>({icon:kart(l.species).i,artBg:kbg(l.species),photo:l.photo,hasPhoto:!!l.photo,noPhoto:!l.photo,
       species:l.species,len:l.len+'cm',owner:l.by===u.id?'내 카드':byName(l.by).name,
       tag:l.by===u.id?'✏️':'❤️ '+((l.likes||[]).length),tap:kOpen(l.id)}));
@@ -3399,12 +3412,16 @@ class Component extends DCLogic {
     if(S.modal&&S.modal.t==='fcard'){
       const l=KLOG.find(x=>x.id===S.modal.id)||KLOG[0]||{};
       const mine=l.by===u.id;
-      V.fcHeadline=l.diff>=5?'✨ 전설급 대물 카드 ✨':(l.diff>=4?'🔥 희귀 대물 카드':'피싱 카드');
+      const fcBig=l.rank?l.rank==='대물':(l.diff>=4);
+      V.fcHeadline=fcBig?(l.diff>=5?'✨ 전설급 대물 카드 ✨':'🔥 희귀 대물 카드'):'피싱 카드';
       V.fcSpecies=l.species||'';V.fcLen=l.len||'';V.fcWater=l.water||'바다';
       V.fcStars=kstars(l.diff);V.fcIcon=kart(l.species).i;V.fcArtBg=kbg(l.species);
-      V.fcEvo=l.diff>=4?(l.species+' 자어에서 대물로 진화'):('기본 단계 · '+l.species+' 계열');
-      V.fcGrade=l.diff>=4?'1단계 대물 👑':'기본 단계 🐟';
+      V.fcEvo=fcBig?(l.species+' 자어에서 대물로 진화'):('기본 단계 · '+l.species+' 계열');
+      V.fcGrade=fcBig?'1단계 대물 👑':'기본 단계 🐟';
       V.fcPhoto=l.photo;V.fcHasPhoto=!!l.photo;V.fcNoPhoto=!l.photo;
+      V.fcZoomOn=!!S.fcZoom&&!!l.photo;
+      V.fcZoomOpen=()=>this.setState({fcZoom:true});
+      V.fcZoomClose=()=>this.setState({fcZoom:false});
       V.fcDiary=l.diary||'오늘의 손맛을 기록해 보세요.';
       V.fcBait=l.bait||'-';V.fcWind=l.wind||'-';V.fcWave=l.wave||'-';
       V.fcTimeIcon=l.time==='낮'?'☀️ 낮':'🌙 밤';
@@ -3425,7 +3442,8 @@ class Component extends DCLogic {
           f:{...f,kfSpecies:l.species,kfLen:String(l.len),kfDiff:l.diff,kfWater:l.water,
             kfBait:inBait?l.bait:'직접작성',kfSpot:inSpot?l.spot:'직접작성',
             kfEtc:inBait?(inSpot?'':l.spot):l.bait,
-            kfWind:l.wind,kfWave:l.wave,kfTime:l.time,kfGear:l.gear,kfPoint:l.point,kfDiary:l.diary||''}});};
+            kfWind:l.wind,kfWave:l.wave,kfTime:l.time,kfGear:l.gear,kfPoint:l.point,kfDiary:l.diary||'',
+            kfDate:l.d||t,kfTm:l.tm||'',kfRank:(l.rank?l.rank==='대물':(l.diff>=4))?'1단계 대물 👑':'기본 단계 🐟'}});};
     }
     if(S.modal&&S.modal.t==='fcatch'){
       const eid=S.modal.id||null;
@@ -3436,7 +3454,6 @@ class Component extends DCLogic {
       V.kIssueLabel=eid?'수정 완료':'🎴 카드 발급하기';
       V.kArtBg=kbg(f.kfSpecies);V.kArtIcon=kart(f.kfSpecies).i;
       V.kPhoto=S.fishPhoto;V.kHasPhoto=!!S.fishPhoto;V.kNoPhoto=!S.fishPhoto;
-      V.kNowLabel=this.dShort(t)+' '+hhmm();
       V.kStarRow=[1,2,3,4,5].map(n=>({icon:(Number(f.kfDiff)||0)>=n?'⭐':'☆',pick:()=>this.setF('kfDiff',n)}));
       V.kGroupsV=this.KGROUPS.map(g=>({label:g.label,
         optsV:g.o.map(o=>({txt:o,st:f[g.k]===o?ON:OFF,pick:()=>this.setF(g.k,o)}))}));
@@ -3452,9 +3469,11 @@ class Component extends DCLogic {
         const rec={species:sp,len:(f.kfLen||'').trim()||'0',water:f.kfWater||'바다',diff:diff,bait:bait,
           wind:f.kfWind||'보통',wave:f.kfWave||'보통',time:f.kfTime||'밤',spot:spot,
           gear:(f.kfGear||'').trim()||'릴 낚시 세트',point:(f.kfPoint||'').trim()||'GPS 자동 기록',
-          diary:(f.kfDiary||'').trim(),photo:S.fishPhoto||null};
+          diary:(f.kfDiary||'').trim(),photo:S.fishPhoto||null,
+          d:(f.kfDate||'').trim()||t,tm:(f.kfTm||'').trim()||hhmm(),
+          rank:(f.kfRank||'').indexOf('대물')>=0?'대물':'기본'};
         const done=id=>{this.setState({modal:{t:'fcard',id:id},fishPhoto:null});
-          this.clearF(['kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDiff','kfWater','kfBait','kfWind','kfWave','kfTime','kfSpot']);};
+          this.clearF(['kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDiff','kfWater','kfBait','kfWind','kfWave','kfTime','kfSpot','kfDate','kfTm','kfRank']);};
         if(eid){let full=null;
           this.mut(d=>{const x=d.fishlog.find(y=>y.id===eid);if(x){Object.assign(x,rec);full=JSON.parse(JSON.stringify(x));}});
           done(eid);if(full)this.fcPaint(full);return;}
@@ -3465,7 +3484,7 @@ class Component extends DCLogic {
           motto:FMOTTOS[Math.floor(Math.random()*FMOTTOS.length)]},rec);
         this.mut(d=>{d.fishlog=d.fishlog||[];
           d.fishlog.unshift(JSON.parse(JSON.stringify(full)));
-          d.feed.unshift({id:this.uid(),by:u.id,d:t,fcid:nid,txt:'🎣 '+rec.species+' '+rec.len+'cm 낚았다! ('+rec.point+')',
+          d.feed.unshift({id:this.uid(),by:u.id,d:rec.d,fcid:nid,txt:'🎣 '+rec.species+' '+rec.len+'cm 낚았다! ('+rec.point+')',
             likes:{'❤️':0,'👏':0,'😆':0,'🥹':0},comments:[]});});
         done(nid);this.fcPaint(full);};
     }
