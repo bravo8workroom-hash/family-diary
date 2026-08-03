@@ -1110,6 +1110,44 @@ input,button,textarea,select{font-family:inherit;}
                 <div style="flex:1;height:8px;background:var(--bg,#FAF6EF);border-radius:99px;overflow:hidden;"><div style="height:100%;width:{{ ko.pct }}%;background:var(--ac,#F59E0B);border-radius:99px;"></div></div>
                 <span>{{ ko.done }}/{{ ko.total }}</span>
               </div>
+              <sc-if value="{{ ko.hasTds }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;">
+                  <sc-for list="{{ ko.tdListV }}" as="pt" hint-placeholder-count="3">
+                    <sc-if value="{{ pt.viewing }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;align-items:center;gap:6px;background:var(--bg,#FAF6EF);border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;">
+                        <span style="font-size:13px;">{{ pt.emoji }}</span>
+                        <span style="flex:1;min-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pt.title }}</span>
+                        <span style="font-size:11px;font-weight:900;color:var(--ac,#F59E0B);background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px 7px;white-space:nowrap;">{{ pt.rew }}</span>
+                        <span style="font-size:11px;font-weight:900;color:{{ pt.stC }};white-space:nowrap;">{{ pt.st }}</span>
+                        <button onClick="{{ pt.startEdit }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:12px;cursor:pointer;padding:2px 3px;">✎</button>
+                        <button onClick="{{ pt.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:12px;cursor:pointer;padding:2px 3px;">✕</button>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ pt.editing }}" hint-placeholder-val="{{ false }}">
+                      <div style="background:var(--bg,#FAF6EF);border:1px solid var(--ac,#F59E0B);border-radius:12px;padding:9px 10px;">
+                        <input value="{{ pt.edVal }}" onChange="{{ pt.edOn }}" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--line,#eee);border-radius:10px;background:var(--card,#fff);color:inherit;font-size:13px;outline:none;">
+                        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:8px;">
+                          <div style="display:flex;gap:4px;">
+                            <sc-for list="{{ pt.edRsV }}" as="er" hint-placeholder-count="6">
+                              <button onClick="{{ er.pick }}" style="width:26px;height:26px;border-radius:50%;background:{{ er.bg }};border:1.5px solid {{ er.bd }};font-size:13px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;">{{ er.e }}</button>
+                            </sc-for>
+                          </div>
+                          <span style="flex:1;"></span>
+                          <div style="display:flex;align-items:center;gap:2px;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px;">
+                            <button onClick="{{ pt.edRnDec }}" style="width:24px;height:24px;border-radius:50%;border:none;background:none;color:var(--sub,#8A8177);font-size:14px;font-weight:900;cursor:pointer;padding:0;">−</button>
+                            <span style="min-width:30px;text-align:center;font-size:12px;font-weight:900;">×{{ pt.edRn }}</span>
+                            <button onClick="{{ pt.edRnInc }}" style="width:24px;height:24px;border-radius:50%;border:none;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);font-size:14px;font-weight:900;cursor:pointer;padding:0;">+</button>
+                          </div>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-top:8px;">
+                          <button onClick="{{ pt.save }}" style="flex:1;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:10px;padding:9px 0;font-size:12px;font-weight:800;cursor:pointer;">저장</button>
+                          <button onClick="{{ pt.cancel }}" style="flex:1;background:var(--card,#fff);color:var(--sub,#8A8177);border:1px solid var(--line,#EFE4CF);border-radius:10px;padding:9px 0;font-size:12px;font-weight:800;cursor:pointer;">취소</button>
+                        </div>
+                      </div>
+                    </sc-if>
+                  </sc-for>
+                </div>
+              </sc-if>
               <div style="font-size:13px;font-weight:700;color:var(--sub,#8A8177);">이번 주 공부 <b style="color:var(--tx,#3F3A33);">{{ ko.weekMin }}분</b> · 최근 점수 <b style="color:var(--tx,#3F3A33);">{{ ko.lastScore }}</b></div>
               <sc-if value="{{ ko.hasJ }}" hint-placeholder-val="{{ false }}">
                 <div style="background:var(--bg,#FAF6EF);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.5;margin-top:10px;color:var(--sub,#8A8177);"><b style="color:var(--tx,#3F3A33);">최근 공부일기</b> · {{ ko.lastJ }}</div>
@@ -4095,6 +4133,24 @@ class Component extends DCLogic {
           hasAppr:kAppr.length>0,apprV:kAppr.map(x=>({title:x.title,rew:(x.rs||'🌟')+(Number(x.rn||1)>1?' ×'+x.rn:''),date:this.dShort(x.d),ok:()=>this.apprOk(x.id),no:()=>this.apprNo(x.id)})),
           hasStHist:stHist.length>0,stHistV:stHist.slice(0,histOpen?40:5).map(x=>({date:this.dShort(x.d),txt:x.txt,amt:x.amt,c:x.c})),
           histMore:stHist.length>5,histArrow:histOpen?'접기 ▴':'더보기 ▾',histToggle:()=>this.setState({stHistOpen:histOpen?'':kp.id}),
+          hasTds:tds.length>0,
+          tdListV:tds.map(td=>{const dn=!!ck[td.id];const pend=(D.appr||[]).some(x=>x.tag==='td_'+td.id+'_'+t);
+            const rs=td.rs||'🌟',rn=Math.max(1,Number(td.rn||1));const ed=S.ptdEdit===td.id;
+            return{emoji:td.e,title:td.t,rew:rn>1?rs+' ×'+rn:rs,
+              st:pend?'⏳ 확인 대기':(dn?'오늘 ✓':'미완'),stC:pend?'#E0654F':(dn?'#3FA45B':sk.sub),
+              viewing:!ed,editing:ed,
+              edVal:f['ptt_'+td.id]!==undefined?f['ptt_'+td.id]:td.t,edOn:e=>this.setF('ptt_'+td.id,e.target.value),
+              edRsV:this.STK.slice(0,6).map(e=>({e,bg:(f['ptrs_'+td.id]||rs)===e?sk.soft:sk.card,bd:(f['ptrs_'+td.id]||rs)===e?sk.ac:sk.line,pick:()=>this.setF('ptrs_'+td.id,e)})),
+              edRn:Math.max(1,Number(f['ptrn_'+td.id]||rn)),
+              edRnDec:()=>this.setF('ptrn_'+td.id,Math.max(1,Math.max(1,Number(f['ptrn_'+td.id]||rn))-1)),
+              edRnInc:()=>this.setF('ptrn_'+td.id,Math.min(9,Math.max(1,Number(f['ptrn_'+td.id]||rn))+1)),
+              startEdit:()=>this.setState({ptdEdit:td.id,f:{...f,['ptt_'+td.id]:td.t,['ptrs_'+td.id]:rs,['ptrn_'+td.id]:String(rn)}}),
+              cancel:()=>this.setState({ptdEdit:''}),
+              save:()=>{const t2=(f['ptt_'+td.id]||'').trim();if(!t2)return;const rs2=f['ptrs_'+td.id]||rs,rn2=Math.max(1,Number(f['ptrn_'+td.id]||rn));
+                this.mut(d=>{const e2=d.todos.find(y=>y.id===td.id);if(e2){e2.t=t2;e2.rs=rs2;e2.rn=rn2;}
+                  (d.appr||[]).forEach(a=>{if(a.td===td.id){a.title=t2;a.rs=rs2;a.rn=rn2;}});});
+                this.setState({ptdEdit:''});},
+              del:()=>{if(S.ptdEdit===td.id)this.setState({ptdEdit:''});this.mut(d=>{d.todos=d.todos.filter(x=>x.id!==td.id);d.appr=(d.appr||[]).filter(x=>x.td!==td.id);});}};}),
           openTodo:()=>this.setState({modal:{t:'ptodo',kid:kp.id}}),
           openStick:()=>this.setState({modal:{t:'pstick',kid:kp.id}}),
           openMoney:()=>this.setState({modal:{t:'pmoney',kid:kp.id}}),
