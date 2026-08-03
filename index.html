@@ -244,6 +244,7 @@ input,button,textarea,select{font-family:inherit;}
                 <button onClick="{{ go.ok }}" style="flex:1;background:{{ go.okBg }};color:{{ go.okFg }};border:1px solid {{ go.okBd }};border-radius:10px;padding:9px 0;font-size:12px;font-weight:800;cursor:pointer;">● 성공</button>
                 <button onClick="{{ go.no }}" style="flex:1;background:{{ go.noBg }};color:{{ go.noFg }};border:1px solid {{ go.noBd }};border-radius:10px;padding:9px 0;font-size:12px;font-weight:800;cursor:pointer;">○ 미완료</button>
               </div>
+              <button onClick="{{ go.shCycle }}" title="누를 때마다 나만 보기 → 요약만 공유 → 메모까지 공유로 바뀌어요" style="width:100%;box-sizing:border-box;background:{{ go.shBg }};color:{{ go.shFg }};border:1px solid {{ go.shBd }};border-radius:10px;padding:9px;margin-top:6px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;min-height:38px;">{{ go.shLbl }}</button>
             </div>
           </sc-for>
           <sc-if value="{{ goEmptyBtn }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goFormToggle }}" style="width:100%;box-sizing:border-box;background:var(--bg,#FAF6EF);border:1.5px dashed var(--line,#EFE4CF);border-radius:14px;padding:14px;font-size:13px;font-weight:800;color:var(--sub,#8A8177);cursor:pointer;">🎯 첫 목표 만들기</button></sc-if>
@@ -518,6 +519,14 @@ input,button,textarea,select{font-family:inherit;}
           <button onClick="{{ addFeed }}" style="flex:1;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:800;cursor:pointer;">올리기</button>
         </div>
       </div>
+      <button onClick="{{ goFamGoals }}" style="width:100%;box-sizing:border-box;display:flex;align-items:center;gap:12px;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:14px 16px;cursor:pointer;text-align:left;color:var(--tx,#3F3A33);font-family:inherit;min-height:44px;">
+        <span style="width:38px;height:38px;border-radius:12px;background:var(--soft,#F7EAD2);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;">🎯</span>
+        <span style="flex:1;min-width:0;">
+          <span style="display:block;font-size:14px;font-weight:800;">가족들 목표 보러가기</span>
+          <span style="display:block;font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.6;margin-top:2px;">가족이 공유한 목표와 기록을 볼 수 있어요</span>
+        </span>
+        <span style="font-size:16px;color:var(--sub,#8A8177);flex-shrink:0;">→</span>
+      </button>
       <sc-for list="{{ feedV }}" as="po" hint-placeholder-count="2">
         <div style="position:relative;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
           <sc-for list="{{ po.stkV }}" as="fs" hint-placeholder-count="0">
@@ -594,6 +603,73 @@ input,button,textarea,select{font-family:inherit;}
           <div style="display:flex;gap:6px;margin-top:10px;">
             <input value="{{ po.cmVal }}" onChange="{{ po.cmOn }}" placeholder="댓글 달기..." style="flex:1;box-sizing:border-box;padding:8px 12px;border:1px solid var(--line,#EFE4CF);border-radius:99px;font-size:13px;font-family:inherit;background:var(--bg,#FAF6EF);color:inherit;outline:none;">
             <button onClick="{{ po.cmAdd }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;">{{ po.cmBtn }}</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ tabGoals }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="가족들의 목표" style="padding:0 16px;display:flex;flex-direction:column;gap:14px;">
+      <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
+        <button onClick="{{ famBack }}" style="background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:7px 13px;font-size:12px;font-weight:800;color:var(--sub,#8A8177);cursor:pointer;font-family:inherit;min-height:34px;">← 피드로</button>
+        <div style="font-size:16px;font-weight:800;margin-top:12px;">🎯 가족들의 목표</div>
+        <div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.7;margin-top:5px;">공유를 켠 목표만 여기에 보여요. 내 목표는 홈의 <b>나의 목표</b>에서 공유 버튼을 눌러 <b>나만 보기 → 요약만 → 메모까지</b> 중에 고를 수 있어요.</div>
+      </div>
+      <sc-if value="{{ famEmpty }}" hint-placeholder-val="{{ true }}">
+        <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:26px 18px;text-align:center;">
+          <div style="font-size:34px;">🌱</div>
+          <div style="font-size:13px;font-weight:800;margin-top:10px;">아직 공유된 목표가 없어요</div>
+          <div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.7;margin-top:6px;">홈의 나의 목표에서 🔒 버튼을 눌러 공유를 켜면 가족이 볼 수 있어요.</div>
+        </div>
+      </sc-if>
+      <sc-for list="{{ famGroupsV }}" as="fg" hint-placeholder-count="2">
+        <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:32px;height:32px;border-radius:50%;background:var(--soft,#F7EAD2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">{{ fg.emoji }}</span>
+            <span style="flex:1;font-size:14px;font-weight:800;min-width:0;">{{ fg.name }}</span>
+            <sc-if value="{{ fg.isMe }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:800;color:var(--ac,#F59E0B);background:var(--soft,#F7EAD2);border-radius:99px;padding:4px 10px;white-space:nowrap;">나</span></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+            <sc-for list="{{ fg.fgoalsV }}" as="fgo" hint-placeholder-count="1">
+              <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="flex:1;font-size:14px;font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ fgo.title }}</span>
+                  <sc-if value="{{ fgo.hasDd }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:900;color:var(--ac,#F59E0B);background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:3px 9px;white-space:nowrap;">⏳ {{ fgo.dd }}</span></sc-if>
+                </div>
+                <sc-if value="{{ fgo.hasDots }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+                    <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">
+                      <sc-for list="{{ fgo.dots }}" as="fd" hint-placeholder-count="5">
+                        <span style="width:13px;height:13px;border-radius:99px;background:{{ fd.bg }};border:1.5px solid {{ fd.bd }};box-sizing:border-box;flex-shrink:0;"></span>
+                      </sc-for>
+                    </div>
+                    <span style="font-size:11px;font-weight:900;white-space:nowrap;color:var(--sub,#8A8177);font-variant-numeric:tabular-nums;"><b style="color:var(--ac,#F59E0B);">성공 {{ fgo.okN }}</b> / 미완료 {{ fgo.noN }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ fgo.summaryOnly }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-top:9px;">👀 요약만 공유한 목표예요 (메모는 비공개)</div>
+                </sc-if>
+                <sc-if value="{{ fgo.canOpen }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ fgo.toggle }}" style="width:100%;box-sizing:border-box;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:10px;padding:9px;margin-top:10px;font-size:12px;font-weight:800;color:var(--sub,#8A8177);cursor:pointer;font-family:inherit;min-height:38px;">📖 날짜별 기록·메모 보기 ▾</button>
+                </sc-if>
+                <sc-if value="{{ fgo.memoOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">
+                    <sc-if value="{{ fgo.memoEmpty }}" hint-placeholder-val="{{ false }}">
+                      <div style="background:var(--card,#fff);border-radius:10px;padding:14px;text-align:center;font-size:12px;font-weight:700;color:var(--sub,#8A8177);">아직 기록이 없어요</div>
+                    </sc-if>
+                    <sc-for list="{{ fgo.memosV }}" as="fm" hint-placeholder-count="3">
+                      <div style="background:var(--card,#fff);border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:flex-start;">
+                        <span style="min-width:52px;font-size:12px;font-weight:900;color:var(--sub,#8A8177);flex-shrink:0;">{{ fm.date }}</span>
+                        <span style="font-size:12px;font-weight:900;color:{{ fm.stC }};white-space:nowrap;flex-shrink:0;">{{ fm.st }}</span>
+                        <sc-if value="{{ fm.hasMemo }}" hint-placeholder-val="{{ true }}"><span style="flex:1;font-size:12px;font-weight:700;line-height:1.65;min-width:0;">{{ fm.memo }}</span></sc-if>
+                      </div>
+                    </sc-for>
+                    <button onClick="{{ fgo.toggle }}" style="width:100%;box-sizing:border-box;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:10px;padding:9px;font-size:12px;font-weight:800;color:var(--sub,#8A8177);cursor:pointer;font-family:inherit;min-height:38px;">닫기 ▴</button>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
           </div>
         </div>
       </sc-for>
@@ -3547,7 +3623,7 @@ class Component extends DCLogic {
     V.meBtnBg=S.tab==='me'?sk.soft:sk.card;
     // 다이어트 일기는 같은 저장소의 별도 페이지(diet/)다 — 화면 전환이 아니라 이동
     V.showDiet=u.id==='mom';V.goDiet=()=>{location.href='diet/';};
-    V.tabHome=S.tab==='home';V.tabFeed=S.tab==='feed';V.tabFish=S.tab==='fish'&&!isKid;V.tabMy=(S.tab==='my'||S.tab==='sticker'||S.tab==='money')&&isKid;V.tabParent=S.tab==='parent'&&!isKid;V.tabMe=S.tab==='me';
+    V.tabHome=S.tab==='home';V.tabFeed=S.tab==='feed';V.tabFish=S.tab==='fish'&&!isKid;V.tabMy=(S.tab==='my'||S.tab==='sticker'||S.tab==='money')&&isKid;V.tabParent=S.tab==='parent'&&!isKid;V.tabMe=S.tab==='me';V.tabGoals=S.tab==='goals';
     // MY SETTINGS (모든 프로필 공통)
     const meFlash=msg=>{this.setState({meMsg:msg});setTimeout(()=>this.setState({meMsg:''}),2500);};
     V.pickMePhoto=async e=>{const file=e.target.files[0];if(!file)return;e.target.value='';const url=await this.compress(file,240);this.mut(d=>{d.profiles.find(p=>p.id===u.id).photo=url;});meFlash('📷 프로필 사진을 바꿨어요!');};
@@ -3920,6 +3996,28 @@ class Component extends DCLogic {
       this.mut(d=>{d.goals=d.goals||[];if(d.goals.filter(x=>x.k===u.id).length>=3)return;
         d.goals.push({id:this.uid(),k:u.id,t:gt,dd:f.goDate||'',start:t,m:{}});});
       this.clearF(['goTitle','goDate']);this.setState({goAdd:false});};
+
+    // FAMILY GOALS — 피드에서 들어가는 별도 화면. 공유를 켠 목표만 보인다 (1=요약만, 2=메모까지)
+    V.goFamGoals=()=>this.setState({tab:'goals',fgOpen:null});
+    V.famBack=()=>this.setState({tab:'feed'});
+    const shGoals=(D.goals||[]).filter(g=>Number(g.sh||0)>0);
+    V.famEmpty=!shGoals.length;
+    V.famGroupsV=D.profiles.filter(p=>shGoals.some(g=>g.k===p.id)).map(p=>({
+      name:p.name,emoji:p.emoji,isMe:p.id===u.id,
+      fgoalsV:shGoals.filter(g=>g.k===p.id).map(g=>{
+        const gm=g.m||{},gn=g.n||{};
+        const days=Object.keys(gm).sort();
+        const full=Number(g.sh)===2,open=S.fgOpen===g.id;
+        const mdays=full?[...new Set([...Object.keys(gm),...Object.keys(gn)])].sort().reverse():[];
+        return{title:g.t,hasDd:!!g.dd,dd:g.dd?ddCalc(g.dd):'',
+          okN:days.filter(ds=>gm[ds]===1).length,noN:days.filter(ds=>gm[ds]===2).length,
+          hasDots:days.length>0,dots:days.slice(-70).map(ds=>({bg:gm[ds]===1?sk.ac:'transparent',bd:gm[ds]===1?sk.ac:sk.sub})),
+          summaryOnly:!full,canOpen:full&&!open,memoOpen:full&&open,
+          toggle:()=>this.setState({fgOpen:open?null:g.id}),
+          memoEmpty:full&&open&&!mdays.length,
+          memosV:mdays.map(ds=>({date:this.dShort(ds),hasMemo:!!gn[ds],memo:gn[ds]||'',
+            st:gm[ds]===1?'● 성공':(gm[ds]===2?'○ 미완료':'· 기록 없음'),stC:gm[ds]===1?sk.ac:sk.sub}))};
+      })}));
 
     // 목표 자세히 모달 — 날짜별 성공/미완료 + 메모 열람·수정·추가 (메모는 g.n={날짜:내용})
     V.modalGoal=!!(S.modal&&S.modal.t==='goal');
