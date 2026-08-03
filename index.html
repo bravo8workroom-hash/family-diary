@@ -2366,7 +2366,7 @@ input,button,textarea,select{font-family:inherit;}
         <span><b style="color:#E0654F;">{{ tideBigRange }}</b> 사리 — 물살 셈</span>
         <span><b style="color:#4D7BA6;">조금</b> — 물살 약함</span>
       </div>
-      <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);line-height:1.7;margin-top:6px;">달의 주기로 계산한 값이라 실제 물때표와 하루 차이가 날 수 있어요. 만조·간조 시각은 🌊 물때표에서 확인하세요.</div>
+      <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);line-height:1.7;margin-top:6px;">물 수는 음력 날짜로 정해져서 같은 바다 안에서는 어디서나 같아요. 만조·간조 시각은 항구마다 다르니 🌊 물때표에서 확인하세요.</div>
       <button onClick="{{ closeModal }}" style="width:100%;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;margin-top:14px;font-family:inherit;">닫기</button>
     </div>
   </div>
@@ -3032,10 +3032,29 @@ class Component extends DCLogic {
     {id:'west',n:'서해',sub:'인천·태안·군산·목포',s:7}
   ];
   tideRg(id){return this.TIDERG.find(r=>r.id===id)||this.TIDERG[0];}
+  // 삭(신월)이 든 날 = 한국 날짜 일련번호. 천문 계산(Meeus 49장 주요항, 오차 1분 내외)이라 실제 물때표와 어긋나지 않음
+  nmKday(k){const R=Math.PI/180,s=Math.sin,T=k/1236.85,T2=T*T,T3=T2*T,T4=T3*T;
+    let j=2451550.09766+29.530588861*k+0.00015437*T2-0.00000015*T3+0.00000000073*T4;
+    const E=1-0.002516*T-0.0000074*T2,
+      M=(2.5534+29.1053567*k-0.0000014*T2-0.00000011*T3)*R,
+      P=(201.5643+385.81693528*k+0.0107582*T2+0.00001238*T3-0.000000058*T4)*R,
+      F=(160.7108+390.67050284*k-0.0016118*T2-0.00000227*T3+0.000000011*T4)*R,
+      O=(124.7746-1.56375588*k+0.0020672*T2+0.00000215*T3)*R;
+    j+=-0.4072*s(P)+0.17241*E*s(M)+0.01608*s(2*P)+0.01039*s(2*F)+0.00739*E*s(P-M)-0.00514*E*s(P+M)
+      +0.00208*E*E*s(2*M)-0.00111*s(P-2*F)-0.00057*s(P+2*F)+0.00056*E*s(2*P+M)-0.00042*s(3*P)
+      +0.00042*E*s(M+2*F)+0.00038*E*s(M-2*F)-0.00024*E*s(2*P-M)-0.00017*s(O)-0.00007*s(P+2*M)
+      +0.00004*s(2*P-2*F)+0.00004*s(3*M)+0.00003*s(P+M-2*F)+0.00003*s(2*P+2*F)-0.00003*s(P+M+2*F)
+      +0.00003*s(P-M+2*F)-0.00002*s(P-M-2*F)-0.00002*s(3*P+M)+0.00002*s(4*P);
+    j-=69/86400; // 역학시 → 세계시
+    return Math.floor(((j-2440587.5)*86400000+32400000)/86400000);}
+  // 음력 며칠 — 삭이 든 날(한국 시각)이 음력 1일
+  lunarDay(ds){const[y,m,d]=(ds||this.today()).split('-').map(Number);const N=Date.UTC(y,m-1,d)/86400000;
+    let k=Math.round((y+(m-0.5)/12-2000)*12.3685);
+    while(this.nmKday(k)>N)k--;
+    while(this.nmKday(k+1)<=N)k++;
+    return N-this.nmKday(k)+1;}
   // 물때 표기는 지역마다 다름 — 서해는 7물때식(조금 다음날이 무시), 남해·동해·제주는 8물때식
-  tideInfo(ds,rgId){const base=Date.UTC(2000,0,6,18,14);const p=29.530588;
-    const ms=ds?new Date(ds+'T12:00:00').getTime():new Date(this.today()+'T12:00:00').getTime();
-    const age=((((ms-base)/86400000)%p)+p)%p;const ld=Math.floor(age)+1;const i=(ld+7)%15;
+  tideInfo(ds,rgId){const ld=this.lunarDay(ds);const i=(ld+7)%15;
     const west=this.tideRg(rgId).s===7;
     const label=i===0?'조금':(west?(i===1?'무시':(i-1)+'물'):i+'물');
     return{ld,i,label,big:i>=6&&i<=8,small:i===0};}
