@@ -649,8 +649,11 @@ input,button,textarea,select{font-family:inherit;}
           </div>
         </div>
         <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-          <div style="font-size:15px;font-weight:800;">🎯 나의 목표</div>
-          <div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.6;margin-top:4px;">하루 한 칸! 블록을 누르면 <b style="color:var(--ac,#F59E0B);">채움(성공)</b> → <b style="color:#E5484D;">✕(실패)</b> → 빈칸 순서로 바뀌어. 목표는 3개까지!</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="flex:1;font-size:15px;font-weight:800;">🎯 나의 목표</div>
+            <sc-if value="{{ goalPlus }}" hint-placeholder-val="{{ false }}"><button onClick="{{ goFormToggle }}" style="width:28px;height:28px;border-radius:99px;background:var(--soft,#F7EAD2);border:none;color:var(--ac,#F59E0B);font-size:16px;font-weight:900;cursor:pointer;padding:0;line-height:1;">+</button></sc-if>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.6;margin-top:4px;">오늘 해냈으면 <b style="color:var(--ac,#F59E0B);">성공</b>, 아직이면 <b>미완료</b>를 눌러! 하루에 하나씩 동그라미가 쌓여. 목표는 3개까지!</div>
           <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
             <sc-for list="{{ goalsV }}" as="go" hint-placeholder-count="0">
               <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;">
@@ -659,21 +662,25 @@ input,button,textarea,select{font-family:inherit;}
                   <sc-if value="{{ go.hasDd }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:900;color:var(--ac,#F59E0B);background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:3px 9px;white-space:nowrap;">⏳ {{ go.dd }}</span></sc-if>
                   <button onClick="{{ go.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;padding:2px 4px;">✕</button>
                 </div>
-                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:9px;">
-                  <sc-for list="{{ go.cells }}" as="gc" hint-placeholder-count="7">
-                    <button onClick="{{ gc.tap }}" style="width:18px;height:18px;border-radius:5px;background:{{ gc.bg }};border:1.5px solid {{ gc.bd }};color:#fff;font-size:9px;font-weight:900;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">{{ gc.x }}</button>
-                  </sc-for>
-                </div>
-                <div style="display:flex;align-items:center;gap:5px;margin-top:8px;font-size:11px;font-weight:800;color:var(--sub,#8A8177);">
-                  <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--ac,#F59E0B);"></span><span>성공 {{ go.okN }}일</span>
-                  <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#E5484D;margin-left:5px;color:#fff;font-size:7px;font-weight:900;line-height:10px;text-align:center;">✕</span><span>실패 {{ go.noN }}일</span>
-                  <span style="flex:1;text-align:right;font-weight:700;">{{ go.since }}</span>
+                <sc-if value="{{ go.hasDots }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+                    <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">
+                      <sc-for list="{{ go.dots }}" as="gd" hint-placeholder-count="5">
+                        <span style="width:13px;height:13px;border-radius:99px;background:{{ gd.bg }};border:1.5px solid {{ gd.bd }};box-sizing:border-box;flex-shrink:0;"></span>
+                      </sc-for>
+                    </div>
+                    <span style="font-size:11px;font-weight:900;white-space:nowrap;color:var(--sub,#8A8177);"><b style="color:var(--ac,#F59E0B);">성공 {{ go.okN }}</b> / 미완료 {{ go.noN }}</span>
+                  </div>
+                </sc-if>
+                <div style="display:flex;gap:6px;margin-top:10px;">
+                  <button onClick="{{ go.ok }}" style="flex:1;background:{{ go.okBg }};color:{{ go.okFg }};border:1px solid {{ go.okBd }};border-radius:10px;padding:9px 0;font-size:12px;font-weight:800;cursor:pointer;">● 성공</button>
+                  <button onClick="{{ go.no }}" style="flex:1;background:{{ go.noBg }};color:{{ go.noFg }};border:1px solid {{ go.noBd }};border-radius:10px;padding:9px 0;font-size:12px;font-weight:800;cursor:pointer;">○ 미완료</button>
                 </div>
               </div>
             </sc-for>
-            <sc-if value="{{ goalsEmpty }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px;color:var(--sub,#8A8177);">아직 목표가 없어. 아래에서 첫 목표를 만들어 보자!</div></sc-if>
+            <sc-if value="{{ goEmptyBtn }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goFormToggle }}" style="width:100%;box-sizing:border-box;background:var(--bg,#FAF6EF);border:1.5px dashed var(--line,#EFE4CF);border-radius:14px;padding:14px;font-size:13px;font-weight:800;color:var(--sub,#8A8177);cursor:pointer;">🎯 첫 목표 만들기</button></sc-if>
           </div>
-          <sc-if value="{{ goalCanAdd }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ goFormShow }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;gap:6px;margin-top:12px;">
               <input value="{{ f.goTitle }}" onChange="{{ on.goTitle }}" placeholder="새 목표 (예: 아침 운동)" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
               <input value="{{ f.goDate }}" onChange="{{ on.goDate }}" type="date" title="디데이 (선택)" style="width:126px;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:12px;outline:none;">
@@ -1037,8 +1044,11 @@ input,button,textarea,select{font-family:inherit;}
 
         <sc-if value="{{ pvKids }}" hint-placeholder-val="{{ true }}">
           <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-            <div style="font-size:15px;font-weight:800;">🎯 나의 목표</div>
-            <div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.6;margin-top:4px;">하루 한 칸! 블록을 누르면 <b style="color:var(--ac,#F59E0B);">채움(성공)</b> → <b style="color:#E5484D;">✕(실패)</b> → 빈칸 순서로 바뀌어요. 한 사람당 3개까지 만들 수 있어요.</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="flex:1;font-size:15px;font-weight:800;">🎯 나의 목표</div>
+              <sc-if value="{{ goalPlus }}" hint-placeholder-val="{{ false }}"><button onClick="{{ goFormToggle }}" style="width:28px;height:28px;border-radius:99px;background:var(--soft,#F7EAD2);border:none;color:var(--ac,#F59E0B);font-size:16px;font-weight:900;cursor:pointer;padding:0;line-height:1;">+</button></sc-if>
+            </div>
+            <div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.6;margin-top:4px;">오늘 해냈으면 <b style="color:var(--ac,#F59E0B);">성공</b>, 아직이면 <b>미완료</b>를 눌러 기록해요. 하루에 하나씩 동그라미가 쌓여요. 한 사람당 3개까지 만들 수 있어요.</div>
             <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
               <sc-for list="{{ goalsV }}" as="go" hint-placeholder-count="0">
                 <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;">
@@ -1047,21 +1057,25 @@ input,button,textarea,select{font-family:inherit;}
                     <sc-if value="{{ go.hasDd }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:900;color:var(--ac,#F59E0B);background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:3px 9px;white-space:nowrap;">⏳ {{ go.dd }}</span></sc-if>
                     <button onClick="{{ go.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;padding:2px 4px;">✕</button>
                   </div>
-                  <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:9px;">
-                    <sc-for list="{{ go.cells }}" as="gc" hint-placeholder-count="7">
-                      <button onClick="{{ gc.tap }}" style="width:18px;height:18px;border-radius:5px;background:{{ gc.bg }};border:1.5px solid {{ gc.bd }};color:#fff;font-size:9px;font-weight:900;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">{{ gc.x }}</button>
-                    </sc-for>
-                  </div>
-                  <div style="display:flex;align-items:center;gap:5px;margin-top:8px;font-size:11px;font-weight:800;color:var(--sub,#8A8177);">
-                    <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--ac,#F59E0B);"></span><span>성공 {{ go.okN }}일</span>
-                    <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#E5484D;margin-left:5px;color:#fff;font-size:7px;font-weight:900;line-height:10px;text-align:center;">✕</span><span>실패 {{ go.noN }}일</span>
-                    <span style="flex:1;text-align:right;font-weight:700;">{{ go.since }}</span>
+                  <sc-if value="{{ go.hasDots }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+                      <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">
+                        <sc-for list="{{ go.dots }}" as="gd" hint-placeholder-count="5">
+                          <span style="width:13px;height:13px;border-radius:99px;background:{{ gd.bg }};border:1.5px solid {{ gd.bd }};box-sizing:border-box;flex-shrink:0;"></span>
+                        </sc-for>
+                      </div>
+                      <span style="font-size:11px;font-weight:900;white-space:nowrap;color:var(--sub,#8A8177);"><b style="color:var(--ac,#F59E0B);">성공 {{ go.okN }}</b> / 미완료 {{ go.noN }}</span>
+                    </div>
+                  </sc-if>
+                  <div style="display:flex;gap:6px;margin-top:10px;">
+                    <button onClick="{{ go.ok }}" style="flex:1;background:{{ go.okBg }};color:{{ go.okFg }};border:1px solid {{ go.okBd }};border-radius:10px;padding:9px 0;font-size:12px;font-weight:800;cursor:pointer;">● 성공</button>
+                    <button onClick="{{ go.no }}" style="flex:1;background:{{ go.noBg }};color:{{ go.noFg }};border:1px solid {{ go.noBd }};border-radius:10px;padding:9px 0;font-size:12px;font-weight:800;cursor:pointer;">○ 미완료</button>
                   </div>
                 </div>
               </sc-for>
-              <sc-if value="{{ goalsEmpty }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px;color:var(--sub,#8A8177);">아직 목표가 없어요. 아래에서 첫 목표를 만들어 보세요!</div></sc-if>
+              <sc-if value="{{ goEmptyBtn }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goFormToggle }}" style="width:100%;box-sizing:border-box;background:var(--bg,#FAF6EF);border:1.5px dashed var(--line,#EFE4CF);border-radius:14px;padding:14px;font-size:13px;font-weight:800;color:var(--sub,#8A8177);cursor:pointer;">🎯 첫 목표 만들기</button></sc-if>
             </div>
-            <sc-if value="{{ goalCanAdd }}" hint-placeholder-val="{{ true }}">
+            <sc-if value="{{ goFormShow }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;gap:6px;margin-top:12px;">
                 <input value="{{ f.goTitle }}" onChange="{{ on.goTitle }}" placeholder="새 목표 (예: 저녁 산책)" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
                 <input value="{{ f.goDate }}" onChange="{{ on.goDate }}" type="date" title="디데이 (선택)" style="width:126px;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:12px;outline:none;">
@@ -3797,29 +3811,32 @@ class Component extends DCLogic {
           if(eid){const c2=p2.comments.find(x=>x.id===eid);if(c2)c2.txt=txt;}else p2.comments.push({id:this.uid(),by:u.id,txt,d:t});});
         if(eid)this.setState({cmEdit:null});this.clearF([ck]);}};});
 
-    // GOALS — 각자 방 홈의 목표·체크 패널. 한 사람당 3개까지, 블록을 누르면 빈칸→성공→실패 순환
+    // GOALS — 각자 방 홈의 목표·체크 패널. 한 사람당 3개까지, 성공/미완료 버튼으로 오늘을 기록 (같은 버튼 다시 누르면 취소)
     const myGoals=(D.goals||[]).filter(g=>g.k===u.id);
     V.goalsV=myGoals.map(g=>{
       const gm=g.m||{};
-      const total=Math.round((new Date(t+'T00:00:00')-new Date(g.start+'T00:00:00'))/86400000)+1;
-      const n=Math.max(1,Math.min(total,140)); // 오래된 목표는 최근 140일 창만 그린다
-      const cells=[];
-      for(let i=n-1;i>=0;i--){const ds=this.rel(-i);const v=gm[ds]||0;
-        cells.push({x:v===2?'✕':'',bg:v===1?sk.ac:(v===2?'#E5484D':sk.bg),bd:ds===t?sk.tx:(v===1?sk.ac:(v===2?'#E5484D':sk.line)),
-          tap:()=>this.mut(d=>{const x2=(d.goals||[]).find(y=>y.id===g.id);if(!x2)return;x2.m=x2.m||{};
-            const nx=((x2.m[ds]||0)+1)%3;if(nx)x2.m[ds]=nx;else delete x2.m[ds];})});}
-      const okN=Object.keys(gm).filter(ds=>gm[ds]===1).length;
-      const noN=Object.keys(gm).filter(ds=>gm[ds]===2).length;
-      return{title:g.t,hasDd:!!g.dd,dd:g.dd?ddCalc(g.dd):'',since:this.dShort(g.start)+' 시작',okN,noN,cells,
+      const days=Object.keys(gm).sort();
+      const okN=days.filter(ds=>gm[ds]===1).length;
+      const noN=days.filter(ds=>gm[ds]===2).length;
+      const dots=days.slice(-70).map(ds=>({bg:gm[ds]===1?sk.ac:'transparent',bd:gm[ds]===1?sk.ac:sk.sub})); // 최근 70개 기록만 그린다
+      const cur=gm[t]||0;
+      const mark=v=>this.mut(d=>{const x2=(d.goals||[]).find(y=>y.id===g.id);if(!x2)return;x2.m=x2.m||{};
+        if(x2.m[t]===v)delete x2.m[t];else x2.m[t]=v;});
+      return{title:g.t,hasDd:!!g.dd,dd:g.dd?ddCalc(g.dd):'',okN,noN,dots,hasDots:days.length>0,
+        ok:()=>mark(1),no:()=>mark(2),
+        okBg:cur===1?sk.ac:sk.card,okFg:cur===1?sk.on:sk.tx,okBd:cur===1?sk.ac:sk.line,
+        noBg:cur===2?sk.soft:sk.card,noFg:cur===2?sk.tx:sk.sub,noBd:cur===2?sk.sub:sk.line,
         del:()=>this.mut(d=>{d.goals=(d.goals||[]).filter(y=>y.id!==g.id);})};
     });
-    V.goalsEmpty=!myGoals.length;
-    V.goalCanAdd=myGoals.length<3;
+    V.goEmptyBtn=!myGoals.length&&!S.goAdd;
+    V.goalPlus=myGoals.length>0&&myGoals.length<3;
+    V.goFormShow=!!S.goAdd&&myGoals.length<3;
+    V.goFormToggle=()=>this.setState({goAdd:!S.goAdd});
     V.goalFull=myGoals.length>=3;
     V.addGoal=()=>{const gt=(f.goTitle||'').trim();if(!gt||myGoals.length>=3)return;
       this.mut(d=>{d.goals=d.goals||[];if(d.goals.filter(x=>x.k===u.id).length>=3)return;
         d.goals.push({id:this.uid(),k:u.id,t:gt,dd:f.goDate||'',start:t,m:{}});});
-      this.clearF(['goTitle','goDate']);};
+      this.clearF(['goTitle','goDate']);this.setState({goAdd:false});};
 
     // KID SPACE
     if(isKid){
