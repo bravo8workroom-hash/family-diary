@@ -1079,7 +1079,7 @@ input,button,textarea,select{font-family:inherit;}
                 <span style="flex:1;"></span>
                 <div style="text-align:right;">
                   <div style="font-size:13px;font-weight:800;color:var(--ac,#F59E0B);">🌟 {{ ko.stickers }}개</div>
-                  <div style="font-size:10px;font-weight:700;color:var(--sub,#8A8177);">받음 {{ ko.stEarned }} · 사용 {{ ko.stSpent }}</div>
+                  <button onClick="{{ ko.openStHist }}" style="display:block;margin-left:auto;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px 8px;cursor:pointer;font-size:10px;font-weight:700;color:var(--sub,#8A8177);">받음 {{ ko.stEarned }} · 사용 {{ ko.stSpent }} ▸</button>
                 </div>
               </div>
               <sc-if value="{{ ko.hasStTypesK }}" hint-placeholder-val="{{ false }}">
@@ -2119,6 +2119,38 @@ input,button,textarea,select{font-family:inherit;}
         <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">취소</button>
         <button onClick="{{ pmStkSend }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">💌 보내기</button>
       </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ modalPStHist }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
+    <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">🌟 {{ pmEmoji }} {{ pmName }} 스티커 월별 기록</div>
+      <div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:12px;">지금까지 받음 <b style="color:#3FA45B;">{{ pmStEarned }}개</b> · 사용 <b style="color:#E0654F;">{{ pmStSpent }}개</b> · 남음 <b style="color:var(--tx,#3F3A33);">{{ pmStickers }}개</b></div>
+      <sc-if value="{{ pmHistEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:20px;text-align:center;font-size:13px;font-weight:700;color:var(--sub,#8A8177);margin-bottom:14px;">아직 스티커 기록이 없어요</div>
+      </sc-if>
+      <div style="max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+        <sc-for list="{{ pmHistMonV }}" as="hm" hint-placeholder-count="2">
+          <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:10px 12px;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:900;margin-bottom:6px;">
+              <span style="flex:1;">{{ hm.m }}</span>
+              <span style="color:#3FA45B;">받음 {{ hm.inN }}개</span><span style="color:var(--sub,#8A8177);">·</span><span style="color:#E0654F;">사용 {{ hm.outN }}개</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <sc-for list="{{ hm.items }}" as="hi" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;">
+                  <span style="min-width:38px;color:var(--sub,#8A8177);flex-shrink:0;">{{ hi.date }}</span>
+                  <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ hi.txt }}</span>
+                  <span style="font-weight:900;color:{{ hi.c }};">{{ hi.amt }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <button onClick="{{ closeModal }}" style="width:100%;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">닫기</button>
     </div>
   </div>
 </sc-if>
@@ -4049,6 +4081,7 @@ class Component extends DCLogic {
           openTodo:()=>this.setState({modal:{t:'ptodo',kid:kp.id}}),
           openStick:()=>this.setState({modal:{t:'pstick',kid:kp.id}}),
           openMoney:()=>this.setState({modal:{t:'pmoney',kid:kp.id}}),
+          openStHist:()=>this.setState({modal:{t:'psthist',kid:kp.id}}),
           stEarned:kEarned,stSpent:kSpent,stTypesK,hasStTypesK:stTypesK.length>0,
           hasStMon:stMonV.length>0,stMonV,
           hasTrK:kTr.length>0,trKV:kTr.slice(0,6).map(x=>{const gives=x.giver===kp.id;const other=byName(gives?x.doer:x.giver);const mt=this.trMeta(x.st,sk);
@@ -4071,7 +4104,7 @@ class Component extends DCLogic {
             this.clearF(['sa_'+kp.id,'saStk_'+kp.id]);setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),2500);}};});
       const pmKid=kids.find(x=>x.id===(S.modal&&S.modal.kid));
       const pmi=pmKid?V.kidsOV[kids.indexOf(pmKid)]:null;
-      V.modalPTodo=!!(pmi&&S.modal.t==='ptodo');V.modalPStick=!!(pmi&&S.modal.t==='pstick');V.modalPMoney=!!(pmi&&S.modal.t==='pmoney');
+      V.modalPTodo=!!(pmi&&S.modal.t==='ptodo');V.modalPStick=!!(pmi&&S.modal.t==='pstick');V.modalPMoney=!!(pmi&&S.modal.t==='pmoney');V.modalPStHist=!!(pmi&&S.modal.t==='psthist');
       if(pmi){V.pmName=pmKid.name;V.pmEmoji=pmKid.emoji;
         V.pmTodoVal=pmi.ptVal;V.pmTodoOn=pmi.ptOn;V.pmRsV=pmi.rsV;V.pmRnVal=pmi.rnVal;V.pmRnDec=pmi.rnDec;V.pmRnInc=pmi.rnInc;
         V.pmTodoAdd=()=>{if(!(f['pt_'+pmKid.id]||'').trim())return;pmi.ptAdd();this.setState({modal:null});};
@@ -4080,6 +4113,16 @@ class Component extends DCLogic {
         V.pmBnBg=pmi.bnBg;V.pmBnFg=pmi.bnFg;V.pmBnBd=pmi.bnBd;V.pmDdBg=pmi.ddBg;V.pmDdFg=pmi.ddFg;V.pmDdBd=pmi.ddBd;
         V.pmSaBonus=pmi.saBonus;V.pmSaDeduct=pmi.saDeduct;V.pmSaVal=pmi.saVal;V.pmSaOn=pmi.saOn;
         V.pmSaIsDeduct=pmi.saIsDeduct;V.pmStkNeed=pmi.stkNeed;V.pmStkRateTxt=pmi.stkRateTxt;V.pmStickers=pmi.stickers;
+        V.pmStEarned=pmi.stEarned;V.pmStSpent=pmi.stSpent;
+        const shm={};
+        D.stlog.filter(x=>x.k===pmKid.id).forEach(x=>{const m=x.d.slice(0,7);(shm[m]=shm[m]||{inn:[],out:[]}).inn.push(x);});
+        D.exch.filter(x=>x.k===pmKid.id).forEach(x=>{const m=x.d.slice(0,7);(shm[m]=shm[m]||{inn:[],out:[]}).out.push(x);});
+        V.pmHistMonV=Object.keys(shm).sort().reverse().map(m=>{const g=shm[m];
+          return{m:Number(m.slice(0,4))+'년 '+Number(m.slice(5,7))+'월',inN:g.inn.length,outN:g.out.reduce((s2,x)=>s2+x.cost,0),
+            items:g.inn.map(x=>({sd:x.d,date:this.dShort(x.d),txt:x.e+' '+(x.msg||x.from||'받음'),amt:'+1',c:'#3FA45B'}))
+              .concat(g.out.map(x=>({sd:x.d,date:this.dShort(x.d),txt:'🎁 '+x.name,amt:'-'+x.cost,c:'#E0654F'})))
+              .sort((a,b)=>b.sd.localeCompare(a.sd))};});
+        V.pmHistEmpty=V.pmHistMonV.length===0;
         V.pmSaAdd=()=>{if(!Number(f['sa_'+pmKid.id]))return;pmi.saAdd();this.setState({modal:null});};}
       V.kidPickV=kids.map(kp=>({name:kp.name,emoji:kp.emoji,...softChip(S.stKid===kp.id),pick:()=>this.setState({stKid:kp.id})}));
       V.stickerPickV=this.STK.map(e=>({e,bg:f.stEmoji===e?sk.soft:sk.bg,bd:f.stEmoji===e?sk.ac:'transparent',pick:()=>this.setF('stEmoji',e)}));
