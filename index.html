@@ -2219,6 +2219,9 @@ input,button,textarea,select{font-family:inherit;}
         <button onClick="{{ pmTabHist }}" style="flex:1;background:{{ pmTbHBg }};color:{{ pmTbHFg }};border:1px solid {{ pmTbHBd }};border-radius:12px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;min-height:40px;">📜 기록</button>
         <button onClick="{{ pmTabTrash }}" style="flex:1;background:{{ pmTbTBg }};color:{{ pmTbTFg }};border:1px solid {{ pmTbTBd }};border-radius:12px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;min-height:40px;">🗑 휴지통 {{ pmTrashN }}</button>
       </div>
+      <sc-if value="{{ pmHasStMsg }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--bg,#FAF6EF);border:1px solid #E0654F;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;font-weight:700;color:#E0654F;line-height:1.6;word-break:keep-all;">🔒 {{ pmStMsg }}</div>
+      </sc-if>
       <sc-if value="{{ pmHistOpen }}" hint-placeholder-val="{{ true }}">
         <sc-if value="{{ pmHistEmpty }}" hint-placeholder-val="{{ false }}">
           <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:20px;text-align:center;font-size:13px;font-weight:700;color:var(--sub,#8A8177);margin-bottom:14px;">아직 스티커 기록이 없어요</div>
@@ -2236,7 +2239,7 @@ input,button,textarea,select{font-family:inherit;}
                     <span style="min-width:38px;color:var(--sub,#8A8177);flex-shrink:0;">{{ hi.date }}</span>
                     <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ hi.txt }}</span>
                     <span style="font-weight:900;color:{{ hi.c }};">{{ hi.amt }}</span>
-                    <button onClick="{{ hi.del }}" title="휴지통으로 보내기" style="flex-shrink:0;width:40px;height:40px;background:transparent;border:none;border-radius:10px;font-size:14px;font-weight:900;color:var(--sub,#8A8177);cursor:pointer;font-family:inherit;">🗑</button>
+                    <button onClick="{{ hi.del }}" title="{{ hi.delTip }}" style="flex-shrink:0;width:40px;height:40px;background:transparent;border:none;border-radius:10px;font-size:14px;font-weight:900;color:var(--sub,#8A8177);cursor:pointer;font-family:inherit;opacity:{{ hi.delOp }};">{{ hi.delIcon }}</button>
                   </div>
                 </sc-for>
               </div>
@@ -2258,7 +2261,7 @@ input,button,textarea,select{font-family:inherit;}
               </div>
               <div style="display:flex;align-items:center;gap:6px;">
                 <span style="flex:1;font-size:11px;font-weight:600;color:var(--sub,#8A8177);">{{ tr.delDate }} 삭제</span>
-                <button onClick="{{ tr.restore }}" style="background:var(--card,#fff);border:1px solid var(--ac,#F59E0B);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:800;color:var(--ac,#F59E0B);cursor:pointer;font-family:inherit;min-height:40px;">↩ 복원</button>
+                <button onClick="{{ tr.restore }}" style="background:var(--card,#fff);border:1px solid var(--ac,#F59E0B);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:800;color:var(--ac,#F59E0B);cursor:pointer;font-family:inherit;min-height:40px;opacity:{{ tr.rsOp }};">{{ tr.rsLabel }}</button>
                 <sc-if value="{{ tr.askOff }}" hint-placeholder-val="{{ true }}">
                   <button onClick="{{ tr.ask }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:800;color:var(--sub,#8A8177);cursor:pointer;font-family:inherit;min-height:40px;">완전삭제</button>
                 </sc-if>
@@ -4358,10 +4361,19 @@ class Component extends DCLogic {
         const shm={};
         D.stlog.filter(x=>x.k===pmKid.id).forEach(x=>{const m=x.d.slice(0,7);(shm[m]=shm[m]||{inn:[],out:[]}).inn.push(x);});
         D.exch.filter(x=>x.k===pmKid.id).forEach(x=>{const m=x.d.slice(0,7);(shm[m]=shm[m]||{inn:[],out:[]}).out.push(x);});
+        const stAvail=pmi.stickers;
+        const stWarn=txt=>{this.setState({pmStMsg:txt});setTimeout(()=>this.setState({pmStMsg:''}),3000);};
+        const lockTip='이미 써버린 스티커예요 (남은 '+stAvail+'개)';
+        const lockMsg='이미 사용한 스티커라 지울 수 없어요 (남은 스티커 '+stAvail+'개). 먼저 아래 「사용」 기록을 지우면 받음 기록도 지울 수 있어요.';
+        V.pmHasStMsg=!!S.pmStMsg;V.pmStMsg=S.pmStMsg||'';
         V.pmHistMonV=Object.keys(shm).sort().reverse().map(m=>{const g=shm[m];
           return{m:Number(m.slice(0,4))+'년 '+Number(m.slice(5,7))+'월',inN:g.inn.length,outN:g.out.reduce((s2,x)=>s2+x.cost,0),
-            items:g.inn.map(x=>({sd:x.d,date:this.dShort(x.d),txt:x.e+' '+(x.msg||x.from||'받음'),amt:'+1',c:'#3FA45B',del:()=>this.stDel('in',x)}))
-              .concat(g.out.map(x=>({sd:x.d,date:this.dShort(x.d),txt:'🎁 '+x.name,amt:'-'+x.cost,c:'#E0654F',del:()=>this.stDel('out',x)})))
+            items:g.inn.map(x=>{const ok=stAvail>=1;
+              return{sd:x.d,date:this.dShort(x.d),txt:x.e+' '+(x.msg||x.from||'받음'),amt:'+1',c:'#3FA45B',
+                delIcon:ok?'🗑':'🔒',delOp:ok?'1':'0.45',delTip:ok?'휴지통으로 보내기':lockTip,
+                del:()=>{if(!ok)return stWarn(lockMsg);this.stDel('in',x);}};})
+              .concat(g.out.map(x=>({sd:x.d,date:this.dShort(x.d),txt:'🎁 '+x.name,amt:'-'+x.cost,c:'#E0654F',
+                delIcon:'🗑',delOp:'1',delTip:'휴지통으로 보내기',del:()=>this.stDel('out',x)})))
               .sort((a,b)=>b.sd.localeCompare(a.sd))};});
         V.pmHistEmpty=V.pmHistMonV.length===0;
         const stTrash=(D.sttrash||[]).filter(x=>x.it&&x.it.k===pmKid.id);
@@ -4371,10 +4383,13 @@ class Component extends DCLogic {
         V.pmTbHBg=trOpen?sk.card:sk.ac;V.pmTbHFg=trOpen?sk.sub:sk.on;V.pmTbHBd=trOpen?sk.line:sk.ac;
         V.pmTbTBg=trOpen?sk.ac:sk.card;V.pmTbTFg=trOpen?sk.on:sk.sub;V.pmTbTBd=trOpen?sk.ac:sk.line;
         V.pmTrashV=stTrash.slice().sort((a,b)=>String(b.dd).localeCompare(String(a.dd))).map(tr=>{const x=tr.it;const isIn=tr.ty==='in';
+          const rOK=isIn||stAvail>=x.cost;
           return{date:this.dShort(x.d),txt:isIn?(x.e+' '+(x.msg||x.from||'받음')):('🎁 '+x.name),
             amt:isIn?'+1':'-'+x.cost,c:isIn?'#3FA45B':'#E0654F',delDate:this.dShort(tr.dd),
             askOn:S.pmPurgeAsk===tr.tid,askOff:S.pmPurgeAsk!==tr.tid,
-            restore:()=>{this.stRestore(tr.tid);this.setState({pmPurgeAsk:''});},
+            rsLabel:rOK?'↩ 복원':'🔒 복원',rsOp:rOK?'1':'0.45',
+            restore:()=>{if(!rOK)return stWarn('스티커가 모자라서 되돌릴 수 없어요 (사용 '+x.cost+'개 · 남은 '+stAvail+'개)');
+              this.stRestore(tr.tid);this.setState({pmPurgeAsk:''});},
             ask:()=>this.setState({pmPurgeAsk:tr.tid}),
             purge:()=>{this.stPurge(tr.tid);this.setState({pmPurgeAsk:''});}};});
         V.pmTrashEmpty=stTrash.length===0;
