@@ -263,7 +263,11 @@ input,button,textarea,select{font-family:inherit;}
         <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
             <div style="font-size:15px;font-weight:800;">🎣 오늘의 낚시</div>
-            <div style="font-size:11px;font-weight:800;color:var(--ac,#F59E0B);background:var(--soft,#F7EAD2);border-radius:99px;padding:5px 10px;">{{ fishTide }}</div>
+            <button onClick="{{ openTide }}" title="이번 달 물때를 한눈에 보고 위치를 바꿀 수 있어요" style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:var(--ac,#F59E0B);background:var(--soft,#F7EAD2);border:none;border-radius:99px;padding:6px 11px;cursor:pointer;font-family:inherit;min-height:32px;">
+              <span>{{ fishTide }}</span>
+              <span style="font-weight:700;color:var(--sub,#8A8177);">{{ tideRgName }}</span>
+              <span style="color:var(--sub,#8A8177);">›</span>
+            </button>
           </div>
           <button onClick="{{ fishGo }}" style="width:100%;box-sizing:border-box;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#DCEEF7,#F3FAFF);border:1px solid var(--line,#EFE4CF);border-radius:16px;padding:13px 14px;cursor:pointer;text-align:left;color:var(--tx,#3F3A33);font-family:inherit;">
             <span style="font-size:26px;animation:bob 2.6s ease-in-out infinite;">🐟</span>
@@ -2318,6 +2322,56 @@ input,button,textarea,select{font-family:inherit;}
   </div>
 </sc-if>
 
+<sc-if value="{{ modalTide }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
+    <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:12px;">🌊 이번 달 물때</div>
+      <button onClick="{{ tidePickToggle }}" style="width:100%;box-sizing:border-box;display:flex;align-items:center;gap:10px;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:14px;padding:11px 13px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;min-height:44px;">
+        <span style="font-size:17px;flex-shrink:0;">📍</span>
+        <span style="flex:1;min-width:0;">
+          <span style="display:block;font-size:13px;font-weight:800;">{{ tideRgLabel }}</span>
+          <span style="display:block;font-size:11px;font-weight:700;color:var(--sub,#8A8177);line-height:1.6;margin-top:2px;">{{ tideRgSub }}</span>
+        </span>
+        <span style="font-size:12px;font-weight:800;color:var(--ac,#F59E0B);flex-shrink:0;">위치 바꾸기</span>
+      </button>
+      <sc-if value="{{ tidePickOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;animation:pop .25s;">
+          <sc-for list="{{ tideRgsV }}" as="trg" hint-placeholder-count="4">
+            <button onClick="{{ trg.pick }}" style="display:flex;align-items:center;gap:9px;background:{{ trg.bg }};border:1px solid {{ trg.bd }};border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left;color:{{ trg.fg }};font-family:inherit;width:100%;box-sizing:border-box;min-height:44px;">
+              <span style="font-size:12px;flex-shrink:0;">{{ trg.mark }}</span>
+              <span style="font-size:13px;font-weight:800;min-width:52px;flex-shrink:0;">{{ trg.n }}</span>
+              <span style="flex:1;font-size:11px;font-weight:700;color:var(--sub,#8A8177);min-width:0;">{{ trg.sub }}</span>
+            </button>
+          </sc-for>
+          <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);line-height:1.7;padding:2px 4px;">같은 날이라도 서해는 7물때식, 남해·동해·제주는 8물때식으로 세어서 부르는 물 수가 달라요.</div>
+        </div>
+      </sc-if>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 10px;">
+        <button onClick="{{ tidePrevM }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:34px;height:34px;font-size:14px;cursor:pointer;color:inherit;font-family:inherit;">‹</button>
+        <div style="font-size:15px;font-weight:800;">{{ tideMLabel }}</div>
+        <button onClick="{{ tideNextM }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:34px;height:34px;font-size:14px;cursor:pointer;color:inherit;font-family:inherit;">›</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:4px;">
+        <sc-for list="{{ dayHeads }}" as="dh" hint-placeholder-count="7"><div style="text-align:center;font-size:11px;font-weight:700;color:{{ dh.c }};padding:3px 0;">{{ dh.d }}</div></sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;">
+        <sc-for list="{{ tideCellsV }}" as="tc" hint-placeholder-count="42">
+          <div style="background:{{ tc.bg }};border:1px solid {{ tc.bd }};border-radius:10px;padding:5px 1px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:46px;min-width:0;box-sizing:border-box;">
+            <span style="font-size:12px;font-weight:700;color:{{ tc.fg }};font-variant-numeric:tabular-nums;">{{ tc.num }}</span>
+            <span style="font-size:10px;font-weight:800;color:{{ tc.tideFg }};white-space:nowrap;font-variant-numeric:tabular-nums;">{{ tc.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:11px;font-weight:700;color:var(--sub,#8A8177);">
+        <span><b style="color:#E0654F;">{{ tideBigRange }}</b> 사리 — 물살 셈</span>
+        <span><b style="color:#4D7BA6;">조금</b> — 물살 약함</span>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);line-height:1.7;margin-top:6px;">달의 주기로 계산한 값이라 실제 물때표와 하루 차이가 날 수 있어요. 만조·간조 시각은 🌊 물때표에서 확인하세요.</div>
+      <button onClick="{{ closeModal }}" style="width:100%;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;margin-top:14px;font-family:inherit;">닫기</button>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ modalPMoney }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
     <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
@@ -2958,7 +3012,7 @@ input,button,textarea,select{font-family:inherit;}
 const FMOTTOS=['서로 선은 넘지 맙시다. 나는 갯바위에서, 너는 바다 속에서!','오늘의 신사 협정: 찌가 가라앉으면 정당하게 협상 개시.','잡아도 칭찬, 놓쳐도 미소, 꽝 쳐도 품격 유지!','바늘은 거들 뿐, 승부는 신사답게.','물고기는 매너 입질, 낚시꾼은 안전 퇴근!','오늘의 서약: 바늘 끝엔 예의, 발 밑엔 안전.','손맛은 묵직하게, 쓰레기는 싹 다 가볍게!','잡혀줘서 고맙고, 살아서 돌아가니 반갑다!','용왕님도 인정하는 페어플레이 낚시꾼.','바다와의 비즈니스: 꽝 쳐도 절대 투정 금지!','No Trash, No Risk, Just Fishing.','안전 조행 100%, 매너 입질 100%.','물고기에겐 미안함, 바다에겐 고마움.','손맛 낚고, 추억 담고, 무사 귀가.','격식 있는 챔질, 매너 있는 귀가.','바다 위 신사들의 정당한 한판승부.','안전이 우선, 매너가 기본.','바다를 아끼는 진짜 낚시꾼의 품격.','찌끝에 담은 예의, 발끝에 둔 안전.','클린 캐스팅, 리스펙트 조행.','바다가 내어준 선물, 감사함으로 되돌려줍니다.','물고기와 나눈 짧은 대화, 긴 여운으로 남기는 하루.','파도 소리에 감사를, 바람 소리에 안녕을.','자연이 준 소중한 손맛, 내가 지키는 안전한 조행.','바다를 닮은 넓은 마음으로 낚시합니다.','내가 떠난 자리는 바다의 눈물 없이 깨끗하게.','작은 물고기 한 마리에도 경건함을 담아.','바다와 사람이 같이 웃는 소중한 순간.','무사히 집으로 다녀오는 것이 가장 큰 조과입니다.','푸른 바다 위, 나만의 신사적 낭만.','어종 불문, 크기 불문! 안전과 매너는 절대 성역.','발 밑은 조심조심, 바다 속엔 신사답게.','잡는 기쁨보다 지키는 보람을 낚습니다.','바다의 규칙을 지키는 자가 진짜 꾼이다.','나를 지키는 구명조끼, 바다를 지키는 클린마인드.','어린 생명은 놓아주고, 내 쓰레기는 가져오고.','바다 생명과의 약속, 신사적인 라이벌의 대결.','너와 나의 매너가 만날 때 완벽한 조행이 완성된다.','나도 무사히 집으로, 너도 무사히 바다로!','오늘도 신사답게 던지고, 정직하게 낚았습니다.'];
 
 class Component extends DCLogic {
-  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',mview:'list',parentOk:false,modal:null,editMode:false,calM:'',budM:'',selDate:'',budSel:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],rcThumb:null,aiBusy:false,aiMsg:'',pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',qz:null,now:0,qMsg:'',qbKid:'',qbSubj:'engw',qbLv:2,qbRwE:'🌟',qbRwN:2,qbFeeE:'🌟',qbFeeN:1,qbItems:[],qbMsg:'',qbAi:false,qbEditId:null};
+  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',mview:'list',parentOk:false,modal:null,editMode:false,calM:'',budM:'',tideM:'',tidePick:false,selDate:'',budSel:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],rcThumb:null,aiBusy:false,aiMsg:'',pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',qz:null,now:0,qMsg:'',qbKid:'',qbSubj:'engw',qbLv:2,qbRwE:'🌟',qbRwN:2,qbFeeE:'🌟',qbFeeN:1,qbItems:[],qbMsg:'',qbAi:false,qbEditId:null};
   KEY = 'famdiary_v1';
   KART={'가자미':{i:'🐟',a:'#E2D3B4',b:'#7D6746'},'우럭':{i:'🐠',a:'#B9C6AD',b:'#43533F'},'볼락':{i:'🐡',a:'#FFC0AC',b:'#A3392A'},'쥐노래미':{i:'🐟',a:'#DBE4AC',b:'#66743A'},'고등어':{i:'🐟',a:'#C8E7F5',b:'#25587A'},'전갱이':{i:'🐠',a:'#E2F2F8',b:'#54798F'},'학꽁치':{i:'🐟',a:'#EAF5FC',b:'#7691A6'},'보리멸':{i:'🐟',a:'#F6ECD4',b:'#A08554'},'황어':{i:'🐟',a:'#FFE7AD',b:'#94741F'},'삼치':{i:'🐟',a:'#D3E7F2',b:'#37627F'},'붕장어':{i:'🐍',a:'#E0D1B8',b:'#645440'},'장어':{i:'🐍',a:'#DCCFBA',b:'#5B4C3A'},'방어':{i:'🐠',a:'#FFE6B0',b:'#A5761D'},'광어':{i:'🐟',a:'#E6EEF6',b:'#5A6A79'},'감성돔':{i:'🐟',a:'#DFE9F2',b:'#41576B'},'참돔':{i:'🐠',a:'#FFD6D4',b:'#A4413C'}};
   KFISH={'장어':{len:68,diff:5},'삼치':{len:52,diff:3},'방어':{len:74,diff:4},'볼락':{len:24,diff:2},'광어':{len:45,diff:3},'감성돔':{len:31,diff:3},'참돔':{len:38,diff:4}};
@@ -2971,7 +3025,20 @@ class Component extends DCLogic {
     {n:'감성돔',e:'',left:'75%',top:'63%',fs:'0px',ring:'64px',dur:'4.4s',c:'#41576B',lb:''}
   ];
   KGROUPS=[{k:'kfWater',label:'💧 속성',o:['바다','민물']},{k:'kfBait',label:'🪱 미끼',o:['오징어','지렁이','고등어','직접작성']},{k:'kfWind',label:'🌬️ 풍량',o:['약함','보통','강함']},{k:'kfWave',label:'🌊 파도',o:['잔잔','보통','거침']},{k:'kfTime',label:'☀️ 시간대',o:['낮','밤']},{k:'kfSpot',label:'🏝️ 장소 특이점',o:['방파제','해변','기수지역','직접작성']},{k:'kfRank',label:'👑 등급',o:['기본 단계 🐟','1단계 대물 👑']}];
-  tideInfo(){const base=Date.UTC(2000,0,6,18,14);const p=29.530588;const age=((((Date.now()-base)/86400000)%p)+p)%p;const ld=Math.floor(age)+1;const i=(ld+7)%15;return{ld,label:i===0?'조금':i+'물'};}
+  TIDERG=[
+    {id:'south',n:'남해',sub:'부산·통영·여수·거제',s:8},
+    {id:'east',n:'동해',sub:'포항·강릉·속초',s:8},
+    {id:'jeju',n:'제주',sub:'제주·서귀포',s:8},
+    {id:'west',n:'서해',sub:'인천·태안·군산·목포',s:7}
+  ];
+  tideRg(id){return this.TIDERG.find(r=>r.id===id)||this.TIDERG[0];}
+  // 물때 표기는 지역마다 다름 — 서해는 7물때식(조금 다음날이 무시), 남해·동해·제주는 8물때식
+  tideInfo(ds,rgId){const base=Date.UTC(2000,0,6,18,14);const p=29.530588;
+    const ms=ds?new Date(ds+'T12:00:00').getTime():new Date(this.today()+'T12:00:00').getTime();
+    const age=((((ms-base)/86400000)%p)+p)%p;const ld=Math.floor(age)+1;const i=(ld+7)%15;
+    const west=this.tideRg(rgId).s===7;
+    const label=i===0?'조금':(west?(i===1?'무시':(i-1)+'물'):i+'물');
+    return{ld,i,label,big:i>=6&&i<=8,small:i===0};}
   ddRef = React.createRef();
   ddNudge(dir){const el=this.ddRef.current;if(!el)return;el.scrollLeft+=dir*126;}
   ddDrag(e){const el=this.ddRef.current;if(!el)return;const x0=e.clientX,l0=el.scrollLeft;this.ddMoved=false;el.style.scrollBehavior='auto';el.style.cursor='grabbing';
@@ -3017,7 +3084,7 @@ class Component extends DCLogic {
         {id:'kid1',name:'첫째',role:'kid',emoji:'🐰',photo:null,pw:'',skin:'pink',deco:[]},
         {id:'kid2',name:'둘째',role:'kid',emoji:'⚽',photo:null,pw:'',skin:'mint',deco:[]}
       ],
-      settings:{useTT:true,parentPw:String(this.props.parentPassword??'0000')},
+      settings:{useTT:true,parentPw:String(this.props.parentPassword??'0000'),tideRegion:'south'},
       events:[], ddays:[], todos:[], checks:{kid1:{},kid2:{}},
       journal:[], scores:[], stlog:[], exch:[], sttrash:[], fishlog:[], err:[], trades:[], appr:[],
       quizzes:[], qruns:[], stkRate:{kid1:200,kid2:200},
@@ -3055,7 +3122,7 @@ class Component extends DCLogic {
       data.stlog.concat(data.exch).forEach(x=>{if(x.id===undefined)x.id=this.uid();});
       if(!data.kfV2){data.fishlog=this.seed().fishlog;data.kfV2=1;}
       const t=this.today();
-      this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),selDate:t,budSel:t},()=>this.fcBackfill());
+      this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),tideM:t.slice(0,7),selDate:t,budSel:t},()=>this.fcBackfill());
     });
   }
   componentWillUnmount(){if(this.qTimer)clearInterval(this.qTimer);if(this.feedPaste)document.removeEventListener('paste',this.feedPaste);}
@@ -3785,7 +3852,8 @@ class Component extends DCLogic {
 
     // FISHING — KO-FISH GO 피싱 카드
     const KLOG=(D.fishlog||[]).filter(x=>x&&x.species);
-    const tideI=this.tideInfo();
+    const tideRg=this.tideRg(D.settings.tideRegion);
+    const tideI=this.tideInfo(t,tideRg.id);
     const fhr=new Date().getHours();
     const kart=n=>this.KART[String(n||'').trim()]||{i:'🐟',a:'#D3E7F2',b:'#37627F'};
     const kbg=n=>{const a=kart(n);return 'radial-gradient(120% 95% at 50% 8%,'+a.a+' 0%,'+a.b+' 100%)';};
@@ -3804,6 +3872,34 @@ class Component extends DCLogic {
     V.rollMotto=()=>{let n=this._motto;while(n===this._motto)n=FMOTTOS[Math.floor(Math.random()*FMOTTOS.length)];this._motto=n;this.forceUpdate();};
     V.fishGo=()=>this.setState({tab:'fish',fview:'map'});
     V.fishPlan=()=>this.setState({modal:{t:'event'},f:{...f,evTitle:'🎣 낚시 출조',evTime:'05:00',evMembers:[u.id]}});
+
+    // 물때 달력 — 지역마다 표기가 다르므로 지역을 골라 저장
+    V.tideRgName=tideRg.n;
+    V.openTide=()=>this.setState({modal:{t:'tide'},tideM:S.tideM||t.slice(0,7),tidePick:false});
+    V.modalTide=!!(S.modal&&S.modal.t==='tide');
+    if(V.modalTide){
+      const tm=S.tideM||t.slice(0,7);
+      V.tideMLabel=this.mLabel(tm);
+      V.tidePrevM=()=>this.setState({tideM:this.shiftM(tm,-1)});
+      V.tideNextM=()=>this.setState({tideM:this.shiftM(tm,1)});
+      V.tideRgLabel=tideRg.n+' · '+tideRg.s+'물때식';
+      V.tideBigRange=tideRg.s===7?'5~7물':'6~8물';
+      V.tideRgSub=tideRg.sub;
+      V.tidePickOpen=!!S.tidePick;
+      V.tidePickToggle=()=>this.setState({tidePick:!S.tidePick});
+      V.tideRgsV=this.TIDERG.map(r=>{const on=r.id===tideRg.id;return{
+        n:r.n,sub:r.sub+' · '+r.s+'물때식',
+        bg:on?sk.soft:sk.card,bd:on?sk.ac:sk.line,fg:on?sk.ac:sk.tx,mark:on?'●':'○',
+        pick:()=>{this.mut(d=>{d.settings.tideRegion=r.id;});this.setState({tidePick:false});}};});
+      V.tideCellsV=this.grid(tm).map(c=>{
+        const ti=this.tideInfo(c.ds,tideRg.id);
+        const isT=c.ds===t;
+        return{num:c.num,label:ti.label,
+          bg:isT?sk.soft:(c.inM?sk.bg:'transparent'),
+          bd:isT?sk.ac:'transparent',
+          fg:c.inM?sk.tx:sk.line,
+          tideFg:!c.inM?sk.line:(ti.big?'#E0654F':(ti.small?'#4D7BA6':sk.sub))};});
+    }
     const fv=S.fview||'map';
     V.fviewMap=fv==='map';V.fviewTank=fv==='tank';
     V.fSetMap=()=>this.setState({fview:'map'});V.fSetTank=()=>this.setState({fview:'tank'});
