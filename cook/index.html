@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우리집 레시피</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script src="../store.js"></script>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EFECE5;font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;word-break:keep-all;overflow-wrap:break-word}
+a{color:#3A3C40;text-decoration:none}a:hover{color:#1B1C1E}
+input,textarea,button{font-family:inherit}
+input:focus,textarea:focus{outline:none}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</helmet>
+
+<div style="max-width:430px;margin:0 auto;height:100dvh;position:relative;display:flex;flex-direction:column;background:#FFFFFF;overflow:hidden">
+
+<!-- ── TOP BAR ── -->
+<div style="height:58px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 16px;background:#FFFFFF;border-bottom:1px solid #E4E5E8;z-index:6">
+  <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+    <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#9A9DA3;letter-spacing:.14em">RECIPE</span>
+    <span style="font-size:15.5px;font-weight:800;color:#1B1C1E;letter-spacing:-.02em;white-space:nowrap">우리집 레시피</span>
+  </div>
+  <a href="../" title="우리집 다이어리로 이동" style="display:inline-flex;align-items:center;gap:5px;flex:none;min-height:44px;box-sizing:border-box;padding:0 14px;border-radius:99px;background:#F4F4F6;border:1px solid #E4E5E8;font-size:12.5px;font-weight:700;color:#55575C;text-decoration:none;white-space:nowrap">🏡 가족 다이어리</a>
+</div>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden">
+
+<!-- ── HOME ── -->
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:13px">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:26px;font-weight:800;color:#1B1C1E;letter-spacing:-.02em">레시피 <span style="font:500 14px 'IBM Plex Mono',monospace;color:#9A9DA3">{{ count }}</span></div>
+    <div style="display:flex;gap:8px">
+      <div onClick="{{ goPrompt }}" style="height:38px;display:flex;align-items:center;gap:6px;border-radius:11px;background:#FFFFFF;border:1.5px solid #3A3C40;padding:0 13px;font-size:13px;font-weight:700;color:#3A3C40;cursor:pointer" style-active="opacity:.6"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1l1.4 3.4L12 5l-3.6 1.4L7 10 5.6 6.4 2 5l3.6-.6L7 1z" fill="#3A3C40"></path><path d="M11.5 9l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7.7-1.6z" fill="#9A9DA3"></path></svg>프롬프트</div>
+      <div onClick="{{ goNew }}" style="width:38px;height:38px;border-radius:11px;background:#3A3C40;display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="opacity:.7"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke="#fff" stroke-width="2.2" stroke-linecap="round"></path></svg></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;background:#F4F4F6;border:1px solid #E4E5E8;border-radius:10px;padding:10px 13px">
+    <svg width="14" height="14" viewBox="0 0 15 15"><circle cx="6.5" cy="6.5" r="5" fill="none" stroke="#9A9DA3" stroke-width="1.8"></circle><path d="M10.5 10.5L14 14" stroke="#9A9DA3" stroke-width="1.8" stroke-linecap="round"></path></svg>
+    <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="검색 — 이름 / 재료 / 태그 / 기기" style="flex:1;border:none;background:transparent;font-size:14px;color:#1B1C1E">
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <sc-for list="{{ chips }}" as="c" hint-placeholder-count="6">
+      <div onClick="{{ c.onTap }}" style="font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:7px;border:1px solid #E4E5E8;cursor:pointer;background: {{ c.bg }};color: {{ c.fg }};border-color: {{ c.bd }}">{{ c.label }}</div>
+    </sc-for>
+  </div>
+  <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:14px;overflow:hidden">
+    <sc-for list="{{ list }}" as="r" hint-placeholder-count="5">
+      <div onClick="{{ r.onOpen }}" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #EEEEF0;cursor:pointer" style-active="background:#F7F7F9">
+        <div style="width:44px;height:44px;border-radius:9px;background:#F4F4F6;border:1px dashed #D5D7DB;display:flex;align-items:center;justify-content:center;font-size:9px;color:#9A9DA3;flex-shrink:0">IMG</div>
+        <div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:700;color:#1B1C1E">{{ r.name }}</div><div style="font:500 11px 'IBM Plex Mono',monospace;color:#75787E;margin-top:3px">{{ r.meta }}</div></div>
+        <span style="font-size:11px;color:#55575C;background:#F1F1F3;padding:3px 8px;border-radius:5px">{{ r.device }}</span>
+      </div>
+    </sc-for>
+  </div>
+  <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+    <div style="text-align:center;font-size:13px;color:#9A9DA3;padding:24px 0">검색 결과가 없습니다</div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ── DETAIL ── -->
+<sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px 18px 24px;display:flex;flex-direction:column;gap:13px">
+  <div onClick="{{ goHome }}" style="font-size:13.5px;color:#75787E;cursor:pointer">‹ 레시피</div>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+    <div>
+      <div style="font-size:26px;font-weight:800;color:#1B1C1E;letter-spacing:-.02em">{{ d.name }}</div>
+      <div style="font:500 12px 'IBM Plex Mono',monospace;color:#75787E;margin-top:6px">{{ d.meta }}</div>
+    </div>
+    <div onClick="{{ goEdit }}" style="font-size:13px;font-weight:700;color:#FFFFFF;background:#3A3C40;border-radius:8px;padding:8px 15px;flex-shrink:0;cursor:pointer" style-active="opacity:.7">수정</div>
+  </div>
+  <div style="height:120px;border-radius:12px;background:#F4F4F6;border:1px dashed #D5D7DB;display:flex;align-items:center;justify-content:center;font-size:11px;color:#9A9DA3">완성 사진 (선택)</div>
+
+  <div style="display:flex;align-items:center;gap:9px;background:#F7F7F9;border:1px solid #E4E5E8;border-radius:11px;padding:9px 12px">
+    <span style="font-size:12px;font-weight:700;color:#75787E">인분</span>
+    <div onClick="{{ servesDown }}" style="width:28px;height:28px;border-radius:8px;background:#FFFFFF;border:1px solid #D5D7DB;display:flex;align-items:center;justify-content:center;font-size:15px;color:#3A3C40;cursor:pointer">−</div>
+    <span style="font:600 15px 'IBM Plex Mono',monospace;color:#1B1C1E;min-width:22px;text-align:center">{{ viewServes }}</span>
+    <div onClick="{{ servesUp }}" style="width:28px;height:28px;border-radius:8px;background:#FFFFFF;border:1px solid #D5D7DB;display:flex;align-items:center;justify-content:center;font-size:15px;color:#3A3C40;cursor:pointer">＋</div>
+    <span style="flex:1"></span>
+    <span style="font-size:11px;color:#9A9DA3">분량 자동 계산</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:600 11px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">주재료 · {{ d.ingCount }}</div><span style="font-size:11.5px;color:#9A9DA3">없는 재료를 탭하세요</span></div>
+    <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:12px;padding:2px 13px">
+      <sc-for list="{{ d.ing }}" as="g" hint-placeholder-count="4">
+        <div onClick="{{ g.onTap }}" style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #EEEEF0;font-size:14px;cursor:pointer">
+          <span style="color:#1B1C1E">{{ g.n }}</span>
+          <sc-if value="{{ g.out }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;font-weight:700;color:#8A6D2F;background:#F6EFDD;border-radius:5px;padding:2px 7px">없음</span></sc-if>
+          <span style="flex:1"></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#75787E">{{ g.q }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <div style="font:600 11px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">양념·소스 · {{ d.sauceCount }}</div>
+    <div style="background:#F7F7F9;border:1px solid #D5D7DB;border-radius:12px;padding:2px 13px">
+      <sc-for list="{{ d.sauce }}" as="s" hint-placeholder-count="5">
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #E4E5E8;font-size:14px"><span style="color:#1B1C1E">{{ s.n }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#75787E">{{ s.q }}</span></div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <div style="font:600 11px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">STEPS · {{ d.stepCount }}</div>
+    <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:11px">
+      <sc-for list="{{ d.steps }}" as="st" hint-placeholder-count="4">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <span style="font:600 11px 'IBM Plex Mono',monospace;color:#55575C;flex-shrink:0;padding-top:3px">{{ st.no }}</span>
+          <div style="flex:1;font-size:13.5px;line-height:1.55;color:#44464B">{{ st.t }}</div>
+          <sc-if value="{{ st.hasTimer }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ st.onTimer }}" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#FFFFFF;background:#3A3C40;border-radius:5px;padding:3px 7px;white-space:nowrap;cursor:pointer" style-active="opacity:.7">⏱ {{ st.timerLabel }}</div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="background:#F7F7F9;border:1px solid #E4E5E8;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font:600 11px 'IBM Plex Mono',monospace;color:#55575C;letter-spacing:.08em">대체 프롬프트</div>
+      <div onClick="{{ copySubPrompt }}" style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#FFFFFF;background:#3A3C40;border-radius:7px;padding:7px 12px;cursor:pointer" style-active="opacity:.7"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="#fff" stroke-width="1.4"></rect><path d="M8.5 3.5V2.5a1 1 0 00-1-1h-5a1 1 0 00-1 1v5a1 1 0 001 1h1" fill="none" stroke="#fff" stroke-width="1.4"></path></svg>복사</div>
+    </div>
+    <div style="font-size:13px;line-height:1.65;color:#44464B;background:#FFFFFF;border:1px solid #E4E5E8;border-radius:9px;padding:11px 12px">{{ subPromptText }}</div>
+    <div style="font-size:11px;color:#9A9DA3">없는 재료로 표시한 항목이 자동으로 채워집니다</div>
+  </div>
+
+  <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:9px">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div style="font:600 11px 'IBM Plex Mono',monospace;color:#55575C;letter-spacing:.08em">대체 기록 · {{ d.subCount }}</div><div onClick="{{ openSubSheet }}" style="font-size:12px;font-weight:700;color:#55575C;border:1px solid #D5D7DB;border-radius:7px;padding:5px 11px;cursor:pointer">＋ 기록</div></div>
+    <sc-for list="{{ d.subs }}" as="s" hint-placeholder-count="2">
+      <div style="display:flex;gap:9px;align-items:baseline;border-bottom:1px solid #EEEEF0;padding-bottom:9px">
+        <span style="font:500 10.5px 'IBM Plex Mono',monospace;color:#9A9DA3;flex-shrink:0">{{ s.date }}</span>
+        <div style="font-size:13px;line-height:1.55;color:#44464B">{{ s.text }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="background:#F7F7F9;border:1px solid #E4E5E8;border-radius:12px;padding:12px 13px;display:flex;flex-direction:column;gap:5px">
+    <div style="font:600 10.5px 'IBM Plex Mono',monospace;color:#55575C;letter-spacing:.08em">MEMO · 다음엔 이렇게</div>
+    <div style="font-size:13.5px;line-height:1.6;color:#44464B">{{ d.memo }}</div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ── EDIT ── -->
+<sc-if value="{{ isEdit }}" hint-placeholder-val="{{ false }}">
+<div style="position:sticky;top:0;z-index:5;padding:13px 18px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E4E5E8;background:#FAFAFB">
+  <div onClick="{{ cancelEdit }}" style="font-size:14.5px;color:#75787E;cursor:pointer">취소</div>
+  <span style="font:600 12px 'IBM Plex Mono',monospace;color:#1B1C1E;letter-spacing:.08em">EDIT MODE</span>
+  <div onClick="{{ saveEdit }}" style="font-size:14.5px;font-weight:800;color:#FFFFFF;background:#3A3C40;padding:7px 15px;border-radius:8px;cursor:pointer" style-active="opacity:.7">저장</div>
+</div>
+<div style="padding:15px 18px 24px;display:flex;flex-direction:column;gap:13px">
+  <div style="display:flex;gap:10px;align-items:center">
+    <div style="width:64px;height:64px;border-radius:11px;background:#F4F4F6;border:1px dashed #D5D7DB;display:flex;align-items:center;justify-content:center;font-size:9px;color:#9A9DA3;flex-shrink:0">IMG＋</div>
+    <input value="{{ e.name }}" onChange="{{ onEditName }}" style="flex:1;background:#FFFFFF;border:1.5px solid #3A3C40;border-radius:10px;padding:12px 13px;font-size:16px;font-weight:700;color:#1B1C1E">
+  </div>
+  <div style="display:flex;gap:8px">
+    <div style="flex:1;background:#F7F7F9;border:1px solid #E4E5E8;border-radius:10px;padding:10px 12px"><div style="font:600 9.5px 'IBM Plex Mono',monospace;color:#9A9DA3;letter-spacing:.08em">TIME</div><input value="{{ e.time }}" onChange="{{ onEditTime }}" style="width:100%;border:none;background:transparent;font-size:14.5px;color:#1B1C1E;margin-top:3px"></div>
+    <div onClick="{{ cycleLevel }}" style="flex:1;background:#F7F7F9;border:1px solid #E4E5E8;border-radius:10px;padding:10px 12px;cursor:pointer"><div style="font:600 9.5px 'IBM Plex Mono',monospace;color:#9A9DA3;letter-spacing:.08em">LEVEL</div><div style="font-size:14.5px;color:#1B1C1E;margin-top:3px">{{ e.level }} ▾</div></div>
+    <div style="flex:1;background:#F7F7F9;border:1px solid #E4E5E8;border-radius:10px;padding:10px 12px"><div style="font:600 9.5px 'IBM Plex Mono',monospace;color:#9A9DA3;letter-spacing:.08em">SERVES</div><input value="{{ e.serves }}" onChange="{{ onEditServes }}" style="width:100%;border:none;background:transparent;font-size:14.5px;color:#1B1C1E;margin-top:3px"></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 11px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">사용 기기</span><div onClick="{{ goDevices }}" style="font-size:11.5px;color:#3A3C40;font-weight:700;cursor:pointer">내 기기 관리 →</div></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <sc-for list="{{ e.devices }}" as="dv" hint-placeholder-count="5">
+        <div onClick="{{ dv.onTap }}" style="font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:99px;border:1px solid #E4E5E8;cursor:pointer;background: {{ dv.bg }};color: {{ dv.fg }};border-color: {{ dv.bd }}">{{ dv.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div style="font:600 11px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">주재료</div>
+    <sc-for list="{{ e.ing }}" as="g" hint-placeholder-count="4">
+      <div style="display:flex;align-items:center;gap:8px;background:#FFFFFF;border:1px solid #E4E5E8;border-radius:10px;padding:9px 11px">
+        <svg width="11" height="15" viewBox="0 0 12 16"><path d="M2 3h8M2 8h8M2 13h8" stroke="#D5D7DB" stroke-width="1.8" stroke-linecap="round"></path></svg>
+        <input value="{{ g.n }}" onChange="{{ g.onName }}" style="flex:1;border:none;background:transparent;font-size:14px;color:#1B1C1E">
+        <input value="{{ g.q }}" onChange="{{ g.onQty }}" style="width:64px;border:none;background:#F1F1F3;border-radius:6px;padding:5px 9px;font:500 13px 'IBM Plex Mono',monospace;color:#55575C;text-align:right">
+        <div onClick="{{ g.onRemove }}" style="color:#B65E51;font-size:17px;cursor:pointer;padding:0 3px">−</div>
+      </div>
+    </sc-for>
+    <div onClick="{{ addIng }}" style="text-align:center;font-size:13px;font-weight:600;color:#55575C;border:1px dashed #D5D7DB;border-radius:10px;padding:10px;cursor:pointer">＋ 재료 추가</div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:5px"><span style="font:600 11px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">양념·소스</span><span style="font-size:11px;color:#9A9DA3">주재료와 분리 저장</span></div>
+    <sc-for list="{{ e.sauce }}" as="s" hint-placeholder-count="3">
+      <div style="display:flex;align-items:center;gap:8px;background:#F7F7F9;border:1px solid #D5D7DB;border-radius:10px;padding:9px 11px">
+        <svg width="11" height="15" viewBox="0 0 12 16"><path d="M2 3h8M2 8h8M2 13h8" stroke="#C9CCD1" stroke-width="1.8" stroke-linecap="round"></path></svg>
+        <input value="{{ s.n }}" onChange="{{ s.onName }}" style="flex:1;border:none;background:transparent;font-size:14px;color:#1B1C1E">
+        <input value="{{ s.q }}" onChange="{{ s.onQty }}" style="width:64px;border:none;background:#FFFFFF;border-radius:6px;padding:5px 9px;font:500 13px 'IBM Plex Mono',monospace;color:#55575C;text-align:right">
+        <div onClick="{{ s.onRemove }}" style="color:#B65E51;font-size:17px;cursor:pointer;padding:0 3px">−</div>
+      </div>
+    </sc-for>
+    <div onClick="{{ addSauce }}" style="text-align:center;font-size:13px;font-weight:600;color:#55575C;border:1px dashed #D5D7DB;border-radius:10px;padding:10px;cursor:pointer">＋ 양념 추가</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div style="font:600 11px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">STEPS</div>
+    <sc-for list="{{ e.steps }}" as="st" hint-placeholder-count="3">
+      <div style="display:flex;gap:9px;background:#FFFFFF;border:1px solid #E4E5E8;border-radius:10px;padding:11px">
+        <span style="font:600 11px 'IBM Plex Mono',monospace;color:#55575C;padding-top:4px">{{ st.no }}</span>
+        <textarea value="{{ st.t }}" onChange="{{ st.onText }}" rows="2" style="flex:1;border:none;background:transparent;resize:none;font-size:13.5px;line-height:1.55;color:#44464B"></textarea>
+        <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+          <span style="font-size:10px;color:#9A9DA3">사진＋</span>
+          <div onClick="{{ st.onTimerCycle }}" style="font:500 10px 'IBM Plex Mono',monospace;cursor:pointer;border-radius:4px;padding:3px 6px;background: {{ st.tBg }};color: {{ st.tFg }};border:1px solid {{ st.tBd }}">{{ st.tLabel }}</div>
+          <div onClick="{{ st.onRemove }}" style="color:#B65E51;font-size:14px;cursor:pointer">−</div>
+        </div>
+      </div>
+    </sc-for>
+    <div onClick="{{ addStep }}" style="text-align:center;font-size:13px;font-weight:600;color:#55575C;border:1px dashed #D5D7DB;border-radius:10px;padding:10px;cursor:pointer">＋ 단계 추가</div>
+  </div>
+  <div style="background:#F7F7F9;border:1px solid #E4E5E8;border-radius:10px;padding:11px 13px">
+    <div style="font:600 10.5px 'IBM Plex Mono',monospace;color:#55575C;letter-spacing:.08em">MEMO · 다음엔 이렇게</div>
+    <textarea value="{{ e.memo }}" onChange="{{ onEditMemo }}" rows="2" style="width:100%;border:none;background:transparent;resize:none;font-size:13px;line-height:1.6;color:#44464B;margin-top:4px"></textarea>
+  </div>
+</div>
+</sc-if>
+
+<!-- ── PROMPT BUILDER ── -->
+<sc-if value="{{ isPrompt }}" hint-placeholder-val="{{ false }}">
+<div style="position:sticky;top:0;z-index:5;padding:13px 18px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E4E5E8;background:#FAFAFB">
+  <div onClick="{{ goHome }}" style="font-size:14.5px;color:#75787E;cursor:pointer">닫기</div>
+  <span style="font:600 12px 'IBM Plex Mono',monospace;color:#1B1C1E;letter-spacing:.08em">레시피 프롬프트</span>
+  <span style="width:44px"></span>
+</div>
+<div style="padding:15px 18px 24px;display:flex;flex-direction:column;gap:13px">
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <span style="font-size:12px;font-weight:700;color:#75787E">만들고 싶은 음식</span>
+    <input value="{{ p.dish }}" onChange="{{ onDish }}" placeholder="예) 묵은지 닭볶음탕" style="background:#FFFFFF;border:1.5px solid #3A3C40;border-radius:10px;padding:12px 13px;font-size:15.5px;font-weight:600;color:#1B1C1E">
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12px;font-weight:700;color:#75787E">쓸 재료 선택 <span style="font:500 11px 'IBM Plex Mono',monospace;color:#9A9DA3">내 재료 {{ p.pantryCount }}</span></span><span style="font-size:11px;color:#9A9DA3">전부 쓸 필요 없음</span></div>
+    <div style="display:flex;align-items:center;gap:8px;background:#F4F4F6;border:1px solid #E4E5E8;border-radius:9px;padding:8px 12px">
+      <svg width="13" height="13" viewBox="0 0 15 15"><circle cx="6.5" cy="6.5" r="5" fill="none" stroke="#9A9DA3" stroke-width="1.8"></circle><path d="M10.5 10.5L14 14" stroke="#9A9DA3" stroke-width="1.8" stroke-linecap="round"></path></svg>
+      <input value="{{ p.newIng }}" onChange="{{ onNewIng }}" onKeyDown="{{ onNewIngKey }}" placeholder="재료 검색 또는 새로 추가 (Enter)" style="flex:1;border:none;background:transparent;font-size:13px;color:#1B1C1E">
+    </div>
+    <span style="font:600 9.5px 'IBM Plex Mono',monospace;color:#9A9DA3;letter-spacing:.08em">내 재료 — 탭해서 선택 · 선택됨 {{ p.selCount }}</span>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <sc-for list="{{ p.pantry }}" as="i" hint-placeholder-count="8">
+        <div onClick="{{ i.onTap }}" style="font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:99px;border:1px solid #E4E5E8;cursor:pointer;background: {{ i.bg }};color: {{ i.fg }};border-color: {{ i.bd }}">{{ i.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <span style="font-size:12px;font-weight:700;color:#75787E">쓸 수 있는 조리도구</span>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <sc-for list="{{ p.tools }}" as="t" hint-placeholder-count="5">
+        <div onClick="{{ t.onTap }}" style="font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:99px;border:1px solid #E4E5E8;cursor:pointer;background: {{ t.bg }};color: {{ t.fg }};border-color: {{ t.bd }}">{{ t.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <div style="flex:1;background:#F7F7F9;border:1px solid #E4E5E8;border-radius:10px;padding:9px 11px;display:flex;align-items:center;gap:9px">
+      <div><div style="font:600 9px 'IBM Plex Mono',monospace;color:#9A9DA3">인분</div><div style="font-size:13.5px;color:#1B1C1E;margin-top:2px">{{ p.serves }}인분</div></div>
+      <span style="flex:1"></span>
+      <div onClick="{{ pServesDown }}" style="width:26px;height:26px;border-radius:7px;background:#FFFFFF;border:1px solid #D5D7DB;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A3C40">−</div>
+      <div onClick="{{ pServesUp }}" style="width:26px;height:26px;border-radius:7px;background:#FFFFFF;border:1px solid #D5D7DB;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#3A3C40">＋</div>
+    </div>
+    <div style="flex:1;background:#F7F7F9;border:1px solid #E4E5E8;border-radius:10px;padding:9px 11px"><div style="font:600 9px 'IBM Plex Mono',monospace;color:#9A9DA3">선택됨</div><div style="font-size:13.5px;color:#1B1C1E;margin-top:2px">{{ p.summary }}</div></div>
+  </div>
+  <div style="background:#F7F7F9;border:1px solid #E4E5E8;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:9px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font:600 11px 'IBM Plex Mono',monospace;color:#55575C;letter-spacing:.08em">생성된 프롬프트</div>
+      <div onClick="{{ copyPrompt }}" style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#FFFFFF;background:#3A3C40;border-radius:7px;padding:7px 12px;cursor:pointer" style-active="opacity:.7"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="#fff" stroke-width="1.4"></rect><path d="M8.5 3.5V2.5a1 1 0 00-1-1h-5a1 1 0 00-1 1v5a1 1 0 001 1h1" fill="none" stroke="#fff" stroke-width="1.4"></path></svg>복사</div>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.65;color:#44464B;background:#FFFFFF;border:1px solid #E4E5E8;border-radius:9px;padding:11px 12px;white-space:pre-wrap;max-height:250px;overflow-y:auto">{{ p.text }}</div>
+    <div style="font-size:11px;color:#9A9DA3">인식은 앱이 형식 규칙으로 직접 처리 — 붙여넣을 때 AI가 필요 없습니다</div>
+  </div>
+  <div onClick="{{ copyAndGoPaste }}" style="text-align:center;font-size:14.5px;font-weight:800;color:#FFFFFF;background:#3A3C40;border-radius:11px;padding:13px;cursor:pointer" style-active="opacity:.7">복사하고 답변 붙여넣기로 이동 →</div>
+</div>
+</sc-if>
+
+<!-- ── PASTE / AUTO-FILL ── -->
+<sc-if value="{{ isPaste }}" hint-placeholder-val="{{ false }}">
+<div style="position:sticky;top:0;z-index:5;padding:13px 18px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E4E5E8;background:#FAFAFB">
+  <div onClick="{{ goPrompt }}" style="font-size:14.5px;color:#75787E;cursor:pointer">뒤로</div>
+  <span style="font:600 12px 'IBM Plex Mono',monospace;color:#1B1C1E;letter-spacing:.08em">자동 입력</span>
+  <div onClick="{{ savePasted }}" style="font-size:14.5px;font-weight:800;color:#FFFFFF;background:#3A3C40;padding:7px 15px;border-radius:8px;cursor:pointer" style-active="opacity:.7">저장</div>
+</div>
+<div style="padding:15px 18px 24px;display:flex;flex-direction:column;gap:13px">
+  <div style="background:#F7F7F9;border:1px solid #E4E5E8;border-radius:11px;padding:11px 12px;display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:600 10px 'IBM Plex Mono',monospace;color:#9A9DA3;letter-spacing:.08em">레시피 텍스트 붙여넣기 — 앱이 직접 인식</span><div onClick="{{ clearPaste }}" style="font-size:11.5px;font-weight:700;color:#55575C;cursor:pointer">지우기</div></div>
+    <textarea value="{{ pasteText }}" onChange="{{ onPaste }}" rows="6" placeholder="AI 답변을 그대로 붙여넣으세요" style="width:100%;box-sizing:border-box;background:#FFFFFF;border:1px solid #E4E5E8;border-radius:8px;padding:9px 10px;resize:none;font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.6;color:#44464B"></textarea>
+    <div onClick="{{ fillSample }}" style="align-self:flex-start;font-size:11.5px;font-weight:700;color:#3A3C40;border:1px solid #D5D7DB;border-radius:6px;padding:5px 10px;cursor:pointer">샘플 답변 붙여넣기</div>
+  </div>
+  <sc-if value="{{ parsedOk }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:center;gap:8px;background:#EFF4EE;border:1px solid #D6E2D4;border-radius:10px;padding:9px 12px">
+      <svg width="15" height="15" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="6.5" fill="#5B7A56"></circle><path d="M4.5 7.5l2.2 2.2L10.8 5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span style="font-size:12.5px;color:#3F5A3B"><b>인식 완료</b> — {{ parsedSummary }}</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div style="width:58px;height:58px;border-radius:11px;background:#F4F4F6;border:1px dashed #D5D7DB;display:flex;align-items:center;justify-content:center;font-size:9px;color:#9A9DA3;flex-shrink:0">IMG＋</div>
+      <div style="flex:1"><div style="font-size:17px;font-weight:800;color:#1B1C1E">{{ parsed.name }}</div><div style="font:500 11.5px 'IBM Plex Mono',monospace;color:#75787E;margin-top:3px">{{ parsed.meta }}</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font:600 11px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">주재료 · {{ parsed.ingCount }} <span style="color:#9A9DA3;font-weight:400">— 저장 후 수정 가능</span></div>
+      <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:12px;padding:2px 13px">
+        <sc-for list="{{ parsed.ing }}" as="g" hint-placeholder-count="4">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #EEEEF0;font-size:14px"><span style="color:#1B1C1E">{{ g.n }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#75787E">{{ g.q }}</span></div>
+        </sc-for>
+      </div>
+      <div style="font:600 11px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em;margin-top:4px">양념·소스 · {{ parsed.sauceCount }} <span style="color:#9A9DA3;font-weight:400">— 별도 인식</span></div>
+      <div style="background:#F7F7F9;border:1px solid #E4E5E8;border-radius:12px;padding:2px 13px">
+        <sc-for list="{{ parsed.sauce }}" as="s" hint-placeholder-count="3">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #EAEAEC;font-size:14px"><span style="color:#1B1C1E">{{ s.n }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#75787E">{{ s.q }}</span></div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font:600 11px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">STEPS · {{ parsed.stepCount }}</div>
+      <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ parsed.steps }}" as="st" hint-placeholder-count="4">
+          <div style="display:flex;gap:10px"><span style="font:600 11px 'IBM Plex Mono',monospace;color:#55575C;flex-shrink:0;padding-top:2px">{{ st.no }}</span><div style="flex:1;font-size:13.5px;line-height:1.55;color:#44464B">{{ st.t }}</div><sc-if value="{{ st.hasTimer }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#FFFFFF;background:#3A3C40;border-radius:4px;padding:2px 6px;white-space:nowrap;height:fit-content">⏱ {{ st.timerLabel }}</span></sc-if></div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ parsedEmpty }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:flex-start;gap:8px;background:#FBF4E4;border:1px solid #EBDDB8;border-radius:10px;padding:9px 12px">
+      <svg width="15" height="15" viewBox="0 0 15 15" style="flex-shrink:0;margin-top:1px"><circle cx="7.5" cy="7.5" r="6.5" fill="#B08A2E"></circle><path d="M7.5 4v4M7.5 10.5v.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"></path></svg>
+      <div style="font-size:12.5px;line-height:1.55;color:#7A6120">아직 인식할 내용이 없습니다. 답변을 붙여넣거나 <b>샘플</b>로 확인해 보세요.</div>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ── DEVICES ── -->
+<sc-if value="{{ isDevices }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px 18px 24px;display:flex;flex-direction:column;gap:12px">
+  <div onClick="{{ back }}" style="font-size:13.5px;color:#75787E;cursor:pointer">‹ 뒤로</div>
+  <div>
+    <div style="font-size:24px;font-weight:800;color:#1B1C1E">내 조리기기</div>
+    <div style="font-size:12.5px;color:#75787E;margin-top:5px">동시 조리에서 기기 겹침을 계산하는 기준이 됩니다</div>
+  </div>
+  <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:13px;overflow:hidden">
+    <sc-for list="{{ devices }}" as="dv" hint-placeholder-count="5">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #EEEEF0">
+        <div style="flex:1"><div style="font-size:14.5px;font-weight:700;color:#1B1C1E">{{ dv.name }}</div><div style="font-size:11.5px;color:#9A9DA3;margin-top:2px">{{ dv.note }}</div></div>
+        <span style="font:500 11px 'IBM Plex Mono',monospace;color:#55575C;background:#F1F1F3;border-radius:6px;padding:4px 9px">×{{ dv.count }}</span>
+        <div onClick="{{ dv.onRemove }}" style="color:#B65E51;font-size:16px;cursor:pointer">−</div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="background:#F7F7F9;border:1px solid #E4E5E8;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:9px">
+    <div style="font:600 10.5px 'IBM Plex Mono',monospace;color:#55575C;letter-spacing:.08em">새 기기 추가</div>
+    <input value="{{ newDevice }}" onChange="{{ onNewDevice }}" placeholder="예) 전기그릴" style="background:#FFFFFF;border:1.5px solid #3A3C40;border-radius:9px;padding:11px 12px;font-size:14.5px;color:#1B1C1E">
+    <div style="display:flex;gap:8px">
+      <div onClick="{{ cycleDeviceCount }}" style="flex:1;background:#FFFFFF;border:1px solid #E4E5E8;border-radius:9px;padding:9px 11px;cursor:pointer"><div style="font:600 9px 'IBM Plex Mono',monospace;color:#9A9DA3">동시 사용</div><div style="font-size:13.5px;color:#1B1C1E;margin-top:2px">{{ newDeviceCount }}대 ▾</div></div>
+      <div onClick="{{ toggleIdle }}" style="flex:1;background:#FFFFFF;border:1px solid #E4E5E8;border-radius:9px;padding:9px 11px;cursor:pointer"><div style="font:600 9px 'IBM Plex Mono',monospace;color:#9A9DA3">방치 가능</div><div style="font-size:13.5px;color:#1B1C1E;margin-top:2px">{{ newDeviceIdle }} ▾</div></div>
+    </div>
+    <div onClick="{{ addDevice }}" style="text-align:center;font-size:13.5px;font-weight:800;color:#FFFFFF;background:#3A3C40;border-radius:9px;padding:11px;cursor:pointer" style-active="opacity:.7">추가</div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ── PLAN ── -->
+<sc-if value="{{ isPlan }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px 18px 24px;display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;align-items:baseline;justify-content:space-between">
+    <div style="font-size:24px;font-weight:800;color:#1B1C1E;letter-spacing:-.02em">동시 조리 플랜</div>
+    <span style="font:500 12px 'IBM Plex Mono',monospace;color:#55575C">EST {{ plan.est }}</span>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <sc-for list="{{ plan.chips }}" as="c" hint-placeholder-count="5">
+      <div onClick="{{ c.onTap }}" style="font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:7px;cursor:pointer;background: {{ c.bg }};color: {{ c.fg }};border-left:3px solid {{ c.bar }}">{{ c.label }}</div>
+    </sc-for>
+  </div>
+  <sc-if value="{{ plan.has }}" hint-placeholder-val="{{ true }}">
+  <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:13px;padding:14px;display:flex;flex-direction:column;gap:10px">
+    <div style="font:600 10.5px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">{{ plan.laneNote }}</div>
+    <sc-for list="{{ plan.lanes }}" as="l" hint-placeholder-count="3">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="width:56px;font-size:11px;font-weight:700;color:#55575C;flex-shrink:0">{{ l.device }}</span>
+        <div style="flex:1;display:flex;gap:2px;height:22px">
+          <div style="background:#E4E5E8;border-radius:3px;flex: {{ l.prep }}"></div>
+          <div style="border-radius:3px;flex: {{ l.cook }};background: {{ l.color }}"></div>
+          <div style="flex: {{ l.rest }}"></div>
+        </div>
+      </div>
+    </sc-for>
+    <div style="display:flex;justify-content:space-between;font:500 10px 'IBM Plex Mono',monospace;color:#9A9DA3;border-top:1px solid #EEEEF0;padding-top:8px"><span>00:00</span><span>{{ plan.mid }}</span><span>{{ plan.est }}</span></div>
+    <div style="display:flex;gap:12px;font-size:11px;color:#75787E"><span><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:#E4E5E8;margin-right:4px"></span>손질·예열</span><span><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:#3A3C40;margin-right:4px"></span>조리 중</span></div>
+  </div>
+  <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:13px;padding:14px;display:flex;flex-direction:column;gap:9px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:600 10.5px 'IBM Plex Mono',monospace;color:#75787E;letter-spacing:.08em">PREP — 손질 한 번에</div><span style="font:500 10.5px 'IBM Plex Mono',monospace;color:#55575C">{{ plan.prepDone }}</span></div>
+    <sc-for list="{{ plan.prep }}" as="pp" hint-placeholder-count="3">
+      <div onClick="{{ pp.onTap }}" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+        <span style="width:18px;height:18px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background: {{ pp.boxBg }};border:1.5px solid {{ pp.boxBd }}"><sc-if value="{{ pp.done }}" hint-placeholder-val="{{ false }}"><svg width="9" height="7" viewBox="0 0 10 8"><path d="M1 4l2.7 2.7L9 1" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"></path></svg></sc-if></span>
+        <span style="flex:1;font-size:13.5px;color: {{ pp.fg }};text-decoration: {{ pp.deco }}">{{ pp.label }}</span>
+      </div>
+    </sc-for>
+  </div>
+  <div style="background:#F7F7F9;border:1px solid #D5D7DB;border-radius:13px;padding:14px;display:flex;flex-direction:column;gap:9px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:600 10.5px 'IBM Plex Mono',monospace;color:#55575C;letter-spacing:.08em">양념장 — 베이스 한 번에</div><span style="font-size:11px;color:#9A9DA3">겹치는 부분 자동 계산</span></div>
+    <sc-if value="{{ plan.hasBase }}" hint-placeholder-val="{{ true }}">
+    <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-size:12.5px;font-weight:800;color:#1B1C1E">{{ plan.baseTitle }}</div><span style="font:500 10px 'IBM Plex Mono',monospace;color:#9A9DA3">{{ plan.baseScope }}</span></div>
+      <div style="font-size:13px;color:#44464B;line-height:1.6">{{ plan.baseText }}</div>
+    </div>
+    </sc-if>
+    <sc-if value="{{ plan.noBase }}" hint-placeholder-val="{{ false }}">
+    <div style="font-size:12px;color:#9A9DA3;line-height:1.55">{{ plan.baseText }}</div>
+    </sc-if>
+    <sc-if value="{{ plan.hasPartial }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#FFFFFF;border:1px dashed #D5D7DB;border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:7px">
+      <div style="font-size:12.5px;font-weight:800;color:#1B1C1E">{{ plan.partialTitle }}</div>
+      <sc-for list="{{ plan.partials }}" as="pt" hint-placeholder-count="2">
+        <div style="display:flex;gap:9px;align-items:flex-start"><span style="font-size:12.5px;font-weight:700;color:#1B1C1E;width:66px;flex-shrink:0">{{ pt.n }}</span><div style="flex:1"><div style="font-size:13px;color:#44464B">{{ pt.q }}</div><div style="font-size:11px;color:#9A9DA3;margin-top:2px">{{ pt.who }}</div></div></div>
+      </sc-for>
+    </div>
+    </sc-if>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-size:12.5px;font-weight:800;color:#1B1C1E">{{ plan.ownTitle }}</div>
+      <sc-for list="{{ plan.splits }}" as="sp" hint-placeholder-count="2">
+        <div style="display:flex;gap:9px;align-items:flex-start"><span style="font-size:11.5px;font-weight:700;color:#55575C;width:60px;flex-shrink:0;padding-top:2px">{{ sp.name }}</span><span style="flex:1;font-size:13px;color:#44464B;line-height:1.5">{{ sp.text }}</span></div>
+      </sc-for>
+    </div>
+    <div style="display:flex;align-items:center;gap:7px;border-top:1px solid #E4E5E8;padding-top:8px">
+      <svg width="13" height="13" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="6.5" fill="#5B7A56"></circle><path d="M4.5 7.5l2.2 2.2L10.8 5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span style="font-size:12px;color:#3F5A3B">{{ plan.saveNote }}</span>
+    </div>
+  </div>
+  <div onClick="{{ startPlan }}" style="text-align:center;font-size:15px;font-weight:800;color:#FFFFFF;background:#3A3C40;border-radius:11px;padding:14px;cursor:pointer" style-active="opacity:.7">START — 타이머 자동 세팅</div>
+  </sc-if>
+  <sc-if value="{{ plan.none }}" hint-placeholder-val="{{ false }}">
+    <div style="text-align:center;font-size:13px;color:#9A9DA3;padding:40px 0;line-height:1.7">함께 만들 요리를 위에서<br>두 개 이상 골라 보세요</div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ── SHOPPING ── -->
+<sc-if value="{{ isShop }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px 18px 24px;display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;align-items:baseline;justify-content:space-between">
+    <div style="font-size:24px;font-weight:800;color:#1B1C1E;letter-spacing:-.02em">장보기</div>
+    <span style="font:500 12px 'IBM Plex Mono',monospace;color:#55575C">{{ shopCount }}</span>
+  </div>
+  <div style="font-size:12.5px;color:#75787E">동시 조리에 고른 요리에서 <b>없음</b>으로 표시한 재료가 모입니다</div>
+  <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:13px;overflow:hidden">
+    <sc-for list="{{ shopList }}" as="s" hint-placeholder-count="4">
+      <div onClick="{{ s.onTap }}" style="display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid #EEEEF0;cursor:pointer">
+        <span style="width:18px;height:18px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background: {{ s.boxBg }};border:1.5px solid {{ s.boxBd }}"><sc-if value="{{ s.done }}" hint-placeholder-val="{{ false }}"><svg width="9" height="7" viewBox="0 0 10 8"><path d="M1 4l2.7 2.7L9 1" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"></path></svg></sc-if></span>
+        <div style="flex:1"><div style="font-size:14.5px;color: {{ s.fg }};text-decoration: {{ s.deco }}">{{ s.n }}</div><div style="font-size:11px;color:#9A9DA3;margin-top:2px">{{ s.from }}</div></div>
+        <span style="font:500 12.5px 'IBM Plex Mono',monospace;color:#75787E">{{ s.q }}</span>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;background:#F4F4F6;border:1px solid #E4E5E8;border-radius:10px;padding:9px 12px">
+    <input value="{{ newShop }}" onChange="{{ onNewShop }}" onKeyDown="{{ onNewShopKey }}" placeholder="직접 추가 (Enter)" style="flex:1;border:none;background:transparent;font-size:13.5px;color:#1B1C1E">
+    <div onClick="{{ addShop }}" style="font-size:12.5px;font-weight:700;color:#3A3C40;cursor:pointer">추가</div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ── TIMERS ── -->
+<sc-if value="{{ isTimer }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px 18px 24px;display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;align-items:baseline;justify-content:space-between">
+    <div style="font-size:24px;font-weight:800;color:#1B1C1E;letter-spacing:-.02em">타이머</div>
+    <span style="font:500 12px 'IBM Plex Mono',monospace;color:#55575C">{{ timerCount }}</span>
+  </div>
+  <sc-for list="{{ timers }}" as="t" hint-placeholder-count="2">
+    <div style="background:#FFFFFF;border:1px solid #E4E5E8;border-radius:13px;padding:14px;display:flex;flex-direction:column;gap:10px;border-color: {{ t.bd }}">
+      <div style="display:flex;align-items:baseline;justify-content:space-between">
+        <div style="font-size:14px;font-weight:700;color:#1B1C1E">{{ t.label }}</div>
+        <div onClick="{{ t.onRemove }}" style="font-size:12px;color:#9A9DA3;cursor:pointer">삭제</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font:600 34px 'IBM Plex Mono',monospace;letter-spacing:-.02em;color: {{ t.fg }}">{{ t.display }}</div>
+        <span style="flex:1"></span>
+        <div onClick="{{ t.onToggle }}" style="font-size:13px;font-weight:800;color:#FFFFFF;background:#3A3C40;border-radius:9px;padding:9px 16px;cursor:pointer" style-active="opacity:.7">{{ t.action }}</div>
+        <div onClick="{{ t.onReset }}" style="font-size:13px;font-weight:700;color:#55575C;border:1px solid #D5D7DB;border-radius:9px;padding:9px 14px;cursor:pointer">리셋</div>
+      </div>
+      <div style="height:4px;border-radius:99px;background:#EEEEF0;overflow:hidden"><div style="height:100%;background:#3A3C40;width: {{ t.pct }}"></div></div>
+    </div>
+  </sc-for>
+  <div style="display:flex;gap:8px">
+    <sc-for list="{{ quickTimers }}" as="q" hint-placeholder-count="3">
+      <div onClick="{{ q.onTap }}" style="flex:1;text-align:center;font-size:13px;font-weight:700;color:#55575C;border:1px dashed #D5D7DB;border-radius:10px;padding:11px;cursor:pointer">＋ {{ q.label }}</div>
+    </sc-for>
+  </div>
+  <div style="font-size:11.5px;color:#9A9DA3;line-height:1.6">레시피 단계의 ⏱ 배지를 탭하면 그 단계 이름으로 타이머가 추가됩니다</div>
+</div>
+</sc-if>
+
+</div>
+
+<!-- ── TAB BAR ── -->
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;background:#FFFFFF;border-top:1px solid #E4E5E8;padding:10px 8px 26px;flex-shrink:0">
+  <div onClick="{{ tabRecipes }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><svg width="20" height="20" viewBox="0 0 21 21"><path d="M4 3h9a3 3 0 013 3v12H6a2 2 0 01-2-2V3z" fill="none" stroke="{{ tabC.r }}" stroke-width="1.8"></path><path d="M7.5 7h5M7.5 10.5h5" stroke="{{ tabC.r }}" stroke-width="1.6" stroke-linecap="round"></path></svg><span style="font-size:10.5px;font-weight:700;color: {{ tabC.r }}">레시피</span></div>
+  <div onClick="{{ tabPlan }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><svg width="20" height="20" viewBox="0 0 21 21"><path d="M10.5 2.5l8 4-8 4-8-4 8-4z" fill="none" stroke="{{ tabC.p }}" stroke-width="1.7" stroke-linejoin="round"></path><path d="M2.5 11l8 4 8-4" fill="none" stroke="{{ tabC.p }}" stroke-width="1.7" stroke-linejoin="round"></path></svg><span style="font-size:10.5px;font-weight:700;color: {{ tabC.p }}">동시 조리</span></div>
+  <div onClick="{{ tabShop }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><svg width="20" height="20" viewBox="0 0 21 21"><path d="M3 4h2l2.4 10h9.2l2-7H6" fill="none" stroke="{{ tabC.s }}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="17.5" r="1.4" fill="{{ tabC.s }}"></circle><circle cx="15.5" cy="17.5" r="1.4" fill="{{ tabC.s }}"></circle></svg><span style="font-size:10.5px;font-weight:700;color: {{ tabC.s }}">장보기</span></div>
+  <div onClick="{{ tabTimer }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer"><svg width="20" height="20" viewBox="0 0 21 21"><circle cx="10.5" cy="11.5" r="7" fill="none" stroke="{{ tabC.t }}" stroke-width="1.7"></circle><path d="M10.5 7.5v4l3 2M8 2.5h5" stroke="{{ tabC.t }}" stroke-width="1.7" stroke-linecap="round"></path></svg><span style="font-size:10.5px;font-weight:700;color: {{ tabC.t }}">타이머</span></div>
+</div>
+</sc-if>
+
+<!-- ── SUBSTITUTE SHEET ── -->
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(27,28,30,.35);animation:fadeIn .18s ease"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;background:#FFFFFF;border-radius:22px 22px 0 0;padding:12px 18px 40px;display:flex;flex-direction:column;gap:13px;box-shadow:0 -8px 30px rgba(0,0,0,.15);animation:sheetUp .22s cubic-bezier(.2,.8,.2,1)">
+  <div style="width:38px;height:4px;border-radius:99px;background:#D5D7DB;margin:0 auto"></div>
+  <div style="font-size:17px;font-weight:800;color:#1B1C1E">재료 대체 — {{ sheet.target }}</div>
+  <div style="display:flex;flex-direction:column;gap:7px">
+    <span style="font-size:12px;font-weight:700;color:#75787E">대신 쓸 수 있는 재료 (내가 가진 것)</span>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <sc-for list="{{ sheet.options }}" as="o" hint-placeholder-count="3">
+        <div onClick="{{ o.onTap }}" style="font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:99px;border:1px solid #E4E5E8;cursor:pointer;background: {{ o.bg }};color: {{ o.fg }};border-color: {{ o.bd }}">{{ o.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="background:#F7F7F9;border:1px solid #E4E5E8;border-radius:11px;padding:12px;font-size:13px;line-height:1.65;color:#44464B">{{ sheet.prompt }}</div>
+  <div style="display:flex;gap:9px">
+    <div onClick="{{ copySheetPrompt }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14.5px;font-weight:800;color:#FFFFFF;background:#3A3C40;border-radius:11px;padding:13px 0;cursor:pointer" style-active="opacity:.7"><svg width="13" height="13" viewBox="0 0 12 12"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" fill="none" stroke="#fff" stroke-width="1.4"></rect><path d="M8.5 3.5V2.5a1 1 0 00-1-1h-5a1 1 0 00-1 1v5a1 1 0 001 1h1" fill="none" stroke="#fff" stroke-width="1.4"></path></svg>프롬프트 복사</div>
+    <div onClick="{{ logSub }}" style="flex:1;text-align:center;font-size:14.5px;font-weight:700;color:#55575C;background:#FFFFFF;border:1px solid #D5D7DB;border-radius:11px;padding:13px 0;cursor:pointer">대체 기록 남기기</div>
+  </div>
+  <div onClick="{{ toggleOut }}" style="text-align:center;font-size:12.5px;font-weight:700;color:#3A3C40;cursor:pointer">{{ sheet.outLabel }}</div>
+</div>
+</sc-if>
+
+<!-- ── TOAST ── -->
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:20px;right:20px;bottom:104px;background:#1B1C1E;color:#FFFFFF;border-radius:11px;padding:12px 15px;font-size:13px;text-align:center;animation:toastIn .2s ease">{{ toast }}</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:920}}">
+const SEED = [
+  {id:'r1',name:'김치찌개',time:30,level:'쉬움',star:4.5,cooked:12,serves:2,devices:['가스 1구'],tags:['한식','야식'],
+   ing:[{n:'신김치',q:'300g'},{n:'돼지고기 목살',q:'200g',out:true},{n:'양파',q:'1/2개'},{n:'대파',q:'1대'}],
+   sauce:[{n:'고춧가루',q:'1큰술'},{n:'국간장',q:'1큰술'},{n:'다진마늘',q:'½큰술'},{n:'설탕',q:'½작은술'},{n:'멸치액젓',q:'1작은술'}],
+   steps:[{t:'김치는 한입 크기로 썰고, 돼지고기는 도톰하게 썬다.',sec:0},{t:'고기를 먼저 볶다가 김치를 넣고 더 볶는다.',sec:180},{t:'물을 붓고 양념을 넣어 끓인다.',sec:1200},{t:'두부와 대파를 올리고 한소끔 더 끓인다.',sec:300}],
+   subs:[{date:'7/12',text:'목살 → 참치캔 1개 · 기름 반만. 국물이 가벼워짐. ★4'},{date:'3/02',text:'목살 → 스팸 ½캔 · 짠맛 있어 소금 생략. ★4.5'}],
+   memo:'설탕 ½술 줄이기. 두부 반 모 추가 좋았음.'},
+  {id:'r2',name:'수육',time:50,level:'보통',star:4.5,cooked:6,serves:3,devices:['스팀쿡'],tags:['한식'],
+   ing:[{n:'통삼겹살',q:'600g'},{n:'대파',q:'1대'},{n:'양파',q:'1개'}],
+   sauce:[{n:'된장',q:'2큰술'},{n:'통후추',q:'약간'},{n:'소주',q:'2큰술'}],
+   steps:[{t:'고기를 찬물에 30분 담가 핏물을 뺀다.',sec:1800},{t:'향채와 함께 스팀쿡에 넣고 익힌다.',sec:2700},{t:'한 김 식힌 뒤 결 반대로 썬다.',sec:0}],
+   subs:[],memo:'된장 조금 더 넣으면 잡내가 덜함.'},
+  {id:'r3',name:'통삼겹 오븐구이',time:70,level:'보통',star:5,cooked:3,serves:3,devices:['오븐'],tags:['양식'],
+   ing:[{n:'통삼겹살',q:'700g'},{n:'감자',q:'2개'},{n:'로즈마리',q:'2줄',out:true}],
+   sauce:[{n:'간장',q:'2큰술'},{n:'다진마늘',q:'1큰술'},{n:'올리브유',q:'1큰술'},{n:'설탕',q:'½큰술'}],
+   steps:[{t:'삼겹살에 칼집을 내고 밑간한다.',sec:0},{t:'오븐을 200도로 예열한다.',sec:600},{t:'감자와 함께 오븐에 굽는다.',sec:2700},{t:'10분 레스팅 후 썬다.',sec:600}],
+   subs:[],memo:'마지막 5분 230도로 겉면 바삭하게.'},
+  {id:'r4',name:'영양밥',time:40,level:'쉬움',star:4,cooked:7,serves:2,devices:['밥솥'],tags:['한식'],
+   ing:[{n:'잡곡',q:'2컵'},{n:'밤',q:'6개'},{n:'대추',q:'4개'}],
+   sauce:[{n:'간장',q:'2큰술'},{n:'참기름',q:'1큰술'},{n:'다진마늘',q:'½큰술'}],
+   steps:[{t:'잡곡을 씻어 30분 불린다.',sec:1800},{t:'재료를 얹어 취사한다.',sec:2100}],
+   subs:[],memo:''},
+  {id:'r5',name:'계란말이',time:15,level:'보통',star:4,cooked:8,serves:2,devices:['가스 1구'],tags:['한식','야식'],
+   ing:[{n:'계란',q:'4개'},{n:'당근',q:'1/3개'},{n:'쪽파',q:'2줄'}],
+   sauce:[{n:'소금',q:'약간'},{n:'맛술',q:'1작은술'}],
+   steps:[{t:'계란을 풀고 채소를 잘게 썰어 섞는다.',sec:0},{t:'약불에서 나눠 부어 말아준다.',sec:420}],
+   subs:[],memo:'약불이 전부.'},
+  {id:'r6',name:'닭가슴살 에어프라이',time:25,level:'쉬움',star:4,cooked:4,serves:1,devices:['에어프라이어'],tags:['다이어트'],
+   ing:[{n:'닭가슴살',q:'2쪽'},{n:'파프리카',q:'1개'}],
+   sauce:[{n:'올리브유',q:'1큰술'},{n:'허브솔트',q:'약간'}],
+   steps:[{t:'닭가슴살에 칼집을 내고 밑간한다.',sec:0},{t:'180도에서 굽고 뒤집어 한 번 더.',sec:900}],
+   subs:[],memo:''}
+];
+const SEED_DEVICES = [
+  {name:'가스레인지',note:'동시 사용 2구',count:2,idle:false},
+  {name:'오븐',note:'예열 10분 자동 추가',count:1,idle:true},
+  {name:'스팀쿡',note:'조리 중 방치 가능',count:1,idle:true},
+  {name:'밥솥',note:'조리 중 방치 가능',count:1,idle:true},
+  {name:'에어프라이어',note:'직접 추가한 기기',count:1,idle:true}
+];
+const TOOLS = ['가스 1구','오븐','스팀쿡','밥솥','에어프라이어'];
+const PANTRY = ['묵은지','닭다리살','감자','양파','대파','계란','마늘','두부','당근','참치캔','스팸','애호박'];
+const SAMPLE = `[이름] 묵은지 닭볶음탕
+[인분] 2
+[시간] 50분
+[난이도] 보통
+[기기] 가스 1구, 오븐
+[재료]
+묵은지 | 400 | g
+닭다리살 | 500 | g
+감자 | 2 | 개
+양파 | 1 | 개
+대파 | 1 | 대
+[양념]
+고춧가루 | 2 | 큰술
+다진마늘 | 1 | 큰술
+간장 | 3 | 큰술
+설탕 | 1 | 큰술
+후추 | 약간 |
+[단계]
+1. 묵은지는 속을 털고 4cm 폭으로 썬다.
+2. 닭다리살을 끓는 물에 데쳐 잡내를 제거한다. ⏱5:00
+3. 냄비에 묵은지와 닭을 깔고 양념을 넣어 끓인다. ⏱30:00
+4. 감자를 넣고 익을 때까지 더 끓인다. ⏱10:00
+5. 대파를 올리고 불을 끈다.
+[태그] 한식, 찜·볶음, 묵은지`;
+
+const AC = '#3A3C40', OFFBG = '#FFFFFF', OFFFG = '#55575C', OFFBD = '#E4E5E8';
+const pad = n => String(n).padStart(2,'0');
+const mmss = s => pad(Math.floor(s/60)) + ':' + pad(s%60);
+
+class Component extends DCLogic {
+  state = {
+    screen:'home', prev:'home', query:'', filter:'ALL',
+    recipes: SEED.map(r=>({...r})), activeId:'r1', viewServes:null,
+    draft:null, devices:SEED_DEVICES.map(d=>({...d})),
+    newDevice:'', newDeviceCount:1, newDeviceIdle:false,
+    sheet:null, sheetPick:0,
+    p:{dish:'묵은지 닭볶음탕', sel:['묵은지','닭다리살','감자'], tools:['가스 1구','오븐'], serves:2, newIng:''},
+    pantry: PANTRY.slice(),
+    pasteText:'', planSel:['r1','r3'], prepDone:{}, shopDone:{}, extraShop:[], newShop:'',
+    timers:[], toast:''
+  };
+
+  // 레시피는 가족 저장소(Supabase)에 둔다 — family_state 문서의 cook 칸 하나를 쓴다.
+  // (타이머는 지금 이 기기에서만 도는 것이라 저장하지 않는다)
+  DBK = ['recipes','devices','pantry','planSel','prepDone','shopDone','extraShop'];
+  snapshot(){ const o={}; for(const k of this.DBK) o[k]=this.state[k]; return o; }
+  adopt(o, cb){
+    const done = ()=>{ this._saved = JSON.stringify(this.snapshot()); if(cb) cb(); };
+    if(!o || typeof o!=='object') return done();
+    const p={}; for(const k of this.DBK) if(o[k]!==undefined) p[k]=o[k];
+    this.setState(p, done);
+  }
+  persist(){ clearTimeout(this._pt); this._pt = setTimeout(()=>{
+    if(!this._loaded) return;
+    const o = this.snapshot(), s = JSON.stringify(o);
+    if(s === this._saved) return;   // 서버에서 방금 받은 걸 그대로 되돌려 보내지 않게
+    this._saved = s; this._doc.cook = o;
+    window.FamilyStore.save(this._doc, fresh=>{ fresh.cook = o; });
+  },400); }
+  componentDidUpdate(){ this.persist(); }
+
+  componentDidMount(){
+    this._doc = {};
+    window.FamilyStore.start({seed:()=>({}), onRemote:doc=>{ this._doc=doc; this.adopt(doc.cook); }})
+      .then(doc=>{ this._doc = doc || {}; this.adopt(this._doc.cook, ()=>{ this._loaded = true; }); });
+    this._iv = setInterval(()=>{
+      const ts = this.state.timers;
+      if(!ts.some(t=>t.running && t.left>0)) return;
+      this.setState({timers: ts.map(t => t.running && t.left>0 ? {...t,left:t.left-1,running:t.left-1>0} : t)});
+    },1000);
+  }
+  componentWillUnmount(){ clearInterval(this._iv); clearTimeout(this._tt); clearTimeout(this._pt); }
+
+  go(s){ this.setState(st=>({screen:s, prev:st.screen, sheet:null})); }
+  say(msg){ clearTimeout(this._tt); this.setState({toast:msg}); this._tt=setTimeout(()=>this.setState({toast:''}),1900); }
+  copy(text,msg){ try{ navigator.clipboard.writeText(text); }catch(e){} this.say(msg); }
+  active(){ return this.state.recipes.find(r=>r.id===this.state.activeId) || this.state.recipes[0]; }
+  scale(q, from, to){
+    if(from===to) return q;
+    const m = String(q).match(/^([\d.½¼¾/]+)\s*(.*)$/);
+    if(!m) return q;
+    let num = m[1]==='½'?0.5:m[1]==='¼'?0.25:m[1]==='¾'?0.75: (m[1].includes('/') ? (parseFloat(m[1].split('/')[0])/parseFloat(m[1].split('/')[1])) : parseFloat(m[1]));
+    if(isNaN(num)) return q;
+    let v = num*to/from;
+    v = Math.round(v*100)/100;
+    return (v===0.5?'½':v) + (m[2]?m[2]:'');
+  }
+  sumQty(list){
+    const p = list.map(q=>{ const m=String(q).match(/^([\d.]+|½|¼|¾)\s*(.*)$/); if(!m) return null;
+      const n = m[1]==='½'?0.5:m[1]==='¼'?0.25:m[1]==='¾'?0.75:parseFloat(m[1]);
+      return isNaN(n)?null:{n, u:m[2].trim()}; });
+    if(p.some(x=>!x) || new Set(p.map(x=>x.u)).size>1) return list.join(' + ');
+    const t = Math.round(p.reduce((a,x)=>a+x.n,0)*100)/100;
+    return (t===0.5?'½':t) + (p[0].u ? p[0].u : '');
+  }
+  sauceGroups(sel){
+    const key = sel.map(x=>x.id + ':' + x.sauce.map(s=>s.n+s.q).join('|')).join(',');
+    if(this._sgKey===key) return this._sg;
+    const map = {};
+    sel.forEach(x=>x.sauce.forEach(s=>{ (map[s.n] = map[s.n] || []).push({q:s.q, r:x}); }));
+    const all=[], partial=[], own={};
+    sel.forEach(x=>{ own[x.id]=[]; });
+    Object.keys(map).forEach(n=>{
+      const hits = map[n];
+      if(hits.length===sel.length && sel.length>1) all.push({n, q:this.sumQty(hits.map(h=>h.q))});
+      else if(hits.length>1) partial.push({n, q:this.sumQty(hits.map(h=>h.q)), who:hits.map(h=>h.r.name)});
+      else own[hits[0].r.id].push({n, q:hits[0].q});
+    });
+    partial.sort((a,b)=>b.who.length-a.who.length);
+    this._sgKey = key; this._sg = {all, partial, own};
+    return this._sg;
+  }
+  chipStyle(on){ return on ? {bg:AC,fg:'#FFFFFF',bd:AC} : {bg:OFFBG,fg:OFFFG,bd:OFFBD}; }
+
+  parse(text){
+    if(!text || !text.trim()) return null;
+    const out = {name:'',serves:2,time:0,level:'보통',devices:[],ing:[],sauce:[],steps:[],tags:[]};
+    let sec = '';
+    const timeOf = s => { const h=(s.match(/(\d+)\s*시간/)||[])[1]; const m=(s.match(/(\d+)\s*분/)||[])[1]; const n=(!h&&!m)?(s.match(/(\d+)/)||[])[1]:null; return (h?+h*60:0)+(m?+m:0)+(n?+n:0); };
+    const item = line => {
+      const parts = line.split('|').map(s=>s.trim());
+      if(parts.length>1) return {n:parts[0].replace(/^[-·•*\d.\s]+/,''), q:(parts[1]||'')+(parts[2]||'')||'적당량'};
+      const m = line.replace(/^[-·•*]\s*/,'').match(/^(.+?)\s+([\d.\/½¼¾~]+\s*[a-zA-Z가-힣]*|적당량|약간)$/);
+      if(m) return {n:m[1].trim(), q:m[2].trim()};
+      return {n:line.replace(/^[-·•*]\s*/,'').trim(), q:'적당량'};
+    };
+    text.split('\n').forEach(raw=>{
+      let line = raw.replace(/^```.*$/,'').replace(/\*\*/g,'').trim();
+      if(!line) return;
+      const lm = line.match(/^\[?\s*(이름|요리명|인분|시간|총\s*시간|난이도|기기|도구|조리도구|재료|주재료|양념|양념장|소스|단계|조리법|만드는\s*법|태그)\s*\]?\s*[:：]?\s*(.*)$/);
+      if(lm){
+        const k = lm[1].replace(/\s/g,''), v = lm[2].trim();
+        if(k==='이름'||k==='요리명'){ out.name=v; return; }
+        if(k==='인분'){ out.serves=parseInt(v)||2; return; }
+        if(k==='시간'||k==='총시간'){ out.time=timeOf(v); return; }
+        if(k==='난이도'){ out.level=v||'보통'; return; }
+        if(k==='기기'||k==='도구'||k==='조리도구'){ out.devices=v.split(/[,·]/).map(s=>s.trim()).filter(Boolean); return; }
+        if(k==='태그'){ out.tags=v.split(/[,#·]/).map(s=>s.trim()).filter(Boolean); return; }
+        sec = (k==='재료'||k==='주재료')?'ing':(k==='양념'||k==='양념장'||k==='소스')?'sauce':'step';
+        if(v) { if(sec==='step') this._pushStep(out,v); else out[sec].push(item(v)); }
+        return;
+      }
+      if(sec==='ing'||sec==='sauce') out[sec].push(item(line));
+      else if(sec==='step') this._pushStep(out,line);
+    });
+    if(!out.name && out.ing.length) out.name='새 레시피';
+    if(!out.name && !out.steps.length) return null;
+    if(!out.time) out.time = Math.max(10, Math.round(out.steps.reduce((a,s)=>a+s.sec,0)/60));
+    return out;
+  }
+  _pushStep(out, line){
+    let t = line.replace(/^\s*\d+[.)]\s*/,'').replace(/^[-·•*]\s*/,'');
+    let sec = 0;
+    const tm = t.match(/⏱\s*(\d+):(\d+)/);
+    if(tm){ sec = +tm[1]*60 + +tm[2]; t = t.replace(tm[0],'').trim(); }
+    else { const m2 = t.match(/(\d+)\s*분/); if(m2) sec = +m2[1]*60; }
+    if(t) out.steps.push({t, sec});
+  }
+
+  addTimer(label, sec){
+    if(!sec) return;
+    this.setState(st=>({timers:[{id:'t'+Date.now()+Math.random(), label, total:sec, left:sec, running:true}, ...st.timers], screen:'timer', prev:st.screen}));
+    this.say('타이머 시작 — ' + label);
+  }
+
+  renderVals(){
+    const S = this.state, r = this.active();
+    const scr = S.screen;
+    const v = {};
+    v.isHome = scr==='home'; v.isDetail = scr==='detail'; v.isEdit = scr==='edit';
+    v.isPrompt = scr==='prompt'; v.isPaste = scr==='paste'; v.isDevices = scr==='devices';
+    v.isPlan = scr==='plan'; v.isShop = scr==='shop'; v.isTimer = scr==='timer';
+    v.showTabs = ['home','plan','shop','timer','detail'].includes(scr);
+    v.sheetOpen = !!S.sheet;
+    v.toast = S.toast; v.hasToast = !!S.toast;
+    v.goHome = ()=>this.go('home'); v.back = ()=>this.go(S.prev||'home');
+    v.goPrompt = ()=>this.go('prompt'); v.goDevices = ()=>this.go('devices');
+    v.goNew = ()=>{ this.setState({pasteText:''}); this.go('paste'); };
+    const tc = k => scr===k ? '#1B1C1E' : '#9A9DA3';
+    v.tabC = {r: (scr==='home'||scr==='detail'||scr==='edit')?'#1B1C1E':'#9A9DA3', p: tc('plan'), s: tc('shop'), t: tc('timer')};
+    v.tabRecipes = ()=>this.go('home'); v.tabPlan = ()=>this.go('plan');
+    v.tabShop = ()=>this.go('shop'); v.tabTimer = ()=>this.go('timer');
+
+    // HOME
+    const q = S.query.trim();
+    const tags = ['ALL','한식','야식','오븐','스팀쿡','★4+'];
+    v.chips = tags.map(t=>{ const st = this.chipStyle(S.filter===t); return {label:t, ...st, onTap:()=>this.setState({filter:t})}; });
+    let list = S.recipes.filter(x=>{
+      const f = S.filter;
+      const okF = f==='ALL' ? true : f==='★4+' ? x.star>=4 : (x.tags||[]).includes(f) || (x.devices||[]).some(d=>d.includes(f));
+      const hay = [x.name, ...(x.tags||[]), ...(x.devices||[]), ...x.ing.map(i=>i.n)].join(' ');
+      return okF && (!q || hay.includes(q));
+    });
+    v.list = list.map(x=>({id:x.id, name:x.name, device:(x.devices[0]||'—').replace(' 1구',''),
+      meta: `${x.time}M · ${x.level.toUpperCase()} · ★${x.star.toFixed(1)} · ×${x.cooked}`,
+      onOpen: ()=>this.setState({activeId:x.id, viewServes:null, screen:'detail', prev:'home'})}));
+    v.count = S.recipes.length; v.empty = list.length===0; v.query = S.query;
+    v.onQuery = e=>this.setState({query:e.target.value});
+
+    // DETAIL
+    const vs = S.viewServes || r.serves;
+    v.viewServes = vs;
+    v.servesUp = ()=>this.setState({viewServes: Math.min(12, vs+1)});
+    v.servesDown = ()=>this.setState({viewServes: Math.max(1, vs-1)});
+    v.d = {
+      name:r.name, memo:r.memo || '아직 메모가 없습니다',
+      meta: `${r.time}M · ${r.level.toUpperCase()} · ★${r.star.toFixed(1)} · ×${r.cooked} · ${r.devices.join(', ')}`,
+      ingCount:r.ing.length, sauceCount:r.sauce.length, stepCount:r.steps.length, subCount:r.subs.length,
+      ing: r.ing.map((g,i)=>({n:g.n, q:this.scale(g.q, r.serves, vs), out:!!g.out,
+        onTap:()=>this.setState({sheet:{target:g.n, idx:i}, sheetPick:0})})),
+      sauce: r.sauce.map(s=>({n:s.n, q:this.scale(s.q, r.serves, vs)})),
+      steps: r.steps.map((s,i)=>({no:pad(i+1), t:s.t, hasTimer:s.sec>0, timerLabel:mmss(s.sec),
+        onTimer:()=>this.addTimer(r.name+' '+pad(i+1), s.sec)})),
+      subs: r.subs.length ? r.subs : [{date:'—', text:'아직 기록이 없습니다. 재료를 탭해 대체를 기록해 보세요.'}]
+    };
+    const outs = r.ing.filter(g=>g.out).map(g=>g.n);
+    v.subPromptText = `"${r.name}(${r.ing.map(g=>g.n).join(', ')}, ${vs}인분)을 만드는데 ${outs.length?outs.join('·')+'이(가) 없어':'재료를 바꿔보고 싶어'}. 지금 냉장고에 있는 ${S.pantry.slice(9,12).join(', ')} 중에 뭘로 대체하면 맛 균형이 괜찮을까? 분량과 넣는 타이밍도 알려줘."`;
+    v.copySubPrompt = ()=>this.copy(v.subPromptText, '대체 프롬프트를 복사했습니다');
+    v.openSubSheet = ()=>this.setState({sheet:{target: outs[0] || r.ing[0].n, idx: r.ing.findIndex(g=>g.out) >= 0 ? r.ing.findIndex(g=>g.out) : 0}, sheetPick:0});
+
+    // SHEET
+    if(S.sheet){
+      const opts = ['참치캔','스팸','두부'];
+      const pick = opts[S.sheetPick];
+      const tgt = S.sheet.target;
+      const cur = r.ing[S.sheet.idx] || {};
+      v.sheet = {
+        target: tgt,
+        options: opts.map((o,i)=>({label:o, ...this.chipStyle(i===S.sheetPick), onTap:()=>this.setState({sheetPick:i})})),
+        prompt: `"${r.name}(${r.ing.map(g=>g.n).join(', ')}, ${vs}인분)에서 ${tgt} 대신 ${pick}을(를) 쓰면 맛 균형이 괜찮을까? 분량, 넣는 타이밍, 간 조절 팁을 알려줘."`,
+        outLabel: cur.out ? '이 재료 "없음" 표시 끄기' : '이 재료를 "없음"으로 표시하기'
+      };
+      v.copySheetPrompt = ()=>this.copy(v.sheet.prompt, '프롬프트를 복사했습니다');
+      v.closeSheet = ()=>this.setState({sheet:null});
+      v.toggleOut = ()=>this.setState(st=>({recipes: st.recipes.map(x=> x.id!==r.id ? x : {...x, ing:x.ing.map((g,i)=> i===S.sheet.idx ? {...g,out:!g.out} : g)}), sheet:null}));
+      v.logSub = ()=>{
+        const date = (new Date().getMonth()+1)+'/'+new Date().getDate();
+        this.setState(st=>({recipes: st.recipes.map(x=> x.id!==r.id ? x : {...x, subs:[{date, text:`${tgt} → ${pick} · 방금 기록됨`}, ...x.subs]}), sheet:null}));
+        this.say('대체 기록을 남겼습니다');
+      };
+    }
+
+    // EDIT
+    const dr = S.draft;
+    v.goEdit = ()=>this.setState({draft: JSON.parse(JSON.stringify(r)), screen:'edit', prev:'detail'});
+    v.cancelEdit = ()=>this.setState({draft:null, screen:'detail'});
+    v.saveEdit = ()=>{ this.setState(st=>({recipes: st.recipes.map(x=> x.id===st.draft.id ? {...st.draft, time:parseInt(st.draft.time)||x.time, serves:parseInt(st.draft.serves)||x.serves} : x), draft:null, viewServes:null, screen:'detail'})); this.say('저장했습니다'); };
+    const upd = fn => this.setState(st=>{ const d = JSON.parse(JSON.stringify(st.draft)); fn(d); return {draft:d}; });
+    if(dr){
+      const LV = ['쉬움','보통','어려움'];
+      v.e = {
+        name:dr.name, time:dr.time, level:dr.level, serves:dr.serves, memo:dr.memo,
+        devices: TOOLS.map(t=>({label:t, ...this.chipStyle(dr.devices.includes(t)), onTap:()=>upd(d=>{ d.devices = d.devices.includes(t) ? d.devices.filter(x=>x!==t) : [...d.devices,t]; })})),
+        ing: dr.ing.map((g,i)=>({n:g.n, q:g.q, onName:e=>{const v2=e.target.value; upd(d=>{d.ing[i].n=v2;});}, onQty:e=>{const v2=e.target.value; upd(d=>{d.ing[i].q=v2;});}, onRemove:()=>upd(d=>{d.ing.splice(i,1);})})),
+        sauce: dr.sauce.map((s,i)=>({n:s.n, q:s.q, onName:e=>{const v2=e.target.value; upd(d=>{d.sauce[i].n=v2;});}, onQty:e=>{const v2=e.target.value; upd(d=>{d.sauce[i].q=v2;});}, onRemove:()=>upd(d=>{d.sauce.splice(i,1);})})),
+        steps: dr.steps.map((s,i)=>({no:pad(i+1), t:s.t,
+          tLabel: s.sec ? '⏱ '+mmss(s.sec) : '⏱ 설정',
+          tBg: s.sec ? AC : '#FFFFFF', tFg: s.sec ? '#FFFFFF' : '#75787E', tBd: s.sec ? AC : '#E4E5E8',
+          onText:e=>{const v2=e.target.value; upd(d=>{d.steps[i].t=v2;});},
+          onTimerCycle:()=>upd(d=>{ const cy=[0,180,300,600,1200,1800]; d.steps[i].sec = cy[(cy.indexOf(d.steps[i].sec)+1)%cy.length]; }),
+          onRemove:()=>upd(d=>{d.steps.splice(i,1);})}))
+      };
+      v.onEditName = e=>{const v2=e.target.value; upd(d=>{d.name=v2;});};
+      v.onEditTime = e=>{const v2=e.target.value; upd(d=>{d.time=v2;});};
+      v.onEditServes = e=>{const v2=e.target.value; upd(d=>{d.serves=v2;});};
+      v.onEditMemo = e=>{const v2=e.target.value; upd(d=>{d.memo=v2;});};
+      v.cycleLevel = ()=>upd(d=>{ d.level = LV[(LV.indexOf(d.level)+1)%3]; });
+      v.addIng = ()=>upd(d=>{d.ing.push({n:'새 재료',q:'1'});});
+      v.addSauce = ()=>upd(d=>{d.sauce.push({n:'새 양념',q:'1작은술'});});
+      v.addStep = ()=>upd(d=>{d.steps.push({t:'',sec:0});});
+    }
+
+    // PROMPT BUILDER
+    const P = S.p;
+    const promptText = `"${P.dish || '(음식 이름)'} 레시피를 알려줘. ${P.serves}인분 기준.
+· 쓸 수 있는 재료: ${P.sel.join(', ') || '(선택 없음)'} — 전부 쓸 필요 없이 필요한 것만 골라 써줘
+· 쓸 수 있는 조리도구: ${P.tools.join(', ') || '(선택 없음)'} — 필요한 것만 골라 써줘
+· 그 밖에 꼭 필요한 기본 양념은 추가해도 좋아
+
+답변 규칙 (반드시 지켜줘):
+· 설명·인사말 없이 코드블록 하나만 출력
+· 아래 대괄호 표시를 그대로, 순서 변경 금지
+· 주재료는 [재료], 양념·소스는 [양념]으로 나눠서
+· 분량은 숫자 + 단위(g/ml/개/큰술/작은술/컵) · 없으면 "적당량"
+· 각 단계에 시간이 있으면 줄 끝에 ⏱분:초
+
+[이름] 요리명
+[인분] 숫자
+[시간] 분
+[난이도] 쉬움|보통|어려움
+[기기] 쉼표로 구분
+[재료] 재료명 | 분량 | 단위
+[양념] 양념명 | 분량 | 단위
+[단계] 1. 설명 ⏱5:00
+[태그] 쉼표로 구분"`;
+    v.p = {
+      dish:P.dish, serves:P.serves, newIng:P.newIng, selCount:P.sel.length, pantryCount:S.pantry.length,
+      summary:`재료 ${P.sel.length} · 도구 ${P.tools.length}`,
+      pantry: S.pantry.map(i=>({label:i, ...this.chipStyle(P.sel.includes(i)), onTap:()=>this.setState(st=>({p:{...st.p, sel: st.p.sel.includes(i) ? st.p.sel.filter(x=>x!==i) : [...st.p.sel, i]}}))})),
+      tools: TOOLS.map(t=>({label:t, ...this.chipStyle(P.tools.includes(t)), onTap:()=>this.setState(st=>({p:{...st.p, tools: st.p.tools.includes(t) ? st.p.tools.filter(x=>x!==t) : [...st.p.tools, t]}}))})),
+      text: promptText
+    };
+    v.onDish = e=>{const t=e.target.value; this.setState(st=>({p:{...st.p, dish:t}}));};
+    v.onNewIng = e=>{const t=e.target.value; this.setState(st=>({p:{...st.p, newIng:t}}));};
+    v.onNewIngKey = e=>{ if(e.key==='Enter'){ const t=S.p.newIng.trim(); if(!t) return; this.setState(st=>({pantry: st.pantry.includes(t)?st.pantry:[t,...st.pantry], p:{...st.p, sel:[...st.p.sel,t], newIng:''}})); } };
+    v.pServesUp = ()=>this.setState(st=>({p:{...st.p, serves:Math.min(12,st.p.serves+1)}}));
+    v.pServesDown = ()=>this.setState(st=>({p:{...st.p, serves:Math.max(1,st.p.serves-1)}}));
+    v.copyPrompt = ()=>this.copy(promptText, '프롬프트를 복사했습니다');
+    v.copyAndGoPaste = ()=>{ this.copy(promptText, '복사 완료 — 답변을 붙여넣으세요'); this.go('paste'); };
+
+    // PASTE
+    const parsed = this.parse(S.pasteText);
+    v.pasteText = S.pasteText;
+    v.parsedOk = !!parsed; v.parsedEmpty = !parsed;
+    v.onPaste = e=>this.setState({pasteText:e.target.value});
+    v.clearPaste = ()=>this.setState({pasteText:''});
+    v.fillSample = ()=>this.setState({pasteText:SAMPLE});
+    if(parsed){
+      v.parsed = {
+        name:parsed.name,
+        meta:`${parsed.time}M · ${parsed.level.toUpperCase()} · ${parsed.serves}인분 · ${parsed.devices.join('+')||'기기 미지정'}`,
+        ing:parsed.ing, sauce:parsed.sauce, ingCount:parsed.ing.length, sauceCount:parsed.sauce.length,
+        stepCount:parsed.steps.length,
+        steps:parsed.steps.map((s,i)=>({no:pad(i+1), t:s.t, hasTimer:s.sec>0, timerLabel:mmss(s.sec)}))
+      };
+      v.parsedSummary = `재료 ${parsed.ing.length} · 양념 ${parsed.sauce.length} · 단계 ${parsed.steps.length} · 타이머 ${parsed.steps.filter(s=>s.sec>0).length} · 기기 ${parsed.devices.length}`;
+    }
+    v.savePasted = ()=>{
+      if(!parsed){ this.say('먼저 답변을 붙여넣어 주세요'); return; }
+      const id = 'n'+Date.now();
+      const rec = {id, name:parsed.name, time:parsed.time, level:parsed.level, star:0, cooked:0, serves:parsed.serves,
+        devices:parsed.devices.length?parsed.devices:['가스 1구'], tags:parsed.tags, ing:parsed.ing, sauce:parsed.sauce,
+        steps:parsed.steps, subs:[], memo:''};
+      this.setState(st=>({recipes:[rec, ...st.recipes], activeId:id, viewServes:null, pasteText:'', screen:'detail', prev:'home'}));
+      this.say('레시피를 저장했습니다');
+    };
+
+    // DEVICES
+    v.devices = S.devices.map((d,i)=>({name:d.name, note:d.note, count:d.count,
+      onRemove:()=>this.setState(st=>({devices: st.devices.filter((_,j)=>j!==i)}))}));
+    v.newDevice = S.newDevice; v.newDeviceCount = S.newDeviceCount;
+    v.newDeviceIdle = S.newDeviceIdle ? '예' : '아니오';
+    v.onNewDevice = e=>this.setState({newDevice:e.target.value});
+    v.cycleDeviceCount = ()=>this.setState(st=>({newDeviceCount: st.newDeviceCount%4+1}));
+    v.toggleIdle = ()=>this.setState(st=>({newDeviceIdle:!st.newDeviceIdle}));
+    v.addDevice = ()=>{ const n=S.newDevice.trim(); if(!n){ this.say('기기 이름을 입력하세요'); return; }
+      this.setState(st=>({devices:[...st.devices,{name:n, note: st.newDeviceIdle?'조리 중 방치 가능':'직접 추가한 기기', count:st.newDeviceCount, idle:st.newDeviceIdle}], newDevice:''}));
+      this.say(n+' 추가됨'); };
+
+    // PLAN
+    const sel = S.recipes.filter(x=>S.planSel.includes(x.id));
+    const shades = [AC,'#8A8D93','#B9BCC1','#D5D7DB'];
+    const total = sel.length ? Math.max(...sel.map(x=>x.time)) + 10 : 0;
+    v.plan = {
+      has: sel.length>0, none: sel.length===0,
+      est: total ? pad(total)+':00' : '—', mid: total ? pad(Math.round(total/2))+':00' : '',
+      laneNote: '기기별 타임라인 — ' + (new Set(sel.map(x=>x.devices[0])).size === sel.length ? '겹침 없음 ✓' : '같은 기기 겹침 주의'),
+      chips: S.recipes.slice(0,6).map(x=>{ const on = S.planSel.includes(x.id); const idx = S.planSel.indexOf(x.id);
+        return {label:x.name, bg:on?'#F1F1F3':'#FFFFFF', fg:on?'#1B1C1E':'#9A9DA3', bar:on?shades[idx%4]:'#E4E5E8',
+          onTap:()=>this.setState(st=>({planSel: st.planSel.includes(x.id)? st.planSel.filter(i=>i!==x.id) : [...st.planSel, x.id]}))}; }),
+      lanes: sel.map((x,i)=>{ const prep = Math.round(x.time*0.2), cook = x.time - prep;
+        return {device:(x.devices[0]||'—'), color:shades[i%4], prep, cook, rest: Math.max(0.001, total-x.time)}; }),
+      prep: sel.flatMap(x=>x.ing.slice(0,2).map(g=>({key:x.id+g.n, label:`${g.n} 손질 (${x.name})`}))).map(pp=>{
+        const done = !!S.prepDone[pp.key];
+        return {label:pp.label, done, boxBg: done?AC:'#FFFFFF', boxBd: done?AC:'#D5D7DB', fg: done?'#9A9DA3':'#1B1C1E', deco: done?'line-through':'none',
+          onTap:()=>this.setState(st=>({prepDone:{...st.prepDone, [pp.key]: !st.prepDone[pp.key]}}))};
+      }),
+      prepDone: (()=>{ const keys = sel.flatMap(x=>x.ing.slice(0,2).map(g=>x.id+g.n)); return keys.filter(k=>S.prepDone[k]).length+'/'+keys.length; })(),
+      ...(()=>{ const g=this.sauceGroups(sel); const NUM=['①','②','③']; let i=0;
+        const baseTitle = g.all.length ? NUM[i++]+' 공통 베이스 — 큰 볼에 한 번에' : '';
+        const partialTitle = g.partial.length ? NUM[i++]+' 일부만 겹침 — 해당 요리끼리만 함께 계량' : '';
+        const ownTitle = NUM[i]+' 각 요리에만 들어가는 양념';
+        return {
+          hasBase: g.all.length>0, noBase: g.all.length===0, baseTitle, partialTitle, ownTitle,
+          baseScope: `선택 ${sel.length}개 요리 모두`,
+          baseText: g.all.length ? g.all.map(s=>`${s.n} ${s.q}`).join(' · ')
+            : `선택한 ${sel.length}개 요리 전부에 들어가는 양념은 없습니다` + (g.partial.length ? ' — 일부끼리 겹치는 것만 아래에 묶었습니다' : ''),
+          hasPartial: g.partial.length>0,
+          partials: g.partial.map(s=>({n:s.n, q:s.q, who:s.who.join(' · ')}))
+        }; })(),
+      splits: sel.map(x=>{ const own = this.sauceGroups(sel).own[x.id] || [];
+        return {name:x.name, text: own.length ? '＋ ' + own.map(s=>`${s.n} ${s.q}`).join(' · ') : '추가 없음'}; }),
+      saveNote: (()=>{ const g=this.sauceGroups(sel); const all = sel.reduce((a,x)=>a+x.sauce.length,0);
+        const merged = g.all.length*sel.length + g.partial.reduce((a,s)=>a+s.who.length,0);
+        const after = all - merged + g.all.length + g.partial.length;
+        return `계량 ${all}회 → ${after}회 · 한 번에 계량되는 양념 ${g.all.length + g.partial.length}종`; })()
+    };
+    v.startPlan = ()=>{ sel.forEach(x=>{ const s = x.steps.find(st2=>st2.sec>0); if(s) this.addTimer(x.name, s.sec); }); };
+
+    // SHOP
+    const base = S.recipes.filter(x=>S.planSel.includes(x.id)).flatMap(x=>x.ing.filter(g=>g.out).map(g=>({n:g.n,q:g.q,from:x.name})));
+    const all = [...base, ...S.extraShop];
+    v.shopList = all.length ? all.map((s,i)=>{ const key = s.n+i; const done = !!S.shopDone[key];
+      return {n:s.n, q:s.q, from:s.from, done, boxBg: done?AC:'#FFFFFF', boxBd: done?AC:'#D5D7DB', fg: done?'#9A9DA3':'#1B1C1E', deco: done?'line-through':'none',
+        onTap:()=>this.setState(st=>({shopDone:{...st.shopDone,[key]:!st.shopDone[key]}}))}; })
+      : [{n:'담을 재료가 없습니다', q:'', from:'레시피에서 재료를 "없음"으로 표시해 보세요', done:false, boxBg:'#FFFFFF', boxBd:'#E4E5E8', fg:'#9A9DA3', deco:'none', onTap:()=>{}}];
+    v.shopCount = all.filter((s,i)=>!S.shopDone[s.n+i]).length + '개 남음';
+    v.newShop = S.newShop;
+    v.onNewShop = e=>this.setState({newShop:e.target.value});
+    const addShop = ()=>{ const t=S.newShop.trim(); if(!t) return; this.setState(st=>({extraShop:[...st.extraShop,{n:t,q:'',from:'직접 추가'}], newShop:''})); };
+    v.addShop = addShop;
+    v.onNewShopKey = e=>{ if(e.key==='Enter') addShop(); };
+
+    // TIMERS
+    v.timers = S.timers.map(t=>({
+      label:t.label, display: mmss(t.left), action: t.left===0 ? '완료' : (t.running?'일시정지':'시작'),
+      fg: t.left===0 ? '#5B7A56' : '#1B1C1E', bd: t.running ? AC : '#E4E5E8',
+      pct: Math.round((1 - t.left/t.total)*100) + '%',
+      onToggle:()=>this.setState(st=>({timers: st.timers.map(x=> x.id===t.id ? {...x, running: x.left>0 && !x.running} : x)})),
+      onReset:()=>this.setState(st=>({timers: st.timers.map(x=> x.id===t.id ? {...x, left:x.total, running:false} : x)})),
+      onRemove:()=>this.setState(st=>({timers: st.timers.filter(x=>x.id!==t.id)}))
+    }));
+    v.timerCount = S.timers.filter(t=>t.running).length + ' 작동 중';
+    v.quickTimers = [3,5,10].map(m=>({label:m+'분', onTap:()=>this.addTimer(m+'분 타이머', m*60)}));
+    return v;
+  }
+}
+</script>
+</body>
+</html>
