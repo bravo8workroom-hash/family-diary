@@ -77,7 +77,6 @@ input,button,textarea,select{font-family:inherit;}
     <sc-if value="{{ showDiet }}" hint-placeholder-val="{{ true }}">
       <button onClick="{{ goDiet }}" title="다이어트 일기" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">🥗</button>
     </sc-if>
-    <button onClick="{{ openPing }}" style="background:var(--soft,#F7EAD2);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:8px 12px;font-size:12px;font-weight:800;color:var(--tx,#3F3A33);cursor:pointer;">📣 호출</button>
     <button onClick="{{ logout }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:8px 13px;font-size:12px;font-weight:700;color:var(--sub,#8A8177);cursor:pointer;">프로필 전환</button>
   </div>
   <sc-if value="{{ hasPings }}" hint-placeholder-val="{{ false }}">
@@ -140,6 +139,8 @@ input,button,textarea,select{font-family:inherit;}
                     <button onClick="{{ ci.tog }}" style="display:flex;align-items:center;gap:9px;background:none;border:none;padding:7px 0;cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%;">
                       <span style="width:19px;height:19px;border-radius:6px;border:2px solid {{ ev.c }};box-sizing:border-box;flex-shrink:0;"></span>
                       <span style="flex:1;font-size:13px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ci.t }}</span>
+                      <sc-if value="{{ ci.hasWho }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;color:var(--sub,#8A8177);flex-shrink:0;">{{ ci.who }}</span></sc-if>
+                      <sc-if value="{{ ci.hasDue }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:800;color:{{ ci.dueC }};flex-shrink:0;">{{ ci.due }}</span></sc-if>
                     </button>
                   </sc-for>
                 </div>
@@ -148,6 +149,21 @@ input,button,textarea,select{font-family:inherit;}
           </sc-for>
         </div>
         <sc-if value="{{ hasEvMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);margin-top:8px;">{{ evMsg }}</div></sc-if>
+        <sc-if value="{{ pinClShow }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:12px;padding-top:10px;">
+            <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:2px;">📌 남은 할일 · 끝날 때까지 고정</div>
+            <sc-for list="{{ pinClV }}" as="pc" hint-placeholder-count="0">
+              <button onClick="{{ pc.tog }}" style="display:flex;align-items:center;gap:9px;background:none;border:none;padding:7px 0;cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%;">
+                <span style="width:19px;height:19px;border-radius:6px;border:2px solid {{ pc.c }};box-sizing:border-box;flex-shrink:0;"></span>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;">
+                  <span style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pc.t }}</span>
+                  <span style="font-size:11px;color:var(--sub,#8A8177);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pc.src }}<sc-if value="{{ pc.hasWho }}" hint-placeholder-val="{{ false }}"><span> · {{ pc.who }}</span></sc-if></span>
+                </span>
+                <sc-if value="{{ pc.hasDue }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:900;color:{{ pc.dueC }};flex-shrink:0;">{{ pc.due }}</span></sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
         <sc-if value="{{ hasDoneCl }}" hint-placeholder-val="{{ false }}">
           <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:12px;padding-top:10px;">
             <button onClick="{{ toggleDoneCl }}" style="width:100%;display:flex;align-items:center;gap:6px;background:none;border:none;padding:4px 0;cursor:pointer;color:var(--sub,#8A8177);font-family:inherit;">
@@ -191,8 +207,8 @@ input,button,textarea,select{font-family:inherit;}
         </div>
         <div ref="{{ ddRef }}" onMouseDown="{{ ddDown }}" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;cursor:grab;scroll-behavior:smooth;">
           <sc-for list="{{ ddaysV }}" as="dd" hint-placeholder-count="2">
-            <div style="background:var(--bg,#FAF6EF);border-radius:16px;padding:12px 14px;min-width:118px;flex-shrink:0;scroll-snap-align:start;overflow:hidden;">
-              <div style="font-size:22px;">{{ dd.emoji }}</div>
+            <div onClick="{{ dd.open }}" title="눌러서 수정·삭제" style="background:var(--bg,#FAF6EF);border-radius:16px;padding:12px 14px;min-width:118px;flex-shrink:0;scroll-snap-align:start;overflow:hidden;cursor:pointer;">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;"><span style="font-size:22px;">{{ dd.emoji }}</span><span style="font-size:11px;color:var(--sub,#8A8177);">✎</span></div>
               <div style="font-size:12px;font-weight:700;margin:6px 0 3px;">{{ dd.title }}</div>
               <div style="font-size:16px;font-weight:900;color:var(--ac,#F59E0B);">{{ dd.dd }}</div>
             </div>
@@ -615,7 +631,7 @@ input,button,textarea,select{font-family:inherit;}
             <div style="height:100%;width:{{ todoPct }}%;background:var(--ac,#F59E0B);border-radius:99px;transition:width .4s;"></div>
           </div>
           <div style="font-size:13px;font-weight:700;color:var(--sub,#8A8177);margin-bottom:6px;">{{ motMsg }}</div>
-          <div style="font-size:12px;font-weight:700;color:var(--ac,#F59E0B);margin-bottom:12px;">할일마다 정해진 스티커를 받고, 전부 끝내면 🏆 보너스 1개 더!</div>
+          <div style="font-size:12px;font-weight:700;color:var(--ac,#F59E0B);margin-bottom:12px;">다 한 할일은 부모님이 확인(OK)하면 스티커가 도착해! 전부 끝내면 🏆 보너스 1개 더!</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <sc-for list="{{ todosV }}" as="td" hint-placeholder-count="4">
               <div style="display:flex;align-items:center;gap:10px;background:var(--bg,#FAF6EF);border-radius:14px;padding:11px 12px;">
@@ -631,6 +647,41 @@ input,button,textarea,select{font-family:inherit;}
             <input value="{{ f.tdTitle }}" onChange="{{ on.tdTitle }}" placeholder="새 할일 추가 (예: 독서 20분)" style="flex:1;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
             <button onClick="{{ addTodo }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:10px 16px;font-weight:800;cursor:pointer;">+</button>
           </div>
+        </div>
+        <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
+          <div style="font-size:15px;font-weight:800;">🎯 나의 목표</div>
+          <div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.6;margin-top:4px;">하루 한 칸! 블록을 누르면 <b style="color:var(--ac,#F59E0B);">채움(성공)</b> → <b style="color:#E5484D;">✕(실패)</b> → 빈칸 순서로 바뀌어. 목표는 3개까지!</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+            <sc-for list="{{ goalsV }}" as="go" hint-placeholder-count="0">
+              <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="flex:1;font-size:14px;font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ go.title }}</span>
+                  <sc-if value="{{ go.hasDd }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:900;color:var(--ac,#F59E0B);background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:3px 9px;white-space:nowrap;">⏳ {{ go.dd }}</span></sc-if>
+                  <button onClick="{{ go.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;padding:2px 4px;">✕</button>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:9px;">
+                  <sc-for list="{{ go.cells }}" as="gc" hint-placeholder-count="7">
+                    <button onClick="{{ gc.tap }}" style="width:18px;height:18px;border-radius:5px;background:{{ gc.bg }};border:1.5px solid {{ gc.bd }};color:#fff;font-size:9px;font-weight:900;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">{{ gc.x }}</button>
+                  </sc-for>
+                </div>
+                <div style="display:flex;align-items:center;gap:5px;margin-top:8px;font-size:11px;font-weight:800;color:var(--sub,#8A8177);">
+                  <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--ac,#F59E0B);"></span><span>성공 {{ go.okN }}일</span>
+                  <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#E5484D;margin-left:5px;color:#fff;font-size:7px;font-weight:900;line-height:10px;text-align:center;">✕</span><span>실패 {{ go.noN }}일</span>
+                  <span style="flex:1;text-align:right;font-weight:700;">{{ go.since }}</span>
+                </div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ goalsEmpty }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px;color:var(--sub,#8A8177);">아직 목표가 없어. 아래에서 첫 목표를 만들어 보자!</div></sc-if>
+          </div>
+          <sc-if value="{{ goalCanAdd }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:6px;margin-top:12px;">
+              <input value="{{ f.goTitle }}" onChange="{{ on.goTitle }}" placeholder="새 목표 (예: 아침 운동)" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
+              <input value="{{ f.goDate }}" onChange="{{ on.goDate }}" type="date" title="디데이 (선택)" style="width:126px;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:12px;outline:none;">
+              <button onClick="{{ addGoal }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;flex-shrink:0;">+</button>
+            </div>
+            <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-top:6px;">날짜는 디데이가 필요할 때만 골라 (선택)</div>
+          </sc-if>
+          <sc-if value="{{ goalFull }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);margin-top:10px;">목표는 한 사람당 3개까지야. 끝난 목표를 지우면 새로 만들 수 있어.</div></sc-if>
         </div>
         <sc-if value="{{ myTTShow }}" hint-placeholder-val="{{ false }}">
           <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
@@ -985,6 +1036,41 @@ input,button,textarea,select{font-family:inherit;}
         </div>
 
         <sc-if value="{{ pvKids }}" hint-placeholder-val="{{ true }}">
+          <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
+            <div style="font-size:15px;font-weight:800;">🎯 나의 목표</div>
+            <div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.6;margin-top:4px;">하루 한 칸! 블록을 누르면 <b style="color:var(--ac,#F59E0B);">채움(성공)</b> → <b style="color:#E5484D;">✕(실패)</b> → 빈칸 순서로 바뀌어요. 한 사람당 3개까지 만들 수 있어요.</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+              <sc-for list="{{ goalsV }}" as="go" hint-placeholder-count="0">
+                <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="flex:1;font-size:14px;font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ go.title }}</span>
+                    <sc-if value="{{ go.hasDd }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:900;color:var(--ac,#F59E0B);background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:3px 9px;white-space:nowrap;">⏳ {{ go.dd }}</span></sc-if>
+                    <button onClick="{{ go.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;padding:2px 4px;">✕</button>
+                  </div>
+                  <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:9px;">
+                    <sc-for list="{{ go.cells }}" as="gc" hint-placeholder-count="7">
+                      <button onClick="{{ gc.tap }}" style="width:18px;height:18px;border-radius:5px;background:{{ gc.bg }};border:1.5px solid {{ gc.bd }};color:#fff;font-size:9px;font-weight:900;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">{{ gc.x }}</button>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:5px;margin-top:8px;font-size:11px;font-weight:800;color:var(--sub,#8A8177);">
+                    <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--ac,#F59E0B);"></span><span>성공 {{ go.okN }}일</span>
+                    <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#E5484D;margin-left:5px;color:#fff;font-size:7px;font-weight:900;line-height:10px;text-align:center;">✕</span><span>실패 {{ go.noN }}일</span>
+                    <span style="flex:1;text-align:right;font-weight:700;">{{ go.since }}</span>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ goalsEmpty }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px;color:var(--sub,#8A8177);">아직 목표가 없어요. 아래에서 첫 목표를 만들어 보세요!</div></sc-if>
+            </div>
+            <sc-if value="{{ goalCanAdd }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;gap:6px;margin-top:12px;">
+                <input value="{{ f.goTitle }}" onChange="{{ on.goTitle }}" placeholder="새 목표 (예: 저녁 산책)" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
+                <input value="{{ f.goDate }}" onChange="{{ on.goDate }}" type="date" title="디데이 (선택)" style="width:126px;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:12px;outline:none;">
+                <button onClick="{{ addGoal }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;flex-shrink:0;">+</button>
+              </div>
+              <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-top:6px;">날짜는 디데이가 필요할 때만 고르세요 (선택)</div>
+            </sc-if>
+            <sc-if value="{{ goalFull }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);margin-top:10px;">목표는 한 사람당 3개까지예요. 끝난 목표를 지우면 새로 만들 수 있어요.</div></sc-if>
+          </div>
           <sc-for list="{{ kidsOV }}" as="ko" hint-placeholder-count="2">
             <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
@@ -1014,32 +1100,43 @@ input,button,textarea,select{font-family:inherit;}
               <sc-if value="{{ ko.hasJ }}" hint-placeholder-val="{{ false }}">
                 <div style="background:var(--bg,#FAF6EF);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.5;margin-top:10px;color:var(--sub,#8A8177);"><b style="color:var(--tx,#3F3A33);">최근 공부일기</b> · {{ ko.lastJ }}</div>
               </sc-if>
-              <div style="display:flex;gap:8px;margin-top:10px;">
-                <input value="{{ ko.ptVal }}" onChange="{{ ko.ptOn }}" placeholder="{{ ko.name }}에게 필수 할일 넣어주기" style="flex:1;box-sizing:border-box;padding:9px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                <button onClick="{{ ko.ptAdd }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:9px 14px;font-weight:800;cursor:pointer;">+ 필수 할일</button>
-              </div>
-              <div style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;background:var(--bg,#FAF6EF);border-radius:14px;padding:9px 11px;">
-                <span style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);">성공하면 줄 스티커</span>
-                <div style="display:flex;gap:4px;">
-                  <sc-for list="{{ ko.rsV }}" as="rs" hint-placeholder-count="6">
-                    <button onClick="{{ rs.pick }}" style="width:28px;height:28px;border-radius:50%;background:{{ rs.bg }};border:1.5px solid {{ rs.bd }};font-size:14px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;">{{ rs.e }}</button>
-                  </sc-for>
+              <sc-if value="{{ ko.hasAppr }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--soft,#F7EAD2);border:1px solid var(--ac,#F59E0B);border-radius:12px;padding:10px 12px;margin-top:10px;">
+                  <div style="font-size:12px;font-weight:800;margin-bottom:7px;">📮 완료 확인 요청 · OK하면 스티커가 지급돼요</div>
+                  <div style="display:flex;flex-direction:column;gap:7px;">
+                    <sc-for list="{{ ko.apprV }}" as="ap" hint-placeholder-count="1">
+                      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;flex-wrap:wrap;">
+                        <span style="flex:1;min-width:80px;">{{ ap.title }}</span>
+                        <span style="font-size:11px;font-weight:900;color:var(--ac,#F59E0B);white-space:nowrap;">{{ ap.rew }}</span>
+                        <span style="font-size:11px;color:var(--sub,#8A8177);">{{ ap.date }}</span>
+                        <button onClick="{{ ap.ok }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;">OK 지급</button>
+                        <button onClick="{{ ap.no }}" style="background:var(--card,#fff);color:var(--sub,#8A8177);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;">아직</button>
+                      </div>
+                    </sc-for>
+                  </div>
                 </div>
-                <span style="flex:1;"></span>
-                <div style="display:flex;align-items:center;gap:2px;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px;">
-                  <button onClick="{{ ko.rnDec }}" style="width:24px;height:24px;border-radius:50%;border:none;background:none;color:var(--sub,#8A8177);font-size:14px;font-weight:900;cursor:pointer;padding:0;">−</button>
-                  <span style="min-width:34px;text-align:center;font-size:12px;font-weight:900;">×{{ ko.rnVal }}</span>
-                  <button onClick="{{ ko.rnInc }}" style="width:24px;height:24px;border-radius:50%;border:none;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);font-size:14px;font-weight:900;cursor:pointer;padding:0;">+</button>
+              </sc-if>
+              <sc-if value="{{ ko.hasStHist }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--bg,#FAF6EF);border-radius:12px;padding:10px 12px;margin-top:10px;">
+                  <div style="display:flex;align-items:center;margin-bottom:6px;">
+                    <span style="flex:1;font-size:12px;font-weight:800;color:var(--sub,#8A8177);">🌟 스티커 기록 · 받고 쓴 내역</span>
+                    <sc-if value="{{ ko.histMore }}" hint-placeholder-val="{{ false }}"><span onClick="{{ ko.histToggle }}" style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);cursor:pointer;padding:2px 4px;">{{ ko.histArrow }}</span></sc-if>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:4px;">
+                    <sc-for list="{{ ko.stHistV }}" as="sh" hint-placeholder-count="3">
+                      <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--sub,#8A8177);">
+                        <span style="min-width:38px;">{{ sh.date }}</span>
+                        <span style="flex:1;color:var(--tx,#3F3A33);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ sh.txt }}</span>
+                        <span style="font-weight:900;color:{{ sh.c }};">{{ sh.amt }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
                 </div>
-              </div>
+              </sc-if>
               <div style="display:flex;gap:6px;margin-top:10px;">
-                <button onClick="{{ ko.saBonus }}" style="background:{{ ko.bnBg }};color:{{ ko.bnFg }};border:1px solid {{ ko.bnBd }};border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;">🎁 보너스 용돈</button>
-                <button onClick="{{ ko.saDeduct }}" style="background:{{ ko.ddBg }};color:{{ ko.ddFg }};border:1px solid {{ ko.ddBd }};border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;">🌟 스티커 차감</button>
-              </div>
-              <div style="display:flex;gap:8px;margin-top:8px;">
-                <input value="{{ ko.saVal }}" onChange="{{ ko.saOn }}" type="number" placeholder="용돈 금액(원)" style="flex:1;box-sizing:border-box;padding:9px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                <sc-if value="{{ ko.saIsDeduct }}" hint-placeholder-val="{{ false }}"><div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 10px;border:1px solid var(--ac,#F59E0B);border-radius:12px;background:var(--soft,#F7EAD2);"><span style="font-size:13px;font-weight:900;white-space:nowrap;">🌟 {{ ko.stkNeed }}개</span><span style="font-size:9px;font-weight:800;color:var(--sub,#8A8177);white-space:nowrap;">{{ ko.stkRateTxt }}</span></div></sc-if>
-                <button onClick="{{ ko.saAdd }}" style="background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:1px solid var(--line,#eee);border-radius:12px;padding:9px 14px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;">💸 보내기</button>
+                <button onClick="{{ ko.openTodo }}" style="flex:1;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:11px 4px;font-size:12px;font-weight:800;cursor:pointer;">+ 필수 할일</button>
+                <button onClick="{{ ko.openStick }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:11px 4px;font-size:12px;font-weight:800;cursor:pointer;">💌 스티커 보내기</button>
+                <button onClick="{{ ko.openMoney }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:11px 4px;font-size:12px;font-weight:800;cursor:pointer;">💸 용돈·차감</button>
               </div>
               <sc-if value="{{ ko.hasSaMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--ac,#F59E0B);font-weight:700;margin-top:6px;">{{ ko.saMsg }}</div></sc-if>
               <sc-if value="{{ ko.hasTrK }}" hint-placeholder-val="{{ false }}">
@@ -1980,6 +2077,73 @@ input,button,textarea,select{font-family:inherit;}
   </div>
 </sc-if>
 
+<sc-if value="{{ modalPTodo }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
+    <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">✅ {{ pmEmoji }} {{ pmName }} 필수 할일 추가</div>
+      <div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:12px;">아이가 다 하고 부모님이 OK하면 스티커가 지급돼요</div>
+      <input value="{{ pmTodoVal }}" onChange="{{ pmTodoOn }}" placeholder="{{ pmName }}에게 필수 할일 넣어주기" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:var(--bg,#FAF6EF);border-radius:14px;padding:9px 11px;margin-bottom:14px;">
+        <span style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);">성공하면 줄 스티커</span>
+        <div style="display:flex;gap:4px;">
+          <sc-for list="{{ pmRsV }}" as="rs" hint-placeholder-count="6">
+            <button onClick="{{ rs.pick }}" style="width:28px;height:28px;border-radius:50%;background:{{ rs.bg }};border:1.5px solid {{ rs.bd }};font-size:14px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;">{{ rs.e }}</button>
+          </sc-for>
+        </div>
+        <span style="flex:1;"></span>
+        <div style="display:flex;align-items:center;gap:2px;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px;">
+          <button onClick="{{ pmRnDec }}" style="width:24px;height:24px;border-radius:50%;border:none;background:none;color:var(--sub,#8A8177);font-size:14px;font-weight:900;cursor:pointer;padding:0;">−</button>
+          <span style="min-width:34px;text-align:center;font-size:12px;font-weight:900;">×{{ pmRnVal }}</span>
+          <button onClick="{{ pmRnInc }}" style="width:24px;height:24px;border-radius:50%;border:none;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);font-size:14px;font-weight:900;cursor:pointer;padding:0;">+</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">취소</button>
+        <button onClick="{{ pmTodoAdd }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">+ 필수 할일 추가</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ modalPStick }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
+    <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:12px;">💌 {{ pmEmoji }} {{ pmName }}에게 스티커 보내기</div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px;">
+        <sc-for list="{{ pmStkPickV }}" as="sp" hint-placeholder-count="12">
+          <button onClick="{{ sp.pick }}" style="background:{{ sp.bg }};border:2px solid {{ sp.bd }};border-radius:12px;font-size:20px;padding:7px 0;cursor:pointer;">{{ sp.e }}</button>
+        </sc-for>
+      </div>
+      <input value="{{ f.stMsg }}" onChange="{{ on.stMsg }}" placeholder="칭찬 한마디 (예: 숙제 완벽!)" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;margin-bottom:14px;">
+      <div style="display:flex;gap:8px;">
+        <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">취소</button>
+        <button onClick="{{ pmStkSend }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">💌 보내기</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ modalPMoney }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
+    <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">💸 {{ pmEmoji }} {{ pmName }} 용돈 보내기 · 스티커 차감</div>
+      <div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:12px;">지금 보유 스티커 🌟 {{ pmStickers }}개</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <button onClick="{{ pmSaBonus }}" style="flex:1;background:{{ pmBnBg }};color:{{ pmBnFg }};border:1px solid {{ pmBnBd }};border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">🎁 보너스 용돈</button>
+        <button onClick="{{ pmSaDeduct }}" style="flex:1;background:{{ pmDdBg }};color:{{ pmDdFg }};border:1px solid {{ pmDdBd }};border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">🌟 스티커 차감</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input value="{{ pmSaVal }}" onChange="{{ pmSaOn }}" type="number" placeholder="용돈 금액(원)" style="flex:1;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
+        <sc-if value="{{ pmSaIsDeduct }}" hint-placeholder-val="{{ false }}"><div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 10px;border:1px solid var(--ac,#F59E0B);border-radius:12px;background:var(--soft,#F7EAD2);"><span style="font-size:13px;font-weight:900;white-space:nowrap;">🌟 {{ pmStkNeed }}개</span><span style="font-size:9px;font-weight:800;color:var(--sub,#8A8177);white-space:nowrap;">{{ pmStkRateTxt }}</span></div></sc-if>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">취소</button>
+        <button onClick="{{ pmSaAdd }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">💸 보내기</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ modalEvent }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
     <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
@@ -1990,15 +2154,22 @@ input,button,textarea,select{font-family:inherit;}
         <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
           <sc-for list="{{ evClV }}" as="eci" hint-placeholder-count="0">
             <div style="display:flex;align-items:center;gap:8px;background:var(--bg,#FAF6EF);border-radius:10px;padding:8px 10px;">
-              <span style="font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">☑️ {{ eci.t }}</span>
+              <span style="font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">☑️ {{ eci.t }}<sc-if value="{{ eci.hasSub }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;color:var(--sub,#8A8177);font-weight:600;margin-left:6px;">{{ eci.sub }}</span></sc-if></span>
               <button onClick="{{ eci.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;padding:2px 4px;">✕</button>
             </div>
           </sc-for>
         </div>
       </sc-if>
-      <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
         <input value="{{ f.evClItem }}" onChange="{{ on.evClItem }}" placeholder="체크리스트 · 준비물, 할일 (선택)" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
         <button onClick="{{ addEvCl }}" style="background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;">+ 추가</button>
+      </div>
+      <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:4px;">↳ 할일 마감일 · 할 사람 (선택)</div>
+      <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
+        <input value="{{ f.evClDue }}" onChange="{{ on.evClDue }}" type="date" style="width:140px;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:12px;outline:none;">
+        <sc-for list="{{ evClMOptsV }}" as="cmo" hint-placeholder-count="5">
+          <button onClick="{{ cmo.pick }}" style="background:{{ cmo.bg }};color:inherit;border:1px solid {{ cmo.bd }};border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800;cursor:pointer;">{{ cmo.label }}</button>
+        </sc-for>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:10px;">
         <input value="{{ f.evTime }}" onChange="{{ on.evTime }}" type="time" style="width:110px;box-sizing:border-box;padding:11px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
@@ -2040,24 +2211,36 @@ input,button,textarea,select{font-family:inherit;}
 <sc-if value="{{ modalDday }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
     <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
-      <div style="font-size:16px;font-weight:800;margin-bottom:14px;">⏳ 디데이 관리</div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
-        <sc-for list="{{ ddayMgV }}" as="dm" hint-placeholder-count="2">
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;">
-            <span>{{ dm.emoji }}</span><span style="flex:1;">{{ dm.title }}</span><span style="color:var(--ac,#F59E0B);font-weight:900;">{{ dm.dd }}</span>
-            <button onClick="{{ dm.del }}" style="background:none;border:none;color:var(--sub,#8A8177);cursor:pointer;">✕</button>
-          </div>
-        </sc-for>
-      </div>
+      <sc-if value="{{ ddAdding }}" hint-placeholder-val="{{ true }}"><div style="font-size:16px;font-weight:800;margin-bottom:14px;">⏳ 디데이 관리</div></sc-if>
+      <sc-if value="{{ ddEditing }}" hint-placeholder-val="{{ false }}"><div style="font-size:16px;font-weight:800;margin-bottom:14px;">⏳ 디데이 수정</div></sc-if>
+      <sc-if value="{{ ddAdding }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+          <sc-for list="{{ ddayMgV }}" as="dm" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;">
+              <span>{{ dm.emoji }}</span><span style="flex:1;">{{ dm.title }}</span><span style="color:var(--ac,#F59E0B);font-weight:900;">{{ dm.dd }}</span>
+              <button onClick="{{ dm.del }}" style="background:none;border:none;color:var(--sub,#8A8177);cursor:pointer;">✕</button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
       <div style="display:flex;gap:8px;margin-bottom:8px;">
         <input value="{{ f.ddEmoji }}" onChange="{{ on.ddEmoji }}" placeholder="😀" style="width:56px;box-sizing:border-box;padding:11px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:16px;outline:none;text-align:center;">
         <input value="{{ f.ddTitle }}" onChange="{{ on.ddTitle }}" placeholder="디데이 이름" style="flex:1;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
       </div>
       <input value="{{ f.ddDate }}" onChange="{{ on.ddDate }}" type="date" style="width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;margin-bottom:12px;">
-      <div style="display:flex;gap:8px;">
-        <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">닫기</button>
-        <button onClick="{{ addDday }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">추가</button>
-      </div>
+      <sc-if value="{{ ddAdding }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:8px;">
+          <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">닫기</button>
+          <button onClick="{{ addDday }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">추가</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ ddEditing }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:8px;">
+          <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">닫기</button>
+          <button onClick="{{ delDday }}" style="flex:1;background:#FDECEC;color:#E5484D;border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">삭제</button>
+          <button onClick="{{ saveDday }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">저장</button>
+        </div>
+      </sc-if>
     </div>
   </div>
 </sc-if>
@@ -2315,6 +2498,8 @@ input,button,textarea,select{font-family:inherit;}
                   <button onClick="{{ ci.tog }}" style="display:flex;align-items:center;gap:9px;background:none;border:none;padding:7px 0;cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%;">
                     <span style="width:19px;height:19px;border-radius:6px;border:2px solid {{ ev.c }};box-sizing:border-box;flex-shrink:0;"></span>
                     <span style="flex:1;font-size:13px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ci.t }}</span>
+                    <sc-if value="{{ ci.hasWho }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;color:var(--sub,#8A8177);flex-shrink:0;">{{ ci.who }}</span></sc-if>
+                    <sc-if value="{{ ci.hasDue }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:800;color:{{ ci.dueC }};flex-shrink:0;">{{ ci.due }}</span></sc-if>
                   </button>
                 </sc-for>
               </div>
@@ -2323,6 +2508,21 @@ input,button,textarea,select{font-family:inherit;}
         </sc-for>
       </div>
       <sc-if value="{{ hasEvMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);margin-top:8px;">{{ evMsg }}</div></sc-if>
+      <sc-if value="{{ pinClShow }}" hint-placeholder-val="{{ false }}">
+        <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:12px;padding-top:10px;">
+          <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:2px;">📌 남은 할일 · 끝날 때까지 고정</div>
+          <sc-for list="{{ pinClV }}" as="pc" hint-placeholder-count="0">
+            <button onClick="{{ pc.tog }}" style="display:flex;align-items:center;gap:9px;background:none;border:none;padding:7px 0;cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%;">
+              <span style="width:19px;height:19px;border-radius:6px;border:2px solid {{ pc.c }};box-sizing:border-box;flex-shrink:0;"></span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;">
+                <span style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pc.t }}</span>
+                <span style="font-size:11px;color:var(--sub,#8A8177);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pc.src }}<sc-if value="{{ pc.hasWho }}" hint-placeholder-val="{{ false }}"><span> · {{ pc.who }}</span></sc-if></span>
+              </span>
+              <sc-if value="{{ pc.hasDue }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:900;color:{{ pc.dueC }};flex-shrink:0;">{{ pc.due }}</span></sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
       <sc-if value="{{ dayFeedShow }}" hint-placeholder-val="{{ false }}">
         <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:14px;padding-top:12px;display:flex;flex-direction:column;gap:6px;">
           <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);">📸 이 날의 피드 이야기</div>
@@ -2578,8 +2778,8 @@ class Component extends DCLogic {
   tideInfo(){const base=Date.UTC(2000,0,6,18,14);const p=29.530588;const age=((((Date.now()-base)/86400000)%p)+p)%p;const ld=Math.floor(age)+1;const i=(ld+7)%15;return{ld,label:i===0?'조금':i+'물'};}
   ddRef = React.createRef();
   ddNudge(dir){const el=this.ddRef.current;if(!el)return;el.scrollLeft+=dir*126;}
-  ddDrag(e){const el=this.ddRef.current;if(!el)return;const x0=e.clientX,l0=el.scrollLeft;el.style.scrollBehavior='auto';el.style.cursor='grabbing';
-    const mv=ev=>{el.scrollLeft=l0-(ev.clientX-x0);};
+  ddDrag(e){const el=this.ddRef.current;if(!el)return;const x0=e.clientX,l0=el.scrollLeft;this.ddMoved=false;el.style.scrollBehavior='auto';el.style.cursor='grabbing';
+    const mv=ev=>{if(Math.abs(ev.clientX-x0)>5)this.ddMoved=true;el.scrollLeft=l0-(ev.clientX-x0);};
     const up=()=>{el.style.cursor='grab';el.style.scrollBehavior='smooth';window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);};
     window.addEventListener('mousemove',mv);window.addEventListener('mouseup',up);}
   SKINS = {
@@ -2623,10 +2823,10 @@ class Component extends DCLogic {
       ],
       settings:{useTT:true,parentPw:String(this.props.parentPassword??'0000')},
       events:[], ddays:[], todos:[], checks:{kid1:{},kid2:{}},
-      journal:[], scores:[], stlog:[], exch:[], fishlog:[], err:[], trades:[],
+      journal:[], scores:[], stlog:[], exch:[], fishlog:[], err:[], trades:[], appr:[],
       quizzes:[], qruns:[], stkRate:{kid1:200,kid2:200},
       rewards:[], allow:[], tx:[], budgets:[], fixed:[], fixedPaid:{},
-      accounts:[], feed:[], tt:[], calDeco:[],
+      accounts:[], feed:[], tt:[], calDeco:[], goals:[],
       rwV2:1, histSeeded:1, kfV2:1
     };
   }
@@ -2653,6 +2853,8 @@ class Component extends DCLogic {
       if(!data.quizzes){const sd=this.seed();data.quizzes=sd.quizzes;data.qruns=[];data.events=data.events.concat(sd.events.filter(x=>x.qid));}
       if(!data.qruns)data.qruns=[];
       if(!data.calDeco)data.calDeco=[];
+      if(!data.goals)data.goals=[];
+      if(!data.appr)data.appr=[];
       if(!data.kfV2){data.fishlog=this.seed().fishlog;data.kfV2=1;}
       const t=this.today();
       this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),selDate:t,budSel:t},()=>this.fcBackfill());
@@ -2677,6 +2879,17 @@ class Component extends DCLogic {
     return g.role==='kid'?this.trAvail(d,tr.giver):9999;}
   trSet(id,st){this.mut(d=>{const x=(d.trades||[]).find(y=>y.id===id);if(x)x.st=st;});}
   trDel(id){this.mut(d=>{d.trades=(d.trades||[]).filter(y=>y.id!==id);});}
+  apprOk(id){this.mut(d=>{const a=(d.appr||[]).find(x=>x.id===id);if(!a)return;
+    const rn=Math.max(1,Number(a.rn||1));
+    for(let i=0;i<rn;i++){const g=a.tag+'#'+i;if(!d.stlog.some(x=>x.auto===g))d.stlog.push({k:a.k,e:a.rs||'🌟',from:'할일 완료',msg:'"'+a.title+'" 해냈어!',d:a.d,auto:g});}
+    d.appr=d.appr.filter(x=>x.id!==id);
+    const ck=(d.checks[a.k]||{})[a.d]||{};const ts=d.todos.filter(x=>x.k===a.k);
+    const btag='all_'+a.k+'_'+a.d;
+    const all=ts.length>0&&ts.every(x=>ck[x.id])&&!d.appr.some(x=>x.k===a.k&&x.d===a.d);
+    if(all&&!d.stlog.some(x=>x.auto===btag))d.stlog.push({k:a.k,e:'🏆',from:'올클리어 보너스',msg:'오늘 할일 전부 완료!',d:a.d,auto:btag});});}
+  apprNo(id){this.mut(d=>{const a=(d.appr||[]).find(x=>x.id===id);if(!a)return;
+    if(d.checks[a.k]&&d.checks[a.k][a.d])d.checks[a.k][a.d][a.td]=false;
+    d.appr=d.appr.filter(x=>x.id!==id);});}
   trMeta(st,sk){return{ask:{t:'상대 수락 대기',c:sk.sub},pw:{t:'부모님 허락 대기',c:'#E0654F'},go:{t:'진행 중',c:sk.ac},chk:{t:'완료 확인 대기',c:'#3B82F6'},done:{t:'완료 ✓',c:'#3FA45B'}}[st]||{t:'—',c:sk.sub};}
   trPay(tr){const t=this.today();this.mut(d=>{
     const g=d.profiles.find(p=>p.id===tr.giver)||{};const dr=d.profiles.find(p=>p.id===tr.doer)||{};
@@ -3153,7 +3366,7 @@ class Component extends DCLogic {
   renderVals(){
     const S=this.state,D=S.data;
     if(!D)return{loading:true,noUser:false,hasUser:false,skinBg:'#FAF6EF',skinCard:'#fff',skinAc:'#F59E0B',skinOn:'#fff',skinSoft:'#F7EAD2',skinLine:'#EFE4CF',skinTx:'#3F3A33',skinSub:'#8A8177',f:{},on:{},modalPw:false,modalEvent:false,modalDday:false,modalProfile:false,modalPing:false,hasPings:false,pingsV:[]};
-    const FL=['evTitle','evTime','evMemo','evClItem','evMember','jSubj','jMin','jText','scSubj','scName','scScore','txDate','txAmt','txCat','txMemo','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDate','kfTm','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','rwName','rwCost','fxName','fxAmt','fxDay','fxCat'];
+    const FL=['evTitle','evTime','evMemo','evClItem','evClDue','evMember','jSubj','jMin','jText','scSubj','scName','scScore','txDate','txAmt','txCat','txMemo','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDate','kfTm','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','rwName','rwCost','fxName','fxAmt','fxDay','fxCat','goTitle','goDate'];
     const on={};FL.forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     ['qbTitle','qbGoal','qbTries','qbThink','qbCool','qbDate','qbQ','qbA','qbEx','qbNote','qbO1','qbO2','qbO3','qbAiTopic','qbAiN'].forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     const f=S.f,t=this.today(),W=this.won.bind(this);
@@ -3208,7 +3421,7 @@ class Component extends DCLogic {
     V.goMe=()=>this.setState({tab:'me',pwErr:'',meMsg:'',f:{...S.f,meName:u.name,meEmoji:u.emoji,mePw:u.pw||''}});
     V.meBtnBg=S.tab==='me'?sk.soft:sk.card;
     // 다이어트 일기는 같은 저장소의 별도 페이지(diet/)다 — 화면 전환이 아니라 이동
-    V.showDiet=!isKid;V.goDiet=()=>{location.href='diet/';};
+    V.showDiet=u.id==='mom';V.goDiet=()=>{location.href='diet/';};
     V.tabHome=S.tab==='home';V.tabFeed=S.tab==='feed';V.tabFish=S.tab==='fish'&&!isKid;V.tabMy=(S.tab==='my'||S.tab==='sticker'||S.tab==='money')&&isKid;V.tabParent=S.tab==='parent'&&!isKid;V.tabMe=S.tab==='me';
     // MY SETTINGS (모든 프로필 공통)
     const meFlash=msg=>{this.setState({meMsg:msg});setTimeout(()=>this.setState({meMsg:''}),2500);};
@@ -3256,20 +3469,31 @@ class Component extends DCLogic {
     V.hasEvMsg=!!S.evMsg;V.evMsg=S.evMsg;
     const dayEvs=(evByDate[S.selDate]||[]).slice().sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
     V.dayEmpty=!dayEvs.length;
-    const clMine=ev=>!ev.by||ev.by===u.id; // 체크리스트는 일정을 만든 사람에게만 보이고, 그 사람만 체크한다
-    const clSet=(evId,ciId,done)=>{const ev0=D.events.find(y=>y.id===evId);if(ev0&&!clMine(ev0))return;
+    const ddCalc=ds=>{const diff=Math.round((new Date(ds+'T00:00:00')-new Date(t+'T00:00:00'))/86400000);return diff===0?'D-DAY':(diff>0?'D-'+diff:'D+'+(-diff));};
+    const clMine=ev=>!ev.by||ev.by===u.id;
+    // 체크리스트: 담당자(m)가 지정된 항목은 그 사람들(가족 모두면 전원)에게 보이고, 지정이 없으면 예전처럼 만든 사람에게만
+    const clItemMine=(ev,c)=>{if(c.m){const ms=String(c.m).split(',');return ms.includes('fam')||ms.includes(u.id);}return clMine(ev);};
+    const clWho=c=>{const ms=String(c.m||'').split(',').filter(Boolean);if(!ms.length||ms.includes('fam'))return '';return ms.map(mName).filter(Boolean).join('·');};
+    const clDueLabel=c=>c.due?this.dShort(c.due)+'까지 · '+ddCalc(c.due):'';
+    const clSet=(evId,ciId,done)=>{const ev0=D.events.find(y=>y.id===evId);const ci0=ev0&&(ev0.cl||[]).find(z=>z.id===ciId);if(!ci0||!clItemMine(ev0,ci0))return;
       this.mut(d=>{const x=d.events.find(y=>y.id===evId);const ci=x&&(x.cl||[]).find(z=>z.id===ciId);
         if(ci){ci.dn=done;if(done){ci.db=u.id;ci.da=Date.now();}else{delete ci.db;delete ci.da;}}});};
     V.dayEventsV=dayEvs.map(ev=>{const canEdit=!ev.by||ev.by===u.id;
       return{title:ev.t,time:ev.time||'종일',memo:ev.memo||'',hasMemo:!!(ev.memo||'').trim(),c:evCol(ev),who:String(ev.m||'fam').split(',').map(mName).filter(Boolean).join('·'),canEdit,
-      imp:!!ev.imp,hasCl:clMine(ev)&&(ev.cl||[]).some(c=>!c.dn),
-      clV:clMine(ev)?(ev.cl||[]).filter(c=>!c.dn).map(c=>({t:c.t,tog:e=>{e.stopPropagation();clSet(ev.id,c.id,true);}})):[],
+      imp:!!ev.imp,hasCl:(ev.cl||[]).some(c=>!c.dn&&clItemMine(ev,c)),
+      clV:(ev.cl||[]).filter(c=>!c.dn&&clItemMine(ev,c)).map(c=>({t:c.t,due:clDueLabel(c),hasDue:!!c.due,dueC:c.due&&c.due<t?'#E5484D':'var(--sub,#8A8177)',who:clWho(c),hasWho:!!clWho(c),tog:e=>{e.stopPropagation();clSet(ev.id,c.id,true);}})),
       open:()=>{if(ev.qid){const qq=this.qFind(D,ev.qid);
         if(qq&&u.role==='kid'&&qq.k===u.id){this.setState({modal:null});this.qOpen(qq);return;}
         if(qq&&u.role!=='kid'){this.setState({modal:null,tab:'parent',pview:'kids',qbKid:qq.k});return;}}
-      if(canEdit)this.setState({modal:{t:'event',id:ev.id},f:{...f,evTitle:ev.t,evTime:ev.time||'',evMemo:ev.memo||'',evMembers:String(ev.m||'fam').split(','),evImp:!!ev.imp,evCl:(ev.cl||[]).map(x=>({...x})),evClItem:''}});else evFlash('🔒 '+(mName(ev.by)||'작성한 사람')+'만 수정할 수 있어요');},
+      if(canEdit)this.setState({modal:{t:'event',id:ev.id},f:{...f,evTitle:ev.t,evTime:ev.time||'',evMemo:ev.memo||'',evMembers:String(ev.m||'fam').split(','),evImp:!!ev.imp,evCl:(ev.cl||[]).map(x=>({...x})),evClItem:'',evClDue:'',evClM:['fam']}});else evFlash('🔒 '+(mName(ev.by)||'작성한 사람')+'만 수정할 수 있어요');},
       del:e=>{e.stopPropagation();this.mut(d=>{d.events=d.events.filter(x=>x.id!==ev.id);});}};});
-    const doneCl=[];D.events.forEach(ev=>{if(!clMine(ev))return;(ev.cl||[]).forEach(c=>{if(c.dn)doneCl.push({ev,c});});});
+    // 📌 고정 체크리스트: 다른 날짜 일정의 안 끝난 할일도 마감일과 함께 끝날 때까지 이 자리에 계속 보인다
+    const pinCl=[];D.events.forEach(ev=>{if(ev.d===S.selDate)return;(ev.cl||[]).forEach(c=>{if(!c.dn&&clItemMine(ev,c))pinCl.push({ev,c});});});
+    pinCl.sort((a,b)=>(a.c.due||'9999-99-99').localeCompare(b.c.due||'9999-99-99'));
+    V.pinClShow=pinCl.length>0;
+    V.pinClV=pinCl.map(({ev,c})=>({t:c.t,c:evCol(ev),src:ev.t+' · '+this.dShort(ev.d),due:clDueLabel(c),hasDue:!!c.due,
+      dueC:c.due&&c.due<t?'#E5484D':'var(--ac,#F59E0B)',who:clWho(c),hasWho:!!clWho(c),tog:()=>clSet(ev.id,c.id,true)}));
+    const doneCl=[];D.events.forEach(ev=>{(ev.cl||[]).forEach(c=>{if(c.dn&&clItemMine(ev,c))doneCl.push({ev,c});});});
     doneCl.sort((a,b)=>(b.c.da||0)-(a.c.da||0));
     V.hasDoneCl=doneCl.length>0;V.doneClN=doneCl.length;
     V.doneClOpen=!!S.doneClOpen;V.doneClArrow=S.doneClOpen?'접기 ▲':'펼치기 ▼';
@@ -3304,29 +3528,37 @@ class Component extends DCLogic {
     V.ddRef=this.ddRef;
     V.ddPrev=()=>this.ddNudge(-1);V.ddNext=()=>this.ddNudge(1);
     V.ddDown=e=>this.ddDrag(e);
-    V.openEvent=()=>this.setState({modal:{t:'event'},f:{...f,evTitle:'',evTime:'',evMemo:'',evMembers:['fam'],evImp:false,evCl:[],evClItem:''}});
+    V.openEvent=()=>this.setState({modal:{t:'event'},f:{...f,evTitle:'',evTime:'',evMemo:'',evMembers:['fam'],evImp:false,evCl:[],evClItem:'',evClDue:'',evClM:['fam']}});
     V.toggleEvImp=()=>this.setF('evImp',!f.evImp);
     V.evImpBg=f.evImp?'#E5484D':'var(--bg,#FAF6EF)';V.evImpFg=f.evImp?'#fff':'var(--sub,#8A8177)';V.evImpBd=f.evImp?'#E5484D':'var(--line,#eee)';
     V.evHasCl=!!(f.evCl||[]).length;
-    V.evClV=(f.evCl||[]).map((c,i)=>({t:c.t,del:()=>this.setF('evCl',(f.evCl||[]).filter((_,j)=>j!==i))}));
+    V.evClV=(f.evCl||[]).map((c,i)=>({t:c.t,sub:[c.due?this.dShort(c.due)+'까지':'',clWho(c)].filter(Boolean).join(' · '),hasSub:!!(c.due||clWho(c)),del:()=>this.setF('evCl',(f.evCl||[]).filter((_,j)=>j!==i))}));
+    const clMs=Array.isArray(f.evClM)&&f.evClM.length?f.evClM:['fam'];
+    V.evClMOptsV=[{v:'fam',label:'👨‍👩‍👧‍👦 모두'},...D.profiles.map(p=>({v:p.id,label:p.emoji+' '+p.name}))].map(o=>{const onSel=clMs.includes(o.v);
+      return{...o,bg:onSel?sk.soft:'var(--bg,#FAF6EF)',bd:onSel?sk.ac:'var(--line,#eee)',
+        pick:()=>{let n;if(o.v==='fam')n=['fam'];else{n=clMs.filter(x=>x!=='fam');n=n.includes(o.v)?n.filter(x=>x!==o.v):[...n,o.v];if(!n.length)n=['fam'];}this.setF('evClM',n);}};});
     V.addEvCl=()=>{const ct=(f.evClItem||'').trim();if(!ct)return;
-      this.setState({f:{...f,evCl:[...(f.evCl||[]),{id:this.uid(),t:ct,dn:false}],evClItem:''}});};
+      this.setState({f:{...f,evCl:[...(f.evCl||[]),{id:this.uid(),t:ct,dn:false,due:f.evClDue||'',m:clMs.join(',')}],evClItem:'',evClDue:'',evClM:['fam']}});};
     V.addEvent=()=>{if(!(f.evTitle||'').trim())return;const eid=S.modal&&S.modal.id;
-      const cl=(f.evCl||[]).slice();const pend=(f.evClItem||'').trim();if(pend)cl.push({id:this.uid(),t:pend,dn:false});
+      const cl=(f.evCl||[]).slice();const pend=(f.evClItem||'').trim();if(pend)cl.push({id:this.uid(),t:pend,dn:false,due:f.evClDue||'',m:clMs.join(',')});
       const imp=!!f.evImp;
       this.mut(d=>{if(eid){const x=d.events.find(y=>y.id===eid);if(x){x.t=f.evTitle.trim();x.m=(f.evMembers&&f.evMembers.length)?f.evMembers.join(','):x.m;x.time=f.evTime||'';x.memo=(f.evMemo||'').trim();x.imp=imp;x.cl=cl;}}
         else d.events.push({id:this.uid(),d:S.selDate,t:f.evTitle.trim(),m:(f.evMembers&&f.evMembers.length?f.evMembers:['fam']).join(','),time:f.evTime||'',memo:(f.evMemo||'').trim(),imp,cl,by:u.id});});
-      this.setState({modal:null});this.clearF(['evClItem']);};
+      this.setState({modal:null});this.clearF(['evClItem','evClDue','evClM']);};
     const selMs=Array.isArray(f.evMembers)&&f.evMembers.length?f.evMembers:['fam'];
     V.memberOptsV=[{v:'fam',label:'👨‍👩‍👧‍👦 가족 모두'},...D.profiles.map(p=>({v:p.id,label:p.emoji+' '+p.name}))].map(o=>{const onSel=selMs.includes(o.v);
       return{...o,bg:onSel?sk.ac:'var(--bg,#FAF6EF)',fg:onSel?sk.on:'inherit',bd:onSel?sk.ac:'var(--line,#eee)',
         pick:()=>{let n;if(o.v==='fam')n=['fam'];else{n=selMs.filter(x=>x!=='fam');n=n.includes(o.v)?n.filter(x=>x!==o.v):[...n,o.v];if(!n.length)n=['fam'];}this.setF('evMembers',n);}};});
-    const ddCalc=ds=>{const diff=Math.round((new Date(ds+'T00:00:00')-new Date(t+'T00:00:00'))/86400000);return diff===0?'D-DAY':(diff>0?'D-'+diff:'D+'+(-diff));};
     const ddSorted=D.ddays.slice().sort((a,b)=>a.d.localeCompare(b.d));
-    V.ddaysV=ddSorted.map(dd=>({title:dd.t,emoji:dd.e,dd:ddCalc(dd.d)}));
+    V.ddaysV=ddSorted.map(dd=>({title:dd.t,emoji:dd.e,dd:ddCalc(dd.d),
+      open:()=>{if(this.ddMoved)return;this.setState({modal:{t:'dday'},f:{...f,ddTitle:dd.t,ddDate:dd.d,ddEmoji:dd.e,ddEditId:dd.id}});}}));
     V.ddayMgV=ddSorted.map(dd=>({title:dd.t,emoji:dd.e,dd:ddCalc(dd.d),del:()=>this.mut(d=>{d.ddays=d.ddays.filter(x=>x.id!==dd.id);})}));
-    V.openDday=()=>this.setState({modal:{t:'dday'},f:{...f,ddTitle:'',ddDate:'',ddEmoji:''}});
+    V.openDday=()=>this.setState({modal:{t:'dday'},f:{...f,ddTitle:'',ddDate:'',ddEmoji:'',ddEditId:''}});
+    V.ddEditing=!!f.ddEditId;V.ddAdding=!f.ddEditId;
     V.addDday=()=>{if(!(f.ddTitle||'').trim()||!f.ddDate)return;this.mut(d=>{d.ddays.push({id:this.uid(),t:f.ddTitle.trim(),d:f.ddDate,e:f.ddEmoji||'⭐'});});this.clearF(['ddTitle','ddDate','ddEmoji']);};
+    V.saveDday=()=>{if(!(f.ddTitle||'').trim()||!f.ddDate)return;this.mut(d=>{const x=d.ddays.find(y=>y.id===f.ddEditId);if(x){x.t=f.ddTitle.trim();x.d=f.ddDate;x.e=f.ddEmoji||'⭐';}});
+      this.setState({modal:null});this.clearF(['ddTitle','ddDate','ddEmoji','ddEditId']);};
+    V.delDday=()=>{this.mut(d=>{d.ddays=d.ddays.filter(x=>x.id!==f.ddEditId);});this.setState({modal:null});this.clearF(['ddTitle','ddDate','ddEmoji','ddEditId']);};
     const todayDow=new Date().getDay();
     const ttToday=D.tt.filter(x=>x.day===todayDow).sort((a,b)=>a.time.localeCompare(b.time));
     V.ttHomeShow=D.settings.useTT&&ttToday.length>0;
@@ -3532,6 +3764,30 @@ class Component extends DCLogic {
           if(eid){const c2=p2.comments.find(x=>x.id===eid);if(c2)c2.txt=txt;}else p2.comments.push({id:this.uid(),by:u.id,txt,d:t});});
         if(eid)this.setState({cmEdit:null});this.clearF([ck]);}};});
 
+    // GOALS — 각자 방 홈의 목표·체크 패널. 한 사람당 3개까지, 블록을 누르면 빈칸→성공→실패 순환
+    const myGoals=(D.goals||[]).filter(g=>g.k===u.id);
+    V.goalsV=myGoals.map(g=>{
+      const gm=g.m||{};
+      const total=Math.round((new Date(t+'T00:00:00')-new Date(g.start+'T00:00:00'))/86400000)+1;
+      const n=Math.max(1,Math.min(total,140)); // 오래된 목표는 최근 140일 창만 그린다
+      const cells=[];
+      for(let i=n-1;i>=0;i--){const ds=this.rel(-i);const v=gm[ds]||0;
+        cells.push({x:v===2?'✕':'',bg:v===1?sk.ac:(v===2?'#E5484D':sk.bg),bd:ds===t?sk.tx:(v===1?sk.ac:(v===2?'#E5484D':sk.line)),
+          tap:()=>this.mut(d=>{const x2=(d.goals||[]).find(y=>y.id===g.id);if(!x2)return;x2.m=x2.m||{};
+            const nx=((x2.m[ds]||0)+1)%3;if(nx)x2.m[ds]=nx;else delete x2.m[ds];})});}
+      const okN=Object.keys(gm).filter(ds=>gm[ds]===1).length;
+      const noN=Object.keys(gm).filter(ds=>gm[ds]===2).length;
+      return{title:g.t,hasDd:!!g.dd,dd:g.dd?ddCalc(g.dd):'',since:this.dShort(g.start)+' 시작',okN,noN,cells,
+        del:()=>this.mut(d=>{d.goals=(d.goals||[]).filter(y=>y.id!==g.id);})};
+    });
+    V.goalsEmpty=!myGoals.length;
+    V.goalCanAdd=myGoals.length<3;
+    V.goalFull=myGoals.length>=3;
+    V.addGoal=()=>{const gt=(f.goTitle||'').trim();if(!gt||myGoals.length>=3)return;
+      this.mut(d=>{d.goals=d.goals||[];if(d.goals.filter(x=>x.k===u.id).length>=3)return;
+        d.goals.push({id:this.uid(),k:u.id,t:gt,dd:f.goDate||'',start:t,m:{}});});
+      this.clearF(['goTitle','goDate']);};
+
     // KID SPACE
     if(isKid){
       const k=u.id;
@@ -3551,15 +3807,15 @@ class Component extends DCLogic {
       const done=tds.filter(x=>ck[x.id]).length;
       V.doneCnt=done;V.totalCnt=tds.length;V.todoPct=tds.length?Math.round(done/tds.length*100):0;
       V.motMsg=done===0?'첫 체크를 눌러볼까? 시작이 반이야 🌱':(done===tds.length?'올클리어!! 오늘의 주인공은 너야 🎉':(done/tds.length>=0.5?'절반 넘었어! 조금만 더 💪':'좋아, 그 기세로 쭉! 🚀'));
-      V.todosV=tds.map(td=>{const dn=!!ck[td.id];const rs=td.rs||'🌟',rn=Math.max(1,Number(td.rn||1));return{title:td.t,emoji:td.e,rew:rn>1?rs+' ×'+rn:rs,ck:dn?'✓':'',ckBg:dn?sk.ac:'transparent',ckBd:dn?sk.ac:sk.line,deco:dn?'line-through':'none',op:dn?0.55:1,
+      V.todosV=tds.map(td=>{const dn=!!ck[td.id];const rs=td.rs||'🌟',rn=Math.max(1,Number(td.rn||1));const pend=(D.appr||[]).some(x=>x.tag==='td_'+td.id+'_'+t);return{title:td.t,emoji:td.e,rew:pend?'⏳ 확인 중':(rn>1?rs+' ×'+rn:rs),ck:dn?'✓':'',ckBg:dn?sk.ac:'transparent',ckBd:dn?sk.ac:sk.line,deco:dn?'line-through':'none',op:dn?0.55:1,
         toggle:()=>this.mut(d=>{d.checks[k]=d.checks[k]||{};d.checks[k][t]=d.checks[k][t]||{};const on=!d.checks[k][t][td.id];d.checks[k][t][td.id]=on;
-          const tag='td_'+td.id+'_'+t,btag='all_'+k+'_'+t;
-          if(on){for(let i=0;i<rn;i++){const a=tag+'#'+i;if(!d.stlog.some(x=>x.auto===a))d.stlog.push({k,e:rs,from:'할일 완료',msg:'"'+td.t+'" 해냈어!',d:t,auto:a});}}
-          else d.stlog=d.stlog.filter(x=>x.auto!==tag&&String(x.auto||'').indexOf(tag+'#')!==0);
+          const tag='td_'+td.id+'_'+t,btag='all_'+k+'_'+t;d.appr=d.appr||[];
+          if(on){if(!d.appr.some(x=>x.tag===tag)&&!d.stlog.some(x=>x.auto===tag+'#0'))d.appr.push({id:this.uid(),k,td:td.id,tag,title:td.t,rs,rn,d:t});}
+          else{d.appr=d.appr.filter(x=>x.tag!==tag);
+            d.stlog=d.stlog.filter(x=>x.auto!==tag&&String(x.auto||'').indexOf(tag+'#')!==0);}
           const ts2=d.todos.filter(x=>x.k===k);
           const all=ts2.length>0&&ts2.every(x=>d.checks[k][t][x.id]);
-          if(all){if(!d.stlog.some(x=>x.auto===btag))d.stlog.push({k,e:'🏆',from:'올클리어 보너스',msg:'오늘 할일 전부 완료!',d:t,auto:btag});}
-          else d.stlog=d.stlog.filter(x=>x.auto!==btag);}),
+          if(!all)d.stlog=d.stlog.filter(x=>x.auto!==btag);}),
         del:()=>this.mut(d=>{d.todos=d.todos.filter(x=>x.id!==td.id);})};});
       V.addTodo=()=>{if(!(f.tdTitle||'').trim())return;this.mut(d=>{d.todos.push({id:this.uid(),k,t:f.tdTitle.trim(),e:'📌'});});this.clearF(['tdTitle']);};
       const myTT=D.tt.filter(x=>x.k===k).sort((a,b)=>a.day-b.day||a.time.localeCompare(b.time));
@@ -3765,6 +4021,11 @@ class Component extends DCLogic {
         const mrw=(D.rewards||[]).filter(x=>x.money&&x.cost).sort((a,b)=>(a.money/a.cost)-(b.money/b.cost))[0];
         const stkRate=Number((D.stkRate||{})[kp.id])||200;
         const stkNeed=Math.max(1,Math.ceil((Number(f['sa_'+kp.id])||0)/stkRate));
+        const kAppr=(D.appr||[]).filter(x=>x.k===kp.id).slice().sort((a,b)=>b.d.localeCompare(a.d));
+        const stHist=D.stlog.filter(x=>x.k===kp.id).map(x=>({d:x.d,txt:x.e+' '+(x.msg||x.from||'받음'),amt:'+1',c:'#3FA45B'}))
+          .concat(kExch.map(x=>({d:x.d,txt:'🎁 '+x.name,amt:'-'+x.cost,c:'#E0654F'})))
+          .sort((a,b)=>b.d.localeCompare(a.d));
+        const histOpen=S.stHistOpen===kp.id;
         return{name:kp.name,emoji:kp.emoji,done,total:tds.length,pct:tds.length?Math.round(done/tds.length*100):0,weekMin:wk,
           lastScore:lastSc?lastSc.s+' '+lastSc.v+'점':'—',stickers:stkN,hasJ:!!lastJ,lastJ:lastJ?'['+lastJ.s+'] '+lastJ.txt:'',
           ptVal:f[fk]||'',ptOn:e=>this.setF(fk,e.target.value),
@@ -3781,6 +4042,12 @@ class Component extends DCLogic {
           ddBg:f['saMode_'+kp.id]==='deduct'?sk.soft:sk.card,ddFg:f['saMode_'+kp.id]==='deduct'?sk.tx:sk.sub,ddBd:f['saMode_'+kp.id]==='deduct'?sk.ac:sk.line,
           saBonus:()=>this.setF('saMode_'+kp.id,'bonus'),saDeduct:()=>this.setF('saMode_'+kp.id,'deduct'),
           hasMon:monV.length>0,monV,
+          hasAppr:kAppr.length>0,apprV:kAppr.map(x=>({title:x.title,rew:(x.rs||'🌟')+(Number(x.rn||1)>1?' ×'+x.rn:''),date:this.dShort(x.d),ok:()=>this.apprOk(x.id),no:()=>this.apprNo(x.id)})),
+          hasStHist:stHist.length>0,stHistV:stHist.slice(0,histOpen?40:5).map(x=>({date:this.dShort(x.d),txt:x.txt,amt:x.amt,c:x.c})),
+          histMore:stHist.length>5,histArrow:histOpen?'접기 ▴':'더보기 ▾',histToggle:()=>this.setState({stHistOpen:histOpen?'':kp.id}),
+          openTodo:()=>this.setState({modal:{t:'ptodo',kid:kp.id}}),
+          openStick:()=>this.setState({modal:{t:'pstick',kid:kp.id}}),
+          openMoney:()=>this.setState({modal:{t:'pmoney',kid:kp.id}}),
           stEarned:kEarned,stSpent:kSpent,stTypesK,hasStTypesK:stTypesK.length>0,
           hasStMon:stMonV.length>0,stMonV,
           hasTrK:kTr.length>0,trKV:kTr.slice(0,6).map(x=>{const gives=x.giver===kp.id;const other=byName(gives?x.doer:x.giver);const mt=this.trMeta(x.st,sk);
@@ -3801,6 +4068,18 @@ class Component extends DCLogic {
               this.setState({saMsg:kp.id,saMsgTxt:'🎁 보너스 용돈이 '+kp.name+'의 지갑에 들어갔어요!'});
             }
             this.clearF(['sa_'+kp.id,'saStk_'+kp.id]);setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),2500);}};});
+      const pmKid=kids.find(x=>x.id===(S.modal&&S.modal.kid));
+      const pmi=pmKid?V.kidsOV[kids.indexOf(pmKid)]:null;
+      V.modalPTodo=!!(pmi&&S.modal.t==='ptodo');V.modalPStick=!!(pmi&&S.modal.t==='pstick');V.modalPMoney=!!(pmi&&S.modal.t==='pmoney');
+      if(pmi){V.pmName=pmKid.name;V.pmEmoji=pmKid.emoji;
+        V.pmTodoVal=pmi.ptVal;V.pmTodoOn=pmi.ptOn;V.pmRsV=pmi.rsV;V.pmRnVal=pmi.rnVal;V.pmRnDec=pmi.rnDec;V.pmRnInc=pmi.rnInc;
+        V.pmTodoAdd=()=>{if(!(f['pt_'+pmKid.id]||'').trim())return;pmi.ptAdd();this.setState({modal:null});};
+        V.pmStkPickV=this.STK.map(e=>({e,bg:(f.stEmoji||'🌟')===e?sk.soft:sk.bg,bd:(f.stEmoji||'🌟')===e?sk.ac:'transparent',pick:()=>this.setF('stEmoji',e)}));
+        V.pmStkSend=()=>{const e=f.stEmoji||'🌟';this.mut(d=>{d.stlog.push({id:this.uid(),k:pmKid.id,e,msg:(f.stMsg||'').trim(),from:u.name,d:t});});this.clearF(['stMsg']);this.setState({modal:null,saMsg:pmKid.id,saMsgTxt:e+' '+pmKid.name+'에게 스티커를 보냈어요!'});setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),2500);};
+        V.pmBnBg=pmi.bnBg;V.pmBnFg=pmi.bnFg;V.pmBnBd=pmi.bnBd;V.pmDdBg=pmi.ddBg;V.pmDdFg=pmi.ddFg;V.pmDdBd=pmi.ddBd;
+        V.pmSaBonus=pmi.saBonus;V.pmSaDeduct=pmi.saDeduct;V.pmSaVal=pmi.saVal;V.pmSaOn=pmi.saOn;
+        V.pmSaIsDeduct=pmi.saIsDeduct;V.pmStkNeed=pmi.stkNeed;V.pmStkRateTxt=pmi.stkRateTxt;V.pmStickers=pmi.stickers;
+        V.pmSaAdd=()=>{if(!Number(f['sa_'+pmKid.id]))return;pmi.saAdd();this.setState({modal:null});};}
       V.kidPickV=kids.map(kp=>({name:kp.name,emoji:kp.emoji,...softChip(S.stKid===kp.id),pick:()=>this.setState({stKid:kp.id})}));
       V.stickerPickV=this.STK.map(e=>({e,bg:f.stEmoji===e?sk.soft:sk.bg,bd:f.stEmoji===e?sk.ac:'transparent',pick:()=>this.setF('stEmoji',e)}));
       V.giveSticker=()=>{const e=f.stEmoji||'🌟';this.mut(d=>{d.stlog.push({id:this.uid(),k:S.stKid,e,msg:(f.stMsg||'').trim(),from:u.name,d:t});});const kn=(kids.find(x=>x.id===S.stKid)||{}).name;this.setState({stSentMsg:e+' '+kn+'에게 스티커를 보냈어요!'});this.clearF(['stMsg']);setTimeout(()=>this.setState({stSentMsg:''}),2500);};
