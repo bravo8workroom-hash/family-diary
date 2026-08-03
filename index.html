@@ -4074,7 +4074,7 @@ class Component extends DCLogic {
           bd:sel?sk.ac:(isT?sk.line:'transparent'),
           fg:c.inM?sk.tx:sk.line,
           tideFg:!c.inM?sk.line:(ti.big?'#E0654F':(ti.small?'#4D7BA6':sk.sub)),
-          pick:()=>this.setState({tideD:c.ds})};});
+          pick:()=>this.setState({tideD:c.ds,tideM:c.ds.slice(0,7)})};});   // 앞뒤 달 칸을 눌러도 그 달로 넘어가며 선택되게
 
       // ── 이 날 낚시 안내 — 계절(달) + 지역 + 물때로 어종·미끼·출조 시각을 골라줌
       const wst=tideRg.s===7;
