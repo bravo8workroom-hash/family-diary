@@ -186,18 +186,6 @@ input,button,textarea,select{font-family:inherit;}
             </sc-if>
           </div>
         </sc-if>
-        <sc-if value="{{ dayFeedShow }}" hint-placeholder-val="{{ false }}">
-          <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:12px;padding-top:10px;display:flex;flex-direction:column;gap:6px;">
-            <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);">📸 이 날의 피드 이야기</div>
-            <sc-for list="{{ dayFeedV }}" as="df" hint-placeholder-count="1">
-              <button onClick="{{ df.open }}" style="display:flex;align-items:center;gap:8px;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:9px 12px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%;box-sizing:border-box;">
-                <span style="font-size:16px;">{{ df.emoji }}</span>
-                <span style="flex:1;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ df.txt }}</span>
-                <span style="font-size:11px;color:var(--sub,#8A8177);flex-shrink:0;">{{ df.by }} ›</span>
-              </button>
-            </sc-for>
-          </div>
-        </sc-if>
       </div>
       <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -2488,7 +2476,7 @@ input,button,textarea,select{font-family:inherit;}
 <sc-if value="{{ modalEvent }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
     <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
-      <div style="font-size:16px;font-weight:800;margin-bottom:14px;">🗓️ {{ selLabel }} {{ evModalTitle }}</div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:14px;">🗓️ {{ evDateLabel }} {{ evModalTitle }}</div>
       <input value="{{ f.evTitle }}" onChange="{{ on.evTitle }}" placeholder="무슨 일정인가요?" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;margin-bottom:8px;">
       <textarea value="{{ f.evMemo }}" onChange="{{ on.evMemo }}" placeholder="메모 (선택)" rows="2" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;margin-bottom:8px;resize:none;font-family:inherit;line-height:1.5;"></textarea>
       <sc-if value="{{ evHasCl }}" hint-placeholder-val="{{ false }}">
@@ -2512,7 +2500,8 @@ input,button,textarea,select{font-family:inherit;}
           <button onClick="{{ cmo.pick }}" style="background:{{ cmo.bg }};color:inherit;border:1px solid {{ cmo.bd }};border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800;cursor:pointer;">{{ cmo.label }}</button>
         </sc-for>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <input value="{{ f.evDate }}" onChange="{{ on.evDate }}" type="date" style="width:145px;box-sizing:border-box;padding:11px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
         <input value="{{ f.evTime }}" onChange="{{ on.evTime }}" type="time" style="width:110px;box-sizing:border-box;padding:11px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
         <button onClick="{{ toggleEvImp }}" style="background:{{ evImpBg }};color:{{ evImpFg }};border:1px solid {{ evImpBd }};border-radius:12px;padding:11px 14px;font-size:13px;font-weight:800;cursor:pointer;">❗ 중요</button>
       </div>
@@ -2861,18 +2850,6 @@ input,button,textarea,select{font-family:inherit;}
                 <span style="font-size:11px;color:var(--sub,#8A8177);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pc.src }}<sc-if value="{{ pc.hasWho }}" hint-placeholder-val="{{ false }}"><span> · {{ pc.who }}</span></sc-if></span>
               </span>
               <sc-if value="{{ pc.hasDue }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:900;color:{{ pc.dueC }};flex-shrink:0;">{{ pc.due }}</span></sc-if>
-            </button>
-          </sc-for>
-        </div>
-      </sc-if>
-      <sc-if value="{{ dayFeedShow }}" hint-placeholder-val="{{ false }}">
-        <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:14px;padding-top:12px;display:flex;flex-direction:column;gap:6px;">
-          <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);">📸 이 날의 피드 이야기</div>
-          <sc-for list="{{ dayFeedV }}" as="df" hint-placeholder-count="1">
-            <button onClick="{{ df.open }}" style="display:flex;align-items:center;gap:8px;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%;box-sizing:border-box;">
-              <span style="font-size:16px;">{{ df.emoji }}</span>
-              <span style="flex:1;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ df.txt }}</span>
-              <span style="font-size:11px;color:var(--sub,#8A8177);flex-shrink:0;">{{ df.by }} ›</span>
             </button>
           </sc-for>
         </div>
@@ -3813,7 +3790,7 @@ class Component extends DCLogic {
   renderVals(){
     const S=this.state,D=S.data;
     if(!D)return{loading:true,noUser:false,hasUser:false,skinBg:'#FAF6EF',skinCard:'#fff',skinAc:'#F59E0B',skinOn:'#fff',skinSoft:'#F7EAD2',skinLine:'#EFE4CF',skinTx:'#3F3A33',skinSub:'#8A8177',f:{},on:{},modalPw:false,modalEvent:false,modalDday:false,modalProfile:false,modalPing:false,hasPings:false,pingsV:[]};
-    const FL=['evTitle','evTime','evMemo','evClItem','evClDue','evMember','jSubj','jMin','jText','scSubj','scName','scScore','txDate','txAmt','txCat','txMemo','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDate','kfTm','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','rwName','rwCost','fxName','fxAmt','fxDay','fxCat','goTitle','goDate','gdMemo'];
+    const FL=['evTitle','evTime','evMemo','evDate','evClItem','evClDue','evMember','jSubj','jMin','jText','scSubj','scName','scScore','txDate','txAmt','txCat','txMemo','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDate','kfTm','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','rwName','rwCost','fxName','fxAmt','fxDay','fxCat','goTitle','goDate','gdMemo'];
     const on={};FL.forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     ['qbTitle','qbGoal','qbTries','qbThink','qbCool','qbDate','qbQ','qbA','qbEx','qbNote','qbO1','qbO2','qbO3','qbAiTopic','qbAiN'].forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     const f=S.f,t=this.today(),W=this.won.bind(this);
@@ -3934,7 +3911,7 @@ class Component extends DCLogic {
       open:()=>{if(ev.qid){const qq=this.qFind(D,ev.qid);
         if(qq&&u.role==='kid'&&qq.k===u.id){this.setState({modal:null});this.qOpen(qq);return;}
         if(qq&&u.role!=='kid'){this.setState({modal:null,tab:'parent',pview:'kids',qbKid:qq.k});return;}}
-      if(canEdit)this.setState({modal:{t:'event',id:ev.id},f:{...f,evTitle:ev.t,evTime:ev.time||'',evMemo:ev.memo||'',evMembers:String(ev.m||'fam').split(','),evImp:!!ev.imp,evCl:(ev.cl||[]).map(x=>({...x})),evClItem:'',evClDue:'',evClM:['fam']}});else evFlash('🔒 '+(mName(ev.by)||'작성한 사람')+'만 수정할 수 있어요');},
+      if(canEdit)this.setState({modal:{t:'event',id:ev.id},f:{...f,evTitle:ev.t,evDate:ev.d,evTime:ev.time||'',evMemo:ev.memo||'',evMembers:String(ev.m||'fam').split(','),evImp:!!ev.imp,evCl:(ev.cl||[]).map(x=>({...x})),evClItem:'',evClDue:'',evClM:['fam']}});else evFlash('🔒 '+(mName(ev.by)||'작성한 사람')+'만 수정할 수 있어요');},
       del:e=>{e.stopPropagation();this.mut(d=>{d.events=d.events.filter(x=>x.id!==ev.id);});}};});
     // 📌 고정 체크리스트: 다른 날짜 일정의 안 끝난 할일도 마감일과 함께 끝날 때까지 이 자리에 계속 보인다
     const pinCl=[];D.events.forEach(ev=>{if(ev.d===S.selDate)return;(ev.cl||[]).forEach(c=>{if(!c.dn&&clItemMine(ev,c))pinCl.push({ev,c});});});
@@ -3949,14 +3926,10 @@ class Component extends DCLogic {
     V.toggleDoneCl=()=>this.setState({doneClOpen:!S.doneClOpen});
     V.doneClV=doneCl.slice(0,30).map(({ev,c})=>({t:c.t,src:ev.t+' · '+this.dShort(ev.d)+(c.db?' · '+mName(c.db):''),
       undo:()=>clSet(ev.id,c.id,false)}));
-    const fdByDay={};D.feed.forEach(po=>{(fdByDay[po.d]=fdByDay[po.d]||[]).push(po);});
-    const dayFds=(fdByDay[S.selDate]||[]).filter(po=>!po.fcard); // 낚시 카드는 피드에만
-    V.dayFeedShow=dayFds.length>0;
-    V.dayFeedV=dayFds.map(po=>({emoji:(D.profiles.find(p=>p.id===po.by)||{emoji:'🙂'}).emoji,by:mName(po.by),txt:(po.txt||'').trim()||'사진 이야기',
-      open:()=>this.setState({modal:null,tab:'feed'})}));
     if(S.modal&&S.modal.t==='feedview'){const po=D.feed.find(x=>x.id===S.modal.id)||{};const a2=D.profiles.find(p=>p.id===po.by)||{name:'?',emoji:'🙂'};
       V.fvEmoji=a2.emoji;V.fvBy=a2.name;V.fvDate=this.dShort(po.d||'');V.fvTxt=po.txt||'';V.fvPhotosV=this.phl(po).map(u2=>({u:u2}));V.fvHasPhoto=V.fvPhotosV.length>0;V.fvGoFeed=()=>this.setState({modal:null,tab:'feed'});}
     V.evModalTitle=(S.modal&&S.modal.t==='event'&&S.modal.id)?'일정 수정':'일정 추가';
+    V.evDateLabel=this.dLabel(f.evDate||S.selDate);
     V.modalDay=!!(S.modal&&S.modal.t==='day');
     // 달력 꾸미기 스티커 — 달력 카드 위 아무 곳에나 자유 배치, 그 달에만 표시
     V.calDecoV=(D.calDeco||[]).filter(x=>x.m===S.calM).map(x=>({...this.dv(x.s),x:x.x+'%',y:x.y+'%',rot:'rotate('+x.r+'deg)',
@@ -3977,7 +3950,7 @@ class Component extends DCLogic {
     V.ddRef=this.ddRef;
     V.ddPrev=()=>this.ddNudge(-1);V.ddNext=()=>this.ddNudge(1);
     V.ddDown=e=>this.ddDrag(e);
-    V.openEvent=()=>this.setState({modal:{t:'event'},f:{...f,evTitle:'',evTime:'',evMemo:'',evMembers:['fam'],evImp:false,evCl:[],evClItem:'',evClDue:'',evClM:['fam']}});
+    V.openEvent=()=>this.setState({modal:{t:'event'},f:{...f,evTitle:'',evDate:S.selDate,evTime:'',evMemo:'',evMembers:['fam'],evImp:false,evCl:[],evClItem:'',evClDue:'',evClM:['fam']}});
     V.toggleEvImp=()=>this.setF('evImp',!f.evImp);
     V.evImpBg=f.evImp?'#E5484D':'var(--bg,#FAF6EF)';V.evImpFg=f.evImp?'#fff':'var(--sub,#8A8177)';V.evImpBd=f.evImp?'#E5484D':'var(--line,#eee)';
     V.evHasCl=!!(f.evCl||[]).length;
@@ -3991,8 +3964,8 @@ class Component extends DCLogic {
     V.addEvent=()=>{if(!(f.evTitle||'').trim())return;const eid=S.modal&&S.modal.id;
       const cl=(f.evCl||[]).slice();const pend=(f.evClItem||'').trim();if(pend)cl.push({id:this.uid(),t:pend,dn:false,due:f.evClDue||'',m:clMs.join(',')});
       const imp=!!f.evImp;
-      this.mut(d=>{if(eid){const x=d.events.find(y=>y.id===eid);if(x){x.t=f.evTitle.trim();x.m=(f.evMembers&&f.evMembers.length)?f.evMembers.join(','):x.m;x.time=f.evTime||'';x.memo=(f.evMemo||'').trim();x.imp=imp;x.cl=cl;}}
-        else d.events.push({id:this.uid(),d:S.selDate,t:f.evTitle.trim(),m:(f.evMembers&&f.evMembers.length?f.evMembers:['fam']).join(','),time:f.evTime||'',memo:(f.evMemo||'').trim(),imp,cl,by:u.id});});
+      this.mut(d=>{if(eid){const x=d.events.find(y=>y.id===eid);if(x){x.t=f.evTitle.trim();x.d=f.evDate||x.d;x.m=(f.evMembers&&f.evMembers.length)?f.evMembers.join(','):x.m;x.time=f.evTime||'';x.memo=(f.evMemo||'').trim();x.imp=imp;x.cl=cl;}}
+        else d.events.push({id:this.uid(),d:f.evDate||S.selDate,t:f.evTitle.trim(),m:(f.evMembers&&f.evMembers.length?f.evMembers:['fam']).join(','),time:f.evTime||'',memo:(f.evMemo||'').trim(),imp,cl,by:u.id});});
       this.setState({modal:null});this.clearF(['evClItem','evClDue','evClM']);};
     const selMs=Array.isArray(f.evMembers)&&f.evMembers.length?f.evMembers:['fam'];
     V.memberOptsV=[{v:'fam',label:'👨‍👩‍👧‍👦 가족 모두'},...D.profiles.map(p=>({v:p.id,label:p.emoji+' '+p.name}))].map(o=>{const onSel=selMs.includes(o.v);
@@ -4016,11 +3989,8 @@ class Component extends DCLogic {
     V.calLabel=this.mLabel(S.calM);
     V.calPrev=()=>this.setState({calM:this.shiftM(S.calM,-1)});
     V.calNext=()=>this.setState({calM:this.shiftM(S.calM,1)});
-    const fdByDate={};D.feed.forEach(po=>{(fdByDate[po.d]=fdByDate[po.d]||[]).push(po);});
     V.calCellsV=this.grid(S.calM).map(c=>{
-      const evs=(evByDate[c.ds]||[]).map(ev=>({t:ev.t,bg:evCol(ev)+'2E',fg:sk.tx}));
-      const fds=(fdByDate[c.ds]||[]).filter(po=>!po.fcard).map(po=>({t:'📸 '+((po.txt||'').trim()||'사진'),bg:sk.line+'66',fg:sk.sub}));
-      const items=evs.concat(fds); // 피드 이야기는 항상 일정 아래
+      const items=(evByDate[c.ds]||[]).map(ev=>({t:ev.t,bg:evCol(ev)+'2E',fg:sk.tx})); // 피드는 달력에 표시하지 않는다 — 피드 탭에서만
       return{num:c.num,bg:c.ds===S.selDate?sk.soft:'transparent',fg:c.ds===t?sk.ac:(c.inM?sk.tx:sk.line),
         items:items.slice(0,3),hasMore:items.length>3,more:String(items.length-3),
         sel:()=>this.setState({selDate:c.ds,modal:{t:'day'}})};});
@@ -4049,7 +4019,7 @@ class Component extends DCLogic {
     V.fishMotto=this._motto;
     V.rollMotto=()=>{let n=this._motto;while(n===this._motto)n=FMOTTOS[Math.floor(Math.random()*FMOTTOS.length)];this._motto=n;this.forceUpdate();};
     V.fishGo=()=>this.setState({tab:'fish',fview:'map'});
-    V.fishPlan=()=>this.setState({modal:{t:'event'},f:{...f,evTitle:'🎣 낚시 출조',evTime:'05:00',evMembers:[u.id]}});
+    V.fishPlan=()=>this.setState({modal:{t:'event'},f:{...f,evTitle:'🎣 낚시 출조',evDate:S.selDate,evTime:'05:00',evMembers:[u.id]}});
 
     // 물때 달력 — 지역마다 표기가 다르므로 지역을 골라 저장
     V.tideRgName=tideRg.n;
