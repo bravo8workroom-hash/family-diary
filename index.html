@@ -74,6 +74,9 @@ input,button,textarea,select{font-family:inherit;}
       <div style="font-size:12px;color:var(--sub,#8A8177);">{{ todayLabel }}</div>
     </div>
     <button onClick="{{ goMe }}" style="background:{{ meBtnBg }};border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">⚙️</button>
+    <sc-if value="{{ showStudy }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ goStudy }}" title="공부하는 고양이" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">✏️</button>
+    </sc-if>
     <sc-if value="{{ showCook }}" hint-placeholder-val="{{ true }}">
       <button onClick="{{ goCook }}" title="우리집 레시피" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">🍳</button>
     </sc-if>
@@ -3846,6 +3849,8 @@ class Component extends DCLogic {
     V.meBtnBg=S.tab==='me'?sk.soft:sk.card;
     // 다이어트 일기는 같은 저장소의 별도 페이지(diet/)다 — 화면 전환이 아니라 이동
     V.showDiet=u.id==='mom';V.goDiet=()=>{location.href='diet/';};
+    // 공부하는 고양이는 별도 저장소(study-cat)의 앱이다 — 준선(kid2, 옛 id junsun) 방에서만
+    V.showStudy=u.id==='kid2'||u.id==='junsun';V.goStudy=()=>{location.href='https://bravo8workroom-hash.github.io/study-cat/';};
     // 요리 레시피도 같은 저장소의 별도 페이지(cook/)다 — 엄마·아빠방에서만 보인다
     V.showCook=u.role==='parent';V.goCook=()=>{location.href='cook/';};
     V.tabHome=S.tab==='home';V.tabFeed=S.tab==='feed';V.tabFish=S.tab==='fish'&&!isKid;V.tabMy=(S.tab==='my'||S.tab==='sticker'||S.tab==='money')&&isKid;V.tabParent=S.tab==='parent'&&!isKid;V.tabMe=S.tab==='me';V.tabGoals=S.tab==='goals';
