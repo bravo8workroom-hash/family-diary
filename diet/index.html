@@ -757,7 +757,8 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 class Component extends DCLogic {
   constructor(p){
     super(p);
-    const d=o=>{const t=new Date(2026,6,18);t.setDate(t.getDate()-o);const z=n=>String(n).padStart(2,'0');return t.getFullYear()+'-'+z(t.getMonth()+1)+'-'+z(t.getDate())};
+    // 오늘 날짜는 반드시 실제 오늘이어야 한다 — 여기에 날짜를 박으면 그날 칸에만 기록이 쌓여 PC 홈과 어긋난다
+    const d=o=>{const t=new Date();t.setHours(0,0,0,0);t.setDate(t.getDate()-o);const z=n=>String(n).padStart(2,'0');return t.getFullYear()+'-'+z(t.getMonth()+1)+'-'+z(t.getDate())};
     this.d=d;this.TODAY=d(0);this.seq=100;
     this.CAST=[
       {name:'요시 관장',av:'🥋',mbti:'ESTJ',coach:true,ban:true,tone:'추성훈 스타일의 한본인 관장. 터프하지만 정 많은 반말(챔프·곤죠·오츠카레).'},
