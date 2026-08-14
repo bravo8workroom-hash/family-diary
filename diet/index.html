@@ -184,6 +184,8 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           📷 AI 자동 기록
         </label>
 
+        <button onClick="{{tmOpen}}" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:{{cardBg}};color:{{accent}};border:1.5px solid {{accent}};border-radius:{{radM}};padding:12px;font-size:14.5px;font-weight:700;cursor:pointer">💬 문구로 기록</button>
+
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:14px 18px">
         <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">트레이너 칼로리표</div>
         <div style="display:flex;justify-content:space-between;align-items:center">
@@ -605,6 +607,29 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     </div>
   </sc-if>
 
+  <sc-if value="{{tmOn}}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:46">
+      <div onClick="{{tmCancel}}" style="position:absolute;inset:0;background:rgba(31,30,26,.45)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;background:{{cardBg}};border-radius:{{radL}} {{radL}} 0 0;padding:20px 20px 28px;max-height:88%;overflow-y:auto;display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <span style="font-size:16px;font-weight:800">💬 문구로 기록</span>
+          <span style="font-size:12px;font-weight:700;color:#8B887C">{{selLabel}}에 저장</span>
+        </div>
+        <div style="font-size:12.5px;color:#8B887C;line-height:1.65;word-break:keep-all">아래 지시문을 AI(챗GPT·클로드 등)에게 먼저 주고, 먹은 것을 말한 뒤 받은 답을 그대로 붙여넣으세요.</div>
+        <button onClick="{{tmCopy}}" style="border:0;background:{{chipBg}};color:#5C594E;border-radius:{{radM}};padding:11px;font-size:13.5px;font-weight:800;cursor:pointer">📋 AI 지시문 복사</button>
+        <div style="background:#FBFAF7;border:1px solid {{cardBorder}};border-radius:{{radS}};padding:10px 12px;max-height:116px;overflow-y:auto;font-size:11px;line-height:1.65;color:#6B6858;white-space:pre-wrap;-webkit-user-select:text;user-select:text">{{tmPrompt}}</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">AI 답변 붙여넣기</div>
+          <textarea value="{{tmText}}" onChange="{{onTmText}}" rows="6" placeholder="[점심] 현미밥 210g 310kcal 탄68 단6 지2" style="width:100%;box-sizing:border-box;border:1px solid #E3E0D8;border-radius:{{radS}};padding:12px;font-size:13px;line-height:1.6;resize:none;outline-color:{{accent}};background:#FBFAF7"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:2px">
+          <button onClick="{{tmCancel}}" style="flex:1;border:0;background:{{chipBg}};color:#5C594E;border-radius:{{radM}};padding:13px;font-size:14px;font-weight:700;cursor:pointer">취소</button>
+          <button onClick="{{tmSave}}" style="flex:2;border:0;background:{{accent}};color:#fff;border-radius:{{radM}};padding:13px;font-size:14px;font-weight:800;cursor:pointer">기록하기</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
   <sc-if value="{{pmOn}}" hint-placeholder-val="{{ false }}">
     <div style="position:absolute;inset:0;z-index:45">
       <div onClick="{{pmClose}}" style="position:absolute;inset:0;background:rgba(31,30,26,.5)"></div>
@@ -800,7 +825,7 @@ class Component extends DCLogic {
     this.state={tab:'home',mode:'diet',selDate:this.TODAY,feedFilter:'all',sober:SB,calM:this.TODAY.slice(0,7),
       set:{goalDate:'2026-08-10',startW:68.5,goalW:60,budget:10000,provider:'gemini',geminiKey:'',claudeKey:'',apiPass:'0000',diet:{kcal:1500,c:40,p:30,f:30},maint:{kcal:2000,c:50,p:25,f:25}},
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
-      editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
+      editW:null,fm:null,tm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
   fmt(n){return (n==null||n===''||isNaN(+n))?'—':(+n).toLocaleString('ko-KR')}
   royal(){return (this.props.tone??'공주님 말투')==='공주님 말투'}
@@ -811,6 +836,50 @@ class Component extends DCLogic {
   score(dt){const fs=this.state.foods[dt]||[];if(!fs.length)return null;const s=this.sums(dt),g=this.goalFor(dt);let sc=100-Math.min(55,Math.abs(s.kcal-g.kcal)/Math.max(1,g.kcal)*90);const tot=s.c*4+s.p*4+s.f*9;if(tot>0)sc-=Math.min(35,(Math.abs(s.c*4/tot*100-g.c)+Math.abs(s.p*4/tot*100-g.p)+Math.abs(s.f*9/tot*100-g.f))/2);return Math.max(5,Math.round(sc))}
   lbl(ds){const dt=new Date(ds+'T00:00:00');return (dt.getMonth()+1)+'.'+dt.getDate()+' ('+['일','월','화','수','목','금','토'][dt.getDay()]+')'}
   addFoods(dt,items){const F={...this.state.foods};const DM={...this.state.dayMode};if(!(F[dt]||[]).length&&!DM[dt])DM[dt]=this.state.mode;F[dt]=[...(F[dt]||[]),...items];let P=this.state.posts;if(!P.some(p=>p.date===dt)){P=[{id:'p'+(this.seq++),date:dt,photos:[],text:'',auto:true,starred:false,comments:[]},...P]}this.setState({foods:F,dayMode:DM,posts:P})}
+  dietPrompt(){return ['아래 규칙대로만 답해 줘. 다이어트 앱에 그대로 붙여넣을 거야.',
+    '',
+    '내가 오늘 먹은 것을 말하면, 음식 하나당 한 줄로 아래 형식만 출력해.',
+    '',
+    '[끼니] 음식이름 양 kcal 탄N 단N 지N',
+    '',
+    '- 끼니: 아침·점심·저녁·간식 중 하나 (모르면 시간대로 추정)',
+    '- 양: 숫자+단위. 단위는 g, ml, 개, 인분 넷 중 하나만 (컵·잔은 개로)',
+    '- kcal·탄(탄수화물)·단(단백질)·지(지방): 숫자만, 정수 g으로 반올림',
+    '- 브랜드명·설명·이모지는 빼고 음식 이름만 적어',
+    '- 인사말·설명·표·코드블록 금지. 오직 형식 줄만.',
+    '',
+    '예시)',
+    '[아침] 오트밀 60g 230kcal 탄40 단8 지5',
+    '[점심] 현미밥 210g 310kcal 탄68 단6 지2',
+    '[점심] 제육볶음 1인분 480kcal 탄24 단32 지28',
+    '[간식] 아메리카노 1개 10kcal 탄2 단0 지0'].join('\n')}
+  parseDietText(txt){
+    const J=this.parseFoods(txt);if(J.length)return J;
+    const out=[];let cur=null;
+    String(txt||'').split(/\r?\n/).forEach(raw=>{
+      let s=raw.trim().replace(/^[-*•·]\s*/,'');if(!s)return;
+      const mm=s.match(/^[\[\(【]?\s*(아침|점심|저녁|간식)\s*[\]\)】:：\-–]?\s*/);
+      if(mm){cur=mm[1];s=s.slice(mm[0].length).trim()}
+      const ki=s.search(/\d+(?:[.,]\d+)?\s*(?:kcal|칼로리|㎉)/i);if(ki<0)return;
+      const head=s.slice(0,ki),tail=s.slice(ki);
+      const num=re=>{const m=tail.match(re);return m?parseFloat(m[1].replace(/,/g,'')):0};
+      const am=head.match(/(\d+(?:[.,]\d+)?)\s*(g|ml|개|인분|그램|컵|잔)?\s*$/i);
+      let amt=1,unit='인분';
+      if(am&&am[1]){amt=parseFloat(am[1].replace(/,/g,''));unit={'그램':'g','컵':'개','잔':'개'}[am[2]]||(am[2]?am[2].toLowerCase():'인분')}
+      const name=(am?head.slice(0,head.length-am[0].length):head).trim().replace(/[,·:：\-]+$/,'');
+      if(!name||/합계|총합|총계|소계|하루\s*총|오늘\s*총|total/i.test(name)||/^(총|계|합)$/.test(name))return;
+      out.push({meal:cur,name,amt,unit,
+        kcal:num(/(\d+(?:[.,]\d+)?)\s*(?:kcal|칼로리|㎉)/i),
+        c:num(/탄(?:수화물|수)?\s*[:：]?\s*(\d+(?:[.,]\d+)?)/),
+        p:num(/단(?:백질)?\s*[:：]?\s*(\d+(?:[.,]\d+)?)/),
+        f:num(/지(?:방)?\s*[:：]?\s*(\d+(?:[.,]\d+)?)/)});
+    });
+    return out;
+  }
+  copyText(t,ok){
+    const fb=()=>{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(_){}document.body.removeChild(ta);ok()};
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok).catch(fb);else fb();
+  }
   praiseFor(){
     const A=['오늘도','또 한 번','변함없이','묵묵히','스스로와의 약속대로','작은 유혹에도','흔들림 없이','기특하게도','꾸준하게','한결같이','조용히','당당하게','부지런히','성실하게','침착하게','기분 좋게','가볍게','씩씩하게','야무지게','단단하게'];
     const B=['금주를 지켜냈어요','절제에 성공했어요','유혹을 이겨냈어요','목표를 향해 한 걸음 나아갔어요','건강한 하루를 완성했어요','자신을 잘 다스렸어요','약속을 지켜냈어요','좋은 선택을 했어요','페이스를 잘 유지했어요','습관을 하나 더 쌓았어요','몸을 아껴줬어요','오늘의 나를 이겼어요','계획대로 잘 해냈어요','흐름을 잘 이어갔어요','컨디션을 잘 챙겼어요'];
@@ -1109,6 +1178,20 @@ class Component extends DCLogic {
       nextDisabled:S.selDate>=this.TODAY,nextColor:S.selDate>=this.TODAY?'#D8D5CB':'#5C594E',nextOpacity:S.selDate>=this.TODAY?.5:1,
       onDatePick:e=>{const v=e.target.value;if(v&&v<=this.TODAY)this.setState({selDate:v})},
       onPhotoPick:e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;const h=new Date().getHours();const meal=h<10?'아침':h<15?'점심':h<20?'저녁':'간식';this.shrink(f,1568,0.85).then(res=>{const b64=res.slice(res.indexOf(',')+1);const mime=res.slice(5,res.indexOf(';'))||'image/jpeg';this.queueAI({type:'photo',date:S.selDate,meal,image:b64,mime,label:'사진 인식 · '+this.lbl(S.selDate)+' '+meal})})},
+      tmOn:!!S.tm,tmText:S.tm?S.tm.text:'',tmPrompt:this.dietPrompt(),
+      tmOpen:()=>this.setState({tm:{text:''}}),
+      tmCancel:()=>this.setState({tm:null}),
+      onTmText:e=>this.setState({tm:{...this.state.tm,text:e.target.value}}),
+      tmCopy:()=>this.copyText(this.dietPrompt(),()=>this.toast(this.say('지시문을 복사했어요 · AI에게 붙여넣으세요 📋','지시문을 복사해 두었어요 📋'))),
+      tmSave:()=>{
+        const raw=((S.tm&&S.tm.text)||'').trim();
+        if(!raw){this.toast('붙여넣은 문구가 없어요');return}
+        const parsed=this.parseDietText(raw);
+        if(!parsed.length){this.toast(this.say('문구를 못 읽었어요 · 지시문을 복사해 AI에게 주세요','문구를 못 읽었어요 · 지시문을 AI에게 주셔요'));return}
+        const h=new Date().getHours(),dflt=h<10?'아침':h<15?'점심':h<20?'저녁':'간식';
+        const items=parsed.map(x=>({id:'f'+(this.seq++),meal:['아침','점심','저녁','간식'].includes(x.meal)?x.meal:dflt,name:String(x.name||'음식'),amt:+x.amt||0,unit:x.unit||'g',kcal:Math.round(+x.kcal||0),c:+x.c||0,p:+x.p||0,f:+x.f||0}));
+        this.addFoods(S.selDate,items);this.setState({tm:null});
+        this.toast(this.say(items.length+'개를 기록했어요 ✓',items.length+'개를 기록해 두었어요 👑'))},
       dayKcal:fmt(dSum.kcal),dayC:fmt(dSum.c),dayP:fmt(dSum.p),dayF:fmt(dSum.f),
       dayModeBg:modeB(dGoal.m),dayModeColor:modeC(dGoal.m),dayModeLabel:modeL(dGoal.m),
       dayHasLog:dSc!=null,dayNoLog:dSc==null,dayScore:dSc,
