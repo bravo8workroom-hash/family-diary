@@ -242,7 +242,10 @@ input,button,textarea,select{font-family:inherit;}
                 <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
                   <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">
                     <sc-for list="{{ go.dots }}" as="gd" hint-placeholder-count="5">
-                      <span style="width:13px;height:13px;border-radius:99px;background:{{ gd.bg }};border:1.5px solid {{ gd.bd }};box-sizing:border-box;flex-shrink:0;"></span>
+                      <span style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;">
+                        <span style="font-size:8px;font-weight:800;color:var(--sub,#8A8177);white-space:nowrap;font-variant-numeric:tabular-nums;">{{ gd.dl }}</span>
+                        <span style="width:13px;height:13px;border-radius:99px;background:{{ gd.bg }};border:1.5px solid {{ gd.bd }};box-sizing:border-box;"></span>
+                      </span>
                     </sc-for>
                   </div>
                   <span style="font-size:11px;font-weight:900;white-space:nowrap;color:var(--sub,#8A8177);"><b style="color:var(--ac,#F59E0B);">성공 {{ go.okN }}</b> / 미완료 {{ go.noN }}</span>
@@ -672,7 +675,10 @@ input,button,textarea,select{font-family:inherit;}
                   <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
                     <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">
                       <sc-for list="{{ fgo.dots }}" as="fd" hint-placeholder-count="5">
-                        <span style="width:13px;height:13px;border-radius:99px;background:{{ fd.bg }};border:1.5px solid {{ fd.bd }};box-sizing:border-box;flex-shrink:0;"></span>
+                        <span style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;">
+                          <span style="font-size:8px;font-weight:800;color:var(--sub,#8A8177);white-space:nowrap;font-variant-numeric:tabular-nums;">{{ fd.dl }}</span>
+                          <span style="width:13px;height:13px;border-radius:99px;background:{{ fd.bg }};border:1.5px solid {{ fd.bd }};box-sizing:border-box;"></span>
+                        </span>
                       </sc-for>
                     </div>
                     <span style="font-size:11px;font-weight:900;white-space:nowrap;color:var(--sub,#8A8177);font-variant-numeric:tabular-nums;"><b style="color:var(--ac,#F59E0B);">성공 {{ fgo.okN }}</b> / 미완료 {{ fgo.noN }}</span>
@@ -1156,6 +1162,7 @@ input,button,textarea,select{font-family:inherit;}
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
                 <span style="font-size:24px;">{{ ko.emoji }}</span>
                 <span style="font-size:16px;font-weight:800;">{{ ko.name }}</span>
+                <button onClick="{{ ko.openSched }}" style="background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:5px 10px;font-size:11px;font-weight:800;color:var(--sub,#8A8177);cursor:pointer;min-height:28px;">📅 일정관리</button>
                 <span style="flex:1;"></span>
                 <div style="text-align:right;">
                   <div style="font-size:13px;font-weight:800;color:var(--ac,#F59E0B);">🌟 {{ ko.stickers }}개</div>
@@ -1298,6 +1305,7 @@ input,button,textarea,select{font-family:inherit;}
                           <span style="flex:1;">{{ sm.m }}</span>
                           <span style="color:var(--sub,#8A8177);font-weight:700;">{{ sm.n }}</span>
                           <span style="color:var(--ac,#F59E0B);">🌟 {{ sm.sum }}개</span>
+                          <sc-if value="{{ sm.hasMoney }}" hint-placeholder-val="{{ false }}"><span style="color:var(--ac,#F59E0B);">/ {{ sm.amt }}</span></sc-if>
                         </div>
                         <sc-if value="{{ sm.open }}" hint-placeholder-val="{{ false }}">
                           <sc-for list="{{ sm.items }}" as="it" hint-placeholder-count="1">
@@ -1305,36 +1313,24 @@ input,button,textarea,select{font-family:inherit;}
                               <span style="min-width:38px;">{{ it.date }}</span><span style="flex:1;">{{ it.name }}</span><span>−🌟{{ it.cost }}</span>
                             </div>
                           </sc-for>
-                        </sc-if>
-                      </div>
-                    </sc-for>
-                  </div>
-                </div>
-              </sc-if>
-              <sc-if value="{{ ko.hasMon }}" hint-placeholder-val="{{ false }}">
-                <div style="background:var(--bg,#FAF6EF);border-radius:12px;padding:10px 12px;margin-top:10px;">
-                  <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:6px;">💸 월별 보낸 용돈</div>
-                  <div style="display:flex;flex-direction:column;gap:8px;">
-                    <sc-for list="{{ ko.monV }}" as="mo" hint-placeholder-count="2">
-                      <div style="display:flex;flex-direction:column;gap:3px;">
-                        <div onClick="{{ mo.toggle }}" style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800;cursor:pointer;"><span style="color:var(--sub,#8A8177);font-size:10px;">{{ mo.arrow }}</span><span style="flex:1;">{{ mo.m }}</span><span style="color:var(--ac,#F59E0B);">{{ mo.amt }}</span></div>
-                        <sc-if value="{{ mo.open }}" hint-placeholder-val="{{ false }}">
-                          <sc-for list="{{ mo.items }}" as="it" hint-placeholder-count="1">
-                            <sc-if value="{{ it.viewing }}" hint-placeholder-val="{{ true }}">
-                              <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--sub,#8A8177);padding-left:15px;">
-                                <span style="min-width:38px;">{{ it.date }}</span><span style="flex:1;">{{ it.label }}</span><span>{{ it.amt }}</span>
-                                <span onClick="{{ it.startEdit }}" style="cursor:pointer;padding:2px 3px;">✎</span>
-                                <span onClick="{{ it.del }}" style="cursor:pointer;padding:2px 3px;color:#E0654F;font-weight:800;">✕</span>
-                              </div>
-                            </sc-if>
-                            <sc-if value="{{ it.editing }}" hint-placeholder-val="{{ false }}">
-                              <div style="display:flex;align-items:center;gap:5px;padding-left:15px;">
-                                <input value="{{ it.edMemo }}" onChange="{{ it.edMemoOn }}" style="flex:1;min-width:0;box-sizing:border-box;padding:6px 8px;border:1px solid var(--ac,#F59E0B);border-radius:8px;background:var(--card,#fff);color:inherit;font-size:11px;outline:none;">
-                                <input value="{{ it.edAmt }}" onChange="{{ it.edAmtOn }}" type="number" style="width:64px;flex-shrink:0;box-sizing:border-box;padding:6px 8px;border:1px solid var(--ac,#F59E0B);border-radius:8px;background:var(--card,#fff);color:inherit;font-size:11px;outline:none;">
-                                <button onClick="{{ it.save }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:8px;padding:6px 9px;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0;">저장</button>
-                              </div>
-                            </sc-if>
-                          </sc-for>
+                          <sc-if value="{{ sm.hasMoneyItems }}" hint-placeholder-val="{{ false }}">
+                            <sc-for list="{{ sm.moneyItemsV }}" as="it" hint-placeholder-count="1">
+                              <sc-if value="{{ it.viewing }}" hint-placeholder-val="{{ true }}">
+                                <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--sub,#8A8177);padding-left:15px;">
+                                  <span style="min-width:38px;">{{ it.date }}</span><span style="flex:1;">{{ it.label }}</span><span>{{ it.amt }}</span>
+                                  <span onClick="{{ it.startEdit }}" style="cursor:pointer;padding:2px 3px;">✎</span>
+                                  <span onClick="{{ it.del }}" style="cursor:pointer;padding:2px 3px;color:#E0654F;font-weight:800;">✕</span>
+                                </div>
+                              </sc-if>
+                              <sc-if value="{{ it.editing }}" hint-placeholder-val="{{ false }}">
+                                <div style="display:flex;align-items:center;gap:5px;padding-left:15px;">
+                                  <input value="{{ it.edMemo }}" onChange="{{ it.edMemoOn }}" style="flex:1;min-width:0;box-sizing:border-box;padding:6px 8px;border:1px solid var(--ac,#F59E0B);border-radius:8px;background:var(--card,#fff);color:inherit;font-size:11px;outline:none;">
+                                  <input value="{{ it.edAmt }}" onChange="{{ it.edAmtOn }}" type="number" style="width:64px;flex-shrink:0;box-sizing:border-box;padding:6px 8px;border:1px solid var(--ac,#F59E0B);border-radius:8px;background:var(--card,#fff);color:inherit;font-size:11px;outline:none;">
+                                  <button onClick="{{ it.save }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:8px;padding:6px 9px;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0;">저장</button>
+                                </div>
+                              </sc-if>
+                            </sc-for>
+                          </sc-if>
                         </sc-if>
                       </div>
                     </sc-for>
@@ -1343,28 +1339,6 @@ input,button,textarea,select{font-family:inherit;}
               </sc-if>
             </div>
           </sc-for>
-          <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-            <div style="font-size:15px;font-weight:800;margin-bottom:10px;">💌 칭찬 스티커 보내기</div>
-            <div style="display:flex;gap:8px;margin-bottom:10px;">
-              <sc-for list="{{ kidPickV }}" as="kp" hint-placeholder-count="2">
-                <button onClick="{{ kp.pick }}" style="flex:1;background:{{ kp.bg }};color:{{ kp.fg }};border:1px solid {{ kp.bd }};border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">{{ kp.emoji }} {{ kp.name }}</button>
-              </sc-for>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px;">
-              <sc-for list="{{ stickerPickV }}" as="sp" hint-placeholder-count="12">
-                <button onClick="{{ sp.pick }}" style="background:{{ sp.bg }};border:2px solid {{ sp.bd }};border-radius:12px;font-size:20px;padding:7px 0;cursor:pointer;">{{ sp.e }}</button>
-              </sc-for>
-            </div>
-            <div style="display:flex;gap:8px;">
-              <input value="{{ f.stMsg }}" onChange="{{ on.stMsg }}" placeholder="칭찬 한마디 (예: 숙제 완벽!)" style="flex:1;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
-              <button onClick="{{ giveSticker }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:10px 16px;font-weight:800;cursor:pointer;">보내기</button>
-            </div>
-            <sc-if value="{{ hasStMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--ac,#F59E0B);font-weight:800;margin-top:8px;">{{ stSentMsg }}</div></sc-if>
-            <div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);margin:14px 0 6px;">최근 보낸 스티커</div>
-            <sc-for list="{{ stRecentV }}" as="sr" hint-placeholder-count="2">
-              <div style="font-size:13px;padding:3px 0;">{{ sr.e }} <b>{{ sr.kid }}</b> · {{ sr.msg }} <span style="color:var(--sub,#8A8177);font-size:11px;">{{ sr.date }}</span></div>
-            </sc-for>
-          </div>
           <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
             <div style="font-size:15px;font-weight:800;margin-bottom:10px;">🎁 보상 목록 관리</div>
             <div style="display:flex;gap:8px;margin-bottom:10px;">
@@ -2476,6 +2450,40 @@ input,button,textarea,select{font-family:inherit;}
   </div>
 </sc-if>
 
+<sc-if value="{{ modalPSched }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
+    <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:12px;">📅 {{ pmEmoji }} {{ pmName }} 일정 관리</div>
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;margin-bottom:14px;">
+        <div style="flex:1;"><div style="font-size:13px;font-weight:800;">학원·방과후 시간표 사용</div><div style="font-size:11px;color:var(--sub,#8A8177);">끄면 홈과 아이 화면에서 숨겨져요</div></div>
+        <button onClick="{{ toggleTT }}" style="width:52px;height:30px;border-radius:99px;border:none;background:{{ ttSwBg }};position:relative;cursor:pointer;padding:0;flex-shrink:0;">
+          <span style="position:absolute;top:3px;left:{{ ttKnob }}px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></span>
+        </button>
+      </div>
+      <sc-if value="{{ pmTTEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:10px;">아직 등록된 학원·방과후가 없어요.</div></sc-if>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+        <sc-for list="{{ pmTTListV }}" as="tl" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;min-height:36px;">
+            <span style="color:var(--ac,#F59E0B);">{{ tl.day }}</span><span style="color:var(--sub,#8A8177);">{{ tl.time }}</span><span style="flex:1;">{{ tl.name }}</span>
+            <button onClick="{{ tl.del }}" style="background:none;border:none;color:var(--sub,#8A8177);cursor:pointer;padding:4px;">✕</button>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <select value="{{ f.ttDay }}" onChange="{{ on.ttDay }}" style="width:74px;box-sizing:border-box;padding:8px 6px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
+          <sc-for list="{{ dayOptsV }}" as="dop" hint-placeholder-count="7"><option value="{{ dop.v }}">{{ dop.d }}</option></sc-for>
+        </select>
+        <input value="{{ f.ttTime }}" onChange="{{ on.ttTime }}" type="time" style="width:100px;box-sizing:border-box;padding:8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
+        <input value="{{ f.ttName }}" onChange="{{ on.ttName }}" placeholder="학원·활동 이름" style="flex:1;box-sizing:border-box;padding:8px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">닫기</button>
+        <button onClick="{{ addTT }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">+ 추가</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ modalEvent }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
     <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
@@ -3277,6 +3285,8 @@ class Component extends DCLogic {
       if(!data.sttrash)data.sttrash=[];
       data.stlog.concat(data.exch).forEach(x=>{if(x.id===undefined)x.id=this.uid();});
       if(!data.kfV2){data.fishlog=this.seed().fishlog;data.kfV2=1;}
+      // 완료한 할일은 30일이 지나면 자동으로 지운다 (완료 표시 da 기준)
+      data.events.forEach(ev=>{if(ev.cl)ev.cl=ev.cl.filter(c=>!(c.dn&&c.da&&Date.now()-c.da>30*86400000));});
       const t=this.today();
       this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),tideM:t.slice(0,7),selDate:t,budSel:t},()=>this.fcBackfill());
     });
@@ -4268,7 +4278,7 @@ class Component extends DCLogic {
       const days=Object.keys(gm).sort();
       const okN=days.filter(ds=>gm[ds]===1).length;
       const noN=days.filter(ds=>gm[ds]===2).length;
-      const dots=days.slice(-70).map(ds=>({bg:gm[ds]===1?sk.ac:'transparent',bd:gm[ds]===1?sk.ac:sk.sub})); // 최근 70개 기록만 그린다
+      const dots=days.slice(-70).map(ds=>({bg:gm[ds]===1?sk.ac:'transparent',bd:gm[ds]===1?sk.ac:sk.sub,dl:this.dShort(ds)})); // 최근 70개 기록만 그린다
       const cur=gm[t]||0;
       const wv=weekView(g,gm);
       const mark=v=>this.mut(d=>{const x2=(d.goals||[]).find(y=>y.id===g.id);if(!x2)return;x2.m=x2.m||{};
@@ -4311,7 +4321,7 @@ class Component extends DCLogic {
         const wv=weekView(g,gm);
         return{title:g.t,hasDd:!!g.dd,dd:g.dd?ddCalc(g.dd):'',...wv,
           okN:days.filter(ds=>gm[ds]===1).length,noN:days.filter(ds=>gm[ds]===2).length,
-          hasDots:days.length>0&&!wv.weekly,dots:days.slice(-70).map(ds=>({bg:gm[ds]===1?sk.ac:'transparent',bd:gm[ds]===1?sk.ac:sk.sub})),
+          hasDots:days.length>0&&!wv.weekly,dots:days.slice(-70).map(ds=>({bg:gm[ds]===1?sk.ac:'transparent',bd:gm[ds]===1?sk.ac:sk.sub,dl:this.dShort(ds)})),
           summaryOnly:!full,canOpen:full&&!open,memoOpen:full&&open,
           toggle:()=>this.setState({fgOpen:open?null:g.id}),
           memoEmpty:full&&open&&!mdays.length,
@@ -4558,15 +4568,16 @@ class Component extends DCLogic {
         const stTypesK=Object.keys(kTypes).sort((a,b)=>kTypes[b]-kTypes[a]).map(e=>({e,n:kTypes[e]}));
         const kTr=TR.filter(x=>x.doer===kp.id||x.giver===kp.id).slice().sort(trSort);
         const sm={};kExch.forEach(x=>{const m=x.d.slice(0,7);(sm[m]=sm[m]||[]).push(x);});
-        const stMonV=Object.keys(sm).sort().reverse().slice(0,4).map(m=>{const key='st|'+kp.id+'|'+m;const open=S.stMonOpen===key;
-          return{m:Number(m.slice(0,4))+'년 '+Number(m.slice(5,7))+'월',sum:sm[m].reduce((s2,x)=>s2+x.cost,0),n:sm[m].length+'번',
-            open,arrow:open?'▾':'▸',toggle:()=>this.setState({stMonOpen:open?'':key}),
-            items:open?sm[m].slice().sort((a,b)=>b.d.localeCompare(a.d)).map(x=>({date:this.dShort(x.d),name:x.name,cost:x.cost})):[]};});
         const mm={};D.allow.filter(x=>x.k===kp.id&&x.ty==='in'&&x.src==='parent').forEach(x=>{const m=x.d.slice(0,7);(mm[m]=mm[m]||[]).push(x);});
-        const monV=Object.keys(mm).sort().reverse().slice(0,4).map(m=>{const key=kp.id+'|'+m;const open=S.monOpen===key;
-          return{m:Number(m.slice(0,4))+'년 '+Number(m.slice(5,7))+'월',amt:mm[m].reduce((s2,x)=>s2+x.a,0).toLocaleString()+'원',
-            open,arrow:open?'▾':'▸',toggle:()=>this.setState({monOpen:open?'':key}),
-            items:open?mm[m].slice().sort((a,b)=>b.d.localeCompare(a.d)).map(x=>{const ed=S.monEdit===x.id;return{
+        // 월별 스티커 교환 + 월별 보낸 용돈을 한 줄로 합쳐서 보여준다 — 교환된 스티커 옆에 그 달 용돈 금액도 같이 적는다
+        const stMonV=[...new Set([...Object.keys(sm),...Object.keys(mm)])].sort().reverse().slice(0,4).map(m=>{const key='st|'+kp.id+'|'+m;const open=S.stMonOpen===key;
+          const stItems=sm[m]||[],moneyItems=mm[m]||[];const moneySum=moneyItems.reduce((s2,x)=>s2+x.a,0);
+          return{m:Number(m.slice(0,4))+'년 '+Number(m.slice(5,7))+'월',sum:stItems.reduce((s2,x)=>s2+x.cost,0),n:stItems.length+'번',
+            hasMoney:moneySum>0,amt:moneySum.toLocaleString()+'원',
+            open,arrow:open?'▾':'▸',toggle:()=>this.setState({stMonOpen:open?'':key}),
+            items:open?stItems.slice().sort((a,b)=>b.d.localeCompare(a.d)).map(x=>({date:this.dShort(x.d),name:x.name,cost:x.cost})):[],
+            hasMoneyItems:open&&moneyItems.length>0,
+            moneyItemsV:open?moneyItems.slice().sort((a,b)=>b.d.localeCompare(a.d)).map(x=>{const ed=S.monEdit===x.id;return{
               date:this.dShort(x.d),label:x.memo,amt:x.a.toLocaleString()+'원',editing:ed,viewing:!ed,
               edAmt:f['ea_'+x.id]!==undefined?f['ea_'+x.id]:String(x.a),edAmtOn:e=>this.setF('ea_'+x.id,e.target.value),
               edMemo:f['em_'+x.id]!==undefined?f['em_'+x.id]:x.memo,edMemoOn:e=>this.setF('em_'+x.id,e.target.value),
@@ -4597,7 +4608,6 @@ class Component extends DCLogic {
           bnBg:(f['saMode_'+kp.id]||'bonus')==='bonus'?sk.soft:sk.card,bnFg:(f['saMode_'+kp.id]||'bonus')==='bonus'?sk.tx:sk.sub,bnBd:(f['saMode_'+kp.id]||'bonus')==='bonus'?sk.ac:sk.line,
           ddBg:f['saMode_'+kp.id]==='deduct'?sk.soft:sk.card,ddFg:f['saMode_'+kp.id]==='deduct'?sk.tx:sk.sub,ddBd:f['saMode_'+kp.id]==='deduct'?sk.ac:sk.line,
           saBonus:()=>this.setF('saMode_'+kp.id,'bonus'),saDeduct:()=>this.setF('saMode_'+kp.id,'deduct'),
-          hasMon:monV.length>0,monV,
           hasAppr:kAppr.length>0,apprV:kAppr.map(x=>({title:x.title,rew:(x.rs||'🌟')+(Number(x.rn||1)>1?' ×'+x.rn:''),date:this.dShort(x.d),ok:()=>this.apprOk(x.id),no:()=>this.apprNo(x.id)})),
           hasStHist:stHist.length>0,stHistV:stHist.slice(0,histOpen?40:5).map(x=>({date:this.dShort(x.d),txt:x.txt,amt:x.amt,c:x.c})),
           histMore:stHist.length>5,histArrow:histOpen?'접기 ▴':'더보기 ▾',histToggle:()=>this.setState({stHistOpen:histOpen?'':kp.id}),
@@ -4623,6 +4633,7 @@ class Component extends DCLogic {
           openStick:()=>this.setState({modal:{t:'pstick',kid:kp.id}}),
           openMoney:()=>this.setState({modal:{t:'pmoney',kid:kp.id}}),
           openStHist:()=>this.setState({modal:{t:'psthist',kid:kp.id},pmTrashOpen:false,pmPurgeAsk:''}),
+          openSched:()=>this.setState({modal:{t:'psched',kid:kp.id},ttKid:kp.id}),
           stEarned:kEarned,stSpent:kSpent,stTypesK,hasStTypesK:stTypesK.length>0,
           hasStMon:stMonV.length>0,stMonV,
           hasTrK:kTr.length>0,trKV:kTr.slice(0,6).map(x=>{const gives=x.giver===kp.id;const other=byName(gives?x.doer:x.giver);const mt=this.trMeta(x.st,sk);
@@ -4645,8 +4656,10 @@ class Component extends DCLogic {
             this.clearF(['sa_'+kp.id,'saStk_'+kp.id]);setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),2500);}};});
       const pmKid=kids.find(x=>x.id===(S.modal&&S.modal.kid));
       const pmi=pmKid?V.kidsOV[kids.indexOf(pmKid)]:null;
-      V.modalPTodo=!!(pmi&&S.modal.t==='ptodo');V.modalPStick=!!(pmi&&S.modal.t==='pstick');V.modalPMoney=!!(pmi&&S.modal.t==='pmoney');V.modalPStHist=!!(pmi&&S.modal.t==='psthist');
+      V.modalPTodo=!!(pmi&&S.modal.t==='ptodo');V.modalPStick=!!(pmi&&S.modal.t==='pstick');V.modalPMoney=!!(pmi&&S.modal.t==='pmoney');V.modalPStHist=!!(pmi&&S.modal.t==='psthist');V.modalPSched=!!(pmi&&S.modal.t==='psched');
       if(pmi){V.pmName=pmKid.name;V.pmEmoji=pmKid.emoji;
+        V.pmTTListV=(D.tt||[]).filter(x=>x.k===pmKid.id).slice().sort((a,b)=>a.day-b.day).map(x=>({day:this.DAYS[x.day],time:x.time,name:x.name,del:()=>this.mut(d=>{d.tt=d.tt.filter(y=>y.id!==x.id);})}));
+        V.pmTTEmpty=V.pmTTListV.length===0;
         V.pmTodoVal=pmi.ptVal;V.pmTodoOn=pmi.ptOn;V.pmRsV=pmi.rsV;V.pmRnVal=pmi.rnVal;V.pmRnDec=pmi.rnDec;V.pmRnInc=pmi.rnInc;
         V.pmTodoAdd=()=>{if(!(f['pt_'+pmKid.id]||'').trim())return;pmi.ptAdd();this.setState({modal:null});};
         V.pmStkPickV=this.STK.map(e=>({e,bg:(f.stEmoji||'🌟')===e?sk.soft:sk.bg,bd:(f.stEmoji||'🌟')===e?sk.ac:'transparent',pick:()=>this.setF('stEmoji',e)}));
@@ -4691,11 +4704,6 @@ class Component extends DCLogic {
             purge:()=>{this.stPurge(tr.tid);this.setState({pmPurgeAsk:''});}};});
         V.pmTrashEmpty=stTrash.length===0;
         V.pmSaAdd=()=>{if(!Number(f['sa_'+pmKid.id]))return;pmi.saAdd();this.setState({modal:null});};}
-      V.kidPickV=kids.map(kp=>({name:kp.name,emoji:kp.emoji,...softChip(S.stKid===kp.id),pick:()=>this.setState({stKid:kp.id})}));
-      V.stickerPickV=this.STK.map(e=>({e,bg:f.stEmoji===e?sk.soft:sk.bg,bd:f.stEmoji===e?sk.ac:'transparent',pick:()=>this.setF('stEmoji',e)}));
-      V.giveSticker=()=>{const e=f.stEmoji||'🌟';this.mut(d=>{d.stlog.push({id:this.uid(),k:S.stKid,e,msg:(f.stMsg||'').trim(),from:u.name,d:t});});const kn=(kids.find(x=>x.id===S.stKid)||{}).name;this.setState({stSentMsg:e+' '+kn+'에게 스티커를 보냈어요!'});this.clearF(['stMsg']);setTimeout(()=>this.setState({stSentMsg:''}),2500);};
-      V.hasStMsg=!!S.stSentMsg;V.stSentMsg=S.stSentMsg;
-      V.stRecentV=D.stlog.slice().sort((a,b)=>b.d.localeCompare(a.d)).slice(0,5).map(x=>({e:x.e,kid:byName(x.k).name,msg:x.msg||'칭찬!',date:this.dShort(x.d)}));
       const rwKids=D.profiles.filter(p=>p.role==='kid').map(p=>({id:p.id,emoji:p.emoji,name:p.name})).concat([{id:'all',emoji:'👨‍👩‍👧‍👦',name:'공통'}]);
       const rwK=(rwKids.find(p=>p.id===S.rwKid)||rwKids[0]||{}).id;
       const rwAll=rwK==='all';V.rwNotAll=!rwAll;
