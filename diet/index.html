@@ -823,7 +823,10 @@ class Component extends DCLogic {
       {id:'p6',date:d(9),photos:[{e:'🍗',c1:'#FFF0E0',c2:'#FFD9B8'}],text:'치팅데이 🍗',starred:true,comments:[{id:'c6',ai:true,author:'코치 단단',av:'🧠',time:'9일 전',text:'가끔은 괜찮아요. 다음 날 리셋이 중요해요!'}]}];
     const SB={};SB[d(1)]=true;SB[d(2)]=false;SB[d(3)]=true;SB[d(4)]=true;SB[d(6)]=true;SB[d(9)]=false;
     const WO={};WO[d(1)]={'하체':40,'유산소':30};WO[d(2)]={'유산소':60};WO[d(4)]={'등':50,'유산소':30};
-    this.state={tab:'home',mode:'diet',selDate:this.TODAY,feedFilter:'all',sober:SB,calM:this.TODAY.slice(0,7),
+    // 주소로 첫 화면 지정 — 로드맵 대시보드 홈 탭의 「오늘 점수」가 ?tab=log(식단표)로 들어온다
+    const TABS=['home','log','cal','feed','set'];let tab0='home';
+    try{const q=new URLSearchParams(location.search).get('tab');if(q&&TABS.indexOf(q)>=0)tab0=q}catch(e){}
+    this.state={tab:tab0,mode:'diet',selDate:this.TODAY,feedFilter:'all',sober:SB,calM:this.TODAY.slice(0,7),
       set:{goalDate:'2026-08-10',startW:68.5,goalW:60,budget:10000,provider:'gemini',geminiKey:'',claudeKey:'',apiPass:'0000',diet:{kcal:1500,c:40,p:30,f:30},maint:{kcal:2000,c:50,p:25,f:25}},
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       editW:null,fm:null,tm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
