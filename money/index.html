@@ -217,6 +217,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
     </div>
 
     <!-- ══ 🧾 자료 요청 — 무엇을 샀는지 안 남는 결제는 캡처를 받아야 항목을 가른다 ══ -->
+    <!-- 📋 내역 탭에서만 보인다 (사장님 지시) — 보고서·통계·달력 탭에서는 안 나온다 -->
+    <sc-if value="{{ mvList }}" hint-placeholder-val="{{ true }}">
     <div id="askBox" class="wide" style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px 16px;">
       <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
         <span style="font-size:16px;">🧾</span>
@@ -228,7 +230,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
       </div>
       <div style="font-size:11.5px;color:var(--sub);word-break:keep-all;line-height:1.6;">쿠팡·11번가·네이버페이처럼 <b>가게 이름만 찍히는 결제</b>는 무엇을 샀는지 통장·카드 내역에 안 남아요. 주문 내역을 캡처하시거나 <b>무엇을 샀는지 말로 적어</b> 주시면 아래 🤖 자동 정리로 함께 보내 항목까지 갈라 드려요</div>
       <sc-if value="{{ reqEmpty }}" hint-placeholder-val="{{ true }}">
-        <div style="font-size:12.5px;color:var(--sub);text-align:center;padding:14px 0 4px;">지금은 보내 주실 자료가 없어요 👍</div>
+        <div style="font-size:12.5px;color:var(--sub);text-align:center;padding:14px 0 4px;word-break:keep-all;line-height:1.6;">{{ reqEmptyMsg }}</div>
       </sc-if>
       <div style="display:flex;flex-direction:column;gap:9px;margin-top:11px;">
         <sc-for list="{{ reqsV }}" as="rq" hint-placeholder-count="2">
@@ -239,26 +241,26 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
               <button onClick="{{ rq.ansPick }}" style="flex-shrink:0;min-height:40px;padding:0 13px;background:{{ rq.ansBg }};color:{{ rq.ansFg }};border:1px solid {{ rq.ansBd }};border-radius:11px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ rq.ansBtn }}</button>
               <button onClick="{{ rq.skip }}" style="flex-shrink:0;min-height:40px;padding:0 12px;background:var(--card);color:var(--sub);border:1px solid var(--line);border-radius:11px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">넘기기</button>
             </div>
-            <!-- 📷 담기 — 누른 버튼 바로 밑에서 사진을 담는다 -->
+            <!-- 📷 담기 — 누른 버튼 바로 밑에서 사진을 담는다. 아래 🤖 칸으로 내려갈 일이 없게 붙여넣기도 여기서 받는다 -->
             <sc-if value="{{ rq.open }}" hint-placeholder-val="{{ false }}">
               <div style="margin-top:8px;background:var(--card);border:1px solid var(--ac);border-radius:12px;padding:11px;">
                 <label style="display:block;text-align:center;background:var(--bg);border:1.5px dashed var(--ac);border-radius:12px;padding:12px;font-size:13px;font-weight:800;color:var(--ac);cursor:pointer;word-break:keep-all;line-height:1.6;">📷 캡처 사진 고르기 (여러 장 가능)<input type="file" accept="image/*" multiple onChange="{{ rq.onShot }}" style="display:none;"></label>
+                <div style="font-size:11.5px;color:var(--sub);margin-top:8px;text-align:center;word-break:keep-all;line-height:1.6;">캡처를 복사하셨다면 <b>Ctrl+V</b>(맥은 ⌘+V)로 <b>바로 여기에</b> 붙여넣으셔도 돼요 — 아래로 내려가지 않아도 이 요청에 담겨요</div>
                 <sc-if value="{{ rq.hasShotMsg }}" hint-placeholder-val="{{ false }}">
                   <div style="font-size:11.5px;font-weight:800;color:var(--ac);margin-top:8px;word-break:keep-all;line-height:1.6;">{{ rq.shotMsg }}</div>
                 </sc-if>
               </div>
             </sc-if>
-            <!-- ✍️ 답변 — 누른 버튼 바로 밑에서 적는다 (아래로 안 내려간다, 사장님 지시) -->
+            <!-- ✍️ 답변 — 누른 버튼 바로 밑에서 적는다. 누르면 곧바로 이 칸에 커서가 가서 그대로 적으면 된다 (사장님 지시) -->
             <sc-if value="{{ rq.ansOpen }}" hint-placeholder-val="{{ false }}">
               <div style="margin-top:8px;background:var(--card);border:1px solid var(--ac);border-radius:12px;padding:11px;">
-                <div style="font-size:11.5px;color:var(--sub);margin-bottom:7px;word-break:keep-all;line-height:1.6;">사진이 없어도 돼요 — 무엇을 샀는지, 어느 항목으로 넣을지 적어 주시면 그대로 갈라 드려요</div>
-                <textarea value="{{ rq.note }}" onChange="{{ rq.onNote }}" rows="3" placeholder="예: 사무용품이랑 포장 테이프 샀어요 / 이건 차량유지비로 넣어주세요" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;line-height:1.6;resize:vertical;"></textarea>
+                <textarea id="{{ rq.ansId }}" value="{{ rq.note }}" onChange="{{ rq.onNote }}" rows="2" placeholder="여기에 그대로 적으세요 — 예: 외식 / 사무용품 샀어요 / 이건 차량유지비로 넣어주세요" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;line-height:1.6;resize:vertical;"></textarea>
                 <div style="display:flex;gap:8px;margin-top:8px;">
                   <select value="{{ rq.cat }}" onChange="{{ rq.onCat }}" style="width:118px;flex-shrink:0;padding:11px 8px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
                     <option value="">항목 안 정함</option>
                     <sc-for list="{{ catsV }}" as="ct3" hint-placeholder-count="5"><option value="{{ ct3.v }}">{{ ct3.v }}</option></sc-for>
                   </select>
-                  <button onClick="{{ rq.addNote }}" style="flex:1;min-height:44px;background:var(--ac);color:var(--on);border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;">＋ 이 답 담기</button>
+                  <button onClick="{{ rq.addNote }}" style="flex:1;min-height:44px;background:var(--ac);color:var(--on);border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;">＋ 답 담기</button>
                 </div>
                 <sc-if value="{{ rq.hasNoteMsg }}" hint-placeholder-val="{{ false }}">
                   <div style="font-size:11.5px;font-weight:800;color:var(--ac);margin-top:8px;word-break:keep-all;line-height:1.6;">{{ rq.noteMsg }}</div>
@@ -271,24 +273,11 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
             <sc-if value="{{ rq.noAns }}" hint-placeholder-val="{{ false }}">
               <div style="font-size:11.5px;color:var(--sub);margin-top:5px;word-break:keep-all;line-height:1.55;">{{ rq.why }}</div>
             </sc-if>
-            <!-- 담은 답은 이 블록 안에 그대로 보인다 — 아래 보관함까지 내려가 확인하지 않게 (사장님 지시) -->
-            <sc-if value="{{ rq.hasAns }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
-                <sc-for list="{{ rq.ansV }}" as="an" hint-placeholder-count="1">
-                  <div style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 9px;">
-                    <sc-if value="{{ an.isPhoto }}" hint-placeholder-val="{{ false }}">
-                      <span style="flex-shrink:0;width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background-image:url('{{ an.thumb }}');background-size:cover;background-position:center;"></span>
-                    </sc-if>
-                    <span style="flex:1;min-width:0;font-size:12.5px;line-height:1.55;word-break:keep-all;">{{ an.label }}</span>
-                    <button onClick="{{ an.drop }}" title="이 답 빼기" style="flex-shrink:0;width:32px;height:32px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--sub);font-size:14px;font-weight:800;line-height:1;cursor:pointer;">✕</button>
-                  </div>
-                </sc-for>
-              </div>
-            </sc-if>
           </div>
         </sc-for>
       </div>
     </div>
+    </sc-if>
 
     <!-- ══ 📄 보고서 ══ -->
     <sc-if value="{{ mvRep }}" hint-placeholder-val="{{ false }}">
@@ -524,9 +513,14 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
           <div style="background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px;">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;">
               <span style="font-size:13px;font-weight:800;">📎 보관함 {{ trayLabel }}</span>
-              <button onClick="{{ clearShots }}" style="background:none;border:none;min-height:44px;padding:0 4px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;">전체 비우기</button>
+              <sc-if value="{{ hasNotes }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ toggleNotes }}" style="background:none;border:none;min-height:44px;padding:0 4px;margin-left:auto;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;">{{ notesToggleLabel }}</button>
+              </sc-if>
+              <button onClick="{{ clearShots }}" style="background:none;border:none;min-height:44px;padding:0 4px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;">전체 비우기</button>
             </div>
-            <sc-if value="{{ hasNotes }}" hint-placeholder-val="{{ false }}">
+            <!-- 적어 담은 메모는 늘어놓지 않는다 — 열 줄씩 쌓이면 화면이 그것뿐이다 (사장님 지시 2026-08-16).
+                 잘못 담은 것을 뺄 길은 있어야 하므로 「적어둔 것 보기」로만 펼친다 -->
+            <sc-if value="{{ notesOpen }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
                 <sc-for list="{{ notesV }}" as="nt" hint-placeholder-count="1">
                   <div style="display:flex;align-items:flex-start;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px;">
@@ -1775,9 +1769,11 @@ class Component extends DCLogic {
     return bits.join(' · ');
   }
 
-  // 캡처를 복사해서 붙여넣기(Ctrl+V)로도 담을 수 있다 — 내역 화면에서만 받는다
+  // 캡처를 복사해서 붙여넣기(Ctrl+V)로도 담을 수 있다 — 내역 화면에서만 받는다.
+  // 🧾 자료 요청에서 「담기」를 눌러 놓았으면 그 요청 이름표가 붙어 담긴다(addShots가 reqPick을 본다) —
+  // 사진을 붙이려고 아래 🤖 칸까지 내려가지 않아도 된다 (사장님 지시 2026-08-16).
   onPaste(ev){
-    if(this.state.mview!=='list')return;
+    if(this.state.mview!=='list'&&!this.state.reqPick)return;
     const items=Array.from((ev.clipboardData&&ev.clipboardData.items)||[]);
     const files=items.filter(it=>it.kind==='file'&&(it.type||'').indexOf('image/')===0)
       .map(it=>it.getAsFile()).filter(Boolean);
@@ -2052,6 +2048,10 @@ class Component extends DCLogic {
     V.notesV=trayN.map(nt=>({
       label:(nt.reqLabel?'🧾 '+nt.reqLabel+' — ':'✍️ ')+(nt.cat?'['+nt.cat+'] ':'')+nt.text,
       drop:()=>this.dropShot(nt.id)}));
+    // 적어 담은 메모는 기본으로 접어 둔다 — 세는 말(보관함 메모 N개)만 보이면 충분하다 (사장님 지시 2026-08-16)
+    V.notesOpen=!!S.notesOpen&&trayN.length>0;
+    V.notesToggleLabel=S.notesOpen?'적어둔 것 접기':('적어둔 것 보기 '+trayN.length+'개');
+    V.toggleNotes=()=>this.setState({notesOpen:!S.notesOpen});
     V.noteTxt=S.noteTxt||'';V.noteCat=S.noteCat||'';
     V.onNoteTxt=e=>this.setState({noteTxt:e.target.value});
     V.onNoteCat=e=>this.setState({noteCat:e.target.value});
@@ -2549,29 +2549,28 @@ class Component extends DCLogic {
     // (맡기기 전까지는 요청이 목록에 그대로 남으므로, 표시가 없으면 답한 것과 안 한 것이 똑같아 보인다)
     const ansN={};this.shotBox().forEach(s=>{if(!s.reqKey)return;
       const z=ansN[s.reqKey]||(ansN[s.reqKey]={p:0,n:0});if(s.text)z.n++;else z.p++;});
-    V.reqCount=String(reqAll.length);V.reqEmpty=reqAll.length===0;
     const ansCnt=reqAll.filter(r=>ansN[r.key]).length;
     V.hasReqAns=ansCnt>0;V.reqAnsLabel='· 답 담김 '+ansCnt+'건';
-    // 답한 것은 위로, 아직 안 한 것은 아래로 (사장님 지시).
-    // 단 지금 열어 놓고 적는 중인 것은 제자리에 둔다 — 담자마자 블록이 위로 뛰면 적던 칸을 놓친다.
+    // ★ 답을 담은 요청은 목록에서 빠진다 (사장님 지시 2026-08-16 "답변했던것도 안보이게").
+    //   아직 안 한 것만 남아야 「남은 것을 찾으려고 전체를 훑는」 일이 없다.
+    //   단 지금 열어 놓고 적는 중인 것은 그대로 둔다 — 담자마자 블록이 사라지면 이어서 더 담지 못한다.
     const busy=k=>(S.reqPick&&S.reqPick.key===k)||(S.reqAns&&S.reqAns.key===k);
-    const rank=r=>(ansN[r.key]&&!busy(r.key))?1:0;
-    reqAll.sort((a,b)=>rank(b)-rank(a));
-    const shBox=this.shotBox();
-    V.reqsV=reqAll.map(r=>{const on2=!!S.reqPick&&S.reqPick.key===r.key;
+    const reqLeft=reqAll.filter(r=>!ansN[r.key]||busy(r.key));
+    V.reqCount=String(reqLeft.length);V.reqEmpty=reqLeft.length===0;
+    V.reqEmptyMsg=ansCnt?('✅ 답을 다 담으셨어요 ('+ansCnt+'건) — 아래 🤖에서 「한꺼번에 맡기기」를 누르시면 끝나요')
+      :'지금은 보내 주실 자료가 없어요 👍';
+    V.reqsV=reqLeft.map((r,i2)=>{const on2=!!S.reqPick&&S.reqPick.key===r.key;
       const an2=!!S.reqAns&&S.reqAns.key===r.key;
       const an=ansN[r.key],has=!!an;
       const anTxt=has?[an.p?'사진 '+an.p+'장':'',an.n?'메모 '+an.n+'개':''].filter(Boolean).join(' · '):'';
       return{title:r.title,why:r.why,hasAns:has,noAns:!has,
-        ansLabel:has?('✅ 답 담았어요 ('+anTxt+') — 아직 안 맡겼어요, 아래 🤖에서 맡기면 끝나요'):'',
-        // 담은 답을 이 블록 안에 그대로 펼친다 (사진은 작은 그림, 적은 것은 글 그대로)
-        ansV:has?shBox.filter(s=>s.reqKey===r.key).map(s=>({
-          isPhoto:!s.text,thumb:s.url||'',
-          label:s.text?((s.cat?'['+s.cat+'] ':'')+s.text):'📷 담은 캡처',
-          drop:()=>this.dropShot(s.id)})):[],
-        // 📷 담기 칸 (사진) 과 ✍️ 답변 칸 (글) 은 버튼도 여는 자리도 따로다 (사장님 지시)
-        open:on2,hasShotMsg:on2&&!!S.aiProg,shotMsg:S.aiProg||'',
+        // 담은 것을 늘어놓지 않는다 — 「몇 개 담겼다」 한 줄이면 된다 (사장님 지시 2026-08-16)
+        ansLabel:has?('✅ 답 담았어요 ('+anTxt+') — 접으면 이 요청은 목록에서 사라져요'):'',
+        // 📷 담기 칸 (사진) 과 ✍️ 답변 칸 (글) 은 버튼도 여는 자리도 따로다 (사장님 지시).
+        // 붙여넣기(Ctrl+V)로 담은 결과도 이 자리에 뜬다 — 아래 🤖 칸까지 내려가 확인하지 않게
+        open:on2,hasShotMsg:on2&&!!(S.aiProg||S.aiMsg),shotMsg:S.aiProg||S.aiMsg||'',
         onShot:e=>this.reqShot(e,{key:r.key,label:r.title}),
+        ansId:'ansTa_'+i2,
         ansOpen:an2,note:an2?(S.reqNote||''):'',cat:an2?(S.reqCat||''):'',
         onNote:e=>this.setState({reqNote:e.target.value}),
         onCat:e=>this.setState({reqCat:e.target.value}),
@@ -2585,8 +2584,10 @@ class Component extends DCLogic {
         ansBtn:an2?'✕ 접기':'✍️ 답변',
         // 두 칸 다 누른 버튼 바로 밑에서 열린다 — 아래 🤖 칸으로 내려보내지 않는다 (사장님 지시)
         pick:()=>this.setState({reqPick:on2?null:{key:r.key,label:r.title},aiMsg:''}),
-        ansPick:()=>this.setState({reqAns:an2?null:{key:r.key,label:r.title},
-          reqNote:'',reqCat:'',reqMsg:''}),
+        // 「답변」을 누르면 곧바로 적는 칸에 커서를 놓는다 — 누르고 나서 다시 칸을 짚지 않게 (사장님 지시)
+        ansPick:()=>{const nx=an2?null:{key:r.key,label:r.title};
+          this.setState({reqAns:nx,reqNote:'',reqCat:'',reqMsg:''},()=>{if(!nx)return;
+            setTimeout(()=>{const el=document.getElementById('ansTa_'+i2);if(el)el.focus();},40);});},
         skip:()=>{if(confirm('「'+r.title+'」 자료 요청을 넘길까요?\n\n같은 곳에서 결제가 더 생기면 다시 알려드려요.'))
           this.closeAsks([r.key],'넘김');}};});
     // 지금 어느 요청에 답하는 중인지 — 캡처 담는 칸에 그대로 띄운다
