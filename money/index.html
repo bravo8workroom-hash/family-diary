@@ -276,6 +276,10 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
           </div>
         </sc-for>
       </div>
+      <!-- 📂 더 보기 — 한 번에 2건만 보이고 나머지는 여기서 편다 (사장님 지시 2026-08-16) -->
+      <sc-if value="{{ reqMoreShow }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ reqMoreTap }}" style="width:100%;min-height:44px;margin-top:10px;background:var(--bg);color:var(--ac);border:1px solid var(--line);border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;word-break:keep-all;line-height:1.5;">{{ reqMoreLabel }}</button>
+      </sc-if>
     </div>
     </sc-if>
 
@@ -2559,7 +2563,15 @@ class Component extends DCLogic {
     V.reqCount=String(reqLeft.length);V.reqEmpty=reqLeft.length===0;
     V.reqEmptyMsg=ansCnt?('✅ 답을 다 담으셨어요 ('+ansCnt+'건) — 아래 🤖에서 「한꺼번에 맡기기」를 누르시면 끝나요')
       :'지금은 보내 주실 자료가 없어요 👍';
-    V.reqsV=reqLeft.map((r,i2)=>{const on2=!!S.reqPick&&S.reqPick.key===r.key;
+    // ★ 한 번에 2건만 보인다 (사장님 지시 2026-08-16) — 44건이 한꺼번에 쏟아지면 어디까지 했는지 안 보인다.
+    //   나머지는 「더 보기」로 편다. 지금 열어 놓고 담는 중인 것은 접혀 있어도 남긴다 — 담다 말고 사라지면 안 되니까
+    const REQ_TOP=2,reqMore=!!S.reqMore;
+    const reqShown=reqMore?reqLeft:reqLeft.filter((r,i)=>i<REQ_TOP||busy(r.key));
+    const reqHid=reqLeft.length-reqShown.length;
+    V.reqMoreShow=reqMore?(reqLeft.length>REQ_TOP):(reqHid>0);
+    V.reqMoreLabel=reqMore?('✕ 접기 — '+REQ_TOP+'건만 보기'):('＋ 나머지 '+reqHid+'건 더 보기');
+    V.reqMoreTap=()=>this.setState({reqMore:!reqMore});
+    V.reqsV=reqShown.map((r,i2)=>{const on2=!!S.reqPick&&S.reqPick.key===r.key;
       const an2=!!S.reqAns&&S.reqAns.key===r.key;
       const an=ansN[r.key],has=!!an;
       const anTxt=has?[an.p?'사진 '+an.p+'장':'',an.n?'메모 '+an.n+'개':''].filter(Boolean).join(' · '):'';
