@@ -175,6 +175,20 @@
     }
   }
 
+  // 사진 지우기. 문서에서 빼기만 하면 창고에는 파일이 그대로 남는다 —
+  // 가계부 캡처는 처리하면 남기지 않기로 했으므로(자료는 반영 후 버린다) 실물까지 지운다.
+  async function dropPhoto(url) {
+    if (!sb || !url) return false;
+    var key = pathOf.get(url) || (url.indexOf('sb://') === 0 ? url : '');
+    if (!key) return false;
+    try {
+      await sb.storage.from(BUCKET).remove([key.slice(5)]);
+      urlOf.delete(key);
+      pathOf.delete(url);
+      return true;
+    } catch (e) { return false; }
+  }
+
   // ── AI 부탁 대기열 ─────────────────────────────────────────
   // 앱에서 부탁을 걸어두면, VS코드에서 담당(/family-diary)이 처리해
   // 결과를 데이터에 직접 넣는다. 그래서 여기서는 "맡기기"까지만 한다.
@@ -326,6 +340,7 @@
     },
     save: save,
     putPhoto: putPhoto,
+    dropPhoto: dropPhoto,
     ask: ask,
     waiting: waiting,
     reset: async function (doc) {

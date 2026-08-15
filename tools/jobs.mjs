@@ -75,8 +75,32 @@ function api(cfg, token) {
       if (!r.ok) return false;
       fs.writeFileSync(dest, Buffer.from(await r.arrayBuffer()));
       return true;
+    },
+    async remove(bucketPath) {
+      const r = await fetch(`${cfg.url}/storage/v1/object/family-photos/${bucketPath}`, {
+        method: 'DELETE',
+        headers: { apikey: cfg.key, Authorization: 'Bearer ' + token }
+      });
+      return r.ok;
     }
   };
+}
+
+// Processed captures are deleted for good — both the photo store and the local copy.
+// Two reasons: the owner's standing rule (source material is thrown away once applied),
+// and double-entry protection — a capture left behind gets downloaded and applied twice.
+// Failed jobs keep their photos (cmdFail) because they still have to be redone.
+async function burnShots(db, job, id) {
+  const shots = (job && job.payload && job.payload.photos) || [];
+  let gone = 0;
+  for (const sp of shots) if (await db.remove(sp)) gone++;
+  const dir = path.join(INBOX, String(id));
+  if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+  if (shots.length) {
+    console.log(`  🔥 캡처 ${gone}/${shots.length}장 지웠습니다 (두 번 처리되지 않게)`);
+    if (gone < shots.length) console.log('     ⚠ 못 지운 사진이 있습니다 — 다음 list 에 안 뜨지만 창고에는 남아 있습니다');
+  }
+  return gone;
 }
 
 const uid = () => Date.now() + '-' + Math.random().toString(36).slice(2, 7);
@@ -138,6 +162,30 @@ const catOf = (s, R) => {
   return best ? box[best] : '';
 };
 
+// 🧩 소분류 — 큰 분류를 먼저 잡고 그 안에서 가른다 (사장님 지시 2026-08-15).
+// ⚠ 이름은 money/index.html 의 SUBS 와 글자까지 똑같아야 한다. 여기 없는 이름을 넣으면 앱이 버린다.
+const SUBS = {
+  '식비': ['외식비', '식재료비', '카페·간식', '배달'],
+  '생활/마트': ['생활용품', '편의점', '통신비', '공과금', '미용·이발'],
+  '교육': ['학원비', '교재·문구', '등록금', '체험·활동'],
+  '교통': ['차량유지비', '대중교통', '택시', '통행료·주차'],
+  '의료': ['병원', '약국', '보험', '건강검진'],
+  '쇼핑': ['온라인쇼핑', '옷·신발', '가전·가구', '선물'],
+  '문화/여가': ['구독·멤버십', '영화·공연', '취미', '운동'],
+  '여행': ['숙박', '교통편', '현지경비'],
+  '이체': [],
+  '기타': ['경조사', '세금·수수료', '그 밖']
+};
+// 사장님이 앱에서 손수 더한 소분류(doc.subsAdd)도 정식 이름이다 — 버리면 방금 만든 항목이 사라진다.
+// 문서를 읽는 자리에서 useDoc(doc) 을 부르고 나서 fitSub 을 써라 (사장님 지시 2026-08-15).
+let SUBS_ADD = {};
+const useDoc = doc => { const a = (doc || {}).subsAdd; SUBS_ADD = (a && typeof a === 'object') ? a : {}; };
+const subsOf = c => (SUBS[c] || []).concat(
+  (Array.isArray(SUBS_ADD[c]) ? SUBS_ADD[c] : []).filter(x => !(SUBS[c] || []).includes(x)));
+const fitSub = (c, s) => (s && subsOf(c).includes(s)) ? s : '';
+// 소분류도 구매처 규칙을 탄다 (앱에서 가족이 고른 것 = doc.subRules)
+const subOf = (s, R) => catOf(s, R);
+
 // 되풀이 후보 — 같은 상호가 서로 다른 달에 2번 이상 나간 것 중, 아직 고정비로 등록 안 된 것
 function repeatCandidates(D) {
   const known = new Set((D.fixed || []).map(f => norm(f.name)));
@@ -189,7 +237,7 @@ async function cmdList(db) {
   // 캡처 정리에는 「지금 우리집 상태」가 필요하다 — 어느 통장·카드인지, 이미 등록된 고정비가 뭔지,
   // 되풀이되는 지출이 뭔지 모르면 계정별 구분도 고정비 판정도 못 한다. 부탁에 담긴 옛 값 대신 최신 문서를 읽는다.
   let D = null;
-  if (jobs.some(j => j.kind === 'receipt')) {
+  if (jobs.some(j => j.kind === 'receipt' || j.kind === 'ledger')) {
     const rows = await db.get('family_state?id=eq.main&select=doc');
     D = rows.length ? rows[0].doc : null;
   }
@@ -201,10 +249,25 @@ async function cmdList(db) {
   for (const j of jobs) {
     const when = new Date(j.created_at).toLocaleString('ko-KR');
     console.log('─'.repeat(58));
-    const KINDL = { receipt: '가계부 캡처 정리', report: '가계부 보고서 자세히' };
+    const KINDL = { receipt: '가계부 캡처 정리', report: '가계부 보고서 자세히', ledger: '🧑‍🏫 가계부 관리자 호출' };
     console.log(`[${j.id}] ${KINDL[j.kind] || j.kind}  ·  ${j.asked_by || '가족'}  ·  ${when}`);
 
     const p = j.payload || {};
+    // 🧑‍🏫 관리자 호출 — 가족이 앱에서 부른 것. 답은 보고서(blocks)로 올린다.
+    if (j.kind === 'ledger') {
+      console.log(`     ${p.ym || ''} · ${p.summary || ''}`);
+      console.log(`     물어본 것: ${p.ask ? p.ask : '(따로 없음 — 이번 달 살림을 훑어 달라는 뜻)'}`);
+      if ((p.asks || []).length) console.log(`     아직 못 받은 자료: ${p.asks.map(z => z.label).join(' · ')}`);
+      console.log(`     ※ 답은 report 와 같은 형식({title,stars,summary,blocks})으로 apply 하면 보고서함에 올라갑니다.`);
+    }
+    // 🧾 요청한 자료를 받은 캡처면 어느 요청 건인지 여기 찍힌다
+    if ((p.reqs || []).length) {
+      p.reqs.forEach(q => console.log(`     🧾 요청 답변: ${q.label}  (사진 ${(q.shots || []).join(',')}번)`));
+    }
+    // 📷 앱 「고치는 칸」에서 그 거래에 붙여 담은 캡처 — 어느 거래의 증빙인지 여기 찍힌다
+    if ((p.tags || []).length) {
+      p.tags.forEach(t => console.log(`     📷 사진 ${t.shot}번 = ${t.label}`));
+    }
     if (j.kind === 'report') {
       console.log(`     ${p.kind === 'now' ? '현재' : '월'} 보고서 · ${p.ym || ''} · ${p.title || ''}`);
       console.log(`     앱이 계산한 요약: ${p.summary || '(없음)'}`);
@@ -268,10 +331,23 @@ function printLedgerContext(D) {
   }
 
   // 가족이 앱에서 직접 정한 「이 구매처는 이 항목」. 반입할 때 이게 c 를 이기므로 미리 보여 준다.
-  const CR = D.catRules || {}, crK = Object.keys(CR);
+  const CR = D.catRules || {}, crK = Object.keys(CR), SR = D.subRules || {};
   if (crK.length) {
     console.log('\n     ── 🏷️ 구매처 항목 규칙 (가족이 직접 정함 · 반입 때 c 보다 이게 이긴다) ──');
-    crK.sort().forEach(k => console.log(`     🏷️ ${k} → ${CR[k]}`));
+    crK.sort().forEach(k => console.log(`     🏷️ ${k} → ${CR[k]}${SR[k] ? ' · ' + SR[k] : ''}`));
+  }
+
+  // 🧩 소분류 — 큰 분류를 먼저 잡고 그 안에서 가른다. 여기 없는 이름을 tx.sub 에 넣으면 앱이 버린다.
+  console.log('\n     ── 🧩 쓸 수 있는 소분류 (tx 에 sub:"이름" · 대분류 c 와 짝이 맞아야 한다) ──');
+  useDoc(D);
+  Object.keys(SUBS).forEach(c => { if (subsOf(c).length) console.log(`     ${c} → ${subsOf(c).join(' · ')}`); });
+  console.log('     예) 외식은 식비·외식비 · 마트 장보기는 식비·식재료비 · 주유와 차량용품은 교통·차량유지비');
+
+  // 🧾 앱에 걸어 둔 자료 요청 — 아직 못 받은 것만. 받은·넘긴 것은 done 으로 빠져 여기 안 뜬다.
+  const AK = (D.ledgerAsks || {}).items || [];
+  if (AK.length) {
+    console.log('\n     ── 🧾 가족에게 부탁해 둔 자료 (아직 못 받음) ──');
+    AK.forEach(q => console.log(`     🧾 ${q.label}${q.why ? ' — ' + q.why : ''} · ${q.at || ''}`));
   }
 
   // 할부는 산 물건이 명세서 어디에도 없다 — 한 번 적어 두면 매달 내역에 함께 붙는다.
@@ -305,7 +381,8 @@ async function putLedger(db, result) {
   const list = result.tx || [];
   const newFixed = result.fixed || [];
   const newAccs = result.accounts || [];
-  if (!list.length && !newFixed.length && !newAccs.length) die('결과에 tx 항목이 없습니다.');
+  const newAsks = result.asks || [];
+  if (!list.length && !newFixed.length && !newAccs.length && !newAsks.length) die('결과에 tx 항목이 없습니다.');
   return editDoc(db, doc => {
       doc.tx = doc.tx || []; doc.fixed = doc.fixed || [];
       doc.fixedPaid = doc.fixedPaid || {}; doc.accounts = doc.accounts || [];
@@ -366,18 +443,23 @@ async function putLedger(db, result) {
           || doc.accounts.find(a => norm(a.name).includes(k) || k.includes(norm(a.name)))
           || null;
       };
-      let paidN = 0, accN = 0, buyN = 0, ruleN = 0;
+      let paidN = 0, accN = 0, buyN = 0, ruleN = 0, subN = 0;
+      useDoc(doc);   // 사장님이 앱에서 더한 소분류를 정식 이름으로 인정한다
       for (const x of list) {
         const id = uid(), d = x.d || today();
         const acc = findAcc(x.acc);
         // 가족이 앱에서 정해 둔 구매처 규칙이 있으면 그게 이긴다 — 사람이 직접 고친 뜻이라 짐작보다 세다
         const ruled = x.ty === 'tr' ? '' : catOf(x.memo, doc.catRules);
         if (ruled && ruled !== x.c) ruleN++;
+        const cc = ruled || x.c || '기타';
+        // 🧩 소분류: 가족이 정해 둔 규칙이 먼저, 없으면 결과 JSON 의 sub. 그 대분류에 없는 이름은 버린다.
+        const ss = x.ty === 'tr' ? '' : (fitSub(cc, subOf(x.memo, doc.subRules)) || fitSub(cc, String(x.sub || '').trim()));
+        if (ss) subN++;
         const rec = {
           id, d,
           ty: x.ty === 'in' ? 'in' : (x.ty === 'tr' ? 'tr' : 'out'),
           a: Math.abs(Number(x.a) || 0),
-          c: ruled || x.c || '기타', memo: x.memo || '-',
+          c: cc, sub: ss, memo: x.memo || '-',
           pay: ['bank', 'card', 'cash'].includes(x.pay) ? x.pay : (acc ? acc.kind : 'bank')
         };
         if (acc) { rec.acc = acc.name; accN++; }
@@ -399,10 +481,28 @@ async function putLedger(db, result) {
           }
         }
       }
+      // 🧾 앱 「이 자료를 보내 주세요」 칸에 요청 올리기 — 무엇을 샀는지 모르는 결제의 캡처를 가족에게 부탁한다.
+      //    items = 아직 안 받은 것만. 가족이 자료를 맡기거나 넘기면 앱이 done 으로 옮긴다 (여기서 다시 안 뜬다).
+      let askN = 0;
+      for (const q of (result.asks || [])) {
+        const label = String(q.label || '').trim();
+        if (!label) continue;
+        doc.ledgerAsks = doc.ledgerAsks || { items: [], done: [] };
+        doc.ledgerAsks.items = doc.ledgerAsks.items || [];
+        doc.ledgerAsks.done = doc.ledgerAsks.done || [];
+        const key = 'clerk|' + catKey(label);
+        if (doc.ledgerAsks.items.some(z => z.key === key)) continue;
+        if (doc.ledgerAsks.done.some(z => z.key === key)) continue;   // 이미 받았거나 넘긴 건 다시 묻지 않는다
+        doc.ledgerAsks.items.push({ key, label, why: String(q.why || '').trim(), at: today() });
+        askN++;
+      }
+
       // 할부인데 산 물건을 아직 모르는 건은 숨기지 말고 티를 낸다 (가족에게 물어 앱에서 채우면 된다)
       const noBuy = list.filter(x => isInstall(x.memo)
         && !(doc.installBuys || {})[buyKeyFor(x.memo, doc.installBuys)]).length;
       return `가계부 ${list.length}건 넣음`
+        + (subN ? ` · 🧩 소분류 ${subN}건` : '')
+        + (askN ? ` · 🧾 자료 요청 ${askN}건 올림` : '')
         + (addedAcc ? ` · 통장/카드 ${addedAcc}개 등록` : '')
         + (updAcc ? ` · 통장 잔액 ${updAcc}개 갱신` : '')
         + (accN ? ` · ${accN}건 계정 구분` : '')
@@ -423,9 +523,12 @@ async function cmdApply(db, id, file) {
   const job = rows[0];
 
   let note = '';
-  if (job.kind === 'receipt') {
+  // 🧑‍🏫 관리자 호출은 두 길 다 열려 있다 — 답만 올리면 보고서로, 자료도 함께 고쳤으면 가계부에도 반영한다.
+  if (job.kind === 'ledger' && !Array.isArray(result.blocks)) {
     note = await putLedger(db, result);
-  } else if (job.kind === 'report') {
+  } else if (job.kind === 'receipt') {
+    note = await putLedger(db, result);
+  } else if (job.kind === 'report' || job.kind === 'ledger') {
     // 결과 형식: { title, stars, summary, blocks:[{t,v,h1,h2,h3,rows}] }
     // t 는 h(소제목) · p(문단) · stat(※수치) · cmp(◐비교) · judge(→판단) · table · do(▶실행)
     if (!Array.isArray(result.blocks) || !result.blocks.length) die('결과에 blocks 항목이 없습니다.');
@@ -446,8 +549,7 @@ async function cmdApply(db, id, file) {
   }
 
   await db.patch(`family_jobs?id=eq.${id}`, { status: '완료', note, done_at: new Date().toISOString() });
-  const dir = path.join(INBOX, String(id));
-  if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+  await burnShots(db, job, id);
   console.log('\n[완료] ' + id + '번 · ' + note + '\n');
 }
 
@@ -471,9 +573,9 @@ async function cmdImport(db, file) {
 
 // 데이터를 바꾸지 않고 부탁만 닫는다 (같은 사진이 여러 번 올라온 경우 등)
 async function cmdDone(db, id, note) {
+  const rows = await db.get(`family_jobs?id=eq.${id}&select=*`);
   await db.patch(`family_jobs?id=eq.${id}`, { status: '완료', note: note || '따로 정리했어요', done_at: new Date().toISOString() });
-  const dir = path.join(INBOX, String(id));
-  if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+  await burnShots(db, rows[0], id);
   console.log('[닫음] ' + id + '번 · ' + (note || ''));
 }
 
