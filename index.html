@@ -351,6 +351,11 @@ input,button,textarea,select{font-family:inherit;}
                 </button>
               </sc-for>
             </div>
+            <button onClick="{{ openStudio }}" style="width:100%;box-sizing:border-box;margin-top:9px;display:flex;align-items:center;gap:9px;background:var(--card,#fff);border:1px dashed var(--ac,#F59E0B);border-radius:12px;padding:10px 12px;cursor:pointer;color:inherit;font-family:inherit;text-align:left;min-height:44px;">
+              <span style="font-size:17px;flex-shrink:0;">🎨</span>
+              <span style="flex:1;min-width:0;"><span style="display:block;font-size:12px;font-weight:800;">스티커 제작소</span><span style="display:block;font-size:10px;font-weight:700;color:var(--sub,#8A8177);line-height:1.5;margin-top:1px;">배경 지운 사진으로 나만의 스티커 만들기</span></span>
+              <span style="font-size:13px;color:var(--sub,#8A8177);flex-shrink:0;">→</span>
+            </button>
           </div>
         </sc-if>
         <sc-for list="{{ calDecoV }}" as="cd" hint-placeholder-count="0">
@@ -599,6 +604,11 @@ input,button,textarea,select{font-family:inherit;}
                   </button>
                 </sc-for>
               </div>
+              <button onClick="{{ openStudio }}" style="width:100%;box-sizing:border-box;margin-top:9px;display:flex;align-items:center;gap:9px;background:var(--card,#fff);border:1px dashed var(--ac,#F59E0B);border-radius:12px;padding:10px 12px;cursor:pointer;color:inherit;font-family:inherit;text-align:left;min-height:44px;">
+                <span style="font-size:17px;flex-shrink:0;">🎨</span>
+                <span style="flex:1;min-width:0;"><span style="display:block;font-size:12px;font-weight:800;">스티커 제작소</span><span style="display:block;font-size:10px;font-weight:700;color:var(--sub,#8A8177);line-height:1.5;margin-top:1px;">배경 지운 사진으로 나만의 스티커 만들기</span></span>
+                <span style="font-size:13px;color:var(--sub,#8A8177);flex-shrink:0;">→</span>
+              </button>
             </div>
           </sc-if>
           <sc-if value="{{ po.praiseOpen }}" hint-placeholder-val="{{ false }}">
@@ -2377,6 +2387,8 @@ class Component extends DCLogic {
     if(s.slice(0,3)==='my:'){const m=(((this.state.data||{}).mystk)||[]).find(x=>x.id===s.slice(3));
       return m?{isImg:true,isEmo:false,img:m.url}:{isImg:false,isEmo:true,e:'🌟'};}   // 지워진 스티커는 별로 남는다
     return{isImg:false,isEmo:true,e:s};}
+  // 붙일 수 있는 스티커 전부 — 제작소에서 만든 것이 앞(새로 만든 순), 기본 스티커가 뒤
+  stkAll(){return (((this.state.data||{}).mystk)||[]).slice().reverse().map(m=>'my:'+m.id).concat(this.DSTK);}
   phl(po){return (po.photos&&po.photos.length)?po.photos:(po.photo?[po.photo]:[]);}   // 예전 글은 photo 한 장, 새 글은 photos 배열
 
   iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -2403,7 +2415,7 @@ class Component extends DCLogic {
       journal:[], scores:[], stlog:[], exch:[], sttrash:[], fishlog:[], err:[], trades:[], appr:[],
       stkRate:{kid1:200,kid2:200},
       rewards:[], allow:[], tx:[], budgets:[], fixed:[], fixedPaid:{},
-      accounts:[], feed:[], tt:[], calDeco:[], goals:[],
+      accounts:[], feed:[], tt:[], calDeco:[], goals:[], mystk:[],
       rwV2:1, histSeeded:1, kfV2:1
     };
   }
@@ -2509,6 +2521,284 @@ class Component extends DCLogic {
   unlockSet(id,pw){try{const m=JSON.parse(localStorage.getItem('famdiary_unlock')||'{}');m[id]={pw:pw,at:Date.now()};localStorage.setItem('famdiary_unlock',JSON.stringify(m));}catch(e){}}
 
   compress(file,max){return new Promise(res=>{const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.72));};img.src=rd.result;};rd.readAsDataURL(file);});}
+
+  // ── 스티커 제작소 ──────────────────────────────────────────────────────
+  //  폰에서 배경을 지운(누끼) 사진을 잘라 우리 가족 스티커로 만든다.
+  //  · 한 장 — 네모 안에 보이는 만큼 잘라 한 개
+  //  · 나눠 담기 — 한 장에 여러 개가 들어 있을 때 격자로 잘라 여러 개
+  //  손가락으로 끌고 늘리는 조작이라 화면(템플릿)이 아니라 여기서 직접 그린다.
+  openStudio(){
+    if(this._stk)return;
+    const self=this,SZ=300,MAXSRC=1400,OUT=360,GMAX=5;
+    const AC='#F59E0B',BG='#FAF6EF',CARD='#fff',LINE='#EFE4CF',TX='#3F3A33',SUB='#8A8177',SOFT='#F7EAD2';
+    const FONT="'Pretendard Variable',Pretendard,-apple-system,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
+    const E=(t,css,html)=>{const e=document.createElement(t);if(css)e.setAttribute('style',css);if(html!=null)e.innerHTML=html;return e;};
+    const BTN='border-radius:12px;font-size:14px;font-weight:800;min-height:44px;padding:11px 16px;cursor:pointer;font-family:inherit;';
+    const PRI='background:'+AC+';color:#fff;border:none;'+BTN;
+    const GST='background:'+CARD+';color:'+TX+';border:1px solid '+LINE+';'+BTN;
+    const LBL='font-size:11px;font-weight:800;color:'+SUB+';letter-spacing:.02em;';
+
+    const st=E('style',null,'@keyframes stkUp{from{transform:translateY(26px);opacity:0;}to{transform:translateY(0);opacity:1;}}'+
+      '#stkStudio input[type=range]{accent-color:'+AC+';width:100%;height:32px;}'+
+      '#stkStudio button:focus-visible,#stkStudio label:focus-within{outline:2px solid '+AC+';outline-offset:2px;}'+
+      '@media (prefers-reduced-motion:reduce){#stkStudio *{animation:none!important;}}');
+    const wrap=E('div','position:fixed;inset:0;z-index:9990;background:rgba(63,58,51,.5);display:flex;align-items:flex-end;justify-content:center;'+
+      'font-family:'+FONT+';color:'+TX+';word-break:keep-all;overflow-wrap:break-word;');
+    const sheet=E('div','width:100%;max-width:430px;max-height:92vh;overflow-y:auto;background:'+BG+';border-radius:24px 24px 0 0;'+
+      'padding:10px 16px calc(20px + env(safe-area-inset-bottom,0px));box-sizing:border-box;animation:stkUp .22s ease-out;');
+    wrap.appendChild(sheet);wrap.appendChild(st);
+    wrap.onclick=e=>{if(e.target===wrap)close();};
+
+    sheet.appendChild(E('div','width:38px;height:4px;border-radius:99px;background:'+LINE+';margin:2px auto 12px;'));
+    const head=E('div','display:flex;align-items:center;gap:8px;margin-bottom:12px;');
+    head.appendChild(E('div','font-size:17px;font-weight:800;flex:1;','🎨 스티커 제작소'));
+    const xb=E('button','background:'+CARD+';border:1px solid '+LINE+';border-radius:99px;width:34px;height:34px;font-size:14px;'+
+      'cursor:pointer;padding:0;color:'+SUB+';font-family:inherit;flex-shrink:0;','✕');
+    xb.setAttribute('aria-label','닫기');xb.onclick=()=>close();
+    head.appendChild(xb);sheet.appendChild(head);
+    const body=E('div','display:flex;flex-direction:column;gap:12px;');
+    sheet.appendChild(body);
+    document.body.appendChild(wrap);
+    this._stk=wrap;
+
+    function close(){if(!self._stk)return;wrap.remove();self._stk=null;}
+
+    // ── 큰 사진은 한 번 줄여 둔다 (자를 때마다 픽셀을 훑기 때문) ──
+    function shrink(im){
+      const mx=Math.max(im.width,im.height);
+      if(mx<=MAXSRC)return im;
+      const k=MAXSRC/mx,c=document.createElement('canvas');
+      c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      return c;
+    }
+    // ── 잘라낸 뒤 빈 가장자리를 털어낸다 — 누끼 사진의 투명한 여백을 없애 스티커가 꽉 차게 ──
+    function trim(c){
+      const g=c.getContext('2d');let d;
+      try{d=g.getImageData(0,0,c.width,c.height).data;}catch(e){return c.toDataURL('image/png');}
+      let x0=c.width,y0=c.height,x1=-1,y1=-1;
+      for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){
+        if(d[(y*c.width+x)*4+3]>16){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}}
+      if(x1<0)return null;                                   // 아무것도 없는 칸
+      x0=Math.max(0,x0-2);y0=Math.max(0,y0-2);
+      x1=Math.min(c.width-1,x1+2);y1=Math.min(c.height-1,y1+2);
+      const w=x1-x0+1,h=y1-y0+1;
+      if(w<14||h<14)return null;                             // 먼지 같은 조각은 버린다
+      if(w===c.width&&h===c.height)return c.toDataURL('image/png');
+      const o=document.createElement('canvas');o.width=w;o.height=h;
+      o.getContext('2d').drawImage(c,x0,y0,w,h,0,0,w,h);
+      return o.toDataURL('image/png');
+    }
+    function cut(im,sx,sy,sw,sh){
+      const k=Math.min(1.6,OUT/Math.max(sw,sh));             // 원본보다 억지로 키우지 않는다
+      const w=Math.max(20,Math.round(sw*k)),h=Math.max(20,Math.round(sh*k));
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+      g.drawImage(im,sx,sy,sw,sh,0,0,w,h);
+      return trim(c);
+    }
+
+    // ── 보관함 화면 ────────────────────────────────────────────────────
+    function shelf(){
+      body.innerHTML='';
+      body.appendChild(E('div','font-size:13px;line-height:1.7;color:'+SUB+';font-weight:700;',
+        '아이폰·갤럭시에서 <b style="color:'+TX+';">배경을 지운 사진</b>을 고르면 스티커가 돼요.<br>한 장에 여러 개가 있으면 나눠서 여러 장으로 만들 수 있어요.'));
+      const pick=E('label','display:flex;align-items:center;justify-content:center;gap:8px;background:'+AC+';color:#fff;'+BTN+'border:none;');
+      pick.innerHTML='<span style="font-size:17px;">📷</span><span>사진 골라서 만들기</span>';
+      const inp=E('input','position:absolute;width:1px;height:1px;opacity:0;');
+      inp.type='file';inp.accept='image/*';
+      inp.onchange=ev=>{const file=ev.target.files&&ev.target.files[0];ev.target.value='';if(file)load(file);};
+      pick.appendChild(inp);body.appendChild(pick);
+
+      const mine=((self.state.data||{}).mystk)||[];
+      const cap=E('div','display:flex;align-items:baseline;gap:6px;margin-top:4px;');
+      cap.appendChild(E('div',LBL,'우리 가족이 만든 스티커'));
+      cap.appendChild(E('div','font-size:11px;font-weight:800;color:'+AC+';',mine.length+'개'));
+      body.appendChild(cap);
+
+      if(!mine.length){
+        body.appendChild(E('div','background:'+CARD+';border:1px dashed '+LINE+';border-radius:16px;padding:26px 16px;text-align:center;'+
+          'font-size:13px;font-weight:700;line-height:1.7;color:'+SUB+';','아직 만든 스티커가 없어요.<br>위 버튼으로 첫 스티커를 만들어 보세요!'));
+      }else{
+        const grid=E('div','display:grid;grid-template-columns:repeat(4,1fr);gap:8px;');
+        const uid=self.state.user,me=((self.state.data||{}).profiles||[]).find(p=>p.id===uid)||{};
+        mine.slice().reverse().forEach(m=>{
+          const cell=E('div','position:relative;background:'+CARD+';border:1px solid '+LINE+';border-radius:14px;height:72px;'+
+            'background-image:url(\''+m.url+'\');background-size:60% 60%;background-repeat:no-repeat;background-position:center;');
+          if(m.by===uid||me.role==='parent'){
+            const del=E('button','position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:99px;background:'+CARD+';'+
+              'border:1px solid '+LINE+';color:'+SUB+';font-size:11px;cursor:pointer;padding:0;font-family:inherit;line-height:1;','✕');
+            del.title='이 스티커 지우기';del.setAttribute('aria-label','스티커 지우기');
+            del.onclick=()=>{if(!confirm('이 스티커를 지울까요? 이미 붙여둔 자리에는 🌟 로 남아요.'))return;
+              self.mut(d=>{d.mystk=(d.mystk||[]).filter(x=>x.id!==m.id);});shelf();};
+            cell.appendChild(del);
+          }
+          grid.appendChild(cell);
+        });
+        body.appendChild(grid);
+      }
+      const done=E('button',GST+'width:100%;','붙이러 가기');
+      done.onclick=()=>close();
+      body.appendChild(done);
+    }
+
+    // ── 편집 화면 ──────────────────────────────────────────────────────
+    function load(file){
+      body.innerHTML='';
+      body.appendChild(E('div','padding:40px 0;text-align:center;font-size:13px;font-weight:700;color:'+SUB+';','사진을 여는 중...'));
+      const rd=new FileReader();
+      rd.onerror=()=>{body.innerHTML='';body.appendChild(E('div','padding:30px 0;text-align:center;font-size:13px;font-weight:700;color:#E5484D;','사진을 읽지 못했어요. 다른 사진으로 해볼까요?'));
+        const b=E('button',GST+'width:100%;','다시 고르기');b.onclick=shelf;body.appendChild(b);};
+      rd.onload=()=>{const im=new Image();
+        im.onerror=rd.onerror;
+        im.onload=()=>edit(shrink(im));
+        im.src=rd.result;};
+      rd.readAsDataURL(file);
+    }
+
+    function edit(im){
+      let mode='one',cols=2,rows=2,scale=1,base=1,px=0,py=0,busy=false;
+      base=Math.min(SZ/im.width,SZ/im.height);scale=base;
+      px=(SZ-im.width*scale)/2;py=(SZ-im.height*scale)/2;
+
+      body.innerHTML='';
+      const stageBox=E('div','position:relative;align-self:center;border-radius:18px;overflow:hidden;border:1px solid '+LINE+';'+
+        'width:'+SZ+'px;height:'+SZ+'px;max-width:100%;touch-action:none;background:'+CARD+';');
+      const cv=E('canvas','display:block;width:100%;height:100%;cursor:grab;');
+      const dpr=Math.min(2,window.devicePixelRatio||1);
+      cv.width=SZ*dpr;cv.height=SZ*dpr;
+      const g=cv.getContext('2d');
+      stageBox.appendChild(cv);body.appendChild(stageBox);
+
+      const hint=E('div','font-size:12px;font-weight:700;color:'+SUB+';text-align:center;line-height:1.6;','');
+      body.appendChild(hint);
+
+      function draw(){
+        g.setTransform(dpr,0,0,dpr,0,0);
+        g.clearRect(0,0,SZ,SZ);
+        for(let y=0;y<SZ;y+=12)for(let x=0;x<SZ;x+=12){          // 체크무늬 = 뚫린 자리
+          g.fillStyle=((x/12+y/12)%2)?'#F2EDE4':'#FBF8F2';g.fillRect(x,y,12,12);}
+        if(mode==='one'){
+          g.drawImage(im,px,py,im.width*scale,im.height*scale);
+        }else{
+          const k=Math.min(SZ/im.width,SZ/im.height);
+          const w=im.width*k,h=im.height*k,ox=(SZ-w)/2,oy=(SZ-h)/2;
+          g.drawImage(im,ox,oy,w,h);
+          g.strokeStyle=AC;g.lineWidth=2;g.setLineDash([6,4]);
+          for(let c=1;c<cols;c++){g.beginPath();g.moveTo(ox+w*c/cols,oy);g.lineTo(ox+w*c/cols,oy+h);g.stroke();}
+          for(let r=1;r<rows;r++){g.beginPath();g.moveTo(ox,oy+h*r/rows);g.lineTo(ox+w,oy+h*r/rows);g.stroke();}
+          g.setLineDash([]);g.strokeRect(ox+1,oy+1,w-2,h-2);
+        }
+      }
+
+      // 손가락으로 옮기기 · 두 손가락으로 늘리기 (한 장 모드에서만)
+      const pts=new Map();let pinch=0,pcx=0,pcy=0;
+      cv.onpointerdown=e=>{if(mode!=='one')return;cv.setPointerCapture(e.pointerId);
+        pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+        if(pts.size===2){const a=[...pts.values()];pinch=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+          const r=cv.getBoundingClientRect();pcx=((a[0].x+a[1].x)/2-r.left)*SZ/r.width;pcy=((a[0].y+a[1].y)/2-r.top)*SZ/r.height;}};
+      cv.onpointermove=e=>{if(mode!=='one'||!pts.has(e.pointerId))return;
+        const r=cv.getBoundingClientRect(),kx=SZ/r.width;
+        const old=pts.get(e.pointerId);
+        pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+        if(pts.size===2){const a=[...pts.values()],d2=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+          if(pinch>4){zoomAt(scale*d2/pinch,pcx,pcy);pinch=d2;}
+        }else{px+=(e.clientX-old.x)*kx;py+=(e.clientY-old.y)*kx;draw();}};
+      const up=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=0;};
+      cv.onpointerup=up;cv.onpointercancel=up;
+      function zoomAt(ns,cx2,cy2){
+        ns=Math.max(base*0.25,Math.min(base*5,ns));
+        px=cx2-(cx2-px)*ns/scale;py=cy2-(cy2-py)*ns/scale;scale=ns;
+        if(zoom)zoom.value=String(Math.round(scale/base*100));
+        draw();}
+
+      const tools=E('div','background:'+CARD+';border:1px solid '+LINE+';border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;');
+      body.appendChild(tools);
+
+      const tabs=E('div','display:flex;gap:6px;');
+      const tabOne=E('button','flex:1;'+BTN+'border:1px solid '+LINE+';','✂️ 한 장');
+      const tabCut=E('button','flex:1;'+BTN+'border:1px solid '+LINE+';','🔲 나눠 담기');
+      tabs.appendChild(tabOne);tabs.appendChild(tabCut);tools.appendChild(tabs);
+      const panel=E('div','display:flex;flex-direction:column;gap:8px;');tools.appendChild(panel);
+
+      let zoom=null;
+      function paint(){
+        tabOne.setAttribute('style','flex:1;'+BTN+(mode==='one'?'background:'+AC+';color:#fff;border:1px solid '+AC+';':'background:'+BG+';color:'+SUB+';border:1px solid '+LINE+';'));
+        tabCut.setAttribute('style','flex:1;'+BTN+(mode==='cut'?'background:'+AC+';color:#fff;border:1px solid '+AC+';':'background:'+BG+';color:'+SUB+';border:1px solid '+LINE+';'));
+        panel.innerHTML='';zoom=null;
+        if(mode==='one'){
+          hint.innerHTML='네모 안에 보이는 만큼 스티커가 돼요 · 끌어서 옮기고, 아래로 크기를 맞춰요';
+          const row=E('div','display:flex;align-items:center;gap:10px;');
+          row.appendChild(E('span','font-size:15px;flex-shrink:0;','🔍'));
+          zoom=E('input');zoom.type='range';zoom.min='25';zoom.max='500';zoom.step='1';
+          zoom.value=String(Math.round(scale/base*100));
+          zoom.setAttribute('aria-label','스티커 크기');
+          zoom.oninput=()=>zoomAt(base*Number(zoom.value)/100,SZ/2,SZ/2);
+          row.appendChild(zoom);
+          panel.appendChild(row);
+          const fit=E('button',GST+'width:100%;font-size:13px;min-height:40px;','사진 전체가 보이게 맞추기');
+          fit.onclick=()=>{scale=base;px=(SZ-im.width*scale)/2;py=(SZ-im.height*scale)/2;zoom.value='100';draw();};
+          panel.appendChild(fit);
+        }else{
+          hint.innerHTML='칸마다 한 장씩 만들어져요 · 빈 칸은 저절로 건너뛰어요';
+          panel.appendChild(step('가로',()=>cols,v=>{cols=v;draw();}));
+          panel.appendChild(step('세로',()=>rows,v=>{rows=v;draw();}));
+          panel.appendChild(E('div','font-size:11px;font-weight:700;color:'+SUB+';line-height:1.6;','스티커 '+(cols*rows)+'칸으로 나눠요'));
+        }
+        draw();
+      }
+      function step(name,get,set){
+        const r=E('div','display:flex;align-items:center;gap:8px;');
+        r.appendChild(E('span','font-size:13px;font-weight:800;width:34px;flex-shrink:0;',name));
+        const mk=(t,d)=>{const b=E('button','width:44px;height:40px;border-radius:12px;background:'+BG+';border:1px solid '+LINE+
+          ';font-size:17px;font-weight:800;cursor:pointer;color:'+TX+';font-family:inherit;padding:0;',t);
+          b.setAttribute('aria-label',name+(d<0?' 줄이기':' 늘리기'));
+          b.onclick=()=>{const v=Math.max(1,Math.min(GMAX,get()+d));set(v);paint();};return b;};
+        r.appendChild(mk('−',-1));
+        r.appendChild(E('span','flex:1;text-align:center;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;',String(get())+'칸'));
+        r.appendChild(mk('+',1));
+        return r;
+      }
+      tabOne.onclick=()=>{mode='one';paint();};
+      tabCut.onclick=()=>{mode='cut';paint();};
+
+      const foot=E('div','display:flex;gap:8px;');
+      const again=E('button',GST+'flex:0 0 auto;','다시 고르기');
+      again.onclick=()=>{if(!busy)shelf();};
+      const make=E('button',PRI+'flex:1;','스티커로 만들기');
+      foot.appendChild(again);foot.appendChild(make);body.appendChild(foot);
+      const msg=E('div','font-size:12px;font-weight:800;color:'+AC+';text-align:center;min-height:16px;','');
+      body.appendChild(msg);
+
+      make.onclick=async()=>{
+        if(busy)return;
+        let list=[];
+        if(mode==='one'){
+          const s=scale,sx=(-px)/s,sy=(-py)/s,sw=SZ/s,sh=SZ/s;
+          const one=cut(im,sx,sy,sw,sh);
+          if(one)list=[one];
+        }else{
+          const cw=im.width/cols,ch=im.height/rows;
+          for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+            const p=cut(im,c*cw,r*ch,cw,ch);if(p)list.push(p);}
+        }
+        if(!list.length){msg.style.color='#E5484D';msg.textContent='잘라낼 그림이 없어요. 위치나 칸 수를 바꿔 보세요';return;}
+        busy=true;msg.style.color=AC;make.disabled=true;make.style.opacity='.6';
+        const made=[];
+        for(let i=0;i<list.length;i++){
+          msg.textContent='올리는 중 '+(i+1)+' / '+list.length;
+          const url=await window.FamilyStore.putPhoto(list[i]);
+          made.push({id:self.uid(),url:url,by:self.state.user,d:self.today()});
+        }
+        self.mut(d=>{d.mystk=(d.mystk||[]).concat(made);});
+        busy=false;make.disabled=false;make.style.opacity='1';
+        shelf();
+      };
+      paint();
+    }
+
+    shelf();
+  }
 
   // 피싱 카드를 캔버스에 그려 사진(dataURL)으로 만든다 — 피드에 카드 모습 그대로 올리기 위해
   async drawFishCard(l){
@@ -2843,7 +3133,8 @@ class Component extends DCLogic {
     V.calStkOpen=!!S.calStkOpen;
     V.calStkToggle=()=>this.setState({calStkOpen:!S.calStkOpen,calStkSel:null});
     V.calStkMode=!!S.calStkSel;
-    V.calStkPickV=this.DSTK.map(s=>({...this.dv(s),pick:()=>this.setState({calStkSel:s,calStkOpen:false})}));
+    V.calStkPickV=this.stkAll().map(s=>({...this.dv(s),pick:()=>this.setState({calStkSel:s,calStkOpen:false})}));
+    V.openStudio=()=>this.openStudio();
     V.calPlaceTap=e=>{const s=S.calStkSel;if(!s)return;const r=e.currentTarget.getBoundingClientRect();
       const px=Math.round((e.clientX-r.left)/r.width*1000)/10,py=Math.round((e.clientY-r.top)/r.height*1000)/10;
       this.mut(d=>{(d.calDeco=d.calDeco||[]).push({id:this.uid(),m:S.calM,s,x:px,y:py,r:Math.round(-15+Math.random()*30),by:u.id});});
@@ -3121,7 +3412,7 @@ class Component extends DCLogic {
           this.mut(d=>{const p2=d.feed.find(z=>z.id===po.id);if(p2)p2.stks=(p2.stks||[]).filter(y=>y.id!==x.id);});}})),
       stkOpen:S.stkPick===po.id,
       stkToggle:()=>this.setState({stkPick:S.stkPick===po.id?null:po.id,fdStkSel:null}),
-      stkPickV:this.DSTK.map(s=>({...this.dv(s),put:()=>this.setState({stkPick:null,fdStkSel:{pid:po.id,s}})})),
+      stkPickV:this.stkAll().map(s=>({...this.dv(s),put:()=>this.setState({stkPick:null,fdStkSel:{pid:po.id,s}})})),
       placing:!!(S.fdStkSel&&S.fdStkSel.pid===po.id),
       placeTap:e=>{const sel=S.fdStkSel;if(!sel||sel.pid!==po.id)return;const r=e.currentTarget.getBoundingClientRect();
         const px=Math.round((e.clientX-r.left)/r.width*1000)/10,py=Math.round((e.clientY-r.top)/r.height*1000)/10;
