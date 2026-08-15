@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우리집 가계부</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script src="../store.js"></script>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F3EC; --card:#FFFFFF; --ac:#2C5D7C; --on:#FFFFFF;
+  --soft:#E4EDF3; --line:#E5DFD3; --tx:#23211C; --sub:#7A7368;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
+  word-break:keep-all;overflow-wrap:break-word;line-height:1.65;-webkit-text-size-adjust:100%}
+input,textarea,button,select{font-family:inherit}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--ac);outline-offset:1px}
+button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.num{font-variant-numeric:tabular-nums}
+
+/* ── 뼈대 ── */
+.top{position:sticky;top:0;z-index:9;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+.top-t{display:flex;flex-direction:column;gap:1px;min-width:0}
+.top-e{font:600 9.5px 'IBM Plex Mono',monospace;color:#A39B8D;letter-spacing:.16em}
+.top-n{font-size:15.5px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.home{display:inline-flex;align-items:center;gap:5px;flex:none;min-height:44px;padding:0 14px;border-radius:99px;
+  background:var(--bg);border:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--sub);
+  text-decoration:none;white-space:nowrap}
+.wrap{max-width:600px;margin:0 auto;padding:14px 14px 44px}
+.cards{display:flex;flex-direction:column;gap:12px}
+.rail{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.rail button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;
+  min-width:0;border-radius:12px;cursor:pointer;padding:7px 2px}
+.mstrip{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:7px 9px;margin-bottom:12px}
+.mstrip button{background:var(--bg);border:1px solid var(--line);border-radius:10px;width:44px;height:44px;
+  font-size:16px;cursor:pointer;color:inherit}
+.mstrip .lab{font-size:15px;font-weight:800}
+.mstrip .today{background:none;border:none;width:auto;height:auto;min-height:44px;padding:0 12px;
+  font-size:12px;font-weight:700;color:var(--sub);cursor:pointer}
+
+@media (min-width:1024px){
+  .wrap{max-width:1180px;display:grid;grid-template-columns:196px minmax(0,1fr);gap:26px;align-items:start;
+    padding:22px 22px 60px}
+  .side{position:sticky;top:74px}
+  .rail{grid-template-columns:1fr;gap:5px;margin:0}
+  .rail button{flex-direction:row;justify-content:flex-start;gap:9px;min-height:44px;padding:0 13px;font-size:13px}
+  .body{min-width:0}
+  .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+  .cards>.wide{grid-column:1/-1}
+  .mstrip{max-width:none}
+}
+
+/* ── 보고서 ── */
+.rep-head{display:flex;gap:6px;margin-bottom:12px}
+.rep-head button{flex:1;min-height:44px;border-radius:99px;font-size:13px;font-weight:800;cursor:pointer;
+  border:1px solid var(--line)}
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 17px}
+.rcard-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+.rbadge{font-size:10.5px;font-weight:800;letter-spacing:.03em;padding:3px 9px;border-radius:99px;
+  background:var(--soft);color:var(--ac)}
+.rno{font:600 11px 'IBM Plex Mono',monospace;color:var(--sub);letter-spacing:.04em}
+.rstar{margin-left:auto;font-size:11.5px;font-weight:800;color:#B27417;letter-spacing:.06em;white-space:nowrap}
+.rdate{font-size:11px;color:var(--sub);white-space:nowrap}
+.rtitle{font-size:16px;font-weight:800;letter-spacing:-.01em;text-wrap:balance;margin-bottom:5px}
+.rsum{font-size:13px;color:var(--sub)}
+.rbtns{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.rbtns button{min-height:40px;padding:0 13px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;
+  border:1px solid var(--line);background:var(--bg);color:var(--sub)}
+.rbtns .prime{background:var(--ac);color:var(--on);border-color:var(--ac)}
+
+.rbody{border-top:1px solid var(--line);margin-top:14px;padding-top:14px;display:flex;flex-direction:column;gap:13px}
+.rb-h{font-size:13.5px;font-weight:800;color:var(--ac);letter-spacing:-.01em}
+.rb-p{font-size:13.5px;margin:0}
+.rb-stat{font:500 12.5px 'IBM Plex Mono',monospace;background:var(--bg);border-left:3px solid var(--ac);
+  border-radius:0 8px 8px 0;padding:9px 12px;color:var(--tx);font-variant-numeric:tabular-nums;
+  overflow-x:auto;white-space:nowrap}
+.rb-cmp{font-size:12.5px;font-weight:700;color:var(--sub)}
+.rb-judge{font-size:13.5px;font-weight:700;background:var(--soft);border-radius:10px;padding:10px 13px}
+.rb-t{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.rb-tr{display:grid;grid-template-columns:minmax(0,1fr) 92px 76px;gap:8px;padding:8px 11px;font-size:12.5px;
+  border-top:1px solid var(--line);align-items:baseline}
+.rb-tr:first-child{border-top:none}
+.rb-th{background:var(--bg);font-weight:800;color:var(--sub);font-size:11px;letter-spacing:.02em}
+.rb-tr .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:800}
+.rb-do{background:var(--bg);border:1px dashed var(--ac);border-radius:12px;padding:12px 14px}
+.rb-do-h{font-size:12px;font-weight:800;color:var(--ac);margin-bottom:6px}
+.rb-do-i{font-size:13px;font-weight:700;padding:3px 0}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:26px 18px;text-align:center;
+  font-size:13px;color:var(--sub)}
+
+@media print{
+  body{background:#fff}
+  .top,.rail,.mstrip,.rep-head,.rbtns,.home{display:none!important}
+  .wrap{display:block;max-width:none;padding:0}
+  .rcard{border:none;padding:0;break-inside:avoid}
+  .rbody{break-inside:auto}
+  .rb-h,.rb-do,.rb-t{break-inside:avoid}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div class="top">
+  <div class="top-t">
+    <span class="top-e">LEDGER</span>
+    <span class="top-n">우리집 가계부</span>
+  </div>
+  <a href="../" class="home" title="우리집 다이어리로 이동">🏡 가족 다이어리</a>
+</div>
+
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+  <div class="wrap"><div class="empty">불러오는 중이에요…</div></div>
+</sc-if>
+
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+<div class="wrap">
+
+  <div class="side">
+    <div class="rail">
+      <sc-for list="{{ mviewsV }}" as="mv" hint-placeholder-count="7">
+        <button onClick="{{ mv.go }}" style="background:{{ mv.bg }};color:{{ mv.fg }};border:1px solid {{ mv.bd }};">
+          <span style="font-size:15px;line-height:1;">{{ mv.icon }}</span>
+          <span style="font-size:11.5px;font-weight:800;white-space:nowrap;">{{ mv.label }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div class="body">
+
+  <div class="mstrip">
+    <button onClick="{{ budPrev }}" title="이전 달">‹</button>
+    <span class="lab">{{ budLabel }}</span>
+    <button onClick="{{ budNext }}" title="다음 달">›</button>
+    <button class="today" onClick="{{ budToday }}">오늘</button>
+  </div>
+
+  <div class="cards">
+
+    <div class="wide" style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+      <div style="font-size:12.5px;font-weight:700;color:var(--sub);margin-bottom:8px;">{{ budMonthLabel }} 요약</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+        <div><div style="font-size:11px;font-weight:700;color:var(--sub);">수입</div><div class="num" style="font-size:16px;font-weight:900;color:#2E9E63;">+{{ monthIn }}</div></div>
+        <div><div style="font-size:11px;font-weight:700;color:var(--sub);">지출</div><div class="num" style="font-size:16px;font-weight:900;color:#D64550;">-{{ monthOut }}</div></div>
+        <div><div style="font-size:11px;font-weight:700;color:var(--sub);">합계</div><div class="num" style="font-size:16px;font-weight:900;">{{ monthNet }}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--sub);margin-top:8px;text-align:center;">계좌간 이체(⇄)는 수입·지출 계산에서 빠져요</div>
+    </div>
+
+    <div class="wide" style="background:var(--card);border:1px solid var(--ac);border-radius:18px;padding:15px 16px;">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+        <span style="font-size:17px;">🧑‍🏫</span>
+        <span style="font-size:14px;font-weight:800;">가계부 관리자 조언</span>
+        <span style="margin-left:auto;font-size:11px;font-weight:800;color:#fff;background:{{ advGradeBg }};border-radius:99px;padding:3px 10px;white-space:nowrap;">{{ advGrade }}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <sc-for list="{{ adviceV }}" as="ad" hint-placeholder-count="3">
+          <div style="display:flex;gap:8px;font-size:12.5px;line-height:1.6;">
+            <span style="flex-shrink:0;font-size:13px;">{{ ad.ic }}</span>
+            <span style="flex:1;color:{{ ad.c }};font-weight:700;text-wrap:pretty;">{{ ad.txt }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- ══ 📄 보고서 ══ -->
+    <sc-if value="{{ mvRep }}" hint-placeholder-val="{{ false }}">
+      <div class="wide">
+        <div class="rep-head">
+          <button onClick="{{ rvSetNow }}" style="background:{{ rvNowBg }};color:{{ rvNowFg }};">🕒 현재 보고서</button>
+          <button onClick="{{ rvSetMonth }}" style="background:{{ rvMonBg }};color:{{ rvMonFg }};">📅 월 보고서</button>
+          <button onClick="{{ rvSetBox }}" style="background:{{ rvBoxBg }};color:{{ rvBoxFg }};">📚 보고서함 {{ repBoxCount }}</button>
+        </div>
+      </div>
+
+      <sc-if value="{{ rvLive }}" hint-placeholder-val="{{ true }}">
+        <div class="wide rcard">
+          <div class="rcard-top">
+            <span class="rbadge">{{ liveBadge }}</span>
+            <span class="rno">{{ liveNo }}</span>
+            <span class="rdate">{{ liveDate }}</span>
+            <span class="rstar">{{ liveStars }}</span>
+          </div>
+          <div class="rtitle">{{ liveTitle }}</div>
+          <div class="rsum">{{ liveSummary }}</div>
+          <div class="rbody">
+            <sc-for list="{{ liveBlocksV }}" as="b" hint-placeholder-count="6">
+              <div>
+                <sc-if value="{{ b.isH }}" hint-placeholder-val="{{ true }}"><div class="rb-h">{{ b.v }}</div></sc-if>
+                <sc-if value="{{ b.isP }}" hint-placeholder-val="{{ false }}"><p class="rb-p">{{ b.v }}</p></sc-if>
+                <sc-if value="{{ b.isStat }}" hint-placeholder-val="{{ false }}"><div class="rb-stat">{{ b.v }}</div></sc-if>
+                <sc-if value="{{ b.isCmp }}" hint-placeholder-val="{{ false }}"><div class="rb-cmp">{{ b.v }}</div></sc-if>
+                <sc-if value="{{ b.isJudge }}" hint-placeholder-val="{{ false }}"><div class="rb-judge">{{ b.v }}</div></sc-if>
+                <sc-if value="{{ b.isTable }}" hint-placeholder-val="{{ false }}">
+                  <div class="rb-t">
+                    <div class="rb-tr rb-th"><span>{{ b.h1 }}</span><span class="n">{{ b.h2 }}</span><span class="n">{{ b.h3 }}</span></div>
+                    <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="3">
+                      <div class="rb-tr"><span>{{ r.c1 }}</span><span class="n">{{ r.c2 }}</span><span class="n" style="color:{{ r.c3c }};">{{ r.c3 }}</span></div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ b.isDo }}" hint-placeholder-val="{{ false }}">
+                  <div class="rb-do">
+                    <div class="rb-do-h">▶ 실행</div>
+                    <sc-for list="{{ b.rows }}" as="it" hint-placeholder-count="2"><div class="rb-do-i">{{ it.c1 }}</div></sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div class="rbtns">
+            <button class="prime" onClick="{{ repSave }}">{{ repSaveLabel }}</button>
+            <button onClick="{{ repDeep }}">🧑‍🏫 담당에게 더 자세히</button>
+            <button onClick="{{ repPrint }}">🖨 인쇄</button>
+          </div>
+          <sc-if value="{{ hasRepMsg }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px;font-weight:800;margin-top:10px;color:var(--ac);">{{ repMsg }}</div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ rvBox }}" hint-placeholder-val="{{ false }}">
+        <sc-if value="{{ boxEmpty }}" hint-placeholder-val="{{ false }}">
+          <div class="wide empty">아직 보관된 보고서가 없어요.<br>현재·월 보고서에서 <b>보고서함에 넣기</b>를 누르면 여기에 쌓입니다.</div>
+        </sc-if>
+        <sc-for list="{{ boxV }}" as="rp" hint-placeholder-count="3">
+          <div class="wide rcard">
+            <div class="rcard-top">
+              <span class="rbadge">{{ rp.badge }}</span>
+              <span class="rno">{{ rp.no }}</span>
+              <span class="rdate">{{ rp.date }}</span>
+              <span class="rstar">{{ rp.stars }}</span>
+            </div>
+            <div class="rtitle">{{ rp.title }}</div>
+            <div class="rsum">{{ rp.summary }}</div>
+            <sc-if value="{{ rp.open }}" hint-placeholder-val="{{ false }}">
+              <div class="rbody">
+                <sc-for list="{{ rp.blocks }}" as="b2" hint-placeholder-count="5">
+                  <div>
+                    <sc-if value="{{ b2.isH }}" hint-placeholder-val="{{ true }}"><div class="rb-h">{{ b2.v }}</div></sc-if>
+                    <sc-if value="{{ b2.isP }}" hint-placeholder-val="{{ false }}"><p class="rb-p">{{ b2.v }}</p></sc-if>
+                    <sc-if value="{{ b2.isStat }}" hint-placeholder-val="{{ false }}"><div class="rb-stat">{{ b2.v }}</div></sc-if>
+                    <sc-if value="{{ b2.isCmp }}" hint-placeholder-val="{{ false }}"><div class="rb-cmp">{{ b2.v }}</div></sc-if>
+                    <sc-if value="{{ b2.isJudge }}" hint-placeholder-val="{{ false }}"><div class="rb-judge">{{ b2.v }}</div></sc-if>
+                    <sc-if value="{{ b2.isTable }}" hint-placeholder-val="{{ false }}">
+                      <div class="rb-t">
+                        <div class="rb-tr rb-th"><span>{{ b2.h1 }}</span><span class="n">{{ b2.h2 }}</span><span class="n">{{ b2.h3 }}</span></div>
+                        <sc-for list="{{ b2.rows }}" as="r2" hint-placeholder-count="3">
+                          <div class="rb-tr"><span>{{ r2.c1 }}</span><span class="n">{{ r2.c2 }}</span><span class="n" style="color:{{ r2.c3c }};">{{ r2.c3 }}</span></div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ b2.isDo }}" hint-placeholder-val="{{ false }}">
+                      <div class="rb-do">
+                        <div class="rb-do-h">▶ 실행</div>
+                        <sc-for list="{{ b2.rows }}" as="it2" hint-placeholder-count="2"><div class="rb-do-i">{{ it2.c1 }}</div></sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <div class="rbtns">
+              <button onClick="{{ rp.toggle }}">{{ rp.toggleLabel }}</button>
+              <button onClick="{{ rp.del }}">🗑 버리기</button>
+            </div>
+          </div>
+        </sc-for>
+      </sc-if>
+    </sc-if>
+
+    <!-- ══ 📊 분석 ══ -->
+    <sc-if value="{{ mvStat }}" hint-placeholder-val="{{ false }}">
+      <div class="wide" style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+          <div style="font-size:15px;font-weight:800;">📊 6개월 수입·지출</div>
+          <div style="font-size:11px;font-weight:800;color:var(--sub);">🟩 수입 · 🟥 지출</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <sc-for list="{{ stMonthsV }}" as="sm" hint-placeholder-count="6">
+            <button onClick="{{ sm.go }}" style="flex:1;min-width:0;background:{{ sm.bg }};border:none;border-radius:12px;padding:6px 2px 7px;cursor:pointer;">
+              <div style="height:96px;display:flex;align-items:flex-end;justify-content:center;gap:3px;">
+                <div style="width:11px;height:{{ sm.inH }}px;background:#2E9E63;border-radius:4px 4px 0 0;"></div>
+                <div style="width:11px;height:{{ sm.outH }}px;background:#D64550;border-radius:4px 4px 0 0;"></div>
+              </div>
+              <div style="font-size:10px;font-weight:800;color:{{ sm.fg }};margin-top:6px;">{{ sm.label }}</div>
+              <div class="num" style="font-size:9px;font-weight:800;color:{{ sm.netC }};margin-top:2px;">{{ sm.net }}</div>
+            </button>
+          </sc-for>
+        </div>
+        <div style="font-size:11px;color:var(--sub);text-align:center;margin-top:10px;">월을 누르면 화면 전체가 그 달로 바뀌어요</div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="font-size:15px;font-weight:800;margin-bottom:12px;">{{ budLabel }} 살림 성적표</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+          <div><div style="font-size:11px;font-weight:700;color:var(--sub);">수입</div><div class="num" style="font-size:15px;font-weight:900;color:#2E9E63;">{{ monthIn }}</div></div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--sub);">지출</div><div class="num" style="font-size:15px;font-weight:900;color:#D64550;">{{ monthOut }}</div></div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--sub);">남은 돈</div><div class="num" style="font-size:15px;font-weight:900;">{{ monthNet }}</div></div>
+        </div>
+        <div style="height:10px;background:var(--bg);border-radius:99px;overflow:hidden;margin:14px 0 6px;">
+          <div style="height:100%;width:{{ stRateW }}%;background:{{ stRateC }};border-radius:99px;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;color:var(--sub);">
+          <span>저축률 {{ stRate }}%</span><span>{{ stRateNote }}</span>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="font-size:15px;font-weight:800;margin-bottom:4px;">어디에 많이 썼나요</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:14px;">막대 오른쪽 화살표는 지난달과 비교한 변화예요</div>
+        <sc-if value="{{ stNoCat }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px;color:var(--sub);text-align:center;padding:10px 0;">이 달에는 기록된 지출이 없어요</div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:11px;">
+          <sc-for list="{{ stCatsV }}" as="sc" hint-placeholder-count="5">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px;">
+                <span style="font-size:12px;font-weight:800;">{{ sc.name }} <span style="color:var(--sub);font-weight:700;">{{ sc.pct }}%</span></span>
+                <span class="num" style="font-size:12px;font-weight:900;white-space:nowrap;">{{ sc.amt }} <span style="font-size:11px;font-weight:800;color:{{ sc.dC }};">{{ sc.diff }}</span></span>
+              </div>
+              <div style="height:9px;background:var(--bg);border-radius:99px;overflow:hidden;">
+                <div style="height:100%;width:{{ sc.w }}%;background:{{ sc.c }};border-radius:99px;"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="font-size:15px;font-weight:800;margin-bottom:12px;">무엇으로 결제했나요</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <sc-for list="{{ stPaysV }}" as="sp" hint-placeholder-count="3">
+            <div style="background:var(--bg);border-radius:14px;padding:11px 8px;text-align:center;">
+              <div style="font-size:17px;">{{ sp.ic }}</div>
+              <div style="font-size:11px;font-weight:700;color:var(--sub);margin-top:2px;">{{ sp.l }} {{ sp.pct }}</div>
+              <div class="num" style="font-size:13px;font-weight:900;margin-top:3px;">{{ sp.amt }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══ 📋 내역 ══ -->
+    <sc-if value="{{ mvList }}" hint-placeholder-val="{{ true }}">
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="font-size:15px;font-weight:800;">🤖 캡처로 통장 자동 정리</div>
+        <div style="font-size:12px;color:var(--sub);margin:4px 0 10px;">영수증·카드 알림·계좌 내역 캡처를 한꺼번에 올려두면, 거래를 읽어 이 화면 내역에 넣어드려요. 내 계좌끼리 옮긴 돈은 계좌간 이체로 분류돼요</div>
+        <label style="display:block;text-align:center;background:var(--bg);border:1.5px dashed var(--ac);border-radius:14px;padding:14px;font-size:14px;font-weight:800;color:var(--ac);cursor:pointer;">📷 캡처 사진 올리기 (여러 장 가능)<input type="file" accept="image/*" multiple onChange="{{ onReceipt }}" style="display:none;"></label>
+        <sc-if value="{{ aiBusy }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:800;margin-top:10px;text-align:center;">📮 맡기는 중이에요... {{ aiProg }}</div></sc-if>
+        <sc-if value="{{ hasAiMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:800;margin-top:10px;text-align:center;">{{ aiMsg }}</div></sc-if>
+      </div>
+
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button onClick="{{ txSetOut }}" style="flex:1;background:{{ txOutBg }};color:{{ txOutFg }};border:1px solid var(--line);border-radius:12px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;">지출 -</button>
+          <button onClick="{{ txSetIn }}" style="flex:1;background:{{ txInBg }};color:{{ txInFg }};border:1px solid var(--line);border-radius:12px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;">수입 +</button>
+          <button onClick="{{ txSetTr }}" style="flex:1;background:{{ txTrBg }};color:{{ txTrFg }};border:1px solid var(--line);border-radius:12px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;">이체 ⇄</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input value="{{ f.txDate }}" onChange="{{ on.txDate }}" type="date" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+          <input value="{{ f.txAmt }}" onChange="{{ on.txAmt }}" type="number" inputmode="numeric" placeholder="금액(원)" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <select value="{{ f.txCat }}" onChange="{{ on.txCat }}" style="width:96px;flex-shrink:0;padding:11px 8px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+            <sc-for list="{{ catsV }}" as="ct" hint-placeholder-count="5"><option value="{{ ct.v }}">{{ ct.v }}</option></sc-for>
+          </select>
+          <select value="{{ f.txPay }}" onChange="{{ on.txPay }}" style="width:82px;flex-shrink:0;padding:11px 8px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+            <sc-for list="{{ paysV }}" as="py" hint-placeholder-count="3"><option value="{{ py.v }}">{{ py.l }}</option></sc-for>
+          </select>
+          <input value="{{ f.txMemo }}" onChange="{{ on.txMemo }}" placeholder="내용" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button onClick="{{ addTx }}" style="flex:1;background:var(--ac);color:var(--on);border:none;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ txSaveLabel }}</button>
+          <sc-if value="{{ txEditing }}" hint-placeholder-val="{{ false }}"><button onClick="{{ txCancelEdit }}" style="flex:1;background:var(--soft);color:var(--tx);border:none;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;">취소</button></sc-if>
+        </div>
+      </div>
+
+      <div class="wide">
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <sc-for list="{{ payFilterV }}" as="pf" hint-placeholder-count="4">
+            <button onClick="{{ pf.go }}" style="flex:1;background:{{ pf.bg }};color:{{ pf.fg }};border:1px solid {{ pf.bd }};border-radius:99px;padding:10px 4px;font-size:12px;font-weight:800;cursor:pointer;">{{ pf.l }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:var(--sub);padding:0 4px 8px;">
+          <span>{{ payFilterLabel }} {{ payCount }}건</span><span class="num"><span style="color:#2E9E63;">수입 {{ payInSum }}</span> <span style="color:#D64550;">지출 {{ payOutSum }}</span></span>
+        </div>
+        <sc-if value="{{ txEmpty }}" hint-placeholder-val="{{ false }}">
+          <div class="empty">이 달엔 해당 내역이 없어요</div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ txV }}" as="tx" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 13px;">
+              <span class="num" style="font-size:12px;color:var(--sub);min-width:42px;">{{ tx.date }}</span>
+              <span style="font-size:13px;flex-shrink:0;">{{ tx.payIcon }}</span>
+              <span style="background:var(--soft);border-radius:8px;padding:2px 8px;font-size:11px;font-weight:800;flex-shrink:0;">{{ tx.cat }}</span>
+              <span style="flex:1;min-width:0;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tx.memo }}</span>
+              <sc-if value="{{ tx.hasPhoto }}" hint-placeholder-val="{{ false }}"><div style="width:28px;height:28px;border-radius:6px;background-image:url('{{ tx.photo }}');background-size:cover;background-position:center;flex-shrink:0;"></div></sc-if>
+              <span class="num" style="font-size:14px;font-weight:900;color:{{ tx.c }};white-space:nowrap;">{{ tx.amt }}</span>
+              <button onClick="{{ tx.edit }}" title="고치기" style="background:none;border:none;color:var(--sub);font-size:14px;cursor:pointer;min-width:30px;min-height:30px;">✎</button>
+              <button onClick="{{ tx.del }}" title="지우기" style="background:none;border:none;color:var(--sub);font-size:14px;cursor:pointer;min-width:30px;min-height:30px;">✕</button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══ 🗓️ 달력 ══ -->
+    <sc-if value="{{ mvCal }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:4px;">
+          <sc-for list="{{ dayHeads }}" as="dh" hint-placeholder-count="7"><div style="text-align:center;font-size:11px;font-weight:700;color:{{ dh.c }};padding:3px 0;">{{ dh.d }}</div></sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;">
+          <sc-for list="{{ budCellsV }}" as="bc" hint-placeholder-count="35">
+            <button onClick="{{ bc.sel }}" style="background:{{ bc.bg }};border:none;border-radius:10px;padding:5px 0 4px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-height:44px;">
+              <span style="font-size:12px;font-weight:700;color:{{ bc.fg }};">{{ bc.num }}</span>
+              <span class="num" style="font-size:9px;font-weight:800;color:#D64550;">{{ bc.spend }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="font-size:14px;font-weight:800;margin-bottom:8px;">{{ budSelLabel }}</div>
+        <sc-if value="{{ budDayEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--sub);">이 날은 지출·수입이 없어요</div></sc-if>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <sc-for list="{{ budDayV }}" as="bd" hint-placeholder-count="2">
+            <div style="display:flex;gap:8px;font-size:13px;font-weight:700;align-items:baseline;"><span style="background:var(--soft);border-radius:8px;padding:1px 8px;font-size:11px;font-weight:800;flex-shrink:0;">{{ bd.cat }}</span><span style="flex:1;min-width:0;">{{ bd.memo }}</span><span class="num" style="color:{{ bd.c }};font-weight:900;white-space:nowrap;">{{ bd.amt }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══ 🔁 고정비 ══ -->
+    <sc-if value="{{ mvFix }}" hint-placeholder-val="{{ false }}">
+      <div class="wide" style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="font-size:15px;font-weight:800;margin-bottom:12px;">{{ budLabel }} 고정비</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+          <div><div style="font-size:11px;font-weight:700;color:var(--sub);">이번 달 낼 돈</div><div class="num" style="font-size:15px;font-weight:900;">{{ fxTotal }}</div></div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--sub);">낸 금액</div><div class="num" style="font-size:15px;font-weight:900;color:#2E9E63;">{{ fxPaidSum }}</div></div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--sub);">남은 금액</div><div class="num" style="font-size:15px;font-weight:900;color:#D64550;">{{ fxLeft }}</div></div>
+        </div>
+        <div style="height:10px;background:var(--bg);border-radius:99px;overflow:hidden;margin:12px 0 6px;">
+          <div style="height:100%;width:{{ fxPct }}%;background:#2E9E63;border-radius:99px;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:700;color:var(--sub);">
+          <span>{{ fxProgLabel }}</span><span class="num">{{ fxSubLabel }}</span>
+        </div>
+        <div style="font-size:11px;color:var(--sub);margin-top:8px;padding-top:8px;border-top:1px solid var(--line);line-height:1.6;">납부를 기록하면 그 금액이 <b>가계부 지출</b>로 바로 들어가고, 이번 달 요약·달력·예산에도 함께 계산돼요</div>
+      </div>
+
+      <div class="wide" style="display:flex;gap:6px;">
+        <sc-for list="{{ fxFilterV }}" as="ff" hint-placeholder-count="4">
+          <button onClick="{{ ff.go }}" style="flex:1;background:{{ ff.bg }};color:{{ ff.fg }};border:1px solid {{ ff.bd }};border-radius:99px;padding:10px 4px;font-size:12px;font-weight:800;cursor:pointer;">{{ ff.l }}</button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ fxEmpty }}" hint-placeholder-val="{{ false }}">
+        <div class="wide empty">
+          <div style="font-size:13px;font-weight:800;color:var(--tx);">아직 등록한 고정비가 없어요</div>
+          <div style="margin-top:4px;">관리비·학원비·보험처럼 정해진 주기로 나가는 돈을 등록해보세요</div>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{ fxRowsV }}" as="fr" hint-placeholder-count="4">
+        <div style="background:var(--card);border:1px solid {{ fr.bd }};border-radius:16px;padding:13px 14px;opacity:{{ fr.op }};">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;flex-shrink:0;">{{ fr.icon }}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:5px;">
+                <span style="background:{{ fr.freqBg }};color:#fff;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;flex-shrink:0;">{{ fr.freqTag }}</span>
+                <span style="font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ fr.name }}</span>
+                <sc-if value="{{ fr.vary }}" hint-placeholder-val="{{ false }}"><span style="background:var(--soft);border-radius:6px;padding:1px 6px;font-size:10px;font-weight:800;color:var(--sub);flex-shrink:0;">금액변동</span></sc-if>
+              </div>
+              <div style="font-size:11px;color:var(--sub);margin-top:3px;">{{ fr.dayLabel }} · {{ fr.payLabel }} · {{ fr.cat }}{{ fr.prevLabel }}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div class="num" style="font-size:15px;font-weight:900;color:{{ fr.amtC }};">{{ fr.amtLabel }}</div>
+              <div style="font-size:10px;font-weight:800;color:{{ fr.stateC }};margin-top:2px;">{{ fr.stateLabel }}</div>
+            </div>
+          </div>
+          <sc-if value="{{ fr.hasDiff }}" hint-placeholder-val="{{ false }}">
+            <div class="num" style="font-size:11px;font-weight:800;color:{{ fr.diffC }};margin-top:7px;">{{ fr.diffLabel }}</div>
+          </sc-if>
+          <sc-if value="{{ fr.paid }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:11px;font-weight:700;color:#2E9E63;margin-top:7px;">✓ 가계부 지출로 반영됨 · {{ fr.txDateLabel }}</div>
+          </sc-if>
+          <sc-if value="{{ fr.paying }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:11px;font-weight:700;color:var(--sub);margin:10px 0 6px;">실제로 낸 금액을 확인해 주세요 · 저장하면 가계부 지출로 들어가요</div>
+            <div style="display:flex;gap:6px;">
+              <input value="{{ fr.payAmt }}" onChange="{{ fr.onPayAmt }}" type="number" inputmode="numeric" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--ac);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;font-weight:800;">
+              <button onClick="{{ fr.confirmPay }}" style="background:var(--ac);color:var(--on);border:none;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;white-space:nowrap;">기록</button>
+              <button onClick="{{ fr.cancelPay }}" style="background:var(--soft);color:var(--tx);border:none;border-radius:12px;padding:11px 12px;font-weight:800;cursor:pointer;">취소</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ fr.editing }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px;">
+              <div style="font-size:12px;font-weight:800;color:var(--ac);margin-bottom:8px;">✏️ 이 항목 고치기 · 주기와 결제수단을 골라주세요</div>
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;">
+                <sc-for list="{{ fr.freqV }}" as="q" hint-placeholder-count="5">
+                  <button onClick="{{ q.pick }}" style="background:{{ q.bg }};color:{{ q.fg }};border:1px solid var(--line);border-radius:10px;padding:10px 1px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ q.l }}</button>
+                </sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px;">
+                <sc-for list="{{ fr.payV }}" as="pv" hint-placeholder-count="3">
+                  <button onClick="{{ pv.pick }}" style="background:{{ pv.bg }};color:{{ pv.fg }};border:1px solid var(--line);border-radius:10px;padding:10px 1px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ pv.l }}</button>
+                </sc-for>
+              </div>
+              <input value="{{ fr.fName }}" onChange="{{ fr.onName }}" placeholder="항목 이름 (예: 아파트 관리비)" style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;margin-top:8px;">
+              <div style="display:flex;gap:6px;margin-top:8px;">
+                <sc-if value="{{ fr.showMo }}" hint-placeholder-val="{{ false }}">
+                  <select value="{{ fr.fMo }}" onChange="{{ fr.onMo }}" style="width:78px;flex-shrink:0;padding:11px 6px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+                    <sc-for list="{{ fr.moV }}" as="mo" hint-placeholder-count="12"><option value="{{ mo.v }}">{{ mo.l }}</option></sc-for>
+                  </select>
+                </sc-if>
+                <sc-if value="{{ fr.showDay }}" hint-placeholder-val="{{ true }}">
+                  <input value="{{ fr.fDay }}" onChange="{{ fr.onDay }}" type="number" inputmode="numeric" placeholder="{{ fr.dayPh }}" style="width:88px;flex-shrink:0;padding:11px 10px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+                </sc-if>
+                <sc-if value="{{ fr.showWd }}" hint-placeholder-val="{{ false }}">
+                  <select value="{{ fr.fWd }}" onChange="{{ fr.onWd }}" style="width:96px;flex-shrink:0;padding:11px 6px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+                    <sc-for list="{{ fr.wdV }}" as="wd" hint-placeholder-count="7"><option value="{{ wd.v }}">{{ wd.l }}</option></sc-for>
+                  </select>
+                </sc-if>
+                <select value="{{ fr.fCat }}" onChange="{{ fr.onCat }}" style="flex:1;min-width:0;padding:11px 8px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+                  <sc-for list="{{ fr.catsV }}" as="cc" hint-placeholder-count="5"><option value="{{ cc.v }}">{{ cc.v }}</option></sc-for>
+                </select>
+              </div>
+              <input value="{{ fr.fAmt }}" onChange="{{ fr.onAmt }}" type="number" inputmode="numeric" placeholder="{{ fr.amtPh }}" style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;margin-top:8px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
+                <button onClick="{{ fr.toggleVary }}" style="position:relative;width:46px;height:26px;border:none;border-radius:99px;background:{{ fr.varyBg }};cursor:pointer;flex-shrink:0;">
+                  <span style="position:absolute;top:3px;left:{{ fr.varyKnob }}px;width:20px;height:20px;border-radius:99px;background:#fff;"></span>
+                </button>
+                <div>
+                  <div style="font-size:13px;font-weight:800;">낼 때마다 금액이 달라져요</div>
+                  <div style="font-size:11px;color:var(--sub);">켜두면 지난번 낸 금액을 기준으로 보여주고 변동분을 알려줘요</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <button onClick="{{ fr.save }}" style="flex:1;background:var(--ac);color:var(--on);border:none;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;">{{ fr.saveLabel }}</button>
+                <button onClick="{{ fr.cancel }}" style="flex:1;background:var(--soft);color:var(--tx);border:none;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;">취소</button>
+              </div>
+            </div>
+          </sc-if>
+          <div style="display:flex;gap:6px;margin-top:10px;">
+            <sc-if value="{{ fr.canPay }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ fr.openPay }}" style="flex:1;background:var(--soft);color:var(--tx);border:none;border-radius:11px;padding:11px;font-size:12px;font-weight:800;cursor:pointer;">냈어요 · 금액 기록</button>
+            </sc-if>
+            <sc-if value="{{ fr.paid }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ fr.undo }}" style="flex:1;background:var(--bg);color:var(--sub);border:none;border-radius:11px;padding:11px;font-size:12px;font-weight:800;cursor:pointer;">납부 취소 (지출도 삭제)</button>
+            </sc-if>
+            <sc-if value="{{ fr.skip }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;font-size:11px;font-weight:700;color:var(--sub);align-self:center;">{{ fr.skipLabel }}</div>
+            </sc-if>
+            <button onClick="{{ fr.toggleEdit }}" title="고치기" style="background:{{ fr.editBg }};border:1px solid var(--line);border-radius:11px;width:40px;min-height:40px;color:var(--sub);font-size:13px;cursor:pointer;">✎</button>
+            <button onClick="{{ fr.del }}" title="지우기" style="background:none;border:1px solid var(--line);border-radius:11px;width:40px;min-height:40px;color:var(--sub);font-size:13px;cursor:pointer;">✕</button>
+          </div>
+        </div>
+      </sc-for>
+
+      <sc-if value="{{ fxOpen }}" hint-placeholder-val="{{ false }}">
+        <div class="wide" style="background:var(--card);border:1px solid var(--ac);border-radius:18px;padding:16px;">
+          <div style="font-size:15px;font-weight:800;margin-bottom:10px;">🔁 고정비 새로 등록</div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;">
+            <sc-for list="{{ nf.freqV }}" as="q2" hint-placeholder-count="5">
+              <button onClick="{{ q2.pick }}" style="background:{{ q2.bg }};color:{{ q2.fg }};border:1px solid var(--line);border-radius:10px;padding:10px 1px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ q2.l }}</button>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px;">
+            <sc-for list="{{ nf.payV }}" as="pv2" hint-placeholder-count="3">
+              <button onClick="{{ pv2.pick }}" style="background:{{ pv2.bg }};color:{{ pv2.fg }};border:1px solid var(--line);border-radius:10px;padding:10px 1px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ pv2.l }}</button>
+            </sc-for>
+          </div>
+          <input value="{{ nf.fName }}" onChange="{{ nf.onName }}" placeholder="항목 이름 (예: 아파트 관리비)" style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;margin-top:8px;">
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <sc-if value="{{ nf.showMo }}" hint-placeholder-val="{{ false }}">
+              <select value="{{ nf.fMo }}" onChange="{{ nf.onMo }}" style="width:78px;flex-shrink:0;padding:11px 6px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+                <sc-for list="{{ nf.moV }}" as="mo2" hint-placeholder-count="12"><option value="{{ mo2.v }}">{{ mo2.l }}</option></sc-for>
+              </select>
+            </sc-if>
+            <sc-if value="{{ nf.showDay }}" hint-placeholder-val="{{ true }}">
+              <input value="{{ nf.fDay }}" onChange="{{ nf.onDay }}" type="number" inputmode="numeric" placeholder="{{ nf.dayPh }}" style="width:88px;flex-shrink:0;padding:11px 10px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+            </sc-if>
+            <sc-if value="{{ nf.showWd }}" hint-placeholder-val="{{ false }}">
+              <select value="{{ nf.fWd }}" onChange="{{ nf.onWd }}" style="width:96px;flex-shrink:0;padding:11px 6px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+                <sc-for list="{{ nf.wdV }}" as="wd2" hint-placeholder-count="7"><option value="{{ wd2.v }}">{{ wd2.l }}</option></sc-for>
+              </select>
+            </sc-if>
+            <select value="{{ nf.fCat }}" onChange="{{ nf.onCat }}" style="flex:1;min-width:0;padding:11px 8px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+              <sc-for list="{{ nf.catsV }}" as="cc2" hint-placeholder-count="5"><option value="{{ cc2.v }}">{{ cc2.v }}</option></sc-for>
+            </select>
+          </div>
+          <input value="{{ nf.fAmt }}" onChange="{{ nf.onAmt }}" type="number" inputmode="numeric" placeholder="{{ nf.amtPh }}" style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;margin-top:8px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
+            <button onClick="{{ nf.toggleVary }}" style="position:relative;width:46px;height:26px;border:none;border-radius:99px;background:{{ nf.varyBg }};cursor:pointer;flex-shrink:0;">
+              <span style="position:absolute;top:3px;left:{{ nf.varyKnob }}px;width:20px;height:20px;border-radius:99px;background:#fff;"></span>
+            </button>
+            <div>
+              <div style="font-size:13px;font-weight:800;">낼 때마다 금액이 달라져요</div>
+              <div style="font-size:11px;color:var(--sub);">켜두면 지난번 낸 금액을 기준으로 보여주고 변동분을 알려줘요</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button onClick="{{ nf.save }}" style="flex:1;background:var(--ac);color:var(--on);border:none;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;">{{ nf.saveLabel }}</button>
+            <button onClick="{{ nf.cancel }}" style="flex:1;background:var(--soft);color:var(--tx);border:none;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;">취소</button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ fxClosed }}" hint-placeholder-val="{{ true }}">
+        <button class="wide" onClick="{{ fxOpenForm }}" style="background:var(--card);border:1.5px dashed var(--ac);border-radius:14px;padding:14px;font-size:14px;font-weight:800;color:var(--ac);cursor:pointer;width:100%;">＋ 고정비 항목 추가하기</button>
+      </sc-if>
+    </sc-if>
+
+    <!-- ══ 🎯 예산 ══ -->
+    <sc-if value="{{ mvBudget }}" hint-placeholder-val="{{ false }}">
+      <div class="wide" style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="font-size:15px;font-weight:800;margin-bottom:4px;">🎯 예산 만들기</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:10px;">진행률은 지금 보고 있는 <b>{{ budLabel }}</b> 기준이에요</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button onClick="{{ bSetM }}" style="flex:1;background:{{ bMBg }};color:{{ bMFg }};border:1px solid var(--line);border-radius:12px;padding:11px;font-size:12px;font-weight:800;cursor:pointer;">매달 생활비 예산</button>
+          <button onClick="{{ bSetG }}" style="flex:1;background:{{ bGBg }};color:{{ bGFg }};border:1px solid var(--line);border-radius:12px;padding:11px;font-size:12px;font-weight:800;cursor:pointer;">목표 구매·저축</button>
+        </div>
+        <input value="{{ f.bName }}" onChange="{{ on.bName }}" placeholder="예산 이름 (예: 8월 식비)" style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;margin-bottom:8px;">
+        <div style="display:flex;gap:8px;">
+          <select value="{{ f.bCat }}" onChange="{{ on.bCat }}" style="width:112px;flex-shrink:0;padding:11px 8px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+            <sc-for list="{{ catsV }}" as="ct2" hint-placeholder-count="5"><option value="{{ ct2.v }}">{{ ct2.v }}</option></sc-for>
+          </select>
+          <input value="{{ f.bAmt }}" onChange="{{ on.bAmt }}" type="number" inputmode="numeric" placeholder="금액(원)" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;">
+          <button onClick="{{ addBudget }}" style="background:var(--ac);color:var(--on);border:none;border-radius:12px;padding:11px 16px;font-weight:800;cursor:pointer;">추가</button>
+        </div>
+      </div>
+      <sc-if value="{{ budgetsEmpty }}" hint-placeholder-val="{{ false }}">
+        <div class="wide empty">아직 만든 예산이 없어요. 식비처럼 자주 넘치는 항목부터 하나 만들어보세요.</div>
+      </sc-if>
+      <sc-for list="{{ budgetsV }}" as="bg" hint-placeholder-count="2">
+        <div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="background:{{ bg.kindBg }};color:#fff;border-radius:8px;padding:2px 9px;font-size:11px;font-weight:800;flex-shrink:0;">{{ bg.kindLabel }}</span>
+            <span style="flex:1;min-width:0;font-size:14px;font-weight:800;">{{ bg.name }}</span>
+            <button onClick="{{ bg.del }}" title="지우기" style="background:none;border:none;color:var(--sub);cursor:pointer;min-width:30px;min-height:30px;">✕</button>
+          </div>
+          <div style="height:12px;background:var(--bg);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;width:{{ bg.pct }}%;background:{{ bg.barC }};border-radius:99px;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:700;margin-top:6px;">
+            <span class="num" style="color:{{ bg.spentC }};">{{ bg.spentLabel }}</span>
+            <span class="num" style="color:var(--sub);white-space:nowrap;">{{ bg.amtLabel }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </sc-if>
+
+    <!-- ══ 🏦 자산 ══ -->
+    <sc-if value="{{ mvAsset }}" hint-placeholder-val="{{ false }}">
+      <div class="wide" style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><div style="font-size:11px;font-weight:700;color:var(--sub);">통장 잔액 합계</div><div class="num" style="font-size:18px;font-weight:900;color:#2E9E63;">{{ asBank }}원</div></div>
+          <div><div style="font-size:11px;font-weight:700;color:var(--sub);">카드 쓴 금액</div><div class="num" style="font-size:18px;font-weight:900;color:#D64550;">{{ asCard }}원</div></div>
+        </div>
+        <div style="border-top:1px solid var(--line);margin:12px 0 10px;"></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+          <span style="font-size:13px;font-weight:800;">카드값 빼고 남는 돈</span>
+          <span class="num" style="font-size:21px;font-weight:900;color:{{ asNetC }};">{{ asNet }}원</span>
+        </div>
+      </div>
+
+      <sc-if value="{{ acOpen }}" hint-placeholder-val="{{ false }}">
+        <div class="wide" style="background:var(--card);border:1px solid var(--ac);border-radius:18px;padding:16px;">
+          <div style="font-size:15px;font-weight:800;margin-bottom:10px;">{{ acFormTitle }}</div>
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <button onClick="{{ acSetBank }}" style="flex:1;background:{{ acBankBg }};color:{{ acBankFg }};border:1px solid var(--line);border-radius:12px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;">🏦 통장</button>
+            <button onClick="{{ acSetCard }}" style="flex:1;background:{{ acCardBg }};color:{{ acCardFg }};border:1px solid var(--line);border-radius:12px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;">💳 신용카드</button>
+          </div>
+          <sc-if value="{{ acIsBank }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-bottom:8px;">
+              <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:6px;">이 통장의 성향 — 캡처를 읽을 때 거래를 구분하는 데 써요</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <sc-for list="{{ acPurpV }}" as="pp" hint-placeholder-count="6">
+                  <button onClick="{{ pp.pick }}" style="background:{{ pp.bg }};color:{{ pp.fg }};border:1px solid {{ pp.bd }};border-radius:99px;padding:9px 12px;font-size:12px;font-weight:800;cursor:pointer;">{{ pp.l }}</button>
+                </sc-for>
+              </div>
+              <sc-if value="{{ acPurpCustom }}" hint-placeholder-val="{{ false }}">
+                <input value="{{ f.acPurpTxt }}" onChange="{{ on.acPurpTxt }}" placeholder="성향 직접 입력 (예: 여행 자금, 아이 학비)" style="width:100%;margin-top:8px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+              </sc-if>
+            </div>
+          </sc-if>
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <input value="{{ f.acName }}" onChange="{{ on.acName }}" placeholder="{{ acNamePh }}" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;">
+            <input value="{{ f.acOrg }}" onChange="{{ on.acOrg }}" placeholder="{{ acOrgPh }}" style="width:96px;flex-shrink:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input value="{{ f.acAmt }}" onChange="{{ on.acAmt }}" type="number" inputmode="numeric" placeholder="{{ acAmtPh }}" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;">
+            <sc-if value="{{ acIsCard }}" hint-placeholder-val="{{ false }}">
+              <input value="{{ f.acDay }}" onChange="{{ on.acDay }}" type="number" inputmode="numeric" placeholder="결제일" style="width:84px;flex-shrink:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+            </sc-if>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button onClick="{{ addAcc }}" style="flex:1;background:var(--ac);color:var(--on);border:none;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ acSaveLabel }}</button>
+            <button onClick="{{ acCancel }}" style="flex:1;background:var(--soft);color:var(--tx);border:none;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;white-space:nowrap;">취소</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ acClosed }}" hint-placeholder-val="{{ true }}">
+        <button class="wide" onClick="{{ acOpenForm }}" style="background:var(--card);border:1.5px dashed var(--ac);border-radius:14px;padding:14px;font-size:14px;font-weight:800;color:var(--ac);cursor:pointer;width:100%;">＋ 통장·카드 추가하기</button>
+      </sc-if>
+
+      <sc-if value="{{ noAccs }}" hint-placeholder-val="{{ false }}">
+        <div class="wide empty">
+          <div style="font-size:13px;font-weight:800;color:var(--tx);">아직 등록한 통장·카드가 없어요</div>
+          <div style="margin-top:4px;">추가하기를 눌러 통장 잔액과 카드값을 기록해보세요</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasBankAccs }}" hint-placeholder-val="{{ true }}">
+        <div class="wide" style="display:flex;justify-content:space-between;align-items:baseline;padding:0 4px;">
+          <span style="font-size:13px;font-weight:800;">🏦 통장</span>
+          <span class="num" style="font-size:12px;font-weight:800;color:#2E9E63;">{{ bankGroupLabel }}</span>
+        </div>
+      </sc-if>
+      <sc-for list="{{ bankAccsV }}" as="ac" hint-placeholder-count="2">
+        <div style="background:var(--card);border:1px solid {{ ac.bd }};border-radius:16px;padding:13px 14px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:19px;flex-shrink:0;">{{ ac.icon }}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+                <span style="font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ac.name }}</span>
+                <sc-if value="{{ ac.hasPurp }}" hint-placeholder-val="{{ true }}"><span style="flex-shrink:0;font-size:10px;font-weight:800;color:{{ ac.purpC }};background:{{ ac.purpBg }};border-radius:99px;padding:2px 7px;">{{ ac.purpLabel }}</span></sc-if>
+              </div>
+              <div style="font-size:11px;color:var(--sub);">{{ ac.org }} · {{ ac.kindLabel }}</div>
+            </div>
+            <span class="num" style="font-size:16px;font-weight:900;color:{{ ac.amtC }};white-space:nowrap;">{{ ac.amt }}</span>
+            <button onClick="{{ ac.edit }}" title="고치기" style="background:none;border:none;color:var(--sub);font-size:14px;cursor:pointer;min-width:30px;min-height:30px;">✎</button>
+            <button onClick="{{ ac.del }}" title="지우기" style="background:none;border:none;color:var(--sub);font-size:14px;cursor:pointer;min-width:30px;min-height:30px;">✕</button>
+          </div>
+          <div style="height:6px;background:var(--bg);border-radius:99px;overflow:hidden;margin-top:9px;">
+            <div style="height:100%;width:{{ ac.share }}%;background:{{ ac.barC }};border-radius:99px;"></div>
+          </div>
+        </div>
+      </sc-for>
+
+      <sc-if value="{{ hasCardAccs }}" hint-placeholder-val="{{ true }}">
+        <div class="wide" style="display:flex;justify-content:space-between;align-items:baseline;padding:0 4px;">
+          <span style="font-size:13px;font-weight:800;">💳 신용카드</span>
+          <span class="num" style="font-size:12px;font-weight:800;color:#D64550;">{{ cardGroupLabel }}</span>
+        </div>
+      </sc-if>
+      <sc-for list="{{ cardAccsV }}" as="ac2" hint-placeholder-count="2">
+        <div style="background:var(--card);border:1px solid {{ ac2.bd }};border-radius:16px;padding:13px 14px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:19px;flex-shrink:0;">{{ ac2.icon }}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ac2.name }}</div>
+              <div style="font-size:11px;color:var(--sub);">{{ ac2.org }} · {{ ac2.kindLabel }}</div>
+              <sc-if value="{{ ac2.hasDay }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;font-weight:700;color:var(--ac);">{{ ac2.dayLabel }}</div></sc-if>
+            </div>
+            <span class="num" style="font-size:16px;font-weight:900;color:{{ ac2.amtC }};white-space:nowrap;">{{ ac2.amt }}</span>
+            <button onClick="{{ ac2.edit }}" title="고치기" style="background:none;border:none;color:var(--sub);font-size:14px;cursor:pointer;min-width:30px;min-height:30px;">✎</button>
+            <button onClick="{{ ac2.del }}" title="지우기" style="background:none;border:none;color:var(--sub);font-size:14px;cursor:pointer;min-width:30px;min-height:30px;">✕</button>
+          </div>
+          <div style="height:6px;background:var(--bg);border-radius:99px;overflow:hidden;margin-top:9px;">
+            <div style="height:100%;width:{{ ac2.share }}%;background:{{ ac2.barC }};border-radius:99px;"></div>
+          </div>
+        </div>
+      </sc-for>
+    </sc-if>
+
+  </div><!-- /cards -->
+  </div><!-- /body -->
+</div>
+</sc-if>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:920}}">
+// 우리집 가계부 — 가족 다이어리(../)의 부모방에 있던 가계부를 그대로 옮겨온 별도 페이지.
+// 데이터는 같은 family_state 문서를 그대로 쓴다(tx·budgets·fixed·fixedPaid·accounts).
+// 새로 붙인 것은 📄 보고서 하나뿐이다.
+const SK = {bg:'#F6F3EC',card:'#FFFFFF',ac:'#2C5D7C',on:'#FFFFFF',soft:'#E4EDF3',line:'#E5DFD3',tx:'#23211C',sub:'#7A7368'};
+const IN_C = '#2E9E63', OUT_C = '#D64550';
+const CATS = ['식비','생활/마트','교육','교통','의료','쇼핑','문화/여가','여행','이체','기타'];
+const DAYS = ['일','월','화','수','목','금','토'];
+const FL = ['txDate','txAmt','txCat','txMemo','txPay','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','acPurp','acPurpTxt'];
+
+class Component extends DCLogic {
+  state = {
+    data:null, f:{}, mview:'list', budM:'', budSel:'', payF:'all', fxF:'all',
+    txEdit:null, fxEdit:null, fxD:null, fxPayId:null, fxAmtDraft:null,
+    acEdit:null, acOpen:false, aiBusy:false, aiMsg:'', aiProg:'',
+    rview:'now', openRep:null, repMsg:''
+  };
+
+  // ── 공용 도구 (../index.html 과 같은 것) ──
+  iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  today(){return this.iso(new Date());}
+  uid(){return Date.now()+'-'+Math.random().toString(36).slice(2,7);}
+  won(n){return Number(n||0).toLocaleString('ko-KR');}
+  mLabel(m){const[y,mo]=m.split('-');return y+'년 '+Number(mo)+'월';}
+  dLabel(ds){const d=new Date(ds+'T00:00:00');return (d.getMonth()+1)+'월 '+d.getDate()+'일 ('+DAYS[d.getDay()]+')';}
+  dShort(ds){const d=new Date(ds+'T00:00:00');return (d.getMonth()+1)+'/'+d.getDate();}
+  shiftM(m,n){const[y,mo]=m.split('-').map(Number);const d=new Date(y,mo-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+  grid(m){const[y,mo]=m.split('-').map(Number);const first=new Date(y,mo-1,1);const start=new Date(first);start.setDate(1-first.getDay());
+    const out=[];for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);out.push({ds:this.iso(d),num:d.getDate(),inM:d.getMonth()===mo-1});}return out;}
+  compress(file,max){return new Promise(res=>{const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=()=>{
+    const sc=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');
+    c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.72));};img.src=rd.result;};rd.readAsDataURL(file);});}
+
+  save(data,fn){this.setState({data});window.FamilyStore.save(data,fn);}
+  mut(fn){const d=JSON.parse(JSON.stringify(this.state.data));fn(d);this.save(d,fn);}
+  setF(k,v){this.setState(s=>({f:{...s.f,[k]:v}}));}
+  clearF(keys){const f={...this.state.f};keys.forEach(k=>delete f[k]);this.setState({f});}
+  whoName(){const d=this.state.data;if(!d||!d.profiles)return '';
+    const id=(()=>{try{return localStorage.getItem('famdiary_who')||'';}catch(e){return '';}})();
+    return (d.profiles.find(p=>p.id===id)||{}).name||'';}
+
+  componentDidMount(){
+    const t=this.today();
+    window.FamilyStore.start({seed:()=>({}), onRemote:doc=>this.setState({data:this.fill(doc)})})
+      .then(doc=>{
+        this.setState({data:this.fill(doc||{}),budM:t.slice(0,7),budSel:t},()=>this.autoMonthly());
+      });
+  }
+  // 이 페이지는 가족 데이터를 새로 만들지 않는다 — 없는 칸만 빈 값으로 채워 읽기 안전하게 한다
+  fill(doc){const d=doc||{};
+    ['tx','budgets','fixed','accounts','moneyReports','profiles'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[];});
+    if(!d.fixedPaid||typeof d.fixedPaid!=='object')d.fixedPaid={};
+    return d;}
+
+  // 매달 1일 이후 처음 열면 지난달 마감 보고서를 한 번 자동으로 만들어 보고서함에 넣는다
+  autoMonthly(){
+    const D=this.state.data;if(!D)return;
+    const prev=this.shiftM(this.today().slice(0,7),-1);
+    if((D.moneyReports||[]).some(r=>r.kind==='month'&&r.ym===prev))return;
+    if(!D.tx.some(x=>x.d.slice(0,7)===prev))return;   // 기록이 없는 달은 만들지 않는다
+    this.storeReport(this.buildMonth(prev),true);
+  }
+
+  // ══════════ 보고서 ══════════
+  // 로드맵 보고서 문체를 그대로 쓴다 — [소제목] · ※수치 · ◐비교 · →판단 · ▶실행
+  mSum(ym,ty){const D=this.state.data;return D.tx.filter(x=>x.ty===ty&&x.d.slice(0,7)===ym).reduce((s,x)=>s+x.a,0);}
+  catSum(ym){const o={};this.state.data.tx.filter(x=>x.ty==='out'&&x.d.slice(0,7)===ym).forEach(x=>{o[x.c]=(o[x.c]||0)+x.a;});return o;}
+  // 고정비: 그 달에 해당하는 항목과 낼 금액 (화면 계산과 같은 규칙)
+  fixOf(ym){
+    const D=this.state.data,y=Number(ym.slice(0,4)),m=Number(ym.slice(5,7));
+    const dim=new Date(y,m,0).getDate(),paid=(D.fixedPaid||{})[ym]||{};
+    const wk=x=>{let c=0;for(let i=1;i<=dim;i++)if(new Date(y,m-1,i).getDay()===(Number(x.wd)||0))c++;return c;};
+    const due=x=>{const q=x.freq||'m';if(q==='m'||q==='w')return true;
+      const diff=((m-(Number(x.mo)||1))%12+12)%12;return q==='y'?diff===0:(q==='q'?diff%3===0:diff%6===0);};
+    const day=x=>{const q=x.freq||'m';
+      if(q==='w'){for(let i=1;i<=dim;i++)if(new Date(y,m-1,i).getDay()===(Number(x.wd)||0))return i;return 1;}
+      return Math.min(dim,Math.max(1,Number(x.day)||1));};
+    const rows=(D.fixed||[]).filter(due).map(x=>{
+      const p=paid[x.id],exp=(x.freq||'m')==='w'?(Number(x.a)||0)*wk(x):(Number(x.a)||0);
+      return {name:x.name,day:day(x),exp,paid:!!p,amt:p?Number(p.a):exp};});
+    return {rows,total:rows.reduce((s,r)=>s+r.amt,0),done:rows.filter(r=>r.paid).length,
+      left:rows.filter(r=>!r.paid).reduce((s,r)=>s+r.amt,0)};
+  }
+  // 평소보다 튄 지출 — 직전 3개월 같은 분류 평균의 1.5배를 넘는 건
+  spikes(ym){
+    const D=this.state.data,base={};
+    for(let i=1;i<=3;i++){const c=this.catSum(this.shiftM(ym,-i));Object.keys(c).forEach(k=>{(base[k]=base[k]||[]).push(c[k]);});}
+    const avg=k=>{const a=base[k];return a&&a.length?a.reduce((s,v)=>s+v,0)/a.length:0;};
+    return D.tx.filter(x=>x.ty==='out'&&x.d.slice(0,7)===ym)
+      .filter(x=>{const m=avg(x.c);return m>0&&x.a>m*1.5;})
+      .sort((a,b)=>b.a-a.a).slice(0,3);
+  }
+  B(t,v,extra){return Object.assign({t,v:v||''},extra||{});}
+
+  buildMonth(ym){
+    const W=this.won.bind(this),D=this.state.data;
+    const inS=this.mSum(ym,'in'),outS=this.mSum(ym,'out'),net=inS-outS;
+    const pIn=this.mSum(this.shiftM(ym,-1),'in'),pOut=this.mSum(this.shiftM(ym,-1),'out');
+    const cs=this.catSum(ym),csP=this.catSum(this.shiftM(ym,-1));
+    const keys=Object.keys(cs).sort((a,b)=>cs[b]-cs[a]);
+    const tot=keys.reduce((s,k)=>s+cs[k],0);
+    const fx=this.fixOf(ym),mo=Number(ym.slice(5,7));
+    const blocks=[],todo=[];
+
+    blocks.push(this.B('h','결산 — '+mo+'월은 '+(net>=0?'남았습니다':'모자랐습니다')));
+    blocks.push(this.B('stat','※ 수입 '+W(inS)+'원 | 지출 '+W(outS)+'원 | '+(net>=0?'남은 돈 ':'모자란 돈 ')+W(Math.abs(net))+'원'));
+    if(pOut){const dp=Math.round((outS-pOut)/pOut*100);
+      blocks.push(this.B('p','지난달 지출 '+W(pOut)+'원과 견주면 '+(dp>0?'▲ '+dp+'% 늘었습니다':(dp<0?'▼ '+Math.abs(dp)+'% 줄었습니다':'거의 같습니다'))+'.'));}
+    else blocks.push(this.B('p','견줄 지난달 기록이 없어 이번 달 숫자만 정리했습니다.'));
+    const rate=inS?Math.round(net/inS*100):0;
+    if(inS)blocks.push(this.B('cmp','◐ 저축률 '+rate+'% (수입의 '+(100-rate)+'%를 썼습니다)'));
+    if(net<0)todo.push('적자 '+W(-net)+'원 — 아래 지출 1위 항목부터 다음 달 한도를 정하세요');
+
+    if(keys.length){
+      blocks.push(this.B('h','어디에 썼나'));
+      blocks.push(this.B('table','',{h1:'분류',h2:'금액',h3:'전월비',
+        rows:keys.slice(0,5).map(k=>{const dv=cs[k]-(csP[k]||0);
+          return{c1:k+' ('+Math.round(cs[k]/tot*100)+'%)',c2:W(cs[k])+'원',
+            c3:csP[k]==null?'신규':(dv===0?'-':(dv>0?'▲':'▼')+W(Math.abs(dv))),
+            c3c:csP[k]==null?SK.sub:(dv>0?OUT_C:(dv<0?IN_C:SK.sub))};})}));
+      blocks.push(this.B('judge','→ 가장 큰 칸은 '+keys[0]+' '+W(cs[keys[0]])+'원으로, 전체 지출의 '+Math.round(cs[keys[0]]/tot*100)+'%입니다.'));
+    }
+
+    if(fx.rows.length){
+      blocks.push(this.B('h','고정비'));
+      blocks.push(this.B('stat','※ 해당 '+fx.rows.length+'건 | 낼 돈 '+W(fx.total)+'원 | 납부 '+fx.done+'건 | 미납 '+W(fx.left)+'원'));
+      const un=fx.rows.filter(r=>!r.paid);
+      if(un.length){
+        blocks.push(this.B('table','',{h1:'미납 항목',h2:'금액',h3:'납부일',
+          rows:un.map(r=>({c1:r.name,c2:W(r.amt)+'원',c3:r.day+'일',c3c:OUT_C}))}));
+        todo.push('미납 고정비 '+un.length+'건('+W(fx.left)+'원) 정리');
+      }
+      const vary=fx.rows.filter(r=>r.paid&&r.amt!==r.exp);
+      if(vary.length)blocks.push(this.B('cmp','◐ 예상과 실제가 다른 항목 '+vary.length+'건 — '+vary.map(r=>r.name+' '+W(r.amt-r.exp>0?r.amt-r.exp:r.exp-r.amt)+'원 '+(r.amt>r.exp?'더':'덜')).join(' · ')));
+    }
+
+    const ms=(D.budgets||[]).filter(b=>b.kind==='m');
+    if(ms.length){
+      blocks.push(this.B('h','예산 성적표'));
+      blocks.push(this.B('table','',{h1:'예산',h2:'쓴 돈 / 예산',h3:'결과',
+        rows:ms.map(b=>{const sp=cs[b.c]||0,over=sp>b.a;
+          return{c1:b.name,c2:W(sp)+' / '+W(b.a),
+            c3:over?'초과 '+Math.round((sp-b.a)/b.a*100)+'%':Math.round(sp/b.a*100)+'%',
+            c3c:over?OUT_C:IN_C};})}));
+      const overs=ms.filter(b=>(cs[b.c]||0)>b.a);
+      if(overs.length)todo.push(overs.map(b=>b.name).join('·')+' 예산을 실제 지출에 맞게 다시 잡기');
+    }
+
+    const ps={card:0,cash:0,bank:0};
+    D.tx.filter(x=>x.ty==='out'&&x.d.slice(0,7)===ym).forEach(x=>{const k=x.pay||'bank';ps[k]=(ps[k]||0)+x.a;});
+    if(tot)blocks.push(this.B('cmp','◐ 결제수단 — 💳 '+W(ps.card)+'원 · 💵 '+W(ps.cash)+'원 · 🏦 '+W(ps.bank)+'원'));
+
+    const sp=this.spikes(ym);
+    if(sp.length){
+      blocks.push(this.B('h','주의 신호 — 평소보다 크게 쓴 건'));
+      blocks.push(this.B('table','',{h1:'내용',h2:'금액',h3:'날짜',
+        rows:sp.map(x=>({c1:'['+x.c+'] '+x.memo,c2:W(x.a)+'원',c3:this.dShort(x.d),c3c:SK.sub}))}));
+      blocks.push(this.B('p','직전 3개월 같은 분류 평균의 1.5배를 넘은 건입니다. 한 번뿐인 지출이면 넘기셔도 됩니다.'));
+    }
+
+    if(!todo.length)todo.push(net>=0?'지금 흐름을 그대로 이어가세요':'다음 달 지출 한도를 먼저 정하세요');
+    blocks.push(this.B('do','',{rows:todo.slice(0,3).map(v=>({c1:v}))}));
+
+    const stars=net<0?5:((D.budgets||[]).some(b=>b.kind==='m'&&(cs[b.c]||0)>b.a)?4:(rate>=30?2:3));
+    return {kind:'month',ym,date:this.today(),
+      title:this.mLabel(ym)+' 결산 보고서',stars,
+      summary:'수입 '+W(inS)+'원 · 지출 '+W(outS)+'원 · '+(net>=0?'남은 돈 ':'모자란 돈 ')+W(Math.abs(net))+'원',
+      blocks};
+  }
+
+  buildNow(){
+    const W=this.won.bind(this),D=this.state.data,t=this.today(),ym=t.slice(0,7);
+    const y=Number(ym.slice(0,4)),m=Number(ym.slice(5,7));
+    const dim=new Date(y,m,0).getDate(),dnum=Number(t.slice(8,10));
+    const outS=this.mSum(ym,'out'),inS=this.mSum(ym,'in');
+    const perDay=dnum?outS/dnum:0,fore=Math.round(perDay*dim);
+    const pOut=this.mSum(this.shiftM(ym,-1),'out');
+    const cs=this.catSum(ym),fx=this.fixOf(ym);
+    const blocks=[],todo=[];
+
+    blocks.push(this.B('h','이번 달 진행 — '+dnum+'일차 / '+dim+'일'));
+    blocks.push(this.B('stat','※ 지금까지 지출 '+W(outS)+'원 | 하루 평균 '+W(Math.round(perDay))+'원 | 월말 예상 '+W(fore)+'원'));
+    if(pOut){const dv=fore-pOut;
+      blocks.push(this.B('judge','→ 이 속도라면 지난달('+W(pOut)+'원)보다 '+W(Math.abs(dv))+'원 '+(dv>0?'더 쓰게 됩니다':'덜 쓰게 됩니다')+'.'));
+      if(dv>0)todo.push('월말 예상이 지난달보다 '+W(dv)+'원 많습니다 — 큰 지출을 미룰 수 있는지 보세요');}
+    if(inS)blocks.push(this.B('cmp','◐ 이번 달 수입 '+W(inS)+'원 · 현재 남은 돈 '+W(inS-outS)+'원'));
+
+    const ms=(D.budgets||[]).filter(b=>b.kind==='m');
+    if(ms.length){
+      blocks.push(this.B('h','남은 예산'));
+      blocks.push(this.B('table','',{h1:'예산',h2:'남은 돈',h3:'소진 예상',
+        rows:ms.map(b=>{const sp=cs[b.c]||0,left=b.a-sp;
+          const pace=dnum?sp/dnum:0,dday=pace>0?Math.ceil(b.a/pace):0;
+          return{c1:b.name,c2:(left<0?'-':'')+W(Math.abs(left))+'원',
+            c3:left<0?'이미 초과':(dday&&dday<=dim?dday+'일쯤':'여유'),
+            c3c:left<0?OUT_C:((dday&&dday<=dim)?'#B27417':IN_C)};})}));
+      const risky=ms.filter(b=>(cs[b.c]||0)>b.a);
+      if(risky.length)todo.push(risky.map(b=>b.name).join('·')+' 예산을 이미 넘겼습니다 — 이달 남은 기간은 다른 칸에서 아끼세요');
+    }
+
+    const un=fx.rows.filter(r=>!r.paid);
+    if(un.length){
+      blocks.push(this.B('h','곧 나갈 돈'));
+      blocks.push(this.B('table','',{h1:'고정비',h2:'금액',h3:'납부일',
+        rows:un.sort((a,b)=>a.day-b.day).map(r=>({c1:r.name,c2:W(r.amt)+'원',
+          c3:r.day<dnum?'지났음':'D-'+(r.day-dnum),c3c:r.day<dnum?OUT_C:SK.sub}))}));
+      blocks.push(this.B('cmp','◐ 아직 낼 돈 합계 '+W(fx.left)+'원'));
+      const late=un.filter(r=>r.day<dnum);
+      if(late.length)todo.push('납부일이 지난 고정비 '+late.length+'건('+late.map(r=>r.name).join('·')+') 확인');
+    }
+
+    const wk=(a,b)=>D.tx.filter(x=>x.ty==='out'&&x.d>a&&x.d<=b).reduce((s,x)=>s+x.a,0);
+    const back=n=>{const d=new Date(t+'T00:00:00');d.setDate(d.getDate()-n);return this.iso(d);};
+    const w1=wk(back(7),t),w2=wk(back(14),back(7));
+    blocks.push(this.B('h','이번 주'));
+    blocks.push(this.B('cmp','◐ 최근 7일 '+W(w1)+'원 / 직전 7일 '+W(w2)+'원'+(w2?' ('+(w1>=w2?'▲ ':'▼ ')+W(Math.abs(w1-w2))+'원)':'')));
+
+    if(!todo.length)todo.push('지금은 특별히 손댈 곳이 없습니다 — 기록만 계속 남겨두세요');
+    blocks.push(this.B('do','',{rows:todo.slice(0,3).map(v=>({c1:v}))}));
+
+    const over=ms.some(b=>(cs[b.c]||0)>b.a),late=un.some(r=>r.day<dnum);
+    return {kind:'now',ym,date:t,
+      title:this.mLabel(ym)+' '+dnum+'일 현재 보고서',
+      stars:(over||late)?5:(pOut&&fore>pOut?4:3),
+      summary:'지출 '+W(outS)+'원 · 월말 예상 '+W(fore)+'원'+(un.length?' · 미납 고정비 '+un.length+'건':''),
+      blocks};
+  }
+
+  storeReport(rep,silent){
+    this.mut(d=>{
+      d.moneyReports=d.moneyReports||[];
+      const no=d.moneyReports.reduce((mx,r)=>Math.max(mx,Number(r.no)||0),0)+1;
+      d.moneyReports.unshift(Object.assign({id:this.uid(),no},rep));
+    });
+    if(!silent)this.flash('📚 보고서함에 넣었어요');
+  }
+  flash(msg){this.setState({repMsg:msg});clearTimeout(this._rt);this._rt=setTimeout(()=>this.setState({repMsg:''}),2600);}
+  componentWillUnmount(){clearTimeout(this._rt);}
+
+  async askDeep(rep){
+    this.flash('📮 담당에게 맡기는 중이에요…');
+    const r=await window.FamilyStore.ask('report',
+      {kind:rep.kind,ym:rep.ym,title:rep.title,summary:rep.summary,blocks:rep.blocks},[],this.whoName());
+    this.flash(r&&r.ok?'📮 맡겨뒀어요 — 정리되면 보고서함에 올라와요':'😢 맡기지 못했어요. 인터넷 연결을 확인해 주세요');
+  }
+
+  async receipt(e){
+    const files=Array.from(e.target.files||[]);if(!files.length)return;e.target.value='';
+    this.setState({aiBusy:true,aiMsg:'',aiProg:files.length>1?'(0/'+files.length+')':''});
+    const shots=[];
+    for(let i=0;i<files.length;i++){
+      this.setState({aiProg:files.length>1?'('+(i+1)+'/'+files.length+')':''});
+      shots.push(await this.compress(files[i],1100));
+    }
+    const accs=(this.state.data.accounts||[]).filter(a=>a.kind==='bank')
+      .map(a=>({name:a.name,org:a.org||'',purp:a.purp||'',purpTxt:a.purpTxt||''}));
+    const r=await window.FamilyStore.ask('receipt',{accounts:accs,cats:CATS},shots,this.whoName());
+    this.setState({aiBusy:false,aiProg:'',aiMsg:r&&r.ok
+      ?('📮 '+files.length+'장 맡겨뒀어요 — 정리되면 아래 내역에 자동으로 올라와요')
+      :'😢 맡기지 못했어요. 인터넷 연결을 확인해 주세요'});
+  }
+
+  renderVals(){
+    const S=this.state,D=S.data;
+    if(!D||!S.budM)return{loading:true,ready:false,f:{},on:{}};
+    const V={loading:false,ready:true};
+    const W=this.won.bind(this),t=this.today(),f=S.f,sk=SK;
+    const on={};FL.forEach(k=>on[k]=e=>this.setF(k,e.target.value));
+    V.f=f;V.on=on;
+    const chip=a=>a?{bg:sk.ac,fg:sk.on,bd:sk.ac}:{bg:sk.card,fg:sk.tx,bd:sk.line};
+    const bm=S.budM;
+    V.dayHeads=DAYS.map((d,i)=>({d,c:i===0?OUT_C:(i===6?'#3B82F6':sk.sub)}));
+
+    // ── 월 요약 · 메뉴 ──
+    const mIn=this.mSum(bm,'in'),mOut=this.mSum(bm,'out');
+    V.budMonthLabel=this.mLabel(bm);V.budLabel=this.mLabel(bm);
+    V.monthIn=W(mIn);V.monthOut=W(mOut);V.monthNet=(mIn-mOut>=0?'+':'-')+W(Math.abs(mIn-mOut));
+    V.budPrev=()=>this.setState({budM:this.shiftM(bm,-1)});
+    V.budNext=()=>this.setState({budM:this.shiftM(bm,1)});
+    V.budToday=()=>this.setState({budM:t.slice(0,7),budSel:t});
+    V.mviewsV=[{id:'list',icon:'📋',label:'내역'},{id:'rep',icon:'📄',label:'보고서'},{id:'stat',icon:'📊',label:'분석'},
+      {id:'cal',icon:'🗓️',label:'달력'},{id:'fix',icon:'🔁',label:'고정비'},{id:'budget',icon:'🎯',label:'예산'},
+      {id:'asset',icon:'🏦',label:'자산'}]
+      .map(mv=>({...mv,...chip(S.mview===mv.id),go:()=>this.setState({mview:mv.id})}));
+    V.mvList=S.mview==='list';V.mvCal=S.mview==='cal';V.mvBudget=S.mview==='budget';
+    V.mvAsset=S.mview==='asset';V.mvFix=S.mview==='fix';V.mvStat=S.mview==='stat';V.mvRep=S.mview==='rep';
+
+    // ── 📄 보고서 ──
+    const blockV=bs=>(bs||[]).map(b=>({
+      isH:b.t==='h',isP:b.t==='p',isStat:b.t==='stat',isCmp:b.t==='cmp',isJudge:b.t==='judge',
+      isTable:b.t==='table',isDo:b.t==='do',
+      v:b.v||'',h1:b.h1||'',h2:b.h2||'',h3:b.h3||'',rows:b.rows||[]}));
+    V.rvLive=S.rview!=='box';V.rvBox=S.rview==='box';
+    const rc=a=>a?{bg:sk.ac,fg:sk.on}:{bg:sk.card,fg:sk.sub};
+    const cn=rc(S.rview==='now'),cm=rc(S.rview==='month'),cb=rc(S.rview==='box');
+    V.rvNowBg=cn.bg;V.rvNowFg=cn.fg;V.rvMonBg=cm.bg;V.rvMonFg=cm.fg;V.rvBoxBg=cb.bg;V.rvBoxFg=cb.fg;
+    V.rvSetNow=()=>this.setState({rview:'now'});
+    V.rvSetMonth=()=>this.setState({rview:'month'});
+    V.rvSetBox=()=>this.setState({rview:'box'});
+    V.repBoxCount=String((D.moneyReports||[]).length);
+    const stars=n=>'★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n);
+    if(V.rvLive){
+      const live=S.rview==='now'?this.buildNow():this.buildMonth(bm);
+      V.liveBadge=live.kind==='now'?'현재 보고서':'월 보고서';
+      V.liveNo='NEW';V.liveDate=this.dLabel(live.date);V.liveStars=stars(live.stars);
+      V.liveTitle=live.title;V.liveSummary=live.summary;V.liveBlocksV=blockV(live.blocks);
+      V.repSaveLabel='📚 보고서함에 넣기';
+      V.repSave=()=>this.storeReport(live);
+      V.repDeep=()=>this.askDeep(live);
+      V.repPrint=()=>window.print();
+    }else{V.liveBlocksV=[];V.liveBadge='';V.liveNo='';V.liveDate='';V.liveStars='';V.liveTitle='';V.liveSummary='';
+      V.repSaveLabel='';V.repSave=()=>{};V.repDeep=()=>{};V.repPrint=()=>{};}
+    V.hasRepMsg=!!S.repMsg;V.repMsg=S.repMsg;
+    const box=(D.moneyReports||[]).slice();
+    V.boxEmpty=box.length===0;
+    V.boxV=box.map(r=>{const open=S.openRep===r.id;
+      return{no:'#'+String(r.no).padStart(3,'0'),badge:r.kind==='now'?'현재 보고서':'월 보고서',
+        date:this.dLabel(r.date),stars:stars(Number(r.stars)||3),title:r.title,summary:r.summary,
+        open,blocks:open?blockV(r.blocks):[],
+        toggleLabel:open?'접기':'📄 전문 보기',
+        toggle:()=>this.setState({openRep:open?null:r.id}),
+        del:()=>{if(confirm('이 보고서를 버릴까요?'))this.mut(d=>{d.moneyReports=(d.moneyReports||[]).filter(x=>x.id!==r.id);});}};});
+
+    // ── 📋 내역 ──
+    V.onReceipt=e=>this.receipt(e);
+    V.aiBusy=S.aiBusy;V.hasAiMsg=!!S.aiMsg;V.aiMsg=S.aiMsg;V.aiProg=S.aiProg||'';
+    V.catsV=CATS.map(v=>({v}));
+    const txTy=f.txType||'out';
+    V.txOutBg=txTy==='out'?sk.ac:sk.card;V.txOutFg=txTy==='out'?sk.on:sk.sub;
+    V.txInBg=txTy==='in'?sk.ac:sk.card;V.txInFg=txTy==='in'?sk.on:sk.sub;
+    V.txTrBg=txTy==='tr'?sk.ac:sk.card;V.txTrFg=txTy==='tr'?sk.on:sk.sub;
+    V.txSetOut=()=>this.setF('txType','out');V.txSetIn=()=>this.setF('txType','in');V.txSetTr=()=>this.setF('txType','tr');
+    V.txEditing=!!S.txEdit;V.txSaveLabel=S.txEdit?'수정':'저장';
+    V.txCancelEdit=()=>{this.setState({txEdit:null,aiMsg:''});this.clearF(['txAmt','txMemo','txType']);};
+    V.addTx=()=>{if(!f.txAmt)return;
+      if(S.txEdit){this.mut(d=>{const x=d.tx.find(y=>y.id===S.txEdit);if(x){x.d=f.txDate||x.d;x.ty=txTy;x.a=Number(f.txAmt);
+        x.c=txTy==='tr'?'이체':(f.txCat||x.c);x.memo=(f.txMemo||'').trim()||'-';x.pay=f.txPay||x.pay||'bank';}});
+        this.setState({txEdit:null,aiMsg:'✏️ 수정했어요'});}
+      else{this.mut(d=>{d.tx.push({id:this.uid(),d:f.txDate||t,ty:txTy,a:Number(f.txAmt),
+        c:txTy==='tr'?'이체':(f.txCat||'기타'),memo:(f.txMemo||'').trim()||'-',pay:f.txPay||'bank'});});
+        this.setState({aiMsg:''});}
+      this.clearF(['txAmt','txMemo']);};
+    const txClr=ty=>ty==='in'?IN_C:(ty==='tr'?sk.sub:OUT_C);
+    const txSign=ty=>ty==='in'?'+':(ty==='tr'?'⇄ ':'-');
+    const PAYS=[{v:'bank',l:'🏦 통장',ic:'🏦'},{v:'card',l:'💳 카드',ic:'💳'},{v:'cash',l:'💵 현금',ic:'💵'}];
+    V.paysV=PAYS;
+    const pf=S.payF||'all';
+    V.payFilterV=[{v:'all',l:'전체'}].concat(PAYS.map(p=>({v:p.v,l:p.l}))).map(p=>({l:p.l,
+      bg:pf===p.v?sk.soft:sk.card,fg:pf===p.v?sk.tx:sk.sub,bd:pf===p.v?sk.ac:sk.line,
+      go:()=>this.setState({payF:p.v})}));
+    V.payFilterLabel={all:'전체 내역',bank:'통장 내역',card:'카드 내역',cash:'현금 내역'}[pf];
+    const shown=D.tx.filter(x=>x.d.slice(0,7)===bm&&(pf==='all'||(x.pay||'bank')===pf));
+    V.payCount=String(shown.length);
+    V.payInSum=W(shown.filter(x=>x.ty==='in').reduce((s,x)=>s+x.a,0))+'원';
+    V.payOutSum=W(shown.filter(x=>x.ty==='out').reduce((s,x)=>s+x.a,0))+'원';
+    V.txEmpty=shown.length===0;
+    V.txV=shown.slice().sort((a,b)=>b.d.localeCompare(a.d)).map(tx=>({date:this.dShort(tx.d),cat:tx.c,memo:tx.memo,
+      photo:tx.photo,hasPhoto:!!tx.photo,amt:txSign(tx.ty)+W(tx.a),c:txClr(tx.ty),
+      payIcon:(PAYS.find(p=>p.v===(tx.pay||'bank'))||PAYS[0]).ic,
+      edit:()=>this.setState({txEdit:tx.id,mview:'list',aiMsg:'',budM:tx.d.slice(0,7),
+        f:{...f,txDate:tx.d,txAmt:String(tx.a),txCat:tx.c,txMemo:tx.memo==='-'?'':tx.memo,txType:tx.ty,txPay:tx.pay||'bank'}}),
+      del:()=>this.mut(d=>{d.tx=d.tx.filter(x=>x.id!==tx.id);})}));
+
+    // ── 🗓️ 달력 ──
+    const spendBy={};D.tx.filter(x=>x.ty==='out').forEach(x=>{spendBy[x.d]=(spendBy[x.d]||0)+x.a;});
+    const fmtShort=n=>n>=10000?(Math.round(n/1000)/10)+'만':(n>=1000?Math.round(n/1000)+'천':String(n));
+    V.budCellsV=this.grid(bm).map(c=>({num:c.num,bg:c.ds===S.budSel?sk.soft:'transparent',
+      fg:c.ds===t?sk.ac:(c.inM?sk.tx:sk.line),
+      spend:c.inM&&spendBy[c.ds]?fmtShort(spendBy[c.ds]):'',sel:()=>this.setState({budSel:c.ds})}));
+    V.budSelLabel=this.dLabel(S.budSel)+' 내역';
+    const bday=D.tx.filter(x=>x.d===S.budSel);
+    V.budDayEmpty=!bday.length;
+    V.budDayV=bday.map(x=>({cat:x.c,memo:x.memo,amt:txSign(x.ty)+W(x.a)+'원',c:txClr(x.ty)}));
+
+    // ── 🎯 예산 (진행률은 보고 있는 달 기준 — 옛 화면은 언제나 이번 달만 봤다) ──
+    const bk=f.bKind||'m';
+    V.bMBg=bk==='m'?sk.ac:sk.card;V.bMFg=bk==='m'?sk.on:sk.sub;
+    V.bGBg=bk==='g'?sk.ac:sk.card;V.bGFg=bk==='g'?sk.on:sk.sub;
+    V.bSetM=()=>this.setF('bKind','m');V.bSetG=()=>this.setF('bKind','g');
+    V.addBudget=()=>{if(!(f.bName||'').trim()||!f.bAmt)return;
+      this.mut(d=>{d.budgets.push({id:this.uid(),name:f.bName.trim(),kind:bk,c:f.bCat||'기타',a:Number(f.bAmt)});});
+      this.clearF(['bName','bAmt']);};
+    V.budgetsEmpty=(D.budgets||[]).length===0;
+    V.budgetsV=D.budgets.map(b=>{
+      const pool=b.kind==='m'?D.tx.filter(x=>x.ty==='out'&&x.c===b.c&&x.d.slice(0,7)===bm)
+                             :D.tx.filter(x=>x.ty==='out'&&x.c===b.c);
+      const spent=pool.reduce((s,x)=>s+x.a,0),pct=Math.min(100,Math.round(spent/b.a*100)),over=spent>b.a;
+      return{name:b.name,kindLabel:b.kind==='m'?'매달':'목표',kindBg:b.kind==='m'?sk.ac:'#8B5CF6',pct,
+        barC:over?OUT_C:(b.kind==='m'?sk.ac:'#8B5CF6'),spentC:over?OUT_C:sk.tx,
+        spentLabel:(b.kind==='m'?'쓴 돈 ':'모인·쓴 금액 ')+W(spent)+'원'+(over?' (초과!)':' ('+pct+'%)'),
+        amtLabel:'예산 '+W(b.a)+'원',del:()=>this.mut(d=>{d.budgets=d.budgets.filter(x=>x.id!==b.id);})};});
+
+    // ── 🔁 고정비 ──
+    const PAYI={bank:'🏦',card:'💳',cash:'💵'},PAYL={bank:'통장',card:'카드',cash:'현금'};
+    const FREQ=[{v:'w',l:'매주'},{v:'m',l:'매월'},{v:'q',l:'분기'},{v:'h',l:'반기'},{v:'y',l:'매년'}];
+    const FTAG={w:'매주',m:'매월',q:'분기',h:'반기',y:'매년'};
+    const FCLR={w:'#8B5CF6',m:sk.ac,q:'#3B82F6',h:'#0EA5A4',y:'#EC4899'};
+    const fixed=(D.fixed||[]).slice();
+    const fpAll=D.fixedPaid||{},paidM=fpAll[bm]||{},paidPv=fpAll[this.shiftM(bm,-1)]||{};
+    const bmY=Number(bm.slice(0,4)),bmM=Number(bm.slice(5,7));
+    const dimM=new Date(bmY,bmM,0).getDate();
+    const fqOf=x=>x.freq||'m';
+    const expOf=x=>{const p=paidPv[x.id];return (x.vary&&p&&fqOf(x)!=='w')?Number(p.a):(Number(x.a)||0);};
+    const isCurM=bm===t.slice(0,7),todayD=Number(t.slice(8,10));
+    const wkCount=x=>{const wd=Number(x.wd)||0;let c=0;for(let i=1;i<=dimM;i++)if(new Date(bmY,bmM-1,i).getDay()===wd)c++;return c;};
+    const dueIn=x=>{const q=fqOf(x);if(q==='m'||q==='w')return true;
+      const diff=((bmM-(Number(x.mo)||1))%12+12)%12;
+      return q==='y'?diff===0:(q==='q'?diff%3===0:diff%6===0);};
+    const monthAmt=x=>fqOf(x)==='w'?(Number(x.a)||0)*wkCount(x):expOf(x);
+    const dueDay=x=>{const q=fqOf(x);
+      if(q==='w'){for(let i=1;i<=dimM;i++)if(new Date(bmY,bmM-1,i).getDay()===(Number(x.wd)||0))return i;return 1;}
+      return Math.min(dimM,Math.max(1,Number(x.day)||1));};
+    const fqLabel=x=>{const q=fqOf(x);
+      if(q==='w')return '매주 '+DAYS[Number(x.wd)||0]+'요일 (이번 달 '+wkCount(x)+'회)';
+      if(q==='m')return '매월 '+(Number(x.day)||1)+'일';
+      const pre=q==='q'?'3개월마다':(q==='h'?'6개월마다':'매년');
+      return pre+' '+(Number(x.mo)||1)+'월 '+(Number(x.day)||1)+'일';};
+    const avgM=x=>{const q=fqOf(x),b=Number(x.a)||0;
+      return q==='w'?Math.round(b*4.33):(q==='m'?b:Math.round(b/(q==='q'?3:(q==='h'?6:12))));};
+    const sorted=fixed.slice().sort((a,b)=>(dueIn(b)?1:0)-(dueIn(a)?1:0)||dueDay(a)-dueDay(b));
+    let fxT=0,fxP=0,fxLf=0,fxDone=0,fxDueN=0;const byPay={bank:0,card:0,cash:0};
+    sorted.forEach(x=>{if(!dueIn(x))return;fxDueN++;
+      const p=paidM[x.id],amt=p?Number(p.a):monthAmt(x);
+      fxT+=amt;byPay[x.pay]=(byPay[x.pay]||0)+amt;
+      if(p){fxP+=Number(p.a);fxDone++;}else fxLf+=amt;});
+    V.fxTotal=W(fxT)+'원';V.fxPaidSum=W(fxP)+'원';V.fxLeft=W(fxLf)+'원';
+    V.fxPct=fxT?Math.round(fxP/fxT*100):0;
+    V.fxProgLabel=sorted.length?('이번 달 해당 '+fxDueN+'건 중 '+fxDone+'건 완료'):'등록된 고정비 없음';
+    V.fxSubLabel='💳 '+W(byPay.card)+' · 💵 '+W(byPay.cash)+' · 🏦 '+W(byPay.bank);
+    V.fxEmpty=sorted.length===0;
+    const ffv=S.fxF||'all';
+    V.fxFilterV=[{v:'all',l:'전체'},{v:'card',l:'💳 카드'},{v:'cash',l:'💵 현금'},{v:'bank',l:'🏦 통장'}].map(p=>({l:p.l,
+      bg:ffv===p.v?sk.soft:sk.card,fg:ffv===p.v?sk.tx:sk.sub,bd:ffv===p.v?sk.ac:sk.line,
+      go:()=>this.setState({fxF:p.v})}));
+    const dr=S.fxD||{};
+    const fset=(k,v)=>this.setState(st=>({fxD:{...(st.fxD||{}),[k]:v}}));
+    const draftOf=x=>({name:x?x.name:'',amt:x?String(x.a||''):'',day:x&&x.day?String(x.day):'',
+      wd:(x&&x.wd!=null)?String(x.wd):'6',mo:x&&x.mo?String(x.mo):String(bmM),
+      cat:x?x.c:'생활/마트',pay:x?x.pay:'card',vary:(x&&x.vary)?1:0,freq:x?fqOf(x):'m'});
+    const saveFx=id=>{const nm=(dr.name||'').trim();if(!nm||!dr.amt)return;
+      const q=dr.freq||'m';
+      const rec={name:nm,pay:dr.pay||'card',c:dr.cat||'기타',freq:q,
+        a:Number(dr.amt)||0,vary:dr.vary?1:0,
+        day:q==='w'?null:Math.min(31,Math.max(1,Number(dr.day)||1)),
+        wd:q==='w'?(Number(dr.wd)||0):null,
+        mo:(q==='q'||q==='h'||q==='y')?Math.min(12,Math.max(1,Number(dr.mo)||1)):null};
+      this.mut(d=>{d.fixed=d.fixed||[];
+        if(id!=='new'){const y=d.fixed.find(z=>z.id===id);if(y)Object.assign(y,rec);}
+        else d.fixed.push({id:this.uid(),...rec});});
+      this.setState({fxEdit:null,fxD:null});};
+    const formVals=id=>{const q=dr.freq||'m',pk=dr.pay||'card';
+      return{fName:dr.name||'',fAmt:dr.amt||'',fDay:dr.day||'',fMo:dr.mo||String(bmM),fWd:dr.wd||'6',
+        fCat:dr.cat||'생활/마트',
+        catsV:CATS.filter(c=>c!=='이체').map(v=>({v})),
+        wdV:DAYS.map((dd,i)=>({v:String(i),l:dd+'요일'})),
+        moV:Array.from({length:12},(z,i)=>({v:String(i+1),l:(i+1)+'월'})),
+        onName:e=>fset('name',e.target.value),onAmt:e=>fset('amt',e.target.value),
+        onDay:e=>fset('day',e.target.value),onCat:e=>fset('cat',e.target.value),
+        onMo:e=>fset('mo',e.target.value),onWd:e=>fset('wd',e.target.value),
+        freqV:FREQ.map(z=>({l:z.l,bg:q===z.v?FCLR[z.v]:sk.card,fg:q===z.v?'#fff':sk.sub,pick:()=>fset('freq',z.v)})),
+        payV:[{v:'card',l:'💳 카드'},{v:'cash',l:'💵 현금'},{v:'bank',l:'🏦 통장'}].map(z=>({l:z.l,
+          bg:pk===z.v?sk.ac:sk.card,fg:pk===z.v?sk.on:sk.sub,pick:()=>fset('pay',z.v)})),
+        showWd:q==='w',showDay:q!=='w',showMo:q==='q'||q==='h'||q==='y',
+        dayPh:'며칠에',
+        amtPh:q==='w'?'한 번에 내는 금액(원)':'보통 내는 금액(원)',
+        varyBg:dr.vary?sk.ac:sk.line,varyKnob:dr.vary?23:3,toggleVary:()=>fset('vary',dr.vary?0:1),
+        saveLabel:id==='new'?'추가하기':'수정 저장',
+        save:()=>saveFx(id),cancel:()=>this.setState({fxEdit:null,fxD:null})};};
+    V.fxRowsV=sorted.filter(x=>ffv==='all'||x.pay===ffv).map(x=>{
+      const p=paidM[x.id],due=dueIn(x),exp=monthAmt(x),amt=p?Number(p.a):exp;
+      const pv=paidPv[x.id]?Number(paidPv[x.id].a):null;
+      const diff=(p&&pv!=null)?Number(p.a)-pv:0;
+      const dday=dueDay(x);
+      const late=due&&!p&&isCurM&&dday<todayD;
+      const editing=S.fxEdit===x.id,q=fqOf(x);
+      const row={icon:PAYI[x.pay]||'🏦',name:x.name,cat:x.c,vary:!!x.vary,
+        freqTag:FTAG[q],freqBg:FCLR[q],
+        dayLabel:fqLabel(x),payLabel:PAYL[x.pay]||'',
+        prevLabel:!due?(' · 월평균 '+W(avgM(x))+'원'):((x.vary&&pv!=null&&!p)?' · 지난달 '+W(pv)+'원':''),
+        amtLabel:due?W(amt)+'원':'-',amtC:p?sk.tx:sk.sub,op:due?1:0.62,
+        paid:!!p,canPay:due&&!p&&!editing&&S.fxPayId!==x.id,
+        skip:!due,skipLabel:'이번 달은 해당 없어요',
+        stateLabel:!due?'해당 없음':(p?'납부 완료':(late?'납부일 지남':'예정')),
+        stateC:!due?sk.sub:(p?IN_C:(late?OUT_C:sk.sub)),
+        bd:editing?sk.ac:(late?'#E9B7B8':sk.line),
+        txDateLabel:bmM+'월 '+dday+'일 지출로 기록',
+        hasDiff:!!p&&pv!=null&&diff!==0,
+        diffLabel:(diff>0?'▲ ':'▼ ')+W(Math.abs(diff))+'원 (지난달 '+W(pv)+'원)',
+        diffC:diff>0?OUT_C:IN_C,
+        paying:S.fxPayId===x.id,
+        payAmt:S.fxPayId===x.id?(S.fxAmtDraft==null?String(exp):S.fxAmtDraft):'',
+        onPayAmt:e=>this.setState({fxAmtDraft:e.target.value}),
+        openPay:()=>this.setState({fxPayId:x.id,fxAmtDraft:String(exp),fxEdit:null}),
+        cancelPay:()=>this.setState({fxPayId:null,fxAmtDraft:null}),
+        confirmPay:()=>{const va=Number(S.fxAmtDraft)||exp,txId=this.uid();
+          this.mut(d=>{d.fixedPaid=d.fixedPaid||{};d.fixedPaid[bm]=d.fixedPaid[bm]||{};
+            d.fixedPaid[bm][x.id]={a:va,txId};
+            d.tx.push({id:txId,d:bm+'-'+String(dday).padStart(2,'0'),ty:'out',a:va,c:x.c,memo:x.name+' (고정비)',pay:x.pay});});
+          this.setState({fxPayId:null,fxAmtDraft:null});},
+        undo:()=>{const tid=p&&p.txId;this.mut(d=>{if(d.fixedPaid&&d.fixedPaid[bm])delete d.fixedPaid[bm][x.id];
+          if(tid)d.tx=d.tx.filter(y=>y.id!==tid);});},
+        editing,editBg:editing?sk.soft:'transparent',
+        toggleEdit:()=>{if(editing)this.setState({fxEdit:null,fxD:null});
+          else this.setState({fxEdit:x.id,fxD:draftOf(x),fxPayId:null});},
+        del:()=>this.mut(d=>{d.fixed=(d.fixed||[]).filter(y=>y.id!==x.id);})};
+      if(editing)Object.assign(row,formVals(x.id));
+      return row;});
+    V.fxOpen=S.fxEdit==='new';V.fxClosed=S.fxEdit!=='new';
+    V.fxOpenForm=()=>this.setState({fxEdit:'new',fxD:draftOf(null),fxPayId:null});
+    V.nf=formVals('new');
+
+    // ── 📊 분석 + 관리자 조언 ──
+    const monthsL=[];for(let i=5;i>=0;i--)monthsL.push(this.shiftM(bm,-i));
+    const maxV=Math.max(1,...monthsL.map(mm=>Math.max(this.mSum(mm,'in'),this.mSum(mm,'out'))));
+    const shortW=n=>n>=10000?(Math.round(n/10000)+'만'):(n>0?Math.round(n/1000)+'천':'0');
+    V.stMonthsV=monthsL.map(mm=>{const iv=this.mSum(mm,'in'),ov=this.mSum(mm,'out'),nv=iv-ov,sel=mm===bm;
+      return{label:Number(mm.slice(5,7))+'월',
+        inH:iv?Math.max(3,Math.round(iv/maxV*92)):1,
+        outH:ov?Math.max(3,Math.round(ov/maxV*92)):1,
+        net:(iv||ov)?((nv>=0?'+':'-')+shortW(Math.abs(nv))):'',
+        netC:nv>=0?IN_C:OUT_C,
+        bg:sel?sk.soft:'transparent',fg:sel?sk.tx:sk.sub,
+        go:()=>this.setState({budM:mm,budSel:mm+'-01'})};});
+    const aIn=mIn,aOut=mOut,aNet=aIn-aOut;
+    const rate=aIn?Math.round(aNet/aIn*100):0;
+    V.stRate=rate;V.stRateW=Math.max(0,Math.min(100,rate));
+    V.stRateC=rate>=30?IN_C:(rate>=10?sk.ac:OUT_C);
+    V.stRateNote=aIn===0?'수입 기록이 없어요':(rate>=30?'아주 잘 모으고 있어요':(rate>=10?'조금만 더 아껴봐요':(rate>=0?'거의 다 쓰고 있어요':'적자예요')));
+    const CATC=['#2C5D7C','#4E7E9B','#7A9BB0','#8B6F52','#A98E5F','#6E8B6E','#8C7AA6','#B07C8E'];
+    const cs=this.catSum(bm),csP=this.catSum(this.shiftM(bm,-1));
+    const csK=Object.keys(cs).sort((a,b)=>cs[b]-cs[a]);
+    const csTot=csK.reduce((s,k)=>s+cs[k],0),csMax=csK.length?cs[csK[0]]:1;
+    V.stNoCat=csK.length===0;
+    V.stCatsV=csK.slice(0,8).map((k,i)=>{const dv=cs[k]-(csP[k]||0);
+      return{name:k,amt:W(cs[k])+'원',pct:csTot?Math.round(cs[k]/csTot*100):0,
+        w:Math.max(4,Math.round(cs[k]/csMax*100)),c:CATC[i%CATC.length],
+        diff:csP[k]==null?'신규':(dv===0?'-':(dv>0?'▲':'▼')+W(Math.abs(dv))),
+        dC:dv>0?OUT_C:(dv<0?IN_C:sk.sub)};});
+    const ps={card:0,cash:0,bank:0};
+    D.tx.filter(x=>x.ty==='out'&&x.d.slice(0,7)===bm).forEach(x=>{const k=x.pay||'bank';ps[k]=(ps[k]||0)+x.a;});
+    V.stPaysV=[{k:'card',ic:'💳',l:'카드'},{k:'cash',ic:'💵',l:'현금'},{k:'bank',ic:'🏦',l:'통장'}]
+      .map(z=>({ic:z.ic,l:z.l,amt:W(ps[z.k])+'원',pct:csTot?Math.round(ps[z.k]/csTot*100)+'%':'0%'}));
+    const adv=[];
+    if(!aIn&&!aOut)adv.push({ic:'📭',txt:'이번 달은 아직 기록이 없어요. 내역을 넣으면 어디에 얼마 쓰는지 정리해 드려요.',c:sk.sub});
+    else{
+      if(aNet>=0)adv.push({ic:'💰',txt:'수입 '+W(aIn)+'원 중 '+W(aNet)+'원이 남았어요 (저축률 '+rate+'%). '+(rate>=30?'아주 잘하고 있어요!':(rate>=10?'조금만 더 아끼면 목표를 넘길 수 있어요.':'남는 돈이 적어요, 큰 지출부터 점검해보세요.')),c:sk.tx});
+      else adv.push({ic:'🚨',txt:'이번 달은 수입보다 '+W(-aNet)+'원 더 썼어요. 아래 지출 순위에서 큰 항목을 먼저 확인해보세요.',c:OUT_C});
+      if(csK.length)adv.push({ic:'🥇',txt:'가장 많이 쓴 곳은 '+csK[0]+' '+W(cs[csK[0]])+'원, 전체 지출의 '+Math.round(cs[csK[0]]/csTot*100)+'%예요'+(csK[1]?' · 다음은 '+csK[1]+' '+W(cs[csK[1]])+'원':'')+'.',c:sk.tx});
+      const pOut=this.mSum(this.shiftM(bm,-1),'out');
+      if(pOut){const dp=Math.round((aOut-pOut)/pOut*100);let rk=null,rv=0;
+        csK.forEach(k=>{const dv=cs[k]-(csP[k]||0);if(dv>rv){rv=dv;rk=k;}});
+        adv.push({ic:dp>0?'📈':'📉',txt:'지난달보다 지출이 '+Math.abs(dp)+'% '+(dp>0?'늘었어요':(dp<0?'줄었어요':'비슷해요'))+((rk&&dp>0)?' · '+rk+'에서 '+W(rv)+'원 늘었어요.':'.'),c:dp>0?OUT_C:IN_C});}
+      if(fxT)adv.push({ic:'🔁',txt:'이번 달 고정비는 '+W(fxT)+'원'+(aIn?', 수입의 '+Math.round(fxT/aIn*100)+'%':'')+(fxLf?' · 아직 '+W(fxLf)+'원 낼 게 남았어요.':' · 모두 납부해서 지출에 반영됐어요.'),c:sk.tx});
+      const overs=(D.budgets||[]).filter(b=>b.kind==='m'&&(cs[b.c]||0)>b.a);
+      if(overs.length)adv.push({ic:'⚠️',txt:overs.map(b=>b.c+' 예산을 '+Math.round(((cs[b.c]||0)-b.a)/b.a*100)+'% 넘겼어요').join(' · ')+'.',c:OUT_C});}
+    V.adviceV=adv.slice(0,4);
+    V.advGrade=!aIn&&!aOut?'기록 필요':(aNet<0?'적자 주의':(rate>=30?'아주 좋아요':(rate>=10?'괜찮아요':'조금 위험')));
+    V.advGradeBg=!aIn&&!aOut?sk.sub:(aNet<0?OUT_C:(rate>=30?IN_C:(rate>=10?sk.ac:'#D97706')));
+
+    // ── 🏦 자산 ──
+    const accs=(D.accounts||[]).slice();
+    const bankT=accs.filter(a=>a.kind==='bank').reduce((s,a)=>s+(Number(a.amt)||0),0);
+    const cardT=accs.filter(a=>a.kind==='card').reduce((s,a)=>s+(Number(a.amt)||0),0);
+    V.asBank=W(bankT);V.asCard=W(cardT);
+    V.asNet=(bankT-cardT<0?'-':'')+W(Math.abs(bankT-cardT));
+    V.asNetC=bankT-cardT<0?OUT_C:sk.tx;
+    const ak=f.acKind||'bank';
+    V.acIsCard=ak==='card';V.acIsBank=ak==='bank';
+    const PURPS=[{v:'salary',l:'💰 급여',c:IN_C},{v:'living',l:'🛒 생활비',c:'#D97706'},{v:'saving',l:'🐷 저축',c:'#3B82F6'},
+      {v:'emergency',l:'🚨 비상금',c:OUT_C},{v:'invest',l:'📈 투자',c:'#8B5CF6'}];
+    const apv=f.acPurp||'living';
+    V.acPurpV=PURPS.concat([{v:'custom',l:'✏️ 직접 입력',c:'#64748B'}]).map(p=>({l:p.l,
+      bg:apv===p.v?p.c:sk.card,fg:apv===p.v?'#fff':sk.sub,bd:apv===p.v?p.c:sk.line,pick:()=>this.setF('acPurp',p.v)}));
+    V.acPurpCustom=apv==='custom';
+    V.acBankBg=ak==='bank'?sk.ac:sk.card;V.acBankFg=ak==='bank'?sk.on:sk.sub;
+    V.acCardBg=ak==='card'?sk.ac:sk.card;V.acCardFg=ak==='card'?sk.on:sk.sub;
+    V.acSetBank=()=>this.setF('acKind','bank');V.acSetCard=()=>this.setF('acKind','card');
+    V.acNamePh=ak==='card'?'카드 이름 (예: 아빠 신용카드)':'통장 이름 (예: 급여 통장)';
+    V.acOrgPh=ak==='card'?'카드사':'은행';
+    V.acAmtPh=ak==='card'?'이번 달 쓴 금액(원)':'현재 잔액(원)';
+    V.acOpen=!!S.acOpen||!!S.acEdit;V.acClosed=!V.acOpen;
+    V.acSaveLabel=S.acEdit?'수정 저장':'추가하기';
+    V.acFormTitle=S.acEdit?'✏️ 통장·카드 고치기':'🏦 통장·카드 등록';
+    V.acOpenForm=()=>{this.setState({acOpen:true,acEdit:null});this.clearF(['acName','acOrg','acAmt','acDay','acPurp','acPurpTxt']);};
+    V.acCancel=()=>{this.setState({acEdit:null,acOpen:false});this.clearF(['acName','acOrg','acAmt','acDay','acPurp','acPurpTxt']);};
+    V.addAcc=()=>{
+      const nm=(f.acName||'').trim();if(!nm)return;
+      const rec={kind:ak,name:nm,org:(f.acOrg||'').trim(),amt:Number(f.acAmt)||0,
+        day:ak==='card'?(f.acDay||''):'',purp:ak==='bank'?(f.acPurp||'living'):'',
+        purpTxt:ak==='bank'&&f.acPurp==='custom'?(f.acPurpTxt||'').trim():''};
+      const eid=S.acEdit;
+      this.mut(d=>{d.accounts=d.accounts||[];
+        if(eid){const x=d.accounts.find(y=>y.id===eid);if(x)Object.assign(x,rec);}
+        else d.accounts.push({id:this.uid(),...rec});});
+      this.setState({acEdit:null,acOpen:false});this.clearF(['acName','acOrg','acAmt','acDay','acPurp','acPurpTxt']);};
+    V.noAccs=accs.length===0;
+    const accRow=a=>{const isC=a.kind==='card',v=Number(a.amt)||0;
+      const pp=a.purp==='custom'?(a.purpTxt?{l:'✏️ '+a.purpTxt,c:'#64748B'}:null):PURPS.find(z=>z.v===a.purp);
+      return{icon:isC?'💳':'🏦',name:a.name,org:a.org||(isC?'카드':'통장'),
+        hasPurp:!isC&&!!pp,purpLabel:pp?pp.l:'',purpC:pp?pp.c:sk.sub,purpBg:pp?pp.c+'1A':sk.soft,
+        kindLabel:isC?'이번 달 사용':'현재 잔액',
+        amt:(isC?'-':'')+W(v)+'원',amtC:isC?OUT_C:IN_C,
+        share:(isC?cardT:bankT)>0?Math.round(v/(isC?cardT:bankT)*100):0,
+        barC:isC?OUT_C:IN_C,
+        hasDay:isC&&!!a.day,dayLabel:'매월 '+a.day+'일 결제',
+        bd:S.acEdit===a.id?sk.ac:sk.line,
+        edit:()=>this.setState({acEdit:a.id,acOpen:true,f:{...f,acKind:a.kind,acName:a.name,acOrg:a.org||'',
+          acAmt:String(a.amt||''),acDay:a.day||'',acPurp:a.purp||'living',acPurpTxt:a.purpTxt||''}}),
+        del:()=>{if(S.acEdit===a.id)this.setState({acEdit:null});
+          this.mut(d=>{d.accounts=(d.accounts||[]).filter(x=>x.id!==a.id);});}};};
+    const bankL=accs.filter(a=>a.kind==='bank'),cardL=accs.filter(a=>a.kind==='card');
+    V.hasBankAccs=bankL.length>0;V.hasCardAccs=cardL.length>0;
+    V.bankAccsV=bankL.map(accRow);V.cardAccsV=cardL.map(accRow);
+    V.bankGroupLabel='통장 '+bankL.length+'개 · 합계 '+W(bankT)+'원';
+    V.cardGroupLabel='카드 '+cardL.length+'개 · 합계 '+W(cardT)+'원';
+
+    return V;
+  }
+}
+</script>
+</body>
+</html>

@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
 <style>
-body{margin:0;background:#EDE8DF;word-break:keep-all;overflow-wrap:break-word;}
+body{margin:0;background:#EDE8DF;word-break:keep-all;overflow-wrap:break-word;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;}
 a{color:inherit;} a:hover{color:inherit;opacity:.8;}
 input,button,textarea,select{font-family:inherit;}
 ::-webkit-scrollbar{display:none;}
@@ -33,7 +33,7 @@ input,button,textarea,select{font-family:inherit;}
 @keyframes sparkle{0%,100%{opacity:.1;transform:scale(.9);}50%{opacity:.7;transform:scale(1.06);}}
 </style>
 </helmet>
-<div style="--bg:{{skinBg}};--card:{{skinCard}};--ac:{{skinAc}};--on:{{skinOn}};--soft:{{skinSoft}};--line:{{skinLine}};--tx:{{skinTx}};--sub:{{skinSub}};max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg,#FAF6EF);color:var(--tx,#3F3A33);font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;position:relative;padding-bottom:32px;box-sizing:border-box;">
+<div style="--bg:{{skinBg}};--card:{{skinCard}};--ac:{{skinAc}};--on:{{skinOn}};--soft:{{skinSoft}};--line:{{skinLine}};--tx:{{skinTx}};--sub:{{skinSub}};max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg,#FAF6EF);color:var(--tx,#3F3A33);font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;position:relative;padding-bottom:32px;box-sizing:border-box;">
 
 <sc-if value="{{ loading }}" hint-placeholder-val="{{ true }}">
   <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
@@ -74,6 +74,9 @@ input,button,textarea,select{font-family:inherit;}
       <div style="font-size:12px;color:var(--sub,#8A8177);">{{ todayLabel }}</div>
     </div>
     <button onClick="{{ goMe }}" style="background:{{ meBtnBg }};border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">⚙️</button>
+    <sc-if value="{{ showWallet }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ goWallet }}" title="우리집 가계부" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">💳</button>
+    </sc-if>
     <sc-if value="{{ showStudy }}" hint-placeholder-val="{{ true }}">
       <button onClick="{{ goStudy }}" title="공부하는 고양이" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">✏️</button>
     </sc-if>
@@ -1482,543 +1485,6 @@ input,button,textarea,select{font-family:inherit;}
           </sc-if>
         </sc-if>
 
-        <sc-if value="{{ pvMoney }}" hint-placeholder-val="{{ false }}">
-          <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-            <div style="font-size:13px;font-weight:700;color:var(--sub,#8A8177);margin-bottom:8px;">{{ budMonthLabel }} 요약</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
-              <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">수입</div><div style="font-size:15px;font-weight:900;color:#2E9E63;">+{{ monthIn }}</div></div>
-              <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">지출</div><div style="font-size:15px;font-weight:900;color:#E5484D;">−{{ monthOut }}</div></div>
-              <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">합계</div><div style="font-size:15px;font-weight:900;">{{ monthNet }}</div></div>
-            </div>
-            <div style="font-size:11px;color:var(--sub,#8A8177);margin-top:8px;text-align:center;">계좌간 이체(⇄)는 수입·지출 계산에서 빠져요</div>
-          </div>
-          <div style="background:var(--card,#fff);border:1px solid var(--ac,#F59E0B);border-radius:20px;padding:15px 16px;">
-            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
-              <span style="font-size:17px;">🧑‍🏫</span>
-              <span style="font-size:14px;font-weight:800;">가계부 관리자 조언</span>
-              <span style="margin-left:auto;font-size:11px;font-weight:800;color:#fff;background:{{ advGradeBg }};border-radius:99px;padding:3px 10px;white-space:nowrap;">{{ advGrade }}</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              <sc-for list="{{ adviceV }}" as="ad" hint-placeholder-count="3">
-                <div style="display:flex;gap:8px;font-size:12px;line-height:1.55;">
-                  <span style="flex-shrink:0;font-size:13px;">{{ ad.ic }}</span>
-                  <span style="flex:1;color:{{ ad.c }};font-weight:700;text-wrap:pretty;">{{ ad.txt }}</span>
-                </div>
-              </sc-for>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
-            <sc-for list="{{ mviewsV }}" as="mv" hint-placeholder-count="6">
-              <button onClick="{{ mv.go }}" style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;background:{{ mv.bg }};color:{{ mv.fg }};border:1px solid {{ mv.bd }};border-radius:12px;padding:8px 2px;cursor:pointer;">
-                <span style="font-size:15px;line-height:1;">{{ mv.icon }}</span>
-                <span style="font-size:11px;font-weight:800;white-space:nowrap;">{{ mv.label }}</span>
-              </button>
-            </sc-for>
-          </div>
-
-          <sc-if value="{{ mvStat }}" hint-placeholder-val="{{ false }}">
-            <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
-                <div style="font-size:15px;font-weight:800;">📊 6개월 수입·지출</div>
-                <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);">🟩 수입 · 🟥 지출</div>
-              </div>
-              <div style="display:flex;gap:6px;">
-                <sc-for list="{{ stMonthsV }}" as="sm" hint-placeholder-count="6">
-                  <button onClick="{{ sm.go }}" style="flex:1;min-width:0;background:{{ sm.bg }};border:none;border-radius:12px;padding:6px 2px 7px;cursor:pointer;">
-                    <div style="height:96px;display:flex;align-items:flex-end;justify-content:center;gap:3px;">
-                      <div style="width:11px;height:{{ sm.inH }}px;background:#2E9E63;border-radius:4px 4px 0 0;"></div>
-                      <div style="width:11px;height:{{ sm.outH }}px;background:#E5484D;border-radius:4px 4px 0 0;"></div>
-                    </div>
-                    <div style="font-size:10px;font-weight:800;color:{{ sm.fg }};margin-top:6px;">{{ sm.label }}</div>
-                    <div style="font-size:9px;font-weight:800;color:{{ sm.netC }};margin-top:2px;">{{ sm.net }}</div>
-                  </button>
-                </sc-for>
-              </div>
-              <div style="font-size:11px;color:var(--sub,#8A8177);text-align:center;margin-top:10px;">월을 누르면 아래 상세가 그 달로 바뀌어요</div>
-            </div>
-
-            <div style="background:linear-gradient(135deg,var(--soft,#F7EAD2),var(--card,#fff));border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="font-size:15px;font-weight:800;margin-bottom:12px;">{{ budLabel }} 살림 성적표</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
-                <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">수입</div><div style="font-size:15px;font-weight:900;color:#2E9E63;">{{ monthIn }}</div></div>
-                <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">지출</div><div style="font-size:15px;font-weight:900;color:#E5484D;">{{ monthOut }}</div></div>
-                <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">남은 돈</div><div style="font-size:15px;font-weight:900;">{{ monthNet }}</div></div>
-              </div>
-              <div style="height:10px;background:var(--card,#fff);border-radius:99px;overflow:hidden;margin:14px 0 6px;">
-                <div style="height:100%;width:{{ stRateW }}%;background:{{ stRateC }};border-radius:99px;"></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;color:var(--sub,#8A8177);">
-                <span>저축률 {{ stRate }}%</span><span>{{ stRateNote }}</span>
-              </div>
-            </div>
-
-            <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="font-size:15px;font-weight:800;margin-bottom:4px;">어디에 많이 썼나요</div>
-              <div style="font-size:11px;color:var(--sub,#8A8177);margin-bottom:14px;">막대 오른쪽 화살표는 지난달과 비교한 변화예요</div>
-              <sc-if value="{{ stNoCat }}" hint-placeholder-val="{{ false }}">
-                <div style="font-size:13px;color:var(--sub,#8A8177);text-align:center;padding:10px 0;">이 달에는 기록된 지출이 없어요</div>
-              </sc-if>
-              <div style="display:flex;flex-direction:column;gap:11px;">
-                <sc-for list="{{ stCatsV }}" as="sc" hint-placeholder-count="5">
-                  <div>
-                    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">
-                      <span style="font-size:12px;font-weight:800;">{{ sc.name }} <span style="color:var(--sub,#8A8177);font-weight:700;">{{ sc.pct }}%</span></span>
-                      <span style="font-size:12px;font-weight:900;">{{ sc.amt }} <span style="font-size:11px;font-weight:800;color:{{ sc.dC }};">{{ sc.diff }}</span></span>
-                    </div>
-                    <div style="height:9px;background:var(--bg,#FAF6EF);border-radius:99px;overflow:hidden;">
-                      <div style="height:100%;width:{{ sc.w }}%;background:{{ sc.c }};border-radius:99px;"></div>
-                    </div>
-                  </div>
-                </sc-for>
-              </div>
-            </div>
-
-            <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="font-size:15px;font-weight:800;margin-bottom:12px;">무엇으로 결제했나요</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-                <sc-for list="{{ stPaysV }}" as="sp" hint-placeholder-count="3">
-                  <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:11px 8px;text-align:center;">
-                    <div style="font-size:17px;">{{ sp.ic }}</div>
-                    <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-top:2px;">{{ sp.l }} {{ sp.pct }}</div>
-                    <div style="font-size:13px;font-weight:900;margin-top:3px;">{{ sp.amt }}</div>
-                  </div>
-                </sc-for>
-              </div>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ mvList }}" hint-placeholder-val="{{ true }}">
-            <div style="background:linear-gradient(135deg,var(--soft,#F7EAD2),var(--card,#fff));border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="font-size:15px;font-weight:800;">🤖 캡처로 통장 자동 정리</div>
-              <div style="font-size:12px;color:var(--sub,#8A8177);margin:4px 0 10px;">영수증·카드 알림·계좌 내역 캡처를 한꺼번에 올려두면, 거래를 읽어 이 화면 내역에 넣어드려요. 내 계좌끼리 옮긴 돈은 계좌간 이체로 분류돼요</div>
-              <label style="display:block;text-align:center;background:var(--card,#fff);border:1.5px dashed var(--ac,#F59E0B);border-radius:14px;padding:14px;font-size:14px;font-weight:800;color:var(--ac,#F59E0B);cursor:pointer;">📷 캡처 사진 올리기 (여러 장 가능)<input type="file" accept="image/*" multiple onChange="{{ onReceipt }}" style="display:none;"></label>
-              <sc-if value="{{ aiBusy }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:800;margin-top:10px;text-align:center;">📮 맡기는 중이에요... {{ aiProg }}</div></sc-if>
-              <sc-if value="{{ hasAiMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:800;margin-top:10px;text-align:center;">{{ aiMsg }}</div></sc-if>
-            </div>
-            <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="display:flex;gap:8px;margin-bottom:8px;">
-                <button onClick="{{ txSetOut }}" style="flex:1;background:{{ txOutBg }};color:{{ txOutFg }};border:1px solid var(--line,#eee);border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">지출 −</button>
-                <button onClick="{{ txSetIn }}" style="flex:1;background:{{ txInBg }};color:{{ txInFg }};border:1px solid var(--line,#eee);border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">수입 +</button>
-                <button onClick="{{ txSetTr }}" style="flex:1;background:{{ txTrBg }};color:{{ txTrFg }};border:1px solid var(--line,#eee);border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">이체 ⇄</button>
-              </div>
-              <div style="display:flex;gap:8px;margin-bottom:8px;">
-                <input value="{{ f.txDate }}" onChange="{{ on.txDate }}" type="date" style="flex:1;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                <input value="{{ f.txAmt }}" onChange="{{ on.txAmt }}" type="number" placeholder="금액(원)" style="flex:1;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
-              </div>
-              <div style="display:flex;gap:8px;">
-                <select value="{{ f.txCat }}" onChange="{{ on.txCat }}" style="width:92px;flex-shrink:0;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                  <sc-for list="{{ catsV }}" as="ct" hint-placeholder-count="5"><option value="{{ ct.v }}">{{ ct.v }}</option></sc-for>
-                </select>
-                <select value="{{ f.txPay }}" onChange="{{ on.txPay }}" style="width:78px;flex-shrink:0;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                  <sc-for list="{{ paysV }}" as="py" hint-placeholder-count="3"><option value="{{ py.v }}">{{ py.l }}</option></sc-for>
-                </select>
-                <input value="{{ f.txMemo }}" onChange="{{ on.txMemo }}" placeholder="내용" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
-              </div>
-              <div style="display:flex;gap:8px;margin-top:8px;">
-                <button onClick="{{ addTx }}" style="flex:1;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ txSaveLabel }}</button>
-                <sc-if value="{{ txEditing }}" hint-placeholder-val="{{ false }}"><button onClick="{{ txCancelEdit }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:12px;padding:11px 12px;font-weight:800;cursor:pointer;white-space:nowrap;">취소</button></sc-if>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:14px;padding:8px 10px;">
-              <button onClick="{{ budPrev }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">‹</button>
-              <div style="font-size:14px;font-weight:800;">{{ budLabel }} 내역</div>
-              <button onClick="{{ budNext }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">›</button>
-            </div>
-            <div style="display:flex;gap:6px;">
-              <sc-for list="{{ payFilterV }}" as="pf" hint-placeholder-count="4">
-                <button onClick="{{ pf.go }}" style="flex:1;background:{{ pf.bg }};color:{{ pf.fg }};border:1px solid {{ pf.bd }};border-radius:99px;padding:8px 4px;font-size:12px;font-weight:800;cursor:pointer;">{{ pf.l }}</button>
-              </sc-for>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:var(--sub,#8A8177);padding:0 4px;">
-              <span>{{ payFilterLabel }} {{ payCount }}건</span><span><span style="color:#2E9E63;">수입 {{ payInSum }}</span> <span style="color:#E5484D;">지출 {{ payOutSum }}</span></span>
-            </div>
-            <sc-if value="{{ txEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:16px;padding:20px 16px;text-align:center;font-size:13px;font-weight:700;color:var(--sub,#8A8177);">이 달엔 해당 내역이 없어요</div>
-            </sc-if>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              <sc-for list="{{ txV }}" as="tx" hint-placeholder-count="5">
-                <div style="display:flex;align-items:center;gap:8px;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:14px;padding:11px 14px;">
-                  <span style="font-size:12px;color:var(--sub,#8A8177);min-width:44px;">{{ tx.date }}</span>
-                  <span style="font-size:13px;flex-shrink:0;">{{ tx.payIcon }}</span>
-                  <span style="background:var(--soft,#F7EAD2);border-radius:8px;padding:2px 8px;font-size:11px;font-weight:800;flex-shrink:0;">{{ tx.cat }}</span>
-                  <span style="flex:1;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tx.memo }}</span>
-                  <sc-if value="{{ tx.hasPhoto }}" hint-placeholder-val="{{ false }}"><div style="width:28px;height:28px;border-radius:6px;background-image:url('{{ tx.photo }}');background-size:cover;background-position:center;flex-shrink:0;"></div></sc-if>
-                  <span style="font-size:14px;font-weight:900;color:{{ tx.c }};">{{ tx.amt }}</span>
-                  <button onClick="{{ tx.edit }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;">✎</button>
-                  <button onClick="{{ tx.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;">✕</button>
-                </div>
-              </sc-for>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ mvCal }}" hint-placeholder-val="{{ false }}">
-            <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                <button onClick="{{ budPrev }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">‹</button>
-                <div style="font-size:15px;font-weight:800;">{{ budLabel }}</div>
-                <button onClick="{{ budNext }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">›</button>
-              </div>
-              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:4px;">
-                <sc-for list="{{ dayHeads }}" as="dh2" hint-placeholder-count="7"><div style="text-align:center;font-size:11px;font-weight:700;color:{{ dh2.c }};padding:3px 0;">{{ dh2.d }}</div></sc-for>
-              </div>
-              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;">
-                <sc-for list="{{ budCellsV }}" as="bc" hint-placeholder-count="35">
-                  <button onClick="{{ bc.sel }}" style="background:{{ bc.bg }};border:none;border-radius:10px;padding:5px 0 4px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;min-height:44px;">
-                    <span style="font-size:12px;font-weight:700;color:{{ bc.fg }};">{{ bc.num }}</span>
-                    <span style="font-size:9px;font-weight:800;color:#E5484D;">{{ bc.spend }}</span>
-                  </button>
-                </sc-for>
-              </div>
-            </div>
-            <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="font-size:14px;font-weight:800;margin-bottom:8px;">{{ budSelLabel }}</div>
-              <sc-if value="{{ budDayEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--sub,#8A8177);">이 날은 지출·수입이 없어요</div></sc-if>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <sc-for list="{{ budDayV }}" as="bd" hint-placeholder-count="2">
-                  <div style="display:flex;gap:8px;font-size:13px;font-weight:700;"><span style="background:var(--soft,#F7EAD2);border-radius:8px;padding:1px 8px;font-size:11px;font-weight:800;">{{ bd.cat }}</span><span style="flex:1;">{{ bd.memo }}</span><span style="color:{{ bd.c }};font-weight:900;">{{ bd.amt }}</span></div>
-                </sc-for>
-              </div>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ mvFix }}" hint-placeholder-val="{{ false }}">
-            <div style="background:linear-gradient(135deg,var(--soft,#F7EAD2),var(--card,#fff));border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                <button onClick="{{ budPrev }}" style="background:var(--card,#fff);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">‹</button>
-                <div style="font-size:15px;font-weight:800;">{{ budLabel }} 고정비</div>
-                <button onClick="{{ budNext }}" style="background:var(--card,#fff);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">›</button>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
-                <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">이번 달 낼 돈</div><div style="font-size:15px;font-weight:900;">{{ fxTotal }}</div></div>
-                <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">낸 금액</div><div style="font-size:15px;font-weight:900;color:#2E9E63;">{{ fxPaidSum }}</div></div>
-                <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">남은 금액</div><div style="font-size:15px;font-weight:900;color:#E5484D;">{{ fxLeft }}</div></div>
-              </div>
-              <div style="height:10px;background:var(--card,#fff);border-radius:99px;overflow:hidden;margin:12px 0 6px;">
-                <div style="height:100%;width:{{ fxPct }}%;background:#2E9E63;border-radius:99px;"></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--sub,#8A8177);">
-                <span>{{ fxProgLabel }}</span><span>{{ fxSubLabel }}</span>
-              </div>
-              <div style="font-size:11px;color:var(--sub,#8A8177);margin-top:8px;padding-top:8px;border-top:1px solid var(--line,#EFE4CF);line-height:1.6;">납부를 기록하면 그 금액이 <b>가계부 지출</b>로 바로 들어가고, 이번 달 요약·달력·예산에도 함께 계산돼요</div>
-            </div>
-
-            <div style="display:flex;gap:6px;">
-              <sc-for list="{{ fxFilterV }}" as="ff" hint-placeholder-count="4">
-                <button onClick="{{ ff.go }}" style="flex:1;background:{{ ff.bg }};color:{{ ff.fg }};border:1px solid {{ ff.bd }};border-radius:99px;padding:8px 4px;font-size:12px;font-weight:800;cursor:pointer;">{{ ff.l }}</button>
-              </sc-for>
-            </div>
-
-            <sc-if value="{{ fxEmpty }}" hint-placeholder-val="{{ false }}">
-              <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:22px 16px;text-align:center;">
-                <div style="font-size:13px;font-weight:800;">아직 등록한 고정비가 없어요</div>
-                <div style="font-size:12px;color:var(--sub,#8A8177);margin-top:4px;">관리비·학원비·보험처럼 정해진 주기로 나가는 돈을 등록해보세요</div>
-              </div>
-            </sc-if>
-
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              <sc-for list="{{ fxRowsV }}" as="fr" hint-placeholder-count="4">
-                <div style="background:var(--card,#fff);border:1px solid {{ fr.bd }};border-radius:16px;padding:13px 14px;opacity:{{ fr.op }};">
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <span style="font-size:18px;flex-shrink:0;">{{ fr.icon }}</span>
-                    <div style="flex:1;min-width:0;">
-                      <div style="display:flex;align-items:center;gap:5px;">
-                        <span style="background:{{ fr.freqBg }};color:#fff;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;flex-shrink:0;">{{ fr.freqTag }}</span>
-                        <span style="font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ fr.name }}</span>
-                        <sc-if value="{{ fr.vary }}" hint-placeholder-val="{{ false }}"><span style="background:var(--soft,#F7EAD2);border-radius:6px;padding:1px 6px;font-size:10px;font-weight:800;color:var(--sub,#8A8177);flex-shrink:0;">금액변동</span></sc-if>
-                      </div>
-                      <div style="font-size:11px;color:var(--sub,#8A8177);margin-top:3px;">{{ fr.dayLabel }} · {{ fr.payLabel }} · {{ fr.cat }}{{ fr.prevLabel }}</div>
-                    </div>
-                    <div style="text-align:right;flex-shrink:0;">
-                      <div style="font-size:15px;font-weight:900;color:{{ fr.amtC }};">{{ fr.amtLabel }}</div>
-                      <div style="font-size:10px;font-weight:800;color:{{ fr.stateC }};margin-top:2px;">{{ fr.stateLabel }}</div>
-                    </div>
-                  </div>
-                  <sc-if value="{{ fr.hasDiff }}" hint-placeholder-val="{{ false }}">
-                    <div style="font-size:11px;font-weight:800;color:{{ fr.diffC }};margin-top:7px;">{{ fr.diffLabel }}</div>
-                  </sc-if>
-                  <sc-if value="{{ fr.paid }}" hint-placeholder-val="{{ false }}">
-                    <div style="font-size:11px;font-weight:700;color:#2E9E63;margin-top:7px;">✓ 가계부 지출로 반영됨 · {{ fr.txDateLabel }}</div>
-                  </sc-if>
-                  <sc-if value="{{ fr.paying }}" hint-placeholder-val="{{ false }}">
-                    <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:10px 0 6px;">실제로 낸 금액을 확인해 주세요 · 저장하면 가계부 지출로 들어가요</div>
-                    <div style="display:flex;gap:6px;">
-                      <input value="{{ fr.payAmt }}" onChange="{{ fr.onPayAmt }}" type="number" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--ac,#F59E0B);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;font-weight:800;outline:none;">
-                      <button onClick="{{ fr.confirmPay }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;white-space:nowrap;">기록</button>
-                      <button onClick="{{ fr.cancelPay }}" style="background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;">취소</button>
-                    </div>
-                  </sc-if>
-                  <sc-if value="{{ fr.editing }}" hint-placeholder-val="{{ false }}">
-                    <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:12px;padding-top:12px;">
-                      <div style="font-size:12px;font-weight:800;color:var(--ac,#F59E0B);margin-bottom:8px;">✏️ 이 항목 고치기 · 주기와 결제수단을 골라주세요</div>
-                      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;">
-                        <sc-for list="{{ fr.freqV }}" as="q" hint-placeholder-count="5">
-                          <button onClick="{{ q.pick }}" style="background:{{ q.bg }};color:{{ q.fg }};border:1px solid var(--line,#eee);border-radius:10px;padding:8px 1px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ q.l }}</button>
-                        </sc-for>
-                      </div>
-                      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px;">
-                        <sc-for list="{{ fr.payV }}" as="pv" hint-placeholder-count="3">
-                          <button onClick="{{ pv.pick }}" style="background:{{ pv.bg }};color:{{ pv.fg }};border:1px solid var(--line,#eee);border-radius:10px;padding:8px 1px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ pv.l }}</button>
-                        </sc-for>
-                      </div>
-                      <input value="{{ fr.fName }}" onChange="{{ fr.onName }}" placeholder="항목 이름 (예: 아파트 관리비)" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;margin-top:8px;">
-                      <div style="display:flex;gap:6px;margin-top:8px;">
-                        <sc-if value="{{ fr.showMo }}" hint-placeholder-val="{{ false }}">
-                          <select value="{{ fr.fMo }}" onChange="{{ fr.onMo }}" style="width:74px;flex-shrink:0;box-sizing:border-box;padding:10px 6px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                            <sc-for list="{{ fr.moV }}" as="mo" hint-placeholder-count="12"><option value="{{ mo.v }}">{{ mo.l }}</option></sc-for>
-                          </select>
-                        </sc-if>
-                        <sc-if value="{{ fr.showDay }}" hint-placeholder-val="{{ true }}">
-                          <input value="{{ fr.fDay }}" onChange="{{ fr.onDay }}" type="number" placeholder="{{ fr.dayPh }}" style="width:88px;flex-shrink:0;box-sizing:border-box;padding:10px 10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                        </sc-if>
-                        <sc-if value="{{ fr.showWd }}" hint-placeholder-val="{{ false }}">
-                          <select value="{{ fr.fWd }}" onChange="{{ fr.onWd }}" style="width:96px;flex-shrink:0;box-sizing:border-box;padding:10px 6px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                            <sc-for list="{{ fr.wdV }}" as="wd" hint-placeholder-count="7"><option value="{{ wd.v }}">{{ wd.l }}</option></sc-for>
-                          </select>
-                        </sc-if>
-                        <select value="{{ fr.fCat }}" onChange="{{ fr.onCat }}" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                          <sc-for list="{{ fr.catsV }}" as="cc" hint-placeholder-count="5"><option value="{{ cc.v }}">{{ cc.v }}</option></sc-for>
-                        </select>
-                      </div>
-                      <input value="{{ fr.fAmt }}" onChange="{{ fr.onAmt }}" type="number" placeholder="{{ fr.amtPh }}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;margin-top:8px;">
-                      <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
-                        <button onClick="{{ fr.toggleVary }}" style="position:relative;width:46px;height:26px;border:none;border-radius:99px;background:{{ fr.varyBg }};cursor:pointer;flex-shrink:0;">
-                          <span style="position:absolute;top:3px;left:{{ fr.varyKnob }}px;width:20px;height:20px;border-radius:99px;background:#fff;"></span>
-                        </button>
-                        <div>
-                          <div style="font-size:13px;font-weight:800;">낼 때마다 금액이 달라져요</div>
-                          <div style="font-size:11px;color:var(--sub,#8A8177);">켜두면 지난번 낸 금액을 기준으로 보여주고 변동분을 알려줘요</div>
-                        </div>
-                      </div>
-                      <div style="display:flex;gap:8px;margin-top:12px;">
-                        <button onClick="{{ fr.save }}" style="flex:1;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;">{{ fr.saveLabel }}</button>
-                        <button onClick="{{ fr.cancel }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:12px;padding:11px 12px;font-weight:800;cursor:pointer;">취소</button>
-                      </div>
-                    </div>
-                  </sc-if>
-                  <div style="display:flex;gap:6px;margin-top:10px;">
-                    <sc-if value="{{ fr.canPay }}" hint-placeholder-val="{{ true }}">
-                      <button onClick="{{ fr.openPay }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:11px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;">냈어요 · 금액 기록</button>
-                    </sc-if>
-                    <sc-if value="{{ fr.paid }}" hint-placeholder-val="{{ false }}">
-                      <button onClick="{{ fr.undo }}" style="flex:1;background:var(--bg,#FAF6EF);color:var(--sub,#8A8177);border:none;border-radius:11px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;">납부 취소 (지출도 삭제)</button>
-                    </sc-if>
-                    <sc-if value="{{ fr.skip }}" hint-placeholder-val="{{ false }}">
-                      <div style="flex:1;font-size:11px;font-weight:700;color:var(--sub,#8A8177);align-self:center;">{{ fr.skipLabel }}</div>
-                    </sc-if>
-                    <button onClick="{{ fr.toggleEdit }}" style="background:{{ fr.editBg }};border:1px solid var(--line,#EFE4CF);border-radius:11px;width:36px;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;">✎</button>
-                    <button onClick="{{ fr.del }}" style="background:none;border:1px solid var(--line,#EFE4CF);border-radius:11px;width:36px;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;">✕</button>
-                  </div>
-                </div>
-              </sc-for>
-            </div>
-
-            <sc-if value="{{ fxOpen }}" hint-placeholder-val="{{ false }}">
-              <div style="background:var(--card,#fff);border:1px solid var(--ac,#F59E0B);border-radius:20px;padding:16px;">
-                <div style="font-size:15px;font-weight:800;margin-bottom:10px;">🔁 고정비 새로 등록</div>
-                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;">
-                  <sc-for list="{{ nf.freqV }}" as="q" hint-placeholder-count="5">
-                    <button onClick="{{ q.pick }}" style="background:{{ q.bg }};color:{{ q.fg }};border:1px solid var(--line,#eee);border-radius:10px;padding:8px 1px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ q.l }}</button>
-                  </sc-for>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px;">
-                  <sc-for list="{{ nf.payV }}" as="pv" hint-placeholder-count="3">
-                    <button onClick="{{ pv.pick }}" style="background:{{ pv.bg }};color:{{ pv.fg }};border:1px solid var(--line,#eee);border-radius:10px;padding:8px 1px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ pv.l }}</button>
-                  </sc-for>
-                </div>
-                <input value="{{ nf.fName }}" onChange="{{ nf.onName }}" placeholder="항목 이름 (예: 아파트 관리비)" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;margin-top:8px;">
-                <div style="display:flex;gap:6px;margin-top:8px;">
-                  <sc-if value="{{ nf.showMo }}" hint-placeholder-val="{{ false }}">
-                    <select value="{{ nf.fMo }}" onChange="{{ nf.onMo }}" style="width:74px;flex-shrink:0;box-sizing:border-box;padding:10px 6px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                      <sc-for list="{{ nf.moV }}" as="mo" hint-placeholder-count="12"><option value="{{ mo.v }}">{{ mo.l }}</option></sc-for>
-                    </select>
-                  </sc-if>
-                  <sc-if value="{{ nf.showDay }}" hint-placeholder-val="{{ true }}">
-                    <input value="{{ nf.fDay }}" onChange="{{ nf.onDay }}" type="number" placeholder="{{ nf.dayPh }}" style="width:88px;flex-shrink:0;box-sizing:border-box;padding:10px 10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                  </sc-if>
-                  <sc-if value="{{ nf.showWd }}" hint-placeholder-val="{{ false }}">
-                    <select value="{{ nf.fWd }}" onChange="{{ nf.onWd }}" style="width:96px;flex-shrink:0;box-sizing:border-box;padding:10px 6px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                      <sc-for list="{{ nf.wdV }}" as="wd" hint-placeholder-count="7"><option value="{{ wd.v }}">{{ wd.l }}</option></sc-for>
-                    </select>
-                  </sc-if>
-                  <select value="{{ nf.fCat }}" onChange="{{ nf.onCat }}" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                    <sc-for list="{{ nf.catsV }}" as="cc" hint-placeholder-count="5"><option value="{{ cc.v }}">{{ cc.v }}</option></sc-for>
-                  </select>
-                </div>
-                <input value="{{ nf.fAmt }}" onChange="{{ nf.onAmt }}" type="number" placeholder="{{ nf.amtPh }}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;margin-top:8px;">
-                <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
-                  <button onClick="{{ nf.toggleVary }}" style="position:relative;width:46px;height:26px;border:none;border-radius:99px;background:{{ nf.varyBg }};cursor:pointer;flex-shrink:0;">
-                    <span style="position:absolute;top:3px;left:{{ nf.varyKnob }}px;width:20px;height:20px;border-radius:99px;background:#fff;"></span>
-                  </button>
-                  <div>
-                    <div style="font-size:13px;font-weight:800;">낼 때마다 금액이 달라져요</div>
-                    <div style="font-size:11px;color:var(--sub,#8A8177);">켜두면 지난번 낸 금액을 기준으로 보여주고 변동분을 알려줘요</div>
-                  </div>
-                </div>
-                <div style="display:flex;gap:8px;margin-top:12px;">
-                  <button onClick="{{ nf.save }}" style="flex:1;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;">{{ nf.saveLabel }}</button>
-                  <button onClick="{{ nf.cancel }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:12px;padding:11px 12px;font-weight:800;cursor:pointer;">취소</button>
-                </div>
-              </div>
-            </sc-if>
-            <sc-if value="{{ fxClosed }}" hint-placeholder-val="{{ true }}">
-              <button onClick="{{ fxOpenForm }}" style="background:var(--card,#fff);border:1.5px dashed var(--ac,#F59E0B);border-radius:14px;padding:13px;font-size:14px;font-weight:800;color:var(--ac,#F59E0B);cursor:pointer;width:100%;">＋ 고정비 항목 추가하기</button>
-            </sc-if>
-          </sc-if>
-
-          <sc-if value="{{ mvBudget }}" hint-placeholder-val="{{ false }}">
-            <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="font-size:15px;font-weight:800;margin-bottom:10px;">🎯 예산 만들기</div>
-              <div style="display:flex;gap:8px;margin-bottom:8px;">
-                <button onClick="{{ bSetM }}" style="flex:1;background:{{ bMBg }};color:{{ bMFg }};border:1px solid var(--line,#eee);border-radius:12px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;">매달 생활비 예산</button>
-                <button onClick="{{ bSetG }}" style="flex:1;background:{{ bGBg }};color:{{ bGFg }};border:1px solid var(--line,#eee);border-radius:12px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;">목표 구매·저축</button>
-              </div>
-              <div style="display:flex;gap:8px;margin-bottom:8px;">
-                <input value="{{ f.bName }}" onChange="{{ on.bName }}" placeholder="예산 이름 (예: 8월 식비)" style="flex:1;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
-              </div>
-              <div style="display:flex;gap:8px;">
-                <select value="{{ f.bCat }}" onChange="{{ on.bCat }}" style="width:110px;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                  <sc-for list="{{ catsV }}" as="ct2" hint-placeholder-count="5"><option value="{{ ct2.v }}">{{ ct2.v }}</option></sc-for>
-                </select>
-                <input value="{{ f.bAmt }}" onChange="{{ on.bAmt }}" type="number" placeholder="금액(원)" style="flex:1;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
-                <button onClick="{{ addBudget }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;">추가</button>
-              </div>
-            </div>
-            <sc-for list="{{ budgetsV }}" as="bg" hint-placeholder-count="2">
-              <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                  <span style="background:{{ bg.kindBg }};color:#fff;border-radius:8px;padding:2px 9px;font-size:11px;font-weight:800;">{{ bg.kindLabel }}</span>
-                  <span style="flex:1;font-size:14px;font-weight:800;">{{ bg.name }}</span>
-                  <button onClick="{{ bg.del }}" style="background:none;border:none;color:var(--sub,#8A8177);cursor:pointer;">✕</button>
-                </div>
-                <div style="height:12px;background:var(--bg,#FAF6EF);border-radius:99px;overflow:hidden;">
-                  <div style="height:100%;width:{{ bg.pct }}%;background:{{ bg.barC }};border-radius:99px;"></div>
-                </div>
-                <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-top:6px;">
-                  <span style="color:{{ bg.spentC }};">{{ bg.spentLabel }}</span>
-                  <span style="color:var(--sub,#8A8177);">{{ bg.amtLabel }}</span>
-                </div>
-              </div>
-            </sc-for>
-          </sc-if>
-
-          <sc-if value="{{ mvAsset }}" hint-placeholder-val="{{ false }}">
-            <div style="background:linear-gradient(135deg,var(--soft,#F7EAD2),var(--card,#fff));border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">통장 잔액 합계</div><div style="font-size:17px;font-weight:900;color:#2E9E63;">{{ asBank }}원</div></div>
-                <div><div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">카드 쓴 금액</div><div style="font-size:17px;font-weight:900;color:#E5484D;">{{ asCard }}원</div></div>
-              </div>
-              <div style="border-top:1px solid var(--line,#EFE4CF);margin:12px 0 10px;"></div>
-              <div style="display:flex;align-items:baseline;justify-content:space-between;">
-                <span style="font-size:13px;font-weight:800;">카드값 빼고 남는 돈</span>
-                <span style="font-size:20px;font-weight:900;color:{{ asNetC }};">{{ asNet }}원</span>
-              </div>
-            </div>
-
-            <sc-if value="{{ acOpen }}" hint-placeholder-val="{{ false }}">
-            <div style="background:var(--card,#fff);border:1px solid var(--ac,#F59E0B);border-radius:20px;padding:16px;">
-              <div style="font-size:15px;font-weight:800;margin-bottom:10px;">{{ acFormTitle }}</div>
-              <div style="display:flex;gap:8px;margin-bottom:8px;">
-                <button onClick="{{ acSetBank }}" style="flex:1;background:{{ acBankBg }};color:{{ acBankFg }};border:1px solid var(--line,#eee);border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">🏦 통장</button>
-                <button onClick="{{ acSetCard }}" style="flex:1;background:{{ acCardBg }};color:{{ acCardFg }};border:1px solid var(--line,#eee);border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">💳 신용카드</button>
-              </div>
-              <sc-if value="{{ acIsBank }}" hint-placeholder-val="{{ true }}">
-                <div style="margin-bottom:8px;">
-                  <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-bottom:6px;">이 통장의 성향 — AI가 거래를 구분할 때 써요</div>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <sc-for list="{{ acPurpV }}" as="pp" hint-placeholder-count="6">
-                      <button onClick="{{ pp.pick }}" style="background:{{ pp.bg }};color:{{ pp.fg }};border:1px solid {{ pp.bd }};border-radius:99px;padding:7px 11px;font-size:12px;font-weight:800;cursor:pointer;">{{ pp.l }}</button>
-                    </sc-for>
-                  </div>
-                  <sc-if value="{{ acPurpCustom }}" hint-placeholder-val="{{ false }}">
-                    <input value="{{ f.acPurpTxt }}" onChange="{{ on.acPurpTxt }}" placeholder="성향 직접 입력 (예: 여행 자금, 아이 학비)" style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                  </sc-if>
-                </div>
-              </sc-if>
-              <div style="display:flex;gap:8px;margin-bottom:8px;">
-                <input value="{{ f.acName }}" onChange="{{ on.acName }}" placeholder="{{ acNamePh }}" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
-                <input value="{{ f.acOrg }}" onChange="{{ on.acOrg }}" placeholder="{{ acOrgPh }}" style="width:92px;flex-shrink:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-              </div>
-              <div style="display:flex;gap:8px;">
-                <input value="{{ f.acAmt }}" onChange="{{ on.acAmt }}" type="number" placeholder="{{ acAmtPh }}" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
-                <sc-if value="{{ acIsCard }}" hint-placeholder-val="{{ false }}">
-                  <input value="{{ f.acDay }}" onChange="{{ on.acDay }}" type="number" placeholder="결제일" style="width:80px;flex-shrink:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                </sc-if>
-              </div>
-              <div style="display:flex;gap:8px;margin-top:8px;">
-                <button onClick="{{ addAcc }}" style="flex:1;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ acSaveLabel }}</button>
-                <button onClick="{{ acCancel }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:12px;padding:11px 12px;font-weight:800;cursor:pointer;white-space:nowrap;">취소</button>
-              </div>
-            </div>
-            </sc-if>
-
-            <sc-if value="{{ acClosed }}" hint-placeholder-val="{{ true }}">
-              <button onClick="{{ acOpenForm }}" style="background:var(--card,#fff);border:1.5px dashed var(--ac,#F59E0B);border-radius:14px;padding:13px;font-size:14px;font-weight:800;color:var(--ac,#F59E0B);cursor:pointer;width:100%;">＋ 통장·카드 추가하기</button>
-            </sc-if>
-
-            <sc-if value="{{ noAccs }}" hint-placeholder-val="{{ false }}">
-              <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:22px 16px;text-align:center;">
-                <div style="font-size:13px;font-weight:800;">아직 등록한 통장·카드가 없어요</div>
-                <div style="font-size:12px;color:var(--sub,#8A8177);margin-top:4px;">추가하기를 눌러 통장 잔액과 카드값을 기록해보세요</div>
-              </div>
-            </sc-if>
-
-            <sc-if value="{{ hasBankAccs }}" hint-placeholder-val="{{ true }}">
-              <div style="display:flex;flex-direction:column;gap:8px;">
-                <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 4px;">
-                  <span style="font-size:13px;font-weight:800;">🏦 통장</span>
-                  <span style="font-size:12px;font-weight:800;color:#2E9E63;">{{ bankGroupLabel }}</span>
-                </div>
-                <sc-for list="{{ bankAccsV }}" as="ac" hint-placeholder-count="2">
-                  <div style="background:var(--card,#fff);border:1px solid {{ ac.bd }};border-radius:16px;padding:13px 14px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                      <span style="font-size:19px;flex-shrink:0;">{{ ac.icon }}</span>
-                      <div style="flex:1;min-width:0;">
-                        <div style="display:flex;align-items:center;gap:6px;min-width:0;">
-                          <span style="font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ac.name }}</span>
-                          <sc-if value="{{ ac.hasPurp }}" hint-placeholder-val="{{ true }}"><span style="flex-shrink:0;font-size:10px;font-weight:800;color:{{ ac.purpC }};background:{{ ac.purpBg }};border-radius:99px;padding:2px 7px;">{{ ac.purpLabel }}</span></sc-if>
-                        </div>
-                        <div style="font-size:11px;color:var(--sub,#8A8177);">{{ ac.org }} · {{ ac.kindLabel }}</div>
-                      </div>
-                      <span style="font-size:16px;font-weight:900;color:{{ ac.amtC }};white-space:nowrap;">{{ ac.amt }}</span>
-                      <button onClick="{{ ac.edit }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:14px;cursor:pointer;">✎</button>
-                      <button onClick="{{ ac.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:14px;cursor:pointer;">✕</button>
-                    </div>
-                    <div style="height:6px;background:var(--bg,#FAF6EF);border-radius:99px;overflow:hidden;margin-top:9px;">
-                      <div style="height:100%;width:{{ ac.share }}%;background:{{ ac.barC }};border-radius:99px;"></div>
-                    </div>
-                  </div>
-                </sc-for>
-              </div>
-            </sc-if>
-
-            <sc-if value="{{ hasCardAccs }}" hint-placeholder-val="{{ true }}">
-              <div style="display:flex;flex-direction:column;gap:8px;">
-                <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 4px;">
-                  <span style="font-size:13px;font-weight:800;">💳 신용카드</span>
-                  <span style="font-size:12px;font-weight:800;color:#E5484D;">{{ cardGroupLabel }}</span>
-                </div>
-                <sc-for list="{{ cardAccsV }}" as="ac2" hint-placeholder-count="2">
-                  <div style="background:var(--card,#fff);border:1px solid {{ ac2.bd }};border-radius:16px;padding:13px 14px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                      <span style="font-size:19px;flex-shrink:0;">{{ ac2.icon }}</span>
-                      <div style="flex:1;min-width:0;">
-                        <div style="font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ac2.name }}</div>
-                        <div style="font-size:11px;color:var(--sub,#8A8177);">{{ ac2.org }} · {{ ac2.kindLabel }}</div>
-                        <sc-if value="{{ ac2.hasDay }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;font-weight:700;color:var(--ac,#F59E0B);">{{ ac2.dayLabel }}</div></sc-if>
-                      </div>
-                      <span style="font-size:16px;font-weight:900;color:{{ ac2.amtC }};white-space:nowrap;">{{ ac2.amt }}</span>
-                      <button onClick="{{ ac2.edit }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:14px;cursor:pointer;">✎</button>
-                      <button onClick="{{ ac2.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:14px;cursor:pointer;">✕</button>
-                    </div>
-                    <div style="height:6px;background:var(--bg,#FAF6EF);border-radius:99px;overflow:hidden;margin-top:9px;">
-                      <div style="height:100%;width:{{ ac2.share }}%;background:{{ ac2.barC }};border-radius:99px;"></div>
-                    </div>
-                  </div>
-                </sc-for>
-              </div>
-            </sc-if>
-          </sc-if>
-        </sc-if>
 
         <sc-if value="{{ pvSetOrKids }}" hint-placeholder-val="{{ false }}">
           <sc-if value="{{ pvSet }}" hint-placeholder-val="{{ false }}">
@@ -2772,7 +2238,7 @@ input,button,textarea,select{font-family:inherit;}
 const FMOTTOS=['서로 선은 넘지 맙시다. 나는 갯바위에서, 너는 바다 속에서!','오늘의 신사 협정: 찌가 가라앉으면 정당하게 협상 개시.','잡아도 칭찬, 놓쳐도 미소, 꽝 쳐도 품격 유지!','바늘은 거들 뿐, 승부는 신사답게.','물고기는 매너 입질, 낚시꾼은 안전 퇴근!','오늘의 서약: 바늘 끝엔 예의, 발 밑엔 안전.','손맛은 묵직하게, 쓰레기는 싹 다 가볍게!','잡혀줘서 고맙고, 살아서 돌아가니 반갑다!','용왕님도 인정하는 페어플레이 낚시꾼.','바다와의 비즈니스: 꽝 쳐도 절대 투정 금지!','No Trash, No Risk, Just Fishing.','안전 조행 100%, 매너 입질 100%.','물고기에겐 미안함, 바다에겐 고마움.','손맛 낚고, 추억 담고, 무사 귀가.','격식 있는 챔질, 매너 있는 귀가.','바다 위 신사들의 정당한 한판승부.','안전이 우선, 매너가 기본.','바다를 아끼는 진짜 낚시꾼의 품격.','찌끝에 담은 예의, 발끝에 둔 안전.','클린 캐스팅, 리스펙트 조행.','바다가 내어준 선물, 감사함으로 되돌려줍니다.','물고기와 나눈 짧은 대화, 긴 여운으로 남기는 하루.','파도 소리에 감사를, 바람 소리에 안녕을.','자연이 준 소중한 손맛, 내가 지키는 안전한 조행.','바다를 닮은 넓은 마음으로 낚시합니다.','내가 떠난 자리는 바다의 눈물 없이 깨끗하게.','작은 물고기 한 마리에도 경건함을 담아.','바다와 사람이 같이 웃는 소중한 순간.','무사히 집으로 다녀오는 것이 가장 큰 조과입니다.','푸른 바다 위, 나만의 신사적 낭만.','어종 불문, 크기 불문! 안전과 매너는 절대 성역.','발 밑은 조심조심, 바다 속엔 신사답게.','잡는 기쁨보다 지키는 보람을 낚습니다.','바다의 규칙을 지키는 자가 진짜 꾼이다.','나를 지키는 구명조끼, 바다를 지키는 클린마인드.','어린 생명은 놓아주고, 내 쓰레기는 가져오고.','바다 생명과의 약속, 신사적인 라이벌의 대결.','너와 나의 매너가 만날 때 완벽한 조행이 완성된다.','나도 무사히 집으로, 너도 무사히 바다로!','오늘도 신사답게 던지고, 정직하게 낚았습니다.'];
 
 class Component extends DCLogic {
-  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',mview:'list',parentOk:false,modal:null,editMode:false,calM:'',budM:'',tideM:'',tidePick:false,selDate:'',budSel:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],rcThumb:null,aiBusy:false,aiMsg:'',pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:''};
+  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',parentOk:false,modal:null,editMode:false,calM:'',tideM:'',tidePick:false,selDate:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:''};
   KEY = 'famdiary_v1';
   KART={'가자미':{i:'🐟',a:'#E2D3B4',b:'#7D6746'},'우럭':{i:'🐠',a:'#B9C6AD',b:'#43533F'},'볼락':{i:'🐡',a:'#FFC0AC',b:'#A3392A'},'쥐노래미':{i:'🐟',a:'#DBE4AC',b:'#66743A'},'고등어':{i:'🐟',a:'#C8E7F5',b:'#25587A'},'전갱이':{i:'🐠',a:'#E2F2F8',b:'#54798F'},'학꽁치':{i:'🐟',a:'#EAF5FC',b:'#7691A6'},'보리멸':{i:'🐟',a:'#F6ECD4',b:'#A08554'},'황어':{i:'🐟',a:'#FFE7AD',b:'#94741F'},'삼치':{i:'🐟',a:'#D3E7F2',b:'#37627F'},'붕장어':{i:'🐍',a:'#E0D1B8',b:'#645440'},'장어':{i:'🐍',a:'#DCCFBA',b:'#5B4C3A'},'방어':{i:'🐠',a:'#FFE6B0',b:'#A5761D'},'광어':{i:'🐟',a:'#E6EEF6',b:'#5A6A79'},'감성돔':{i:'🐟',a:'#DFE9F2',b:'#41576B'},'참돔':{i:'🐠',a:'#FFD6D4',b:'#A4413C'}};
   KFISH={'장어':{len:68,diff:5},'삼치':{len:52,diff:3},'방어':{len:74,diff:4},'볼락':{len:24,diff:2},'광어':{len:45,diff:3},'감성돔':{len:31,diff:3},'참돔':{len:38,diff:4}};
@@ -2899,7 +2365,6 @@ class Component extends DCLogic {
     lemon:{name:'레몬 타르트',bg:'#FBF8E9',card:'#FFFFFF',ac:'#CA8A04',on:'#FFFFFF',soft:'#F5EDC2',line:'#EDE4B8',tx:'#3D3A22',sub:'#948E6B'},
     choco:{name:'코코아 무스',bg:'#F5EFEA',card:'#FFFFFF',ac:'#8B5E3C',on:'#FFFFFF',soft:'#EADCCE',line:'#E2D5C6',tx:'#3B2F26',sub:'#93826F'}
   };
-  CATS = ['식비','생활/마트','교육','교통','의료','쇼핑','문화/여가','여행','이체','기타'];
   MCOLOR = {mom:'#F97316',dad:'#3B82F6',kid1:'#EC4899',kid2:'#10B981',fam:'#8B5CF6'};
   PCOLORS = ['#F97316','#EF4444','#EC4899','#A855F7','#8B5CF6','#3B82F6','#0EA5E9','#14B8A6','#10B981','#84CC16','#EAB308','#78716C'];
   DAYS = ['일','월','화','수','목','금','토'];
@@ -2968,7 +2433,7 @@ class Component extends DCLogic {
       // 완료한 할일은 30일이 지나면 자동으로 지운다 (완료 표시 da 기준)
       data.events.forEach(ev=>{if(ev.cl)ev.cl=ev.cl.filter(c=>!(c.dn&&c.da&&Date.now()-c.da>30*86400000));});
       const t=this.today();
-      this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),tideM:t.slice(0,7),selDate:t,budSel:t},()=>{
+      this.setState({data,calM:t.slice(0,7),tideM:t.slice(0,7),selDate:t},()=>{
         if(qLeft)window.FamilyStore.save(this.state.data);
         this.fcBackfill();});
     });
@@ -3026,6 +2491,8 @@ class Component extends DCLogic {
     for(let i=0;i<tr.cost;i++)d.stlog.push({id:this.uid(),k:tr.doer,e:'🌟',msg:'가족 거래: '+tr.task,from:g.name,d:t});
     const x=(d.trades||[]).find(y=>y.id===tr.id);if(x){x.st='done';x.doneD=t;}});}
   clearF(keys){const f={...this.state.f};keys.forEach(k=>delete f[k]);this.setState({f});}
+  // 가계부(money/)로 넘어가기 — 그쪽에서 "누가 맡겼는지"를 알 수 있게 고른 프로필을 남긴다
+  goWallet(){try{localStorage.setItem('famdiary_who',this.state.user||'');}catch(e){}location.href='money/';}
 
   // 이 기기에서 한 번 맞게 입력한 프로필 비번은 30일간 기억한다 — 30일이 지나거나 비번이 바뀌면 다시 묻는다
   unlockGet(){try{const m=JSON.parse(localStorage.getItem('famdiary_unlock')||'{}');const now=Date.now();const out={};
@@ -3205,25 +2672,6 @@ class Component extends DCLogic {
     jobs.forEach(j=>this.fcPaint(j.l));
   }
 
-  // 캡처 읽기는 담당(VS코드)에게 맡긴다 — 정리된 내역이 이 화면에 자동으로 올라온다
-  async receipt(e){
-    const files=Array.from(e.target.files||[]);if(!files.length)return;e.target.value='';
-    this.setState({aiBusy:true,aiMsg:'',aiProg:files.length>1?'(0/'+files.length+')':''});
-    const shots=[];
-    for(let i=0;i<files.length;i++){
-      this.setState({aiProg:files.length>1?'('+(i+1)+'/'+files.length+')':''});
-      shots.push(await this.compress(files[i],1100));
-    }
-    const S=this.state;
-    const me=(S.data.profiles.find(p=>p.id===S.user)||{}).name||'';
-    const accs=(S.data.accounts||[]).filter(a=>a.kind==='bank')
-      .map(a=>({name:a.name,org:a.org||'',purp:a.purp||'',purpTxt:a.purpTxt||''}));
-    const r=await window.FamilyStore.ask('receipt',{accounts:accs,cats:this.CATS},shots,me);
-    this.setState({aiBusy:false,aiProg:'',aiMsg:r.ok
-      ?('📮 '+files.length+'장 맡겨뒀어요 — 정리되면 아래 내역에 자동으로 올라와요')
-      :'😢 맡기지 못했어요. 인터넷 연결을 확인해 주세요'});
-  }
-
   streak(kid){
     const d=this.state.data;const tds=d.todos.filter(t=>t.k===kid);if(!tds.length)return 0;
     const all=ds=>{const c=(d.checks[kid]||{})[ds]||{};return tds.every(t=>c[t.id]);};
@@ -3237,7 +2685,7 @@ class Component extends DCLogic {
   renderVals(){
     const S=this.state,D=S.data;
     if(!D)return{loading:true,noUser:false,hasUser:false,skinBg:'#FAF6EF',skinCard:'#fff',skinAc:'#F59E0B',skinOn:'#fff',skinSoft:'#F7EAD2',skinLine:'#EFE4CF',skinTx:'#3F3A33',skinSub:'#8A8177',f:{},on:{},modalPw:false,modalEvent:false,modalDday:false,modalProfile:false,modalPing:false,hasPings:false,pingsV:[]};
-    const FL=['evTitle','evTime','evMemo','evDate','evClItem','evClDue','evMember','jSubj','jMin','jText','scSubj','scName','scScore','txDate','txAmt','txCat','txMemo','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDate','kfTm','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','rwName','rwCost','fxName','fxAmt','fxDay','fxCat','goTitle','goDate','gdMemo'];
+    const FL=['evTitle','evTime','evMemo','evDate','evClItem','evClDue','evMember','jSubj','jMin','jText','scSubj','scName','scScore','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDate','kfTm','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','rwName','rwCost','goTitle','goDate','gdMemo'];
     const on={};FL.forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     const f=S.f,t=this.today(),W=this.won.bind(this);
     const u=D.profiles.find(p=>p.id===S.user)||null;
@@ -3296,6 +2744,9 @@ class Component extends DCLogic {
     V.showStudy=u.id==='kid2'||u.id==='junsun';V.goStudy=()=>{location.href='https://bravo8workroom-hash.github.io/study-cat/';};
     // 요리 레시피도 같은 저장소의 별도 페이지(cook/)다 — 엄마·아빠방에서만 보인다
     V.showCook=u.role==='parent';V.goCook=()=>{location.href='cook/';};
+    // 가계부도 같은 저장소의 별도 페이지(money/)다 — 엄마·아빠방에서만 보인다
+    // (아이 용돈기입장으로 가는 V.goMoney 와는 다른 것이라 이름을 goWallet 으로 둔다)
+    V.showWallet=u.role==='parent';V.goWallet=()=>this.goWallet();
     V.tabHome=S.tab==='home';V.tabFeed=S.tab==='feed';V.tabFish=S.tab==='fish'&&!isKid;V.tabMy=(S.tab==='my'||S.tab==='sticker'||S.tab==='money')&&isKid;V.tabParent=S.tab==='parent'&&!isKid;V.tabMe=S.tab==='me';V.tabGoals=S.tab==='goals';
     // MY SETTINGS (모든 프로필 공통)
     const meFlash=msg=>{this.setState({meMsg:msg});setTimeout(()=>this.setState({meMsg:''}),2500);};
@@ -3936,8 +3387,10 @@ class Component extends DCLogic {
       V.parentLocked=false;
       V.parentOpen=S.tab==='parent';
       V.unlockParent=()=>{if((f.ppw||'')===D.settings.parentPw)this.setState({parentOk:true,pwErr:'',f:{...f,ppw:''}});else this.setState({pwErr:'비밀번호가 틀렸어요 (기본: 0000)'});};
-      V.pviewsV=[{id:'kids',label:'👧 자녀 일정'},{id:'stk',label:'🌟 스티커'},{id:'money',label:'💳 가계부'},{id:'set',label:'⚙️ 설정'}].map(pv=>({...pv,...chip(S.pview===pv.id),go:()=>this.setState({pview:pv.id})}));
-      V.pvKids=S.pview==='kids';V.pvMoney=S.pview==='money';V.pvSet=S.pview==='set';V.pvSetOrKids=V.pvKids||V.pvSet;
+      // 가계부는 별도 페이지(money/)로 옮겼다 — 칩은 남기되 누르면 그리로 간다
+      V.pviewsV=[{id:'kids',label:'👧 자녀 일정'},{id:'stk',label:'🌟 스티커'},{id:'money',label:'💳 가계부'},{id:'set',label:'⚙️ 설정'}]
+        .map(pv=>({...pv,...chip(S.pview===pv.id),go:pv.id==='money'?(()=>this.goWallet()):(()=>this.setState({pview:pv.id}))}));
+      V.pvKids=S.pview==='kids';V.pvMoney=false;V.pvSet=S.pview==='set';V.pvSetOrKids=V.pvKids||V.pvSet;
       V.pvStk=S.pview==='stk';
       V.pErrBal=this.errAvail(D,u.id);
       const pErr=(D.err||[]).filter(x=>x.k===u.id).slice().sort((a,b)=>b.d.localeCompare(a.d));
@@ -4150,290 +3603,6 @@ class Component extends DCLogic {
       V.hasRewardMg=V.rewardMgV.length>0;
       V.addReward=()=>{if(!(f.rwName||'').trim())return;const n=Math.max(1,Number(f.rwCost)||1);
         this.mut(d=>{d.rewards.push({id:this.uid(),k:rwK,name:f.rwName.trim(),e:rwE,cost:n,desc:(f.rwDesc||'').trim()});});this.clearF(['rwName','rwCost','rwDesc']);};
-      // money
-      const bm=S.budM;
-      const mtx=D.tx.filter(x=>x.d.slice(0,7)===bm);
-      const mIn=mtx.filter(x=>x.ty==='in').reduce((s2,x)=>s2+x.a,0);
-      const mOut=mtx.filter(x=>x.ty==='out').reduce((s2,x)=>s2+x.a,0);
-      V.budMonthLabel=this.mLabel(bm);V.monthIn=W(mIn);V.monthOut=W(mOut);V.monthNet=(mIn-mOut>=0?'+':'−')+W(Math.abs(mIn-mOut));
-      V.mviewsV=[{id:'list',icon:'📋',label:'내역'},{id:'stat',icon:'📊',label:'분석'},{id:'cal',icon:'🗓️',label:'달력'},{id:'fix',icon:'🔁',label:'고정비'},{id:'budget',icon:'🎯',label:'예산'},{id:'asset',icon:'🏦',label:'자산'}].map(mv=>({...mv,...chip(S.mview===mv.id),go:()=>this.setState({mview:mv.id})}));
-      V.mvList=S.mview==='list';V.mvCal=S.mview==='cal';V.mvBudget=S.mview==='budget';V.mvAsset=S.mview==='asset';V.mvFix=S.mview==='fix';V.mvStat=S.mview==='stat';
-      V.onReceipt=e=>this.receipt(e);
-      V.aiBusy=S.aiBusy;V.hasAiMsg=!!S.aiMsg;V.aiMsg=S.aiMsg;V.aiProg=S.aiProg||'';
-      V.catsV=this.CATS.map(v=>({v}));
-      const txTy=f.txType||'out';
-      V.txOutBg=txTy==='out'?sk.ac:sk.card;V.txOutFg=txTy==='out'?sk.on:sk.sub;V.txInBg=txTy==='in'?sk.ac:sk.card;V.txInFg=txTy==='in'?sk.on:sk.sub;
-      V.txTrBg=txTy==='tr'?sk.ac:sk.card;V.txTrFg=txTy==='tr'?sk.on:sk.sub;
-      V.txSetOut=()=>this.setF('txType','out');V.txSetIn=()=>this.setF('txType','in');V.txSetTr=()=>this.setF('txType','tr');
-      V.txEditing=!!S.txEdit;V.txSaveLabel=S.txEdit?'수정':'저장';
-      V.txCancelEdit=()=>{this.setState({txEdit:null,aiMsg:''});this.clearF(['txAmt','txMemo','txType']);};
-      V.addTx=()=>{if(!f.txAmt)return;
-        if(S.txEdit){this.mut(d=>{const x=d.tx.find(y=>y.id===S.txEdit);if(x){x.d=f.txDate||x.d;x.ty=txTy;x.a=Number(f.txAmt);x.c=txTy==='tr'?'이체':(f.txCat||x.c);x.memo=(f.txMemo||'').trim()||'-';x.pay=f.txPay||x.pay||'bank';}});this.setState({txEdit:null,aiMsg:'✏️ 수정했어요'});}
-        else{this.mut(d=>{d.tx.push({id:this.uid(),d:f.txDate||t,ty:txTy,a:Number(f.txAmt),c:txTy==='tr'?'이체':(f.txCat||'기타'),memo:(f.txMemo||'').trim()||'-',pay:f.txPay||'bank',photo:S.rcThumb});});this.setState({rcThumb:null,aiMsg:''});}
-        this.clearF(['txAmt','txMemo']);};
-      const txClr=ty=>ty==='in'?'#2E9E63':ty==='tr'?'#8A8177':'#E5484D';
-      const txSign=ty=>ty==='in'?'+':ty==='tr'?'⇄ ':'−';
-      const PAYS=[{v:'bank',l:'🏦 통장',ic:'🏦'},{v:'card',l:'💳 카드',ic:'💳'},{v:'cash',l:'💵 현금',ic:'💵'}];
-      V.paysV=PAYS;
-      const pf=S.payF||'all';
-      V.payFilterV=[{v:'all',l:'전체'}].concat(PAYS.map(p=>({v:p.v,l:p.l}))).map(p=>({l:p.l,
-        bg:pf===p.v?sk.soft:sk.card,fg:pf===p.v?sk.tx:sk.sub,bd:pf===p.v?sk.ac:sk.line,
-        go:()=>this.setState({payF:p.v})}));
-      const payLbl={all:'전체 내역',bank:'통장 내역',card:'카드 내역',cash:'현금 내역'};
-      V.payFilterLabel=payLbl[pf];
-      const shown=D.tx.filter(x=>x.d.slice(0,7)===bm&&(pf==='all'||(x.pay||'bank')===pf));
-      V.payCount=String(shown.length);
-      V.payInSum=W(shown.filter(x=>x.ty==='in').reduce((s2,x)=>s2+x.a,0))+'원';
-      V.txEmpty=shown.length===0;
-      V.payOutSum=W(shown.filter(x=>x.ty==='out').reduce((s2,x)=>s2+x.a,0))+'원';
-      V.txV=shown.slice().sort((a,b)=>b.d.localeCompare(a.d)).map(tx=>({date:this.dShort(tx.d),cat:tx.c,memo:tx.memo,photo:tx.photo,hasPhoto:!!tx.photo,
-        amt:txSign(tx.ty)+W(tx.a),c:txClr(tx.ty),
-        payIcon:(PAYS.find(p=>p.v===(tx.pay||'bank'))||PAYS[0]).ic,
-        edit:()=>this.setState({txEdit:tx.id,mview:'list',aiMsg:'',budM:tx.d.slice(0,7),f:{...f,txDate:tx.d,txAmt:String(tx.a),txCat:tx.c,txMemo:tx.memo==='-'?'':tx.memo,txType:tx.ty,txPay:tx.pay||'bank'}}),
-        del:()=>this.mut(d=>{d.tx=d.tx.filter(x=>x.id!==tx.id);})}));
-      // budget calendar
-      const spendBy={};D.tx.filter(x=>x.ty==='out').forEach(x=>{spendBy[x.d]=(spendBy[x.d]||0)+x.a;});
-      const fmtShort=n=>n>=10000?(Math.round(n/1000)/10)+'만':(n>=1000?Math.round(n/1000)+'천':String(n));
-      V.budLabel=this.mLabel(bm);
-      V.budPrev=()=>this.setState({budM:this.shiftM(bm,-1)});
-      V.budNext=()=>this.setState({budM:this.shiftM(bm,1)});
-      V.budCellsV=this.grid(bm).map(c=>({num:c.num,bg:c.ds===S.budSel?sk.soft:'transparent',fg:c.ds===t?sk.ac:(c.inM?sk.tx:sk.line),
-        spend:c.inM&&spendBy[c.ds]?fmtShort(spendBy[c.ds]):'',sel:()=>this.setState({budSel:c.ds})}));
-      V.budSelLabel=this.dLabel(S.budSel)+' 내역';
-      const bday=D.tx.filter(x=>x.d===S.budSel);
-      V.budDayEmpty=!bday.length;
-      V.budDayV=bday.map(x=>({cat:x.c,memo:x.memo,amt:txSign(x.ty)+W(x.a)+'원',c:txClr(x.ty)}));
-      // budgets
-      const bk=f.bKind||'m';
-      V.bMBg=bk==='m'?sk.ac:sk.card;V.bMFg=bk==='m'?sk.on:sk.sub;V.bGBg=bk==='g'?sk.ac:sk.card;V.bGFg=bk==='g'?sk.on:sk.sub;
-      V.bSetM=()=>this.setF('bKind','m');V.bSetG=()=>this.setF('bKind','g');
-      V.addBudget=()=>{if(!(f.bName||'').trim()||!f.bAmt)return;this.mut(d=>{d.budgets.push({id:this.uid(),name:f.bName.trim(),kind:bk,c:f.bCat||'기타',a:Number(f.bAmt)});});this.clearF(['bName','bAmt']);};
-      const curM=t.slice(0,7);
-      V.budgetsV=D.budgets.map(b=>{
-        const pool=b.kind==='m'?D.tx.filter(x=>x.ty==='out'&&x.c===b.c&&x.d.slice(0,7)===curM):D.tx.filter(x=>x.ty==='out'&&x.c===b.c);
-        const spent=pool.reduce((s2,x)=>s2+x.a,0);const pct=Math.min(100,Math.round(spent/b.a*100));const over=spent>b.a;
-        return{name:b.name,kindLabel:b.kind==='m'?'매달':'목표',kindBg:b.kind==='m'?sk.ac:'#8B5CF6',pct,
-          barC:over?'#E5484D':(b.kind==='m'?sk.ac:'#8B5CF6'),spentC:over?'#E5484D':sk.tx,
-          spentLabel:(b.kind==='m'?'쓴 돈 ':'모인·쓴 금액 ')+W(spent)+'원'+(over?' (초과!)':' ('+pct+'%)'),
-          amtLabel:'예산 '+W(b.a)+'원',del:()=>this.mut(d=>{d.budgets=d.budgets.filter(x=>x.id!==b.id);})};});
-      // FIXED COSTS (고정비)
-      const PAYI={bank:'🏦',card:'💳',cash:'💵'},PAYL={bank:'통장',card:'카드',cash:'현금'};
-      const FREQ=[{v:'w',l:'매주'},{v:'m',l:'매월'},{v:'q',l:'분기'},{v:'h',l:'반기'},{v:'y',l:'매년'}];
-      const FTAG={w:'매주',m:'매월',q:'분기',h:'반기',y:'매년'};
-      const FCLR={w:'#8B5CF6',m:sk.ac,q:'#3B82F6',h:'#0EA5A4',y:'#EC4899'};
-      const fixed=(D.fixed||[]).slice();
-      const fpAll=D.fixedPaid||{},paidM=fpAll[bm]||{},paidPv=fpAll[this.shiftM(bm,-1)]||{};
-      const bmY=Number(bm.slice(0,4)),bmM=Number(bm.slice(5,7));
-      const dimM=new Date(bmY,bmM,0).getDate();
-      const fqOf=x=>x.freq||'m';
-      const expOf=x=>{const p=paidPv[x.id];return (x.vary&&p&&fqOf(x)!=='w')?Number(p.a):(Number(x.a)||0);};
-      const isCurM=bm===t.slice(0,7),todayD=Number(t.slice(8,10));
-      const wkCount=x=>{const wd=Number(x.wd)||0;let c=0;for(let i=1;i<=dimM;i++)if(new Date(bmY,bmM-1,i).getDay()===wd)c++;return c;};
-      const dueIn=x=>{const q=fqOf(x);if(q==='m'||q==='w')return true;
-        const diff=((bmM-(Number(x.mo)||1))%12+12)%12;
-        return q==='y'?diff===0:(q==='q'?diff%3===0:diff%6===0);};
-      const monthAmt=x=>fqOf(x)==='w'?(Number(x.a)||0)*wkCount(x):expOf(x);
-      const dueDay=x=>{const q=fqOf(x);
-        if(q==='w'){for(let i=1;i<=dimM;i++)if(new Date(bmY,bmM-1,i).getDay()===(Number(x.wd)||0))return i;return 1;}
-        return Math.min(dimM,Math.max(1,Number(x.day)||1));};
-      const fqLabel=x=>{const q=fqOf(x);
-        if(q==='w')return '매주 '+this.DAYS[Number(x.wd)||0]+'요일 (이번 달 '+wkCount(x)+'회)';
-        if(q==='m')return '매월 '+(Number(x.day)||1)+'일';
-        const pre=q==='q'?'3개월마다':(q==='h'?'6개월마다':'매년');
-        return pre+' '+(Number(x.mo)||1)+'월 '+(Number(x.day)||1)+'일';};
-      const avgM=x=>{const q=fqOf(x),b=Number(x.a)||0;
-        return q==='w'?Math.round(b*4.33):(q==='m'?b:Math.round(b/(q==='q'?3:(q==='h'?6:12))));};
-      const sorted=fixed.slice().sort((a,b)=>(dueIn(b)?1:0)-(dueIn(a)?1:0)||dueDay(a)-dueDay(b));
-      let fxT=0,fxP=0,fxLf=0,fxDone=0,fxDueN=0;const byPay={bank:0,card:0,cash:0};
-      sorted.forEach(x=>{if(!dueIn(x))return;fxDueN++;
-        const p=paidM[x.id],amt=p?Number(p.a):monthAmt(x);
-        fxT+=amt;byPay[x.pay]=(byPay[x.pay]||0)+amt;
-        if(p){fxP+=Number(p.a);fxDone++;}else fxLf+=amt;});
-      V.fxTotal=W(fxT)+'원';V.fxPaidSum=W(fxP)+'원';V.fxLeft=W(fxLf)+'원';
-      V.fxPct=fxT?Math.round(fxP/fxT*100):0;
-      V.fxProgLabel=sorted.length?('이번 달 해당 '+fxDueN+'건 중 '+fxDone+'건 완료'):'등록된 고정비 없음';
-      V.fxSubLabel='💳 '+W(byPay.card)+' · 💵 '+W(byPay.cash)+' · 🏦 '+W(byPay.bank);
-      V.fxEmpty=sorted.length===0;
-      const ffv=S.fxF||'all';
-      V.fxFilterV=[{v:'all',l:'전체'},{v:'card',l:'💳 카드'},{v:'cash',l:'💵 현금'},{v:'bank',l:'🏦 통장'}].map(p=>({l:p.l,
-        bg:ffv===p.v?sk.soft:sk.card,fg:ffv===p.v?sk.tx:sk.sub,bd:ffv===p.v?sk.ac:sk.line,
-        go:()=>this.setState({fxF:p.v})}));
-      const dr=S.fxD||{};
-      const fset=(k,v)=>this.setState(st=>({fxD:{...(st.fxD||{}),[k]:v}}));
-      const draftOf=x=>({name:x?x.name:'',amt:x?String(x.a||''):'',day:x&&x.day?String(x.day):'',
-        wd:(x&&x.wd!=null)?String(x.wd):'6',mo:x&&x.mo?String(x.mo):String(bmM),
-        cat:x?x.c:'생활/마트',pay:x?x.pay:'card',vary:(x&&x.vary)?1:0,freq:x?fqOf(x):'m'});
-      const saveFx=id=>{const nm=(dr.name||'').trim();if(!nm||!dr.amt)return;
-        const q=dr.freq||'m';
-        const rec={name:nm,pay:dr.pay||'card',c:dr.cat||'기타',freq:q,
-          a:Number(dr.amt)||0,vary:dr.vary?1:0,
-          day:q==='w'?null:Math.min(31,Math.max(1,Number(dr.day)||1)),
-          wd:q==='w'?(Number(dr.wd)||0):null,
-          mo:(q==='q'||q==='h'||q==='y')?Math.min(12,Math.max(1,Number(dr.mo)||1)):null};
-        this.mut(d=>{d.fixed=d.fixed||[];
-          if(id!=='new'){const y=d.fixed.find(z=>z.id===id);if(y)Object.assign(y,rec);}
-          else d.fixed.push({id:this.uid(),...rec});});
-        this.setState({fxEdit:null,fxD:null});};
-      const formVals=(id)=>{const q=dr.freq||'m',pk=dr.pay||'card';
-        return{fName:dr.name||'',fAmt:dr.amt||'',fDay:dr.day||'',fMo:dr.mo||String(bmM),fWd:dr.wd||'6',fCat:dr.cat||'생활/마트',
-          catsV:this.CATS.filter(c=>c!=='이체').map(v=>({v})),
-          wdV:this.DAYS.map((dd,i)=>({v:String(i),l:dd+'요일'})),
-          moV:Array.from({length:12},(z,i)=>({v:String(i+1),l:(i+1)+'월'})),
-          onName:e=>fset('name',e.target.value),onAmt:e=>fset('amt',e.target.value),
-          onDay:e=>fset('day',e.target.value),onCat:e=>fset('cat',e.target.value),
-          onMo:e=>fset('mo',e.target.value),onWd:e=>fset('wd',e.target.value),
-          freqV:FREQ.map(z=>({l:z.l,bg:q===z.v?FCLR[z.v]:sk.card,fg:q===z.v?'#fff':sk.sub,pick:()=>fset('freq',z.v)})),
-          payV:[{v:'card',l:'💳 카드'},{v:'cash',l:'💵 현금'},{v:'bank',l:'🏦 통장'}].map(z=>({l:z.l,
-            bg:pk===z.v?sk.ac:sk.card,fg:pk===z.v?sk.on:sk.sub,pick:()=>fset('pay',z.v)})),
-          showWd:q==='w',showDay:q!=='w',showMo:q==='q'||q==='h'||q==='y',
-          dayPh:'며칠에',
-          amtPh:q==='w'?'한 번에 내는 금액(원)':'보통 내는 금액(원)',
-          varyBg:dr.vary?sk.ac:sk.line,varyKnob:dr.vary?23:3,toggleVary:()=>fset('vary',dr.vary?0:1),
-          saveLabel:id==='new'?'추가하기':'수정 저장',
-          save:()=>saveFx(id),cancel:()=>this.setState({fxEdit:null,fxD:null})};};
-      V.fxRowsV=sorted.filter(x=>ffv==='all'||x.pay===ffv).map(x=>{
-        const p=paidM[x.id],due=dueIn(x),exp=monthAmt(x),amt=p?Number(p.a):exp;
-        const pv=paidPv[x.id]?Number(paidPv[x.id].a):null;
-        const diff=(p&&pv!=null)?Number(p.a)-pv:0;
-        const dday=dueDay(x);
-        const late=due&&!p&&isCurM&&dday<todayD;
-        const editing=S.fxEdit===x.id,q=fqOf(x);
-        const row={icon:PAYI[x.pay]||'🏦',name:x.name,cat:x.c,vary:!!x.vary,
-          freqTag:FTAG[q],freqBg:FCLR[q],
-          dayLabel:fqLabel(x),payLabel:PAYL[x.pay]||'',
-          prevLabel:!due?(' · 월평균 '+W(avgM(x))+'원'):((x.vary&&pv!=null&&!p)?' · 지난달 '+W(pv)+'원':''),
-          amtLabel:due?W(amt)+'원':'—',amtC:p?sk.tx:sk.sub,op:due?1:0.62,
-          paid:!!p,canPay:due&&!p&&!editing&&S.fxPayId!==x.id,
-          skip:!due,skipLabel:'이번 달은 해당 없어요',
-          stateLabel:!due?'해당 없음':(p?'납부 완료':(late?'납부일 지남':'예정')),
-          stateC:!due?sk.sub:(p?'#2E9E63':(late?'#E5484D':sk.sub)),
-          bd:editing?sk.ac:(late?'#E9B7B8':sk.line),
-          txDateLabel:bmM+'월 '+dday+'일 지출로 기록',
-          hasDiff:!!p&&pv!=null&&diff!==0,
-          diffLabel:(diff>0?'▲ ':'▼ ')+W(Math.abs(diff))+'원 (지난달 '+W(pv)+'원)',
-          diffC:diff>0?'#E5484D':'#2E9E63',
-          paying:S.fxPayId===x.id,
-          payAmt:S.fxPayId===x.id?(S.fxAmtDraft==null?String(exp):S.fxAmtDraft):'',
-          onPayAmt:e=>this.setState({fxAmtDraft:e.target.value}),
-          openPay:()=>this.setState({fxPayId:x.id,fxAmtDraft:String(exp),fxEdit:null}),
-          cancelPay:()=>this.setState({fxPayId:null,fxAmtDraft:null}),
-          confirmPay:()=>{const va=Number(S.fxAmtDraft)||exp,txId=this.uid();
-            this.mut(d=>{d.fixedPaid=d.fixedPaid||{};d.fixedPaid[bm]=d.fixedPaid[bm]||{};
-              d.fixedPaid[bm][x.id]={a:va,txId};
-              d.tx.push({id:txId,d:bm+'-'+String(dday).padStart(2,'0'),ty:'out',a:va,c:x.c,memo:x.name+' (고정비)',pay:x.pay});});
-            this.setState({fxPayId:null,fxAmtDraft:null});},
-          undo:()=>{const tid=p&&p.txId;this.mut(d=>{if(d.fixedPaid&&d.fixedPaid[bm])delete d.fixedPaid[bm][x.id];if(tid)d.tx=d.tx.filter(y=>y.id!==tid);});},
-          editing,editBg:editing?sk.soft:'transparent',
-          toggleEdit:()=>{if(editing)this.setState({fxEdit:null,fxD:null});
-            else this.setState({fxEdit:x.id,fxD:draftOf(x),fxPayId:null});},
-          del:()=>this.mut(d=>{d.fixed=(d.fixed||[]).filter(y=>y.id!==x.id);})};
-        if(editing)Object.assign(row,formVals(x.id));
-        return row;});
-      V.fxOpen=S.fxEdit==='new';V.fxClosed=S.fxEdit!=='new';
-      V.fxOpenForm=()=>this.setState({fxEdit:'new',fxD:draftOf(null),fxPayId:null});
-      V.nf=formVals('new');
-      // ANALYTICS + 관리자 조언
-      const sumM=(mm,ty)=>D.tx.filter(x=>x.ty===ty&&x.d.slice(0,7)===mm).reduce((s2,x)=>s2+x.a,0);
-      const monthsL=[];for(let i=5;i>=0;i--)monthsL.push(this.shiftM(bm,-i));
-      const maxV=Math.max(1,...monthsL.map(mm=>Math.max(sumM(mm,'in'),sumM(mm,'out'))));
-      const shortW=n=>n>=10000?(Math.round(n/10000)+'만'):(n>0?Math.round(n/1000)+'천':'0');
-      V.stMonthsV=monthsL.map(mm=>{const iv=sumM(mm,'in'),ov=sumM(mm,'out'),nv=iv-ov,sel=mm===bm;
-        return{label:Number(mm.slice(5,7))+'월',
-          inH:iv?Math.max(3,Math.round(iv/maxV*92)):1,
-          outH:ov?Math.max(3,Math.round(ov/maxV*92)):1,
-          net:(iv||ov)?((nv>=0?'+':'−')+shortW(Math.abs(nv))):'',
-          netC:nv>=0?'#2E9E63':'#E5484D',
-          bg:sel?sk.soft:'transparent',fg:sel?sk.tx:sk.sub,
-          go:()=>this.setState({budM:mm,budSel:mm+'-01'})};});
-      const aIn=sumM(bm,'in'),aOut=sumM(bm,'out'),aNet=aIn-aOut;
-      const rate=aIn?Math.round(aNet/aIn*100):0;
-      V.stRate=rate;V.stRateW=Math.max(0,Math.min(100,rate));
-      V.stRateC=rate>=30?'#2E9E63':(rate>=10?sk.ac:'#E5484D');
-      V.stRateNote=aIn===0?'수입 기록이 없어요':(rate>=30?'아주 잘 모으고 있어요':(rate>=10?'조금만 더 아껴봐요':(rate>=0?'거의 다 쓰고 있어요':'적자예요')));
-      const CATC=['#E08A3C','#C2643E','#8B5E3C','#A98E5F','#6E8B6E','#7A8BA6','#9A7AA6','#C77E9C'];
-      const catSum=mm=>{const o={};D.tx.filter(x=>x.ty==='out'&&x.d.slice(0,7)===mm).forEach(x=>{o[x.c]=(o[x.c]||0)+x.a;});return o;};
-      const cs=catSum(bm),csP=catSum(this.shiftM(bm,-1));
-      const csK=Object.keys(cs).sort((a,b)=>cs[b]-cs[a]);
-      const csTot=csK.reduce((s2,k)=>s2+cs[k],0),csMax=csK.length?cs[csK[0]]:1;
-      V.stNoCat=csK.length===0;
-      V.stCatsV=csK.slice(0,8).map((k,i)=>{const dv=cs[k]-(csP[k]||0);
-        return{name:k,amt:W(cs[k])+'원',pct:csTot?Math.round(cs[k]/csTot*100):0,
-          w:Math.max(4,Math.round(cs[k]/csMax*100)),c:CATC[i%CATC.length],
-          diff:csP[k]==null?'신규':(dv===0?'—':(dv>0?'▲':'▼')+W(Math.abs(dv))),
-          dC:dv>0?'#E5484D':(dv<0?'#2E9E63':sk.sub)};});
-      const ps={card:0,cash:0,bank:0};
-      D.tx.filter(x=>x.ty==='out'&&x.d.slice(0,7)===bm).forEach(x=>{const k=x.pay||'bank';ps[k]=(ps[k]||0)+x.a;});
-      V.stPaysV=[{k:'card',ic:'💳',l:'카드'},{k:'cash',ic:'💵',l:'현금'},{k:'bank',ic:'🏦',l:'통장'}]
-        .map(z=>({ic:z.ic,l:z.l,amt:W(ps[z.k])+'원',pct:csTot?Math.round(ps[z.k]/csTot*100)+'%':'0%'}));
-      const adv=[];
-      if(!aIn&&!aOut)adv.push({ic:'📭',txt:'이번 달은 아직 기록이 없어요. 내역을 넣으면 어디에 얼마 쓰는지 정리해 드려요.',c:sk.sub});
-      else{
-        if(aNet>=0)adv.push({ic:'💰',txt:'수입 '+W(aIn)+'원 중 '+W(aNet)+'원이 남았어요 (저축률 '+rate+'%). '+(rate>=30?'아주 잘하고 있어요!':(rate>=10?'조금만 더 아끼면 목표를 넘길 수 있어요.':'남는 돈이 적어요, 큰 지출부터 점검해보세요.')),c:sk.tx});
-        else adv.push({ic:'🚨',txt:'이번 달은 수입보다 '+W(-aNet)+'원 더 썼어요. 아래 지출 순위에서 큰 항목을 먼저 확인해보세요.',c:'#E5484D'});
-        if(csK.length)adv.push({ic:'🥇',txt:'가장 많이 쓴 곳은 '+csK[0]+' '+W(cs[csK[0]])+'원, 전체 지출의 '+Math.round(cs[csK[0]]/csTot*100)+'%예요'+(csK[1]?' · 다음은 '+csK[1]+' '+W(cs[csK[1]])+'원':'')+'.',c:sk.tx});
-        const pOut=sumM(this.shiftM(bm,-1),'out');
-        if(pOut){const dp=Math.round((aOut-pOut)/pOut*100);let rk=null,rv=0;
-          csK.forEach(k=>{const dv=cs[k]-(csP[k]||0);if(dv>rv){rv=dv;rk=k;}});
-          adv.push({ic:dp>0?'📈':'📉',txt:'지난달보다 지출이 '+Math.abs(dp)+'% '+(dp>0?'늘었어요':(dp<0?'줄었어요':'비슷해요'))+((rk&&dp>0)?' · '+rk+'에서 '+W(rv)+'원 늘었어요.':'.'),c:dp>0?'#E5484D':'#2E9E63'});}
-        if(fxT)adv.push({ic:'🔁',txt:'이번 달 고정비는 '+W(fxT)+'원'+(aIn?', 수입의 '+Math.round(fxT/aIn*100)+'%':'')+(fxLf?' · 아직 '+W(fxLf)+'원 낼 게 남았어요.':' · 모두 납부해서 지출에 반영됐어요.'),c:sk.tx});
-        const overs=(D.budgets||[]).filter(b=>b.kind==='m'&&(cs[b.c]||0)>b.a);
-        if(overs.length)adv.push({ic:'⚠️',txt:overs.map(b=>b.c+' 예산을 '+Math.round(((cs[b.c]||0)-b.a)/b.a*100)+'% 넘겼어요').join(' · ')+'.',c:'#E5484D'});}
-      V.adviceV=adv.slice(0,4);
-      V.advGrade=!aIn&&!aOut?'기록 필요':(aNet<0?'적자 주의':(rate>=30?'아주 좋아요':(rate>=10?'괜찮아요':'조금 위험')));
-      V.advGradeBg=!aIn&&!aOut?sk.sub:(aNet<0?'#E5484D':(rate>=30?'#2E9E63':(rate>=10?sk.ac:'#D97706')));
-      // ASSETS (통장·카드 관리)
-      const accs=(D.accounts||[]).slice();
-      const bankT=accs.filter(a=>a.kind==='bank').reduce((s2,a)=>s2+(Number(a.amt)||0),0);
-      const cardT=accs.filter(a=>a.kind==='card').reduce((s2,a)=>s2+(Number(a.amt)||0),0);
-      V.asBank=W(bankT);V.asCard=W(cardT);
-      V.asNet=(bankT-cardT<0?'−':'')+W(Math.abs(bankT-cardT));
-      V.asNetC=bankT-cardT<0?'#E5484D':sk.tx;
-      const ak=f.acKind||'bank';
-      V.acIsCard=ak==='card';V.acIsBank=ak==='bank';
-      const PURPS=[{v:'salary',l:'💰 급여',c:'#2E9E63'},{v:'living',l:'🛒 생활비',c:'#D97706'},{v:'saving',l:'🐷 저축',c:'#3B82F6'},{v:'emergency',l:'🚨 비상금',c:'#E5484D'},{v:'invest',l:'📈 투자',c:'#8B5CF6'}];
-      this.PURPS=PURPS;
-      const apv=f.acPurp||'living';
-      V.acPurpV=PURPS.concat([{v:'custom',l:'✏️ 직접 입력',c:'#64748B'}]).map(p=>({l:p.l,bg:apv===p.v?p.c:sk.card,fg:apv===p.v?'#fff':sk.sub,bd:apv===p.v?p.c:sk.line,pick:()=>this.setF('acPurp',p.v)}));
-      V.acPurpCustom=apv==='custom';
-      V.acBankBg=ak==='bank'?sk.ac:sk.card;V.acBankFg=ak==='bank'?sk.on:sk.sub;
-      V.acCardBg=ak==='card'?sk.ac:sk.card;V.acCardFg=ak==='card'?sk.on:sk.sub;
-      V.acSetBank=()=>this.setF('acKind','bank');V.acSetCard=()=>this.setF('acKind','card');
-      V.acNamePh=ak==='card'?'카드 이름 (예: 아빠 신용카드)':'통장 이름 (예: 급여 통장)';
-      V.acOrgPh=ak==='card'?'카드사':'은행';
-      V.acAmtPh=ak==='card'?'이번 달 쓴 금액(원)':'현재 잔액(원)';
-      V.acEditing=!!S.acEdit;
-      V.acOpen=!!S.acOpen||!!S.acEdit;V.acClosed=!V.acOpen;
-      V.acSaveLabel=S.acEdit?'수정 저장':'추가하기';
-      V.acFormTitle=S.acEdit?'✏️ 통장·카드 고치기':'🏦 통장·카드 등록';
-      V.acOpenForm=()=>{this.setState({acOpen:true,acEdit:null});this.clearF(['acName','acOrg','acAmt','acDay','acPurp','acPurpTxt']);};
-      V.acCancel=()=>{this.setState({acEdit:null,acOpen:false});this.clearF(['acName','acOrg','acAmt','acDay','acPurp','acPurpTxt']);};
-      V.addAcc=()=>{
-        const nm=(f.acName||'').trim();if(!nm)return;
-        const rec={kind:ak,name:nm,org:(f.acOrg||'').trim(),amt:Number(f.acAmt)||0,day:ak==='card'?(f.acDay||''):'',purp:ak==='bank'?(f.acPurp||'living'):'',purpTxt:ak==='bank'&&f.acPurp==='custom'?(f.acPurpTxt||'').trim():''};
-        const eid=S.acEdit;
-        this.mut(d=>{d.accounts=d.accounts||[];
-          if(eid){const x=d.accounts.find(y=>y.id===eid);if(x)Object.assign(x,rec);}
-          else d.accounts.push({id:this.uid(),...rec});});
-        this.setState({acEdit:null,acOpen:false});this.clearF(['acName','acOrg','acAmt','acDay','acPurp','acPurpTxt']);};
-      V.hasAccs=accs.length>0;V.noAccs=accs.length===0;
-      const accRow=a=>{const isC=a.kind==='card';const v=Number(a.amt)||0;
-        const pp=a.purp==='custom'?(a.purpTxt?{l:'✏️ '+a.purpTxt,c:'#64748B'}:null):PURPS.find(z=>z.v===a.purp);
-        return{icon:isC?'💳':'🏦',name:a.name,org:a.org||(isC?'카드':'통장'),
-          hasPurp:!isC&&!!pp,purpLabel:pp?pp.l:'',purpC:pp?pp.c:sk.sub,purpBg:pp?pp.c+'1A':sk.soft,
-          kindLabel:isC?'이번 달 사용':'현재 잔액',
-          amt:(isC?'−':'')+W(v)+'원',
-          amtC:isC?'#E5484D':'#2E9E63',
-          share:(isC?cardT:bankT)>0?Math.round(v/(isC?cardT:bankT)*100):0,
-          barC:isC?'#E5484D':'#2E9E63',
-          hasDay:isC&&!!a.day,dayLabel:'매월 '+a.day+'일 결제',
-          bd:S.acEdit===a.id?sk.ac:sk.line,
-          edit:()=>this.setState({acEdit:a.id,acOpen:true,f:{...f,acKind:a.kind,acName:a.name,acOrg:a.org||'',acAmt:String(a.amt||''),acDay:a.day||'',acPurp:a.purp||'living',acPurpTxt:a.purpTxt||''}}),
-          del:()=>{if(S.acEdit===a.id)this.setState({acEdit:null});this.mut(d=>{d.accounts=(d.accounts||[]).filter(x=>x.id!==a.id);});}};};
-      const bankL=accs.filter(a=>a.kind==='bank'),cardL=accs.filter(a=>a.kind==='card');
-      V.hasBankAccs=bankL.length>0;V.hasCardAccs=cardL.length>0;
-      V.bankAccsV=bankL.map(accRow);V.cardAccsV=cardL.map(accRow);
-      V.bankGroupLabel='통장 '+bankL.length+'개 · 합계 '+W(bankT)+'원';
-      V.cardGroupLabel='카드 '+cardL.length+'개 · 합계 '+W(cardT)+'원';
       // settings
       V.useTT=D.settings.useTT;
       V.ttSwBg=D.settings.useTT?sk.ac:sk.line;V.ttKnob=D.settings.useTT?25:3;
