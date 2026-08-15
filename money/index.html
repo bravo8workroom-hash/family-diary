@@ -670,6 +670,27 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
       <sc-if value="{{ fxClosed }}" hint-placeholder-val="{{ true }}">
         <button class="wide" onClick="{{ fxOpenForm }}" style="background:var(--card);border:1.5px dashed var(--ac);border-radius:14px;padding:14px;font-size:14px;font-weight:800;color:var(--ac);cursor:pointer;width:100%;">＋ 고정비 항목 추가하기</button>
       </sc-if>
+
+      <!-- ⏸ 안 나가게 된 고정비 — 지운 게 아니라 쉬는 중. 되돌릴 길을 옆에 둔다 -->
+      <sc-if value="{{ fxStopShow }}" hint-placeholder-val="{{ false }}">
+        <div class="wide" style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;">
+          <div style="display:flex;align-items:baseline;gap:6px;">
+            <span style="font-size:13px;font-weight:800;color:var(--sub);">⏸ 그만 나가는 고정비</span>
+            <span class="num" style="font-size:11px;font-weight:800;color:var(--sub);">{{ fxStopN }}</span>
+          </div>
+          <div style="font-size:11px;color:var(--sub);margin-top:5px;line-height:1.7;">한 번 걸러서 자동으로 뺐어요. 지난달까지 기록은 그대로 있고, 다시 나가면 저절로 돌아와요</div>
+          <sc-for list="{{ fxStopV }}" as="fs" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:8px;margin-top:11px;padding-top:11px;border-top:1px solid var(--line);">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ fs.name }}</div>
+                <div style="font-size:11px;color:var(--sub);margin-top:3px;">{{ fs.sub }}</div>
+              </div>
+              <button onClick="{{ fs.back }}" style="background:var(--soft);color:var(--tx);border:none;border-radius:11px;padding:11px 13px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;min-height:40px;flex-shrink:0;">다시 넣기</button>
+              <button onClick="{{ fs.del }}" title="아주 지우기" style="background:none;border:1px solid var(--line);border-radius:11px;width:40px;min-height:40px;color:var(--sub);font-size:13px;cursor:pointer;flex-shrink:0;">✕</button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
     </sc-if>
 
     <!-- ══ 🎯 예산 ══ -->
@@ -703,7 +724,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
                 <span class="num" style="font-size:13px;font-weight:900;line-height:1.2;letter-spacing:-.02em;white-space:nowrap;">{{ budPlanOut }}</span>
               </div>
             </div>
-            <div style="flex:1;min-width:170px;display:flex;flex-direction:column;gap:8px;">
+            <div style="flex:1;min-width:170px;max-width:400px;display:flex;flex-direction:column;gap:8px;">
               <sc-for list="{{ pieLegV }}" as="pl" hint-placeholder-count="4">
                 <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;">
                   <span style="width:11px;height:11px;border-radius:4px;background:{{ pl.c }};flex:none;"></span>
@@ -742,8 +763,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
               <span style="font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;background:var(--soft);color:var(--ac);">{{ bi.dayLabel }}</span>
             </sc-if>
             <span style="flex:1;"></span>
-            <button onClick="{{ bi.edit }}" title="고치기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:34px;min-height:34px;">✏️</button>
-            <button onClick="{{ bi.del }}" title="지우기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:34px;min-height:34px;">✕</button>
+            <button onClick="{{ bi.edit }}" title="고치기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:44px;min-height:44px;">✏️</button>
+            <button onClick="{{ bi.del }}" title="지우기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:44px;min-height:44px;">✕</button>
           </div>
           <sc-if value="{{ bi.hasMemo }}" hint-placeholder-val="{{ false }}">
             <div style="font-size:11.5px;color:var(--sub);margin-top:7px;">{{ bi.memo }}</div>
@@ -771,8 +792,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
               <span style="font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;background:var(--soft);color:var(--ac);">{{ bx.dayLabel }}</span>
             </sc-if>
             <span style="flex:1;"></span>
-            <button onClick="{{ bx.edit }}" title="고치기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:34px;min-height:34px;">✏️</button>
-            <button onClick="{{ bx.del }}" title="지우기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:34px;min-height:34px;">✕</button>
+            <button onClick="{{ bx.edit }}" title="고치기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:44px;min-height:44px;">✏️</button>
+            <button onClick="{{ bx.del }}" title="지우기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:44px;min-height:44px;">✕</button>
           </div>
           <sc-if value="{{ bx.hasMemo }}" hint-placeholder-val="{{ false }}">
             <div style="font-size:11.5px;color:var(--sub);margin-top:7px;">{{ bx.memo }}</div>
@@ -807,8 +828,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
               <span style="font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;background:var(--soft);color:var(--ac);">{{ bo.dayLabel }}</span>
             </sc-if>
             <span style="flex:1;"></span>
-            <button onClick="{{ bo.edit }}" title="고치기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:34px;min-height:34px;">✏️</button>
-            <button onClick="{{ bo.del }}" title="지우기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:34px;min-height:34px;">✕</button>
+            <button onClick="{{ bo.edit }}" title="고치기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:44px;min-height:44px;">✏️</button>
+            <button onClick="{{ bo.del }}" title="지우기" style="background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;min-width:44px;min-height:44px;">✕</button>
           </div>
           <sc-if value="{{ bo.hasMemo }}" hint-placeholder-val="{{ false }}">
             <div style="font-size:11.5px;color:var(--sub);margin-top:7px;">{{ bo.memo }}</div>
@@ -883,7 +904,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
 
           <div style="font-size:11.5px;color:{{ budHintC }};margin-top:10px;">{{ budHint }}</div>
           <div style="display:flex;gap:8px;margin-top:8px;">
-            <button onClick="{{ budSave }}" style="flex:1;background:{{ budSaveBg }};color:var(--on);border:none;border-radius:12px;padding:13px 14px;font-weight:800;font-size:14px;cursor:pointer;">{{ budSaveLabel }}</button>
+            <button onClick="{{ budSave }}" style="flex:1;background:{{ budSaveBg }};color:{{ budSaveFg }};border:none;border-radius:12px;padding:13px 14px;font-weight:800;font-size:14px;cursor:pointer;">{{ budSaveLabel }}</button>
             <button onClick="{{ budCancel }}" style="flex:1;background:var(--soft);color:var(--tx);border:none;border-radius:12px;padding:13px;font-weight:800;font-size:14px;cursor:pointer;">취소</button>
           </div>
         </div>
@@ -1117,7 +1138,17 @@ class Component extends DCLogic {
     const m=s.match(/\(\s*\d{1,3}\s*\/\s*(\d{1,3})\s*\)/);
     return s.replace(/\(고정비\)/g,'').replace(/\(\s*\d{1,3}\s*\/\s*\d{1,3}\s*\)/g,'')
       .replace(/\s+/g,'').toLowerCase()+(m?'#'+m[1]:'');}
-  buyOf(memo){const k=this.buyKey(memo);if(!k)return '';
+  // 열쇠를 실제 저장된 것에 맞춰 준다. 고정비 「납부」가 만드는 줄은 memo 가 "롯데하이마트 할부 (고정비)" 라
+  // 회차가 없다(1735줄) — 그대로 두면 그 줄만 영영 안 이어진다.
+  // 회차 없는 쪽은 **후보가 딱 하나일 때만** 잇는다. 같은 가게에 할부가 둘이면 넘겨짚지 않는다.
+  buyKeyFor(memo){const k=this.buyKey(memo);if(!k)return '';
+    const B=((this.state.data||{}).installBuys)||{};
+    if(B[k])return k;
+    const bare=k.split('#')[0];
+    if(k!==bare)return B[bare]?bare:k;
+    const hits=Object.keys(B).filter(x=>x.indexOf(bare+'#')===0);
+    return hits.length===1?hits[0]:k;}
+  buyOf(memo){const k=this.buyKeyFor(memo);if(!k)return '';
     return String((((this.state.data||{}).installBuys)||{})[k]||'');}
 
   componentDidMount(){
@@ -1126,7 +1157,7 @@ class Component extends DCLogic {
     document.addEventListener('paste',this._paste);
     window.FamilyStore.start({seed:()=>({}), onRemote:doc=>this.setState({data:this.fill(doc)})})
       .then(doc=>{
-        this.setState({data:this.fill(doc||{}),budM:t.slice(0,7),budSel:t},()=>this.autoMonthly());
+        this.setState({data:this.fill(doc||{}),budM:t.slice(0,7),budSel:t},()=>{this.autoStopFixed();this.autoMonthly();});
       });
   }
   // 이 페이지는 가족 데이터를 새로 만들지 않는다 — 없는 칸만 빈 값으로 채워 읽기 안전하게 한다
@@ -1145,6 +1176,38 @@ class Component extends DCLogic {
     this.storeReport(this.buildMonth(prev),true);
   }
 
+  // ══════════ 안 나가는 고정비는 스스로 뺀다 (사장님 지시 2026-08-15) ══════════
+  // 신호는 하나뿐이다: 마지막으로 낸 달 뒤로, **이미 다 지나간 달**에서 해당 회차를 한 번 걸렀다.
+  //  ⚠ 이번 달은 절대 세지 않는다 — 카드 명세서는 한 달 늦게 온다. 이번 달 「납부일 지남」은
+  //    안 나갔다는 증거가 아니라 아직 명세서가 안 왔다는 뜻이다. 이 한 줄이 빠지면 멀쩡한 고정비가 통째로 사라진다.
+  //  ⚠ 한 번도 낸 적 없는 항목도 세지 않는다 — 손으로 방금 등록한 것이 첫 납부 전에 사라지면 안 된다.
+  // 지우는 게 아니라 stop('이 달부터 안 나감')만 단다 — 지난달까지 기록·보고서는 그대로 남는다.
+  // 되살아나는 길 둘: ① 그 달 납부가 뒤늦게 찍히면 저절로 ② 손으로 「다시 넣기」(keepM 에 그 달을 적어
+  // 시계를 되돌린다 — 이게 없으면 되살리는 즉시 또 빠진다).
+  fxDueM(x,ym){const q=x.freq||'m';if(q==='m'||q==='w')return true;
+    const diff=((Number(ym.slice(5,7))-(Number(x.mo)||1))%12+12)%12;
+    return q==='y'?diff===0:(q==='q'?diff%3===0:diff%6===0);}
+  fxOff(x,ym){return !!(x.stop&&ym>=x.stop);}
+  fxLastPaid(id){const fp=(this.state.data||{}).fixedPaid||{};
+    return Object.keys(fp).filter(ym=>fp[ym]&&fp[ym][id]).sort().pop()||'';}
+  autoStopFixed(){
+    const D=this.state.data;if(!D||!(D.fixed||[]).length)return;
+    const cur=this.today().slice(0,7),out=[],back=[];
+    D.fixed.forEach(x=>{
+      const lp=this.fxLastPaid(x.id);
+      if(x.stop){if(lp&&lp>=x.stop)back.push(x.id);return;}
+      const anchor=(x.keepM&&x.keepM>lp)?x.keepM:lp;
+      if(!anchor)return;
+      for(let m=this.shiftM(anchor,1),i=0;m<cur&&i<60;m=this.shiftM(m,1),i++)
+        if(this.fxDueM(x,m)){out.push({id:x.id,name:x.name,from:m});break;}
+    });
+    if(!out.length&&!back.length)return;
+    this.mut(d=>{(d.fixed||[]).forEach(x=>{
+      const o=out.find(v=>v.id===x.id);if(o)x.stop=o.from;
+      if(back.indexOf(x.id)>=0){delete x.stop;delete x.keepM;}});});
+    if(out.length)this.flash('⏸ '+out.map(o=>'「'+o.name+'」').join(' ')+' 안 나가서 고정비에서 뺐어요');
+  }
+
   // ══════════ 보고서 ══════════
   // 로드맵 보고서 문체를 그대로 쓴다 — [소제목] · ※수치 · ◐비교 · →판단 · ▶실행
   mSum(ym,ty){const D=this.state.data;return D.tx.filter(x=>x.ty===ty&&x.d.slice(0,7)===ym).reduce((s,x)=>s+x.a,0);}
@@ -1154,12 +1217,11 @@ class Component extends DCLogic {
     const D=this.state.data,y=Number(ym.slice(0,4)),m=Number(ym.slice(5,7));
     const dim=new Date(y,m,0).getDate(),paid=(D.fixedPaid||{})[ym]||{};
     const wk=x=>{let c=0;for(let i=1;i<=dim;i++)if(new Date(y,m-1,i).getDay()===(Number(x.wd)||0))c++;return c;};
-    const due=x=>{const q=x.freq||'m';if(q==='m'||q==='w')return true;
-      const diff=((m-(Number(x.mo)||1))%12+12)%12;return q==='y'?diff===0:(q==='q'?diff%3===0:diff%6===0);};
+    const due=x=>this.fxDueM(x,ym);
     const day=x=>{const q=x.freq||'m';
       if(q==='w'){for(let i=1;i<=dim;i++)if(new Date(y,m-1,i).getDay()===(Number(x.wd)||0))return i;return 1;}
       return Math.min(dim,Math.max(1,Number(x.day)||1));};
-    const rows=(D.fixed||[]).filter(due).map(x=>{
+    const rows=(D.fixed||[]).filter(x=>!this.fxOff(x,ym)&&due(x)).map(x=>{
       const p=paid[x.id],exp=(x.freq||'m')==='w'?(Number(x.a)||0)*wk(x):(Number(x.a)||0);
       return {name:x.name,day:day(x),exp,paid:!!p,amt:p?Number(p.a):exp};});
     return {rows,total:rows.reduce((s,r)=>s+r.amt,0),done:rows.filter(r=>r.paid).length,
@@ -1470,7 +1532,7 @@ class Component extends DCLogic {
     V.txBuyHint=txBuyNow?'📦 매달 이 할부가 나갈 때 내역에 함께 보여요':'📦 할부는 산 물건을 꼭 적어야 저장돼요';
     V.txBuyHintC=txBuyNow?sk.sub:OUT_C;V.txBuyLine=txBuyNow?sk.line:OUT_C;
     V.addTx=()=>{if(!f.txAmt)return;
-      const memo=txMemoNow||'-',bk=this.buyKey(memo);
+      const memo=txMemoNow||'-',bk=this.buyKeyFor(memo);
       if(bk&&!txBuyNow){this.setState({aiMsg:'📦 할부는 무엇을 샀는지 꼭 적어 주세요'});return;}
       const keepBuy=d=>{if(bk){d.installBuys=d.installBuys||{};d.installBuys[bk]=txBuyNow;}};
       if(S.txEdit){this.mut(d=>{const x=d.tx.find(y=>y.id===S.txEdit);if(x){x.d=f.txDate||x.d;x.ty=txTy;x.a=Number(f.txAmt);
@@ -1615,7 +1677,7 @@ class Component extends DCLogic {
     const bOK=!!(f.bName||'').trim()&&bAmtN>0;
     V.budHint=bOK?'담을 준비가 됐어요':'계정을 고르고 금액을 눌러 주세요';
     V.budHintC=bOK?IN_C:sk.sub;
-    V.budSaveBg=bOK?sk.ac:sk.line;
+    V.budSaveBg=bOK?sk.ac:sk.soft;V.budSaveFg=bOK?sk.on:sk.sub;
     V.budSaveLabel=S.budEdit?'수정 저장':'담기';
     V.budSave=()=>{
       const nm=(f.bName||'').trim();if(!nm||!(Number(f.bAmt)>0))return;
@@ -1632,7 +1694,9 @@ class Component extends DCLogic {
     const FREQ=[{v:'w',l:'매주'},{v:'m',l:'매월'},{v:'q',l:'분기'},{v:'h',l:'반기'},{v:'y',l:'매년'}];
     const FTAG={w:'매주',m:'매월',q:'분기',h:'반기',y:'매년'};
     const FCLR={w:'#8B5CF6',m:sk.ac,q:'#3B82F6',h:'#0EA5A4',y:'#EC4899'};
-    const fixed=(D.fixed||[]).slice();
+    // 「그만 나가는」 것으로 표시된 항목은 그 달부터 목록·합계·보고서에서 빠진다 (그 전 달에는 그대로 보인다)
+    const fixed=(D.fixed||[]).filter(x=>!this.fxOff(x,bm));
+    const fxStopped=(D.fixed||[]).filter(x=>this.fxOff(x,bm));
     const fpAll=D.fixedPaid||{},paidM=fpAll[bm]||{},paidPv=fpAll[this.shiftM(bm,-1)]||{};
     const bmY=Number(bm.slice(0,4)),bmM=Number(bm.slice(5,7));
     const dimM=new Date(bmY,bmM,0).getDate();
@@ -1640,9 +1704,7 @@ class Component extends DCLogic {
     const expOf=x=>{const p=paidPv[x.id];return (x.vary&&p&&fqOf(x)!=='w')?Number(p.a):(Number(x.a)||0);};
     const isCurM=bm===t.slice(0,7),todayD=Number(t.slice(8,10));
     const wkCount=x=>{const wd=Number(x.wd)||0;let c=0;for(let i=1;i<=dimM;i++)if(new Date(bmY,bmM-1,i).getDay()===wd)c++;return c;};
-    const dueIn=x=>{const q=fqOf(x);if(q==='m'||q==='w')return true;
-      const diff=((bmM-(Number(x.mo)||1))%12+12)%12;
-      return q==='y'?diff===0:(q==='q'?diff%3===0:diff%6===0);};
+    const dueIn=x=>this.fxDueM(x,bm);
     const monthAmt=x=>fqOf(x)==='w'?(Number(x.a)||0)*wkCount(x):expOf(x);
     const dueDay=x=>{const q=fqOf(x);
       if(q==='w'){for(let i=1;i<=dimM;i++)if(new Date(bmY,bmM-1,i).getDay()===(Number(x.wd)||0))return i;return 1;}
@@ -1745,6 +1807,14 @@ class Component extends DCLogic {
     V.fxOpen=S.fxEdit==='new';V.fxClosed=S.fxEdit!=='new';
     V.fxOpenForm=()=>this.setState({fxEdit:'new',fxD:draftOf(null),fxPayId:null});
     V.nf=formVals('new');
+
+    // ⏸ 그만 나가는 고정비 — 자동으로 뺀 것을 숨기지 않고 보여주고 되돌릴 길을 남긴다
+    V.fxStopShow=fxStopped.length>0;V.fxStopN=fxStopped.length+'건';
+    V.fxStopV=fxStopped.map(x=>({name:x.name,
+      sub:fqLabel(x)+' · 보통 '+W(Number(x.a)||0)+'원 · '+this.mLabel(x.stop)+'부터 안 나감',
+      back:()=>this.mut(d=>{const y=(d.fixed||[]).find(z=>z.id===x.id);
+        if(y){delete y.stop;y.keepM=t.slice(0,7);}}),   // keepM = 시계 되돌리기. 없으면 즉시 또 빠진다
+      del:()=>this.mut(d=>{d.fixed=(d.fixed||[]).filter(y=>y.id!==x.id);})}));
 
     // ── 📊 분석 + 관리자 조언 ──
     const monthsL=[];for(let i=5;i>=0;i--)monthsL.push(this.shiftM(bm,-i));
