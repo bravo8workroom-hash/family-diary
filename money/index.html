@@ -798,7 +798,7 @@ class Component extends DCLogic {
   state = {
     data:null, f:{}, mview:'list', budM:'', budSel:'', payF:'all', fxF:'all',
     txEdit:null, fxEdit:null, fxD:null, fxPayId:null, fxAmtDraft:null,
-    acEdit:null, acOpen:false, aiBusy:false, aiMsg:'', aiProg:'',
+    acEdit:null, acOpen:false, aiBusy:false, aiMsg:'', aiProg:'', aiSent:0,
     rview:'now', openRep:null, repMsg:''
   };
 
@@ -1040,16 +1040,21 @@ class Component extends DCLogic {
 
   // 캡처를 복사해서 붙여넣기(Ctrl+V)로도 올릴 수 있다 — 내역 화면에서만 받는다
   onPaste(ev){
-    if(this.state.mview!=='list'||this.state.aiBusy)return;
+    if(this.state.mview!=='list')return;
     const items=Array.from((ev.clipboardData&&ev.clipboardData.items)||[]);
     const files=items.filter(it=>it.kind==='file'&&(it.type||'').indexOf('image/')===0)
       .map(it=>it.getAsFile()).filter(Boolean);
     if(!files.length)return;
     ev.preventDefault();
+    // 앞 장을 맡기는 중이면 조용히 버리지 말고 알려준다 (그냥 두면 사라진 줄 안다)
+    if(this.state.aiBusy){this.setState({aiMsg:'⏳ 앞 캡처를 맡기는 중이에요 — 끝나면 다시 붙여넣어 주세요'});return;}
     this.sendShots(files);
   }
 
   async sendShots(files){
+    // 붙여넣기·파일 올리기를 나눠서 해도 한 화면에서 맡긴 건 모두 합쳐서 알려준다.
+    // 안내 문구가 지워진 뒤라면(다른 작업으로 화면이 초기화됨) 다시 0부터 센다
+    const before=this.state.aiMsg?(this.state.aiSent||0):0;
     this.setState({aiBusy:true,aiMsg:'',aiProg:files.length>1?'(0/'+files.length+')':''});
     const shots=[];
     for(let i=0;i<files.length;i++){
@@ -1059,8 +1064,9 @@ class Component extends DCLogic {
     const accs=(this.state.data.accounts||[]).filter(a=>a.kind==='bank')
       .map(a=>({name:a.name,org:a.org||'',purp:a.purp||'',purpTxt:a.purpTxt||''}));
     const r=await window.FamilyStore.ask('receipt',{accounts:accs,cats:CATS},shots,this.whoName());
-    this.setState({aiBusy:false,aiProg:'',aiMsg:r&&r.ok
-      ?('📮 '+files.length+'장 맡겨뒀어요 — 정리되면 아래 내역에 자동으로 올라와요')
+    const sent=before+(r&&r.ok?files.length:0);
+    this.setState({aiBusy:false,aiProg:'',aiSent:sent,aiMsg:r&&r.ok
+      ?('📮 지금까지 '+sent+'장 맡겨뒀어요 — 정리되면 아래 내역에 자동으로 올라와요')
       :'😢 맡기지 못했어요. 인터넷 연결을 확인해 주세요'});
   }
 
