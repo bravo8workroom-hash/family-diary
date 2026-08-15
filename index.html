@@ -2962,10 +2962,15 @@ class Component extends DCLogic {
       if(!data.sttrash)data.sttrash=[];
       data.stlog.concat(data.exch).forEach(x=>{if(x.id===undefined)x.id=this.uid();});
       if(!data.kfV2){data.fishlog=this.seed().fishlog;data.kfV2=1;}
+      // 퀴즈 기능을 없앴다 — 남아 있던 퀴즈 자료와 퀴즈 일정을 한 번만 지운다
+      const qLeft=!!(data.quizzes||data.qruns||data.events.some(x=>x.qid));
+      if(qLeft){delete data.quizzes;delete data.qruns;data.events=data.events.filter(x=>!x.qid);}
       // 완료한 할일은 30일이 지나면 자동으로 지운다 (완료 표시 da 기준)
       data.events.forEach(ev=>{if(ev.cl)ev.cl=ev.cl.filter(c=>!(c.dn&&c.da&&Date.now()-c.da>30*86400000));});
       const t=this.today();
-      this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),tideM:t.slice(0,7),selDate:t,budSel:t},()=>this.fcBackfill());
+      this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),tideM:t.slice(0,7),selDate:t,budSel:t},()=>{
+        if(qLeft)window.FamilyStore.save(this.state.data);
+        this.fcBackfill();});
     });
   }
   componentWillUnmount(){if(this.feedPaste)document.removeEventListener('paste',this.feedPaste);}
