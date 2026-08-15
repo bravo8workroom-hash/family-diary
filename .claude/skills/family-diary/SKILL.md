@@ -39,8 +39,17 @@ are all defined there, and that file is the **single source of truth**
 two copies always drift apart.
 
 Put these three lines verbatim in the brief you hand over:
-① no sentence without evidence (text visible in the capture) ② drop unreadable
-pages and say so ③ if you do not know, say "모른다".
+① no sentence without evidence (text visible in the capture, **or written by the
+family in `✍️ 적어 보낸 것`**) ② drop unreadable pages and say so ③ if you do not
+know, say "모른다".
+
+**A job may arrive with no captures at all.** The family can hand over three kinds
+of material: a capture, a written description, or a category they picked. `list`
+prints the written ones as `✍️ 적어 보낸 것 N: …`, with `→ 항목 지정: <분류>` when
+they chose the category themselves. Treat that text as evidence of the same rank as
+a capture — build the transaction from it, and when a category is given, use it as
+`c` instead of guessing. Never reply `캡처가 없어서 못 했어요` to a job that carries
+written material; only `fail` when neither captures nor notes yield anything.
 
 When there are only one or two captures and doing it yourself is cheaper, read that
 file and follow it. The gist:

@@ -201,9 +201,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
         <div style="margin-top:12px;background:var(--bg);border:1px solid var(--ac);border-radius:14px;padding:12px;">
           <div style="font-size:12.5px;font-weight:800;margin-bottom:8px;word-break:keep-all;line-height:1.6;">무엇을 봐 드릴까요? 안 적어도 이번 달 살림을 훑어 드려요</div>
           <input value="{{ callTxt }}" onChange="{{ on.callTxt }}" placeholder="예: 식비가 왜 늘었는지 봐주세요" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:inherit;font-size:14px;">
-          <!-- 부르면 보관함에 담아둔 캡처가 이 호출에 함께 실려 한꺼번에 처리된다 -->
+          <!-- 부르면 보관함에 담아둔 사진·메모가 이 호출에 함께 실려 한꺼번에 처리된다 -->
           <sc-if value="{{ hasShots }}" hint-placeholder-val="{{ false }}">
-            <div style="font-size:11.5px;font-weight:800;color:var(--ac);margin-top:8px;word-break:keep-all;line-height:1.6;">📎 보관함에 담아둔 캡처 <span class="num">{{ shotCount }}</span>장도 함께 보내 한꺼번에 정리해 드려요 (맡긴 사진은 보관함에서 사라져요)</div>
+            <div style="font-size:11.5px;font-weight:800;color:var(--ac);margin-top:8px;word-break:keep-all;line-height:1.6;">📎 보관함에 담아둔 {{ trayLabel }}도 함께 보내 한꺼번에 정리해 드려요 (맡긴 자료는 보관함에서 사라져요)</div>
           </sc-if>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button onClick="{{ sendCall }}" style="flex:1;min-height:44px;background:var(--ac);color:var(--on);border:none;border-radius:12px;font-size:13.5px;font-weight:800;cursor:pointer;">📮 맡기기</button>
@@ -223,7 +223,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
         <span style="font-size:14px;font-weight:800;">이 자료를 보내 주세요</span>
         <span style="margin-left:auto;font-size:11px;font-weight:800;color:var(--sub);">요청 <span class="num">{{ reqCount }}</span>건</span>
       </div>
-      <div style="font-size:11.5px;color:var(--sub);word-break:keep-all;line-height:1.6;">쿠팡·11번가·네이버페이처럼 <b>가게 이름만 찍히는 결제</b>는 무엇을 샀는지 통장·카드 내역에 안 남아요. 주문 내역을 캡처해 주시면 아래 🤖 통장 자동 정리로 함께 보내 항목까지 갈라 드려요</div>
+      <div style="font-size:11.5px;color:var(--sub);word-break:keep-all;line-height:1.6;">쿠팡·11번가·네이버페이처럼 <b>가게 이름만 찍히는 결제</b>는 무엇을 샀는지 통장·카드 내역에 안 남아요. 주문 내역을 캡처하시거나 <b>무엇을 샀는지 말로 적어</b> 주시면 아래 🤖 자동 정리로 함께 보내 항목까지 갈라 드려요</div>
       <sc-if value="{{ reqEmpty }}" hint-placeholder-val="{{ true }}">
         <div style="font-size:12.5px;color:var(--sub);text-align:center;padding:14px 0 4px;">지금은 보내 주실 자료가 없어요 👍</div>
       </sc-if>
@@ -443,8 +443,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
     <!-- ══ 📋 내역 ══ -->
     <sc-if value="{{ mvList }}" hint-placeholder-val="{{ true }}">
       <div id="shotBox" style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
-        <div style="font-size:15px;font-weight:800;">🤖 캡처로 통장 자동 정리</div>
-        <div style="font-size:12px;color:var(--sub);margin:4px 0 10px;">영수증·카드 알림·계좌 내역 캡처를 <b>보관함</b>에 담아두었다가 부를 때 한꺼번에 맡기면, 거래를 읽어 이 화면 내역에 넣어드려요. 내 계좌끼리 옮긴 돈은 계좌간 이체로 분류돼요</div>
+        <div style="font-size:15px;font-weight:800;">🤖 자료 맡기면 통장 자동 정리</div>
+        <div style="font-size:12px;color:var(--sub);margin:4px 0 10px;">담는 방법은 셋 중 아무거나예요 — <b>①캡처 사진</b> · <b>②말로 적은 설명</b>(사진이 없어도 돼요) · <b>③항목 정해주기</b>. <b>보관함</b>에 담아두었다가 부를 때 한꺼번에 맡기면, 거래를 읽어 이 화면 내역에 넣어드려요. 내 계좌끼리 옮긴 돈은 계좌간 이체로 분류돼요</div>
         <!-- 🧾 위 「자료 요청」에서 넘어왔을 때 — 어느 요청에 답하는 캡처인지 못박아 둔다 -->
         <sc-if value="{{ reqPickOn }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--ac);border-radius:12px;padding:10px 12px;margin-bottom:10px;">
@@ -455,24 +455,51 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
         <label style="display:block;text-align:center;background:var(--bg);border:1.5px dashed var(--ac);border-radius:14px;padding:14px;font-size:14px;font-weight:800;color:var(--ac);cursor:pointer;">📷 캡처 사진 담기 (여러 장 가능)<input type="file" accept="image/*" multiple onChange="{{ onReceipt }}" style="display:none;"></label>
         <div style="font-size:12px;color:var(--sub);margin-top:8px;text-align:center;word-break:keep-all;line-height:1.6;">캡처를 복사했다면 이 화면에서 <b>Ctrl+V</b>(맥은 ⌘+V)로 바로 붙여넣어도 돼요. 한 장씩 담아도 보관함에 모였다가 함께 나가요 — <b>새로고침하거나 폰을 바꿔도 그대로 있어요</b></div>
 
-        <!-- 담아둔 캡처 바구니 — 한 장씩 붙여넣어도 여기 모였다가 한 건으로 나간다 -->
+        <!-- ✍️ 사진이 없어도 맡길 수 있다 — 말로 적은 설명·항목 지정도 사진과 같은 보관함으로 들어간다.
+             캡처를 못 찍은 지출, 사진만으로는 무엇을 산 건지 담당이 알 수 없는 건이 여기로 들어온다. -->
+        <div style="background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px;">
+          <div style="font-size:13px;font-weight:800;">✍️ 답변</div>
+          <div style="font-size:11.5px;color:var(--sub);margin:3px 0 8px;word-break:keep-all;line-height:1.6;">캡처가 없는 지출도, 「이건 어느 항목으로 넣어달라」는 부탁도 여기 적어 담으면 사진과 함께 나가요</div>
+          <textarea value="{{ noteTxt }}" onChange="{{ onNoteTxt }}" rows="2" placeholder="예: 어제 하나로마트에서 32,000원 장 봤어요 / 8월 12일 주유 5만원은 차량유지비로 넣어주세요" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:inherit;font-size:14px;line-height:1.6;resize:vertical;"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <select value="{{ noteCat }}" onChange="{{ onNoteCat }}" style="width:118px;flex-shrink:0;padding:11px 8px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:inherit;font-size:13px;">
+              <option value="">항목 안 정함</option>
+              <sc-for list="{{ catsV }}" as="ct" hint-placeholder-count="5"><option value="{{ ct.v }}">{{ ct.v }}</option></sc-for>
+            </select>
+            <button onClick="{{ addNote }}" style="flex:1;min-height:44px;background:var(--card);color:var(--ac);border:1.5px dashed var(--ac);border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;">＋ 보관함에 담기</button>
+          </div>
+        </div>
+
+        <!-- 담아둔 자료 바구니 — 사진과 적어 담은 메모가 한 칸에 모였다가 한 건으로 나간다 -->
         <sc-if value="{{ hasShots }}" hint-placeholder-val="{{ false }}">
           <div style="background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px;">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;">
-              <span style="font-size:13px;font-weight:800;">📎 보관함 <span class="num">{{ shotCount }}</span>장</span>
+              <span style="font-size:13px;font-weight:800;">📎 보관함 {{ trayLabel }}</span>
               <button onClick="{{ clearShots }}" style="background:none;border:none;min-height:44px;padding:0 4px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;">전체 비우기</button>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;">
-              <sc-for list="{{ shotsV }}" as="sh" hint-placeholder-count="2">
-                <div style="position:relative;aspect-ratio:1/1;border-radius:10px;border:1px solid var(--line);background-color:var(--card);background-image:url('{{ sh.thumb }}');background-size:cover;background-position:center;overflow:hidden;">
-                  <button onClick="{{ sh.drop }}" title="{{ sh.alt }} 빼기" style="position:absolute;top:4px;right:4px;width:32px;height:32px;border-radius:99px;border:1px solid rgba(255,255,255,.75);background:rgba(35,33,28,.72);color:#fff;font-size:14px;font-weight:800;line-height:1;cursor:pointer;">✕</button>
-                  <sc-if value="{{ sh.hasReq }}" hint-placeholder-val="{{ false }}">
-                    <span style="position:absolute;left:0;right:0;bottom:0;background:rgba(44,93,124,.88);color:#fff;font-size:9.5px;font-weight:800;padding:3px 5px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ sh.reqLabel }}</span>
-                  </sc-if>
-                </div>
-              </sc-for>
-            </div>
-            <button onClick="{{ trySend }}" style="width:100%;margin-top:11px;min-height:48px;background:var(--ac);color:var(--on);border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;">📮 {{ shotCount }}장 한꺼번에 맡기기</button>
+            <sc-if value="{{ hasNotes }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
+                <sc-for list="{{ notesV }}" as="nt" hint-placeholder-count="1">
+                  <div style="display:flex;align-items:flex-start;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px;">
+                    <span style="flex:1;min-width:0;font-size:12.5px;line-height:1.6;word-break:keep-all;">{{ nt.label }}</span>
+                    <button onClick="{{ nt.drop }}" title="이 메모 빼기" style="flex-shrink:0;width:32px;height:32px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--sub);font-size:14px;font-weight:800;line-height:1;cursor:pointer;">✕</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hasPhotos }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;">
+                <sc-for list="{{ shotsV }}" as="sh" hint-placeholder-count="2">
+                  <div style="position:relative;aspect-ratio:1/1;border-radius:10px;border:1px solid var(--line);background-color:var(--card);background-image:url('{{ sh.thumb }}');background-size:cover;background-position:center;overflow:hidden;">
+                    <button onClick="{{ sh.drop }}" title="{{ sh.alt }} 빼기" style="position:absolute;top:4px;right:4px;width:32px;height:32px;border-radius:99px;border:1px solid rgba(255,255,255,.75);background:rgba(35,33,28,.72);color:#fff;font-size:14px;font-weight:800;line-height:1;cursor:pointer;">✕</button>
+                    <sc-if value="{{ sh.hasReq }}" hint-placeholder-val="{{ false }}">
+                      <span style="position:absolute;left:0;right:0;bottom:0;background:rgba(44,93,124,.88);color:#fff;font-size:9.5px;font-weight:800;padding:3px 5px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ sh.reqLabel }}</span>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <button onClick="{{ trySend }}" style="width:100%;margin-top:11px;min-height:48px;background:var(--ac);color:var(--on);border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;">📮 {{ trayLabel }} 한꺼번에 맡기기</button>
           </div>
         </sc-if>
 
@@ -1262,7 +1289,8 @@ class Component extends DCLogic {
     acEdit:null, acOpen:false, aiBusy:false, aiMsg:'', aiProg:'',
     budEdit:null, budOpen:false,
     rview:'now', openRep:null, repMsg:'',
-    reqPick:null, callOpen:false, callTxt:'', callMsg:''
+    reqPick:null, callOpen:false, callTxt:'', callMsg:'',
+    noteTxt:'', noteCat:''
   };
 
   // ── 공용 도구 (../index.html 과 같은 것) ──
@@ -1734,31 +1762,65 @@ class Component extends DCLogic {
       :(add.length?('📎 보관함에 '+add.length+'장 담았어요'+(tag?' ('+tag+')':'')+' — 관리자를 부를 때 한꺼번에 나가요'):'')});
   }
 
+  // ✍️ 사진이 없어도 맡길 수 있다 — 말로 적은 설명·항목 지정도 사진과 같은 보관함에 담긴다.
+  // 캡처를 못 찍은 지출, 사진만으로는 무엇을 산 건지 담당이 알 수 없는 건이 이 길로 들어온다.
+  addNote(){
+    if(this.state.aiBusy){this.setState({aiMsg:'⏳ 맡기는 중이에요 — 끝나면 담아 주세요'});return;}
+    const txt=(this.state.noteTxt||'').trim();
+    if(!txt){this.setState({aiMsg:'✍️ 적을 내용을 먼저 써 주세요'});return;}
+    const rq=this.state.reqPick,cat=this.state.noteCat||'';
+    this.mut(d=>{d.ledgerShots=(d.ledgerShots||[]).concat([{id:this.uid(),
+      at:this.today(),who:this.whoName(),text:txt,cat,
+      reqKey:rq?rq.key:'',reqLabel:rq?rq.label:''}]);});
+    this.setState({noteTxt:'',noteCat:'',aiProg:'',
+      aiMsg:'📎 보관함에 적어 담았어요'+(cat?' (항목: '+cat+')':'')+' — 관리자를 부를 때 한꺼번에 나가요'});
+  }
+
   // 뺀 사진은 창고에서도 지운다 — 문서에서만 빼면 사진이 창고에 그대로 남는다
+  // (적어 담은 메모는 사진이 없으므로 문서에서 빼면 그만이다)
   dropShot(id){
     const sh=this.shotBox().find(x=>x.id===id);
-    if(sh)window.FamilyStore.dropPhoto(sh.url);
+    if(sh&&sh.url)window.FamilyStore.dropPhoto(sh.url);
     this.mut(d=>{d.ledgerShots=(d.ledgerShots||[]).filter(x=>x.id!==id);});
     this.setState({aiMsg:''});
   }
   clearShots(){
     const box=this.shotBox();
-    if(box.length&&!confirm('담아둔 캡처 '+box.length+'장을 모두 버릴까요? 사진도 함께 지워져요'))return;
-    box.forEach(sh=>window.FamilyStore.dropPhoto(sh.url));
+    if(box.length&&!confirm('보관함에 담아둔 '+this.trayText(box)+'를 모두 버릴까요? 사진도 함께 지워져요'))return;
+    box.forEach(sh=>{if(sh.url)window.FamilyStore.dropPhoto(sh.url);});
     this.mut(d=>{d.ledgerShots=[];});
     this.setState({aiMsg:''});
   }
 
-  // 보관함에 담긴 사진을 한 건으로 묶어 보낼 채비 — 맡기기와 관리자 호출이 같은 길을 쓴다.
+  // 보관함에 든 것을 세는 말 — 사진과 적어 담은 메모가 한 칸에 섞여 있다
+  trayText(box){
+    const p=box.filter(s=>!s.text).length,n=box.length-p,b=[];
+    if(p)b.push('사진 '+p+'장');
+    if(n)b.push('메모 '+n+'개');
+    return b.join(' · ');
+  }
+
+  // 보관함에 담긴 것을 한 건으로 묶어 보낼 채비 — 맡기기와 관리자 호출이 같은 길을 쓴다.
   // 📷 이름표(tag)는 「어느 거래에 붙여 담은 캡처인가」다 — 담당이 그 거래를 찾아 고칠 수 있게.
+  // ✍️ 적어 담은 메모는 사진이 아니므로 urls 에 안 실린다 — notes 로 따로 나간다.
+  //    그래서 사진 번호(shot)는 보관함 순서가 아니라 「실제로 보낸 사진 중 몇 번째」로 센다.
   packShots(box){
-    const reqs=[],tags=[];
-    box.forEach((s,i)=>{
-      if(s.tag)tags.push({shot:i+1,label:s.tag});
-      if(!s.reqKey)return;
-      const had=reqs.find(z=>z.key===s.reqKey);
-      if(had)had.shots.push(i+1);else reqs.push({key:s.reqKey,label:s.reqLabel,shots:[i+1]});});
-    return {reqs,tags,urls:box.map(s=>s.url)};
+    const reqs=[],tags=[],notes=[],urls=[];
+    const reqOf=s=>{if(!s.reqKey)return null;
+      let z=reqs.find(x=>x.key===s.reqKey);
+      if(!z){z={key:s.reqKey,label:s.reqLabel,shots:[],notes:[]};reqs.push(z);}
+      return z;};
+    box.forEach(s=>{
+      const z=reqOf(s);
+      if(s.text){
+        notes.push({no:notes.length+1,text:s.text,cat:s.cat||'',who:s.who||'',at:s.at||''});
+        if(z)z.notes.push(notes.length);
+        return;}
+      urls.push(s.url);
+      const n=urls.length;
+      if(s.tag)tags.push({shot:n,label:s.tag});
+      if(z)z.shots.push(n);});
+    return {reqs,tags,notes,urls};
   }
 
   // 맡긴 뒤 보관함을 비운다. 같은 사진이 두 번 나가지 않게 하는 자리다 —
@@ -1772,19 +1834,20 @@ class Component extends DCLogic {
   async sendTray(){
     const box=this.shotBox();
     if(!box.length||this.state.aiBusy)return;
-    this.setState({aiBusy:true,aiMsg:'',aiProg:'('+box.length+'장)'});
+    const lab=this.trayText(box);
+    this.setState({aiBusy:true,aiMsg:'',aiProg:'('+lab+')'});
     const accs=(this.state.data.accounts||[]).filter(a=>a.kind==='bank')
       .map(a=>({name:a.name,org:a.org||'',purp:a.purp||'',purpTxt:a.purpTxt||''}));
-    // 🧾 어느 요청에 답한 캡처인지 함께 보낸다 — 담당이 「무엇을 산 건지」 찾아야 할 사진을 안다
-    const {reqs,tags,urls}=this.packShots(box);
+    // 🧾 어느 요청에 답한 자료인지 함께 보낸다 — 담당이 「무엇을 산 건지」 찾아야 할 사진·메모를 안다
+    const {reqs,tags,notes,urls}=this.packShots(box);
     const r=await window.FamilyStore.ask('receipt',
-      {accounts:accs,cats:CATS,subs:SUBS,reqs,tags},urls,this.whoName());
-    // 실패하면 담아둔 사진은 그대로 둔다 (다시 누르면 그만이다)
+      {accounts:accs,cats:CATS,subs:SUBS,reqs,tags,notes},urls,this.whoName());
+    // 실패하면 담아둔 것은 그대로 둔다 (다시 누르면 그만이다)
     if(r&&r.ok)this.afterSend(reqs);
     this.setState(s=>({aiBusy:false,aiProg:'',reqPick:r&&r.ok?null:s.reqPick,
       aiMsg:r&&r.ok
-      ?('📮 '+box.length+'장 한꺼번에 맡겼어요'+(reqs.length?' (요청 '+reqs.length+'건 자료 포함)':'')+' — 정리되면 아래 내역에 자동으로 올라와요')
-      :'😢 맡기지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요 (사진은 그대로 있어요)'}));
+      ?('📮 '+lab+' 한꺼번에 맡겼어요'+(reqs.length?' (요청 '+reqs.length+'건 자료 포함)':'')+' — 정리되면 아래 내역에 자동으로 올라와요')
+      :'😢 맡기지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요 (담아둔 자료는 그대로 있어요)'}));
   }
 
   // 🧾 요청건을 대기칸에서 빼내 처리칸(done)으로 옮긴다. how = '자료 맡김' · '넘김'
@@ -1804,19 +1867,20 @@ class Component extends DCLogic {
   async callClerk(){
     const txt=(this.state.callTxt||'').trim();
     const bm=this.state.budM;
-    // 🧑‍🏫 「부르면 한꺼번에 처리」 — 보관함에 담아둔 캡처를 이 호출에 함께 실어 보낸다
+    // 🧑‍🏫 「부르면 한꺼번에 처리」 — 보관함에 담아둔 사진·메모를 이 호출에 함께 실어 보낸다
     const box=this.shotBox();
-    const {reqs,tags,urls}=this.packShots(box);
-    this.setState({callMsg:'📮 관리자를 부르는 중이에요…'+(box.length?' (담아둔 캡처 '+box.length+'장 함께)':'')});
+    const lab=this.trayText(box);
+    const {reqs,tags,notes,urls}=this.packShots(box);
+    this.setState({callMsg:'📮 관리자를 부르는 중이에요…'+(box.length?' (담아둔 '+lab+' 함께)':'')});
     const r=await window.FamilyStore.ask('ledger',{
-      ym:bm, ask:txt, reqs, tags,
+      ym:bm, ask:txt, reqs, tags, notes,
       summary:this.mLabel(bm)+' 수입 '+this.won(this.mSum(bm,'in'))+'원 · 지출 '+this.won(this.mSum(bm,'out'))+'원',
       asks:((this.state.data.ledgerAsks||{}).items||[]).map(x=>({label:x.label,why:x.why||''}))
     },urls,this.whoName());
     if(r&&r.ok)this.afterSend(reqs);
     this.setState({callOpen:!(r&&r.ok),callTxt:r&&r.ok?'':this.state.callTxt,
-      callMsg:r&&r.ok?('🧑‍🏫 관리자에게 맡겼어요'+(box.length?' — 담아둔 캡처 '+box.length+'장도 함께 갔어요':'')+' — 보고 나서 이 화면에 정리해 올려드려요')
-                     :'😢 부르지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요 (사진은 그대로 있어요)'});
+      callMsg:r&&r.ok?('🧑‍🏫 관리자에게 맡겼어요'+(box.length?' — 담아둔 '+lab+'도 함께 갔어요':'')+' — 보고 나서 이 화면에 정리해 올려드려요')
+                     :'😢 부르지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요 (담아둔 자료는 그대로 있어요)'});
   }
 
   renderVals(){
@@ -1826,7 +1890,7 @@ class Component extends DCLogic {
       const E={loading:true,ready:false,f:{},on:{},nf:{freqV:[],payV:[],moV:[],wdV:[],catsV:[]}};
       ['mviewsV','adviceV','reqsV','txSubsV','stSubsV','liveBlocksV','boxV','stMonthsV','stCatsV','stPaysV','payFilterV','txV','catsV',
        'paysV','dayHeads','budCellsV','budDayV','fxFilterV','fxRowsV','bankAccsV','cardAccsV','loanAccsV',
-       'acPurpV','shotsV','pieLegV','budInV','budMV','budGV','bKindV','bPreV','bAmtV','bPayV','bDayV']
+       'acPurpV','shotsV','notesV','pieLegV','budInV','budMV','budGV','bKindV','bPreV','bAmtV','bPayV','bDayV']
        .forEach(k=>E[k]=[]);
       return E;
     }
@@ -1904,17 +1968,27 @@ class Component extends DCLogic {
     V.aiBusy=S.aiBusy;V.hasAiMsg=!!S.aiMsg;V.aiMsg=S.aiMsg;V.aiProg=S.aiProg||'';
     V.hasAiProg=!!S.aiProg&&!S.aiBusy;
     const tray=D.ledgerShots||[];
-    V.hasShots=tray.length>0;V.shotCount=String(tray.length);
+    // 보관함에는 캡처 사진과 ✍️ 적어 담은 메모가 함께 있다 — 화면에서는 갈라 보여준다
+    const trayP=tray.filter(s=>!s.text),trayN=tray.filter(s=>s.text);
+    V.hasShots=tray.length>0;V.hasPhotos=trayP.length>0;V.hasNotes=trayN.length>0;
+    V.trayLabel=this.trayText(tray);
     // 이름표를 사진 위에 붙여 둔다 — 🧾 요청 자료인지, 📷 어느 거래에 붙인 것인지 섞여도 헷갈리지 않게
-    V.shotsV=tray.map((sh,i)=>({thumb:sh.url,alt:(i+1)+'번째 캡처',
+    V.shotsV=trayP.map((sh,i)=>({thumb:sh.url,alt:(i+1)+'번째 캡처',
       hasReq:!!(sh.reqLabel||sh.tag),reqLabel:sh.reqLabel?('🧾 '+sh.reqLabel):('📷 '+(sh.tag||'')),
       drop:()=>this.dropShot(sh.id)}));
+    V.notesV=trayN.map(nt=>({
+      label:(nt.reqLabel?'🧾 '+nt.reqLabel+' — ':'✍️ ')+(nt.cat?'['+nt.cat+'] ':'')+nt.text,
+      drop:()=>this.dropShot(nt.id)}));
+    V.noteTxt=S.noteTxt||'';V.noteCat=S.noteCat||'';
+    V.onNoteTxt=e=>this.setState({noteTxt:e.target.value});
+    V.onNoteCat=e=>this.setState({noteCat:e.target.value});
+    V.addNote=()=>this.addNote();
     V.clearShots=()=>this.clearShots();
     V.trySend=()=>this.sendTray();
     // 📷 고치는 칸에서 담기 — 지금 적는 거래의 이름표가 붙어 보관함으로 들어간다
     V.onTxShot=e=>this.txShot(e);
     V.txShotHint=tray.length
-      ?('📎 보관함에 '+tray.length+'장 담겨 있어요 — 아래 📋 내역의 「한꺼번에 맡기기」나 🧑‍🏫 관리자 부르기로 함께 나가요')
+      ?('📎 보관함에 '+V.trayLabel+' 담겨 있어요 — 아래 📋 내역의 「한꺼번에 맡기기」나 🧑‍🏫 관리자 부르기로 함께 나가요')
       :'영수증·주문 내역을 담아두면 보관함에 모였다가, 관리자를 부를 때 한꺼번에 나가요';
     V.catsV=CATS.map(v=>({v}));
     const txTy=f.txType||'out';
@@ -2394,7 +2468,7 @@ class Component extends DCLogic {
       .filter(g=>askDone[g.key]===undefined||g.n>askDone[g.key])   // 결제가 더 늘었으면 다시 여쭌다
       .sort((a,b)=>b.a-a.a)
       .map(g=>({key:g.key,title:g.name+' '+g.n+'건 · '+W(g.a)+'원',
-        why:this.mLabel(bm)+' 결제인데 무엇을 샀는지 내역에 안 남아요 — 주문 내역 캡처를 올려 주시면 항목을 갈라 드려요'}));
+        why:this.mLabel(bm)+' 결제인데 무엇을 샀는지 내역에 안 남아요 — 주문 내역 캡처를 올리거나 무엇을 샀는지 적어 주시면 항목을 갈라 드려요'}));
     const manReq=(AS.items||[]).map(z=>({key:z.key,title:z.label||'자료 요청',
       why:z.why||'가계부 관리자가 부탁한 자료예요'}));
     const reqAll=manReq.concat(autoReq);
@@ -2402,7 +2476,7 @@ class Component extends DCLogic {
     V.reqsV=reqAll.map(r=>{const on2=!!S.reqPick&&S.reqPick.key===r.key;
       return{title:r.title,why:r.why,
         bd:on2?sk.ac:sk.line,pickBg:on2?sk.ac:sk.soft,pickFg:on2?sk.on:sk.ac,
-        pickLabel:on2?'📷 지금 이 자료를 담는 중':'📷 이 자료 캡처 담기',
+        pickLabel:on2?'📎 지금 이 자료를 담는 중':'📎 이 자료 담기 (사진·설명)',
         pick:()=>this.setState({reqPick:on2?null:{key:r.key,label:r.title},mview:'list',aiMsg:''},()=>{
           if(on2)return;
           const el=document.getElementById('shotBox');
@@ -2411,7 +2485,7 @@ class Component extends DCLogic {
           this.closeAsks([r.key],'넘김');}};});
     // 지금 어느 요청에 답하는 중인지 — 캡처 담는 칸에 그대로 띄운다
     V.reqPickOn=!!S.reqPick;
-    V.reqPickLabel=S.reqPick?('🧾 지금 담는 자료 — '+S.reqPick.label):'';
+    V.reqPickLabel=S.reqPick?('🧾 지금 담는 자료 — '+S.reqPick.label+' (사진·설명 아무거나)'):'';
     V.reqPickOff=()=>this.setState({reqPick:null});
 
     // ── 🏦 자산 ──

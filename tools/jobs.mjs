@@ -260,13 +260,25 @@ async function cmdList(db) {
       if ((p.asks || []).length) console.log(`     아직 못 받은 자료: ${p.asks.map(z => z.label).join(' · ')}`);
       console.log(`     ※ 답은 report 와 같은 형식({title,stars,summary,blocks})으로 apply 하면 보고서함에 올라갑니다.`);
     }
-    // 🧾 요청한 자료를 받은 캡처면 어느 요청 건인지 여기 찍힌다
+    // 🧾 요청한 자료를 받은 것이면 어느 요청 건인지 여기 찍힌다 (사진일 수도, 적어 보낸 메모일 수도 있다)
     if ((p.reqs || []).length) {
-      p.reqs.forEach(q => console.log(`     🧾 요청 답변: ${q.label}  (사진 ${(q.shots || []).join(',')}번)`));
+      p.reqs.forEach(q => {
+        const src = [
+          (q.shots || []).length ? `사진 ${q.shots.join(',')}번` : '',
+          (q.notes || []).length ? `적어 보낸 것 ${q.notes.join(',')}번` : ''
+        ].filter(Boolean).join(' · ') || '내용 없음';
+        console.log(`     🧾 요청 답변: ${q.label}  (${src})`);
+      });
     }
     // 📷 앱 「고치는 칸」에서 그 거래에 붙여 담은 캡처 — 어느 거래의 증빙인지 여기 찍힌다
     if ((p.tags || []).length) {
       p.tags.forEach(t => console.log(`     📷 사진 ${t.shot}번 = ${t.label}`));
+    }
+    // ✍️ 사진 대신(또는 함께) 가족이 말로 적어 보낸 것 — 설명이거나 「이 항목으로 넣어달라」는 지정이다.
+    // 캡처가 한 장도 없는 부탁도 있다. 그때는 이 글이 유일한 근거이므로 여기 적힌 것만 넣어라.
+    if ((p.notes || []).length) {
+      p.notes.forEach((n, i) => console.log(
+        `     ✍️ 적어 보낸 것 ${n.no || i + 1}: ${n.text}${n.cat ? `   → 항목 지정: ${n.cat}` : ''}${n.who ? `  (${n.who})` : ''}`));
     }
     if (j.kind === 'report') {
       console.log(`     ${p.kind === 'now' ? '현재' : '월'} 보고서 · ${p.ym || ''} · ${p.title || ''}`);
