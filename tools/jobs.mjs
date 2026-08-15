@@ -6,6 +6,7 @@
 //
 //    node tools/jobs.mjs list                  대기 중인 부탁 보기 (사진도 내려받음)
 //    node tools/jobs.mjs apply <번호> <결과.json>   결과를 앱에 반영하고 완료 처리
+//    node tools/jobs.mjs import <결과.json>         부탁 없이 바로 반영 (은행 거래내역 파일 등)
 //    node tools/jobs.mjs fail  <번호> "이유"        처리 못 한 이유 남기기
 //
 //  접속 정보: config.js(주소·공개키) + .env.local(가족 계정 이메일·비밀번호)
@@ -101,6 +102,17 @@ const buyKey = s => {
   const v = String(s || ''); if (!isInstall(v)) return '';
   const m = v.match(/\(\s*\d{1,3}\s*\/\s*(\d{1,3})\s*\)/);
   return norm(v) + (m ? '#' + m[1] : '');
+};
+// 앱의 고정비 「납부」가 만드는 줄은 memo 가 "롯데하이마트 할부 (고정비)" 라 회차가 없다.
+// 이미 적어 둔 열쇠에 맞춰 준다 — 회차 없는 쪽은 후보가 딱 하나일 때만 잇는다.
+const buyKeyFor = (s, B) => {
+  const k = buyKey(s); if (!k) return '';
+  const box = B || {};
+  if (box[k]) return k;
+  const bare = k.split('#')[0];
+  if (k !== bare) return box[bare] ? bare : k;
+  const hits = Object.keys(box).filter(x => x.indexOf(bare + '#') === 0);
+  return hits.length === 1 ? hits[0] : k;
 };
 
 // 되풀이 후보 — 같은 상호가 서로 다른 달에 2번 이상 나간 것 중, 아직 고정비로 등록 안 된 것
@@ -210,22 +222,32 @@ function printLedgerContext(D) {
   const PURPL = { salary: '급여', living: '생활비', saving: '저축', emergency: '비상금', invest: '투자', custom: '' };
   const accs = D.accounts || [];
   const banks = accs.filter(a => a.kind === 'bank'), cards = accs.filter(a => a.kind === 'card');
+  const loans = accs.filter(a => a.kind === 'loan');
 
   console.log('\n     ── 우리집 계정 (거래마다 acc 에 이 이름을 그대로 적어라) ──');
   if (!accs.length) console.log('     (등록된 통장·카드가 없습니다 — acc 는 비워 두세요)');
   banks.forEach(a => console.log(`     🏦 ${a.name}${a.org ? ' · ' + a.org : ''}${a.purp ? ' · ' + (a.purp === 'custom' ? (a.purpTxt || '') : PURPL[a.purp] || '') : ''}`));
   cards.forEach(a => console.log(`     💳 ${a.name}${a.org ? ' · ' + a.org : ''}${a.day ? ' · 매월 ' + a.day + '일 결제' : ''}`));
+  // 대출은 「빌린 돈은 수입이 아니다」의 짝이다 — 안 보여주면 담당이 또 수입으로 넣는다.
+  loans.forEach(a => console.log(`     📉 ${a.name}${a.org ? ' · ' + a.org : ''} · 남은 원금 ${W(a.amt)}원${a.due ? ' · 만기 ' + a.due : ''}`));
 
-  const fx = D.fixed || [];
+  const all = D.fixed || [];
+  const fx = all.filter(f => !f.stop), fxOff = all.filter(f => f.stop);
   const FQ = { w: '매주', m: '매월', q: '분기', h: '반년', y: '매년' };
   console.log('\n     ── 이미 등록된 고정비 (이 상호가 나오면 tx 에 fx:"이름" 을 붙여라) ──');
   if (!fx.length) console.log('     (아직 없습니다)');
   fx.forEach(f => console.log(`     🔁 ${f.name} · ${FQ[f.freq] || '매월'}${f.day ? ' ' + f.day + '일' : ''} · 보통 ${W(f.a)}원${f.vary ? '(변동)' : ''} · ${f.c} · ${f.pay}`));
 
+  // 안 나가게 돼서 빠진 것들 — 새로 등록하지 마라. fx 로 납부만 찍으면 저절로 되살아난다.
+  if (fxOff.length) {
+    console.log('\n     ── ⏸ 그만 나가는 고정비 (이 상호가 또 나오면 새로 만들지 말고 fx 로 납부만 찍어라) ──');
+    fxOff.forEach(f => console.log(`     ⏸ ${f.name} · ${f.stop}부터 안 나감 · 보통 ${W(f.a)}원 · ${f.c} · ${f.pay}`));
+  }
+
   // 할부는 산 물건이 명세서 어디에도 없다 — 한 번 적어 두면 매달 내역에 함께 붙는다.
   const buys = D.installBuys || {}, byBuy = {}, buyOrder = [];
   for (const x of [...(D.tx || [])].sort((a, b) => String(a.d).localeCompare(String(b.d)))) {
-    const k = buyKey(x.memo); if (!k) continue;
+    const k = buyKeyFor(x.memo, buys); if (!k) continue;
     if (!byBuy[k]) { byBuy[k] = { name: x.memo, months: [] }; buyOrder.push(k); }
     byBuy[k].name = x.memo; byBuy[k].months.push(String(x.d).slice(0, 7));
   }
@@ -245,46 +267,55 @@ function printLedgerContext(D) {
   console.log('');
 }
 
-async function cmdApply(db, id, file) {
-  if (!fs.existsSync(file)) die('결과 파일을 찾을 수 없습니다: ' + file);
-  const result = JSON.parse(fs.readFileSync(file, 'utf8'));
-  const rows = await db.get(`family_jobs?id=eq.${id}&select=*`);
-  if (!rows.length) die(id + '번 부탁을 찾을 수 없습니다.');
-  const job = rows[0];
-
-  let note = '';
-  if (job.kind === 'receipt') {
-    // 결과 형식: { tx:[{d,a,ty,c,memo,pay,acc,fx,buy}], fixed:[{...}], accounts:[{name,kind,org,day,purp}] }
-    //   acc = 어느 통장·카드인지 (list 가 알려준 이름) · fx = 이 거래가 갚은 고정비 이름
-    //   buy = 할부로 산 물건 (할부 거래에만. 한 번 넣으면 다음 달부터는 안 넣어도 앱이 이어 붙인다)
-    const list = result.tx || [];
-    const newFixed = result.fixed || [];
-    const newAccs = result.accounts || [];
-    if (!list.length && !newFixed.length && !newAccs.length) die('결과에 tx 항목이 없습니다.');
-    note = await editDoc(db, doc => {
+// 가계부 결과(JSON)를 앱 데이터에 얹는다. 가족이 건 부탁을 거치든, 통장 파일에서 바로 넣든 길은 이거 하나다.
+//   { tx:[{d,a,ty,c,memo,pay,acc,fx,buy}], fixed:[{...}], accounts:[{name,kind,org,amt,day,purp}] }
+//   acc = 어느 통장·카드인지 (list 가 알려준 이름) · fx = 이 거래가 갚은 고정비 이름
+//   buy = 할부로 산 물건 (할부 거래에만. 한 번 넣으면 다음 달부터는 안 넣어도 앱이 이어 붙인다)
+async function putLedger(db, result) {
+  const list = result.tx || [];
+  const newFixed = result.fixed || [];
+  const newAccs = result.accounts || [];
+  if (!list.length && !newFixed.length && !newAccs.length) die('결과에 tx 항목이 없습니다.');
+  return editDoc(db, doc => {
       doc.tx = doc.tx || []; doc.fixed = doc.fixed || [];
       doc.fixedPaid = doc.fixedPaid || {}; doc.accounts = doc.accounts || [];
 
-      // ⓪ 캡처에서 새로 찾은 통장·카드 등록 (이름이 같은 게 이미 있으면 건너뛴다)
-      let addedAcc = 0;
+      // ⓪ 새로 찾은 통장·카드 등록. 이름이 같은 게 이미 있으면 「잔액만」 최신으로 갈아끼운다 —
+      //    통장 잔액은 언제나 방금 읽은 거래내역 쪽이 최신이다 (사장님 지시 2026-08-15 "현 통장 잔액에 맞출 것").
+      let addedAcc = 0, updAcc = 0;
       for (const a of newAccs) {
         const nm = String(a.name || '').trim();
-        if (!nm || doc.accounts.some(z => norm(z.name) === norm(nm))) continue;
+        if (!nm) continue;
+        const had = doc.accounts.find(z => norm(z.name) === norm(nm));
+        if (had) {
+          if (a.amt !== undefined && a.amt !== null && a.amt !== '') {
+            const v = Math.abs(Number(a.amt) || 0);
+            if (v !== (Number(had.amt) || 0)) { had.amt = v; updAcc++; }
+          }
+          continue;
+        }
+        // 통장(bank) · 카드(card) 말고 대출(loan)도 있다 — 앱 🏦 자산이 순자산에서 빼는 칸이다.
+        // 빌린 돈은 수입이 아니므로 거래로 넣지 말고 여기 「남은 원금」으로 올린다 (사장님 지시 2026-08-15).
+        const K = ['bank', 'card', 'loan'].includes(a.kind) ? a.kind : 'bank';
         doc.accounts.push({
-          id: uid(), kind: a.kind === 'card' ? 'card' : 'bank', name: nm,
+          id: uid(), kind: K, name: nm,
           org: String(a.org || '').trim(), amt: Math.abs(Number(a.amt) || 0),
-          day: a.kind === 'card' ? String(a.day || '') : '',
-          purp: a.kind === 'card' ? '' : (['salary', 'living', 'saving', 'emergency', 'invest', 'custom'].includes(a.purp) ? a.purp : 'living'),
-          purpTxt: a.purp === 'custom' ? String(a.purpTxt || '').trim() : ''
+          day: K === 'card' ? String(a.day || '') : '',
+          due: K === 'loan' ? String(a.due || '') : '',
+          purp: K === 'bank' ? (['salary', 'living', 'saving', 'emergency', 'invest', 'custom'].includes(a.purp) ? a.purp : 'living') : '',
+          purpTxt: (K === 'bank' && a.purp === 'custom') ? String(a.purpTxt || '').trim() : ''
         });
         addedAcc++;
       }
 
       // ① 새로 찾은 되풀이 지출을 고정비로 등록 (이름이 같은 게 이미 있으면 건너뛴다)
-      let addedFx = 0;
+      //    안 나가서 빠졌던 것(stop)이 다시 나오면 새로 만들지 않고 그 항목을 되살린다 — 안 그러면 같은 게 두 줄이 된다.
+      let addedFx = 0, backFx = 0;
       for (const f of newFixed) {
         const nm = String(f.name || '').trim();
-        if (!nm || doc.fixed.some(z => norm(z.name) === norm(nm))) continue;
+        if (!nm) continue;
+        const same = doc.fixed.find(z => norm(z.name) === norm(nm));
+        if (same) { if (same.stop) { delete same.stop; delete same.keepM; backFx++; } continue; }
         const q = ['w', 'm', 'q', 'h', 'y'].includes(f.freq) ? f.freq : 'm';
         doc.fixed.push({
           id: uid(), name: nm, a: Math.abs(Number(f.a) || 0), freq: q,
@@ -320,7 +351,7 @@ async function cmdApply(db, id, file) {
         doc.tx.push(rec);
 
         // ②-1 할부로 산 물건 — 앱이 매달 이 이름을 내역에 이어 붙인다
-        const bk = buyKey(rec.memo), buy = String(x.buy || '').trim();
+        const bk = buyKeyFor(rec.memo, doc.installBuys), buy = String(x.buy || '').trim();
         if (bk && buy) { doc.installBuys = doc.installBuys || {}; doc.installBuys[bk] = buy; buyN++; }
 
         // ③ 고정비를 갚은 거래면 그 달 납부로 표시 (앱 🔁 고정비 화면이 「납부 완료」로 바뀐다)
@@ -330,19 +361,36 @@ async function cmdApply(db, id, file) {
           if (f) {
             doc.fixedPaid[ym] = doc.fixedPaid[ym] || {};
             if (!doc.fixedPaid[ym][f.id]) { doc.fixedPaid[ym][f.id] = { a: rec.a, txId: id }; paidN++; }
+            // 빠졌던 달의 납부가 뒤늦게 올라왔다 = 잘못 뺐던 것이다. 되살린다.
+            if (f.stop && ym >= f.stop) { delete f.stop; delete f.keepM; backFx++; }
           }
         }
       }
       // 할부인데 산 물건을 아직 모르는 건은 숨기지 말고 티를 낸다 (가족에게 물어 앱에서 채우면 된다)
-      const noBuy = list.filter(x => isInstall(x.memo) && !(doc.installBuys || {})[buyKey(x.memo)]).length;
+      const noBuy = list.filter(x => isInstall(x.memo)
+        && !(doc.installBuys || {})[buyKeyFor(x.memo, doc.installBuys)]).length;
       return `가계부 ${list.length}건 넣음`
         + (addedAcc ? ` · 통장/카드 ${addedAcc}개 등록` : '')
+        + (updAcc ? ` · 통장 잔액 ${updAcc}개 갱신` : '')
         + (accN ? ` · ${accN}건 계정 구분` : '')
         + (addedFx ? ` · 고정비 ${addedFx}건 새로 등록` : '')
+        + (backFx ? ` · ⏸ 빠졌던 고정비 ${backFx}건 되살림` : '')
         + (paidN ? ` · 고정비 납부 ${paidN}건 표시` : '')
         + (buyN ? ` · 할부 산 물건 ${buyN}건 기록` : '')
         + (noBuy ? ` · ⚠ 할부 ${noBuy}건은 산 물건이 비어 있음(가족에게 물어보세요)` : '');
-    });
+  });
+}
+
+async function cmdApply(db, id, file) {
+  if (!fs.existsSync(file)) die('결과 파일을 찾을 수 없습니다: ' + file);
+  const result = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const rows = await db.get(`family_jobs?id=eq.${id}&select=*`);
+  if (!rows.length) die(id + '번 부탁을 찾을 수 없습니다.');
+  const job = rows[0];
+
+  let note = '';
+  if (job.kind === 'receipt') {
+    note = await putLedger(db, result);
   } else if (job.kind === 'report') {
     // 결과 형식: { title, stars, summary, blocks:[{t,v,h1,h2,h3,rows}] }
     // t 는 h(소제목) · p(문단) · stat(※수치) · cmp(◐비교) · judge(→판단) · table · do(▶실행)
@@ -379,6 +427,14 @@ async function cmdState(db) {
   printLedgerContext(D);
 }
 
+// 가족이 앱에 부탁을 걸지 않고 자료를 바로 건네준 경우 (은행에서 내려받은 거래내역 파일 등).
+// 부탁 번호 없이 결과 JSON 하나만 앱에 얹는다 — 형식은 apply 와 똑같다.
+async function cmdImport(db, file) {
+  if (!fs.existsSync(file)) die('결과 파일을 찾을 수 없습니다: ' + file);
+  const note = await putLedger(db, JSON.parse(fs.readFileSync(file, 'utf8')));
+  console.log('\n[넣음] ' + note + '\n');
+}
+
 // 데이터를 바꾸지 않고 부탁만 닫는다 (같은 사진이 여러 번 올라온 경우 등)
 async function cmdDone(db, id, note) {
   await db.patch(`family_jobs?id=eq.${id}`, { status: '완료', note: note || '따로 정리했어요', done_at: new Date().toISOString() });
@@ -400,6 +456,7 @@ const db = api(cfg, await signIn(cfg));
 if (cmd === 'list') await cmdList(db);
 else if (cmd === 'state') await cmdState(db);
 else if (cmd === 'apply') { if (!a1 || !a2) die('사용법: node tools/jobs.mjs apply <번호> <결과.json>'); await cmdApply(db, a1, a2); }
+else if (cmd === 'import') { if (!a1) die('사용법: node tools/jobs.mjs import <결과.json>'); await cmdImport(db, a1); }
 else if (cmd === 'done') { if (!a1) die('사용법: node tools/jobs.mjs done <번호> "메모"'); await cmdDone(db, a1, a2); }
 else if (cmd === 'fail') { if (!a1) die('사용법: node tools/jobs.mjs fail <번호> "이유"'); await cmdFail(db, a1, a2); }
-else console.log('\n사용법:\n  node tools/jobs.mjs list\n  node tools/jobs.mjs state                    (지금 가계부 상태만 보기)\n  node tools/jobs.mjs apply <번호> <결과.json>\n  node tools/jobs.mjs done  <번호> "메모"   (데이터 변경 없이 닫기 — 겹친 사진 등)\n  node tools/jobs.mjs fail  <번호> "이유"\n');
+else console.log('\n사용법:\n  node tools/jobs.mjs list\n  node tools/jobs.mjs state                    (지금 가계부 상태만 보기)\n  node tools/jobs.mjs apply <번호> <결과.json>\n  node tools/jobs.mjs import <결과.json>       (부탁 번호 없이 바로 넣기 — 은행 거래내역 파일 등)\n  node tools/jobs.mjs done  <번호> "메모"   (데이터 변경 없이 닫기 — 겹친 사진 등)\n  node tools/jobs.mjs fail  <번호> "이유"\n');
