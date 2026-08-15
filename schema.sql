@@ -26,7 +26,7 @@ create policy family_allow_self on family_allow
 
 
 -- ── 2) 가족 데이터 ───────────────────────────────────────────
---  일정·피드·할일·스티커·용돈·가계부·퀴즈·낚시도감이 doc 한 칸에
+--  일정·피드·할일·스티커·용돈·가계부·낚시도감이 doc 한 칸에
 --  통째로 들어갑니다. rev 는 "몇 번째 저장인지" 세는 번호로,
 --  두 사람이 동시에 저장할 때 서로의 기록을 덮어쓰지 않게 막아줍니다.
 create table if not exists family_state (
@@ -65,12 +65,12 @@ end $$;
 
 
 -- ── 3) AI 부탁 대기열 ────────────────────────────────────────
---  가족이 앱에서 "캡처 정리해줘" / "퀴즈 만들어줘" 를 누르면 여기 쌓입니다.
+--  가족이 앱에서 "캡처 정리해줘" 를 누르면 여기 쌓입니다.
 --  사용자님이 VS코드에서 담당(/family-diary)을 부르면 대기 중인 것을
 --  읽어 처리하고 결과를 family_state 에 넣은 뒤 완료로 바꿉니다.
 create table if not exists family_jobs (
   id         bigint generated always as identity primary key,
-  kind       text        not null,                  -- receipt(가계부 캡처) | quiz(퀴즈 만들기)
+  kind       text        not null,                  -- receipt(가계부 캡처)
   payload    jsonb       not null default '{}'::jsonb,
   status     text        not null default '대기',    -- 대기 | 완료 | 실패
   note       text,                                   -- 결과 또는 실패 이유 한 줄

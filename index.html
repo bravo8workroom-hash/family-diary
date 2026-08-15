@@ -868,39 +868,6 @@ input,button,textarea,select{font-family:inherit;}
         </div>
       </sc-if>
 
-      <sc-if value="{{ kvQuiz }}" hint-placeholder-val="{{ false }}">
-        <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-          <div style="font-size:15px;font-weight:800;">📝 학습 퀴즈</div>
-          <div style="font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.55;margin-top:5px;">목표 점수를 넘기면 스티커가 자동으로 도착해! 틀린 문제는 학습페이지에서 읽고, 대기시간이 끝나면 스티커를 써서 다시 도전할 수 있어.</div>
-          <sc-if value="{{ kqEmpty }}" hint-placeholder-val="{{ true }}"><div style="font-size:13px;color:var(--sub,#8A8177);margin-top:10px;">아직 받은 퀴즈가 없어요. 엄마·아빠가 만들어 주면 여기에 나타나요 ✨</div></sc-if>
-        </div>
-        <sc-for list="{{ kqListV }}" as="kq" hint-placeholder-count="2">
-          <div style="background:var(--card,#fff);border:1.5px solid {{ kq.bd }};border-radius:20px;padding:16px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:20px;">{{ kq.subjE }}</span>
-              <span style="flex:1;font-size:15px;font-weight:800;">{{ kq.title }}</span>
-              <span style="font-size:11px;font-weight:900;color:{{ kq.stC }};background:{{ kq.stBg }};border-radius:99px;padding:4px 10px;white-space:nowrap;">{{ kq.stLabel }}</span>
-            </div>
-            <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-top:6px;line-height:1.5;">{{ kq.meta }}</div>
-            <div style="display:flex;align-items:center;gap:5px;margin-top:10px;">
-              <span style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);">도전</span>
-              <sc-for list="{{ kq.dotsV }}" as="dt" hint-placeholder-count="3"><span style="width:9px;height:9px;border-radius:50%;background:{{ dt.c }};"></span></sc-for>
-              <span style="flex:1;"></span>
-              <span style="font-size:11px;font-weight:900;color:var(--ac,#F59E0B);">{{ kq.bestTxt }}</span>
-            </div>
-            <div style="display:flex;gap:6px;margin-top:12px;">
-              <sc-if value="{{ kq.canGo }}" hint-placeholder-val="{{ true }}">
-                <button onClick="{{ kq.go }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:14px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">{{ kq.goLabel }}</button>
-              </sc-if>
-              <sc-if value="{{ kq.hasStudy }}" hint-placeholder-val="{{ false }}">
-                <button onClick="{{ kq.study }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:14px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📖 학습페이지</button>
-              </sc-if>
-            </div>
-            <sc-if value="{{ kq.hasNote }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;font-weight:800;color:{{ kq.noteC }};margin-top:8px;line-height:1.5;">{{ kq.note }}</div></sc-if>
-          </div>
-        </sc-for>
-      </sc-if>
-
       <sc-if value="{{ kvScore }}" hint-placeholder-val="{{ false }}">
         <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
           <div style="font-size:15px;font-weight:800;margin-bottom:10px;">💯 시험·평가 기록</div>
@@ -2800,228 +2767,12 @@ input,button,textarea,select{font-family:inherit;}
     </div>
   </div>
 </sc-if>
-<sc-if value="{{ qzOpen }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:60;">
-    <div data-screen-label="퀴즈 풀기" style="background:var(--bg,#FAF6EF);color:var(--tx,#3F3A33);font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;border-radius:24px 24px 0 0;padding:18px 16px 24px;width:100%;max-width:430px;box-sizing:border-box;max-height:94vh;overflow-y:auto;">
-      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:16px;font-weight:800;">{{ qzTitle }}</div>
-          <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-top:2px;">{{ qzSubTxt }}</div>
-        </div>
-        <button onClick="{{ qzClose }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:32px;height:32px;font-size:14px;cursor:pointer;color:inherit;padding:0;flex-shrink:0;">✕</button>
-      </div>
-
-      <sc-if value="{{ qzIntro }}" hint-placeholder-val="{{ false }}">
-        <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:20px 16px;text-align:center;">
-          <div style="font-size:42px;">✏️</div>
-          <div style="font-family:Gaegu;font-size:28px;font-weight:700;margin-top:4px;">준비됐어?</div>
-          <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);">{{ qzIntroMeta }}</div>
-          <div style="display:flex;flex-direction:column;gap:6px;margin-top:14px;text-align:left;">
-            <div style="background:var(--bg,#FAF6EF);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;">🎁 {{ qzIntroRw }}</div>
-            <div style="background:var(--bg,#FAF6EF);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;">🎟️ {{ qzIntroFee }}</div>
-            <div style="background:var(--bg,#FAF6EF);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:700;color:var(--sub,#8A8177);line-height:1.5;">⏱️ 문제마다 생각시간이 있어. 시간이 끝나면 자동으로 다음 문제로 넘어가!</div>
-          </div>
-          <button onClick="{{ qzStart }}" style="width:100%;margin-top:14px;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">{{ qzStartLabel }}</button>
-          <sc-if value="{{ qzHasMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;font-weight:800;color:#E5484D;margin-top:8px;">{{ qzMsg }}</div></sc-if>
-        </div>
-      </sc-if>
-
-      <sc-if value="{{ qzPlay }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <span style="font-size:12px;font-weight:900;color:var(--ac,#F59E0B);white-space:nowrap;">{{ qzIdx }}</span>
-          <div style="flex:1;height:8px;background:var(--card,#fff);border-radius:99px;overflow:hidden;"><div style="height:100%;width:{{ qzBar }}%;background:{{ qzBarC }};border-radius:99px;transition:width .5s linear;"></div></div>
-          <span style="font-size:12px;font-weight:900;color:var(--sub,#8A8177);min-width:34px;text-align:right;">{{ qzTimeTxt }}</span>
-        </div>
-        <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:18px 16px;">
-          <div style="font-size:19px;font-weight:800;line-height:1.45;text-wrap:pretty;">{{ qzQ }}</div>
-          <sc-if value="{{ qzHasMask }}" hint-placeholder-val="{{ false }}"><div style="font-family:Gaegu;font-size:34px;font-weight:700;letter-spacing:.08em;color:var(--ac,#F59E0B);margin-top:10px;">{{ qzMask }}</div></sc-if>
-          <sc-if value="{{ qzHasEx }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:700;color:var(--sub,#8A8177);margin-top:8px;line-height:1.5;">{{ qzEx }}</div></sc-if>
-          <sc-if value="{{ qzSpell }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;gap:8px;margin-top:14px;">
-              <input value="{{ qzInput }}" onChange="{{ qzOnInput }}" placeholder="영어로 적어봐" style="flex:1;min-width:0;box-sizing:border-box;padding:13px 14px;border:1.5px solid var(--line,#EFE4CF);border-radius:14px;background:var(--bg,#FAF6EF);color:inherit;font-size:17px;font-weight:700;outline:none;">
-              <button onClick="{{ qzSubmit }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:14px;padding:13px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0;">확인</button>
-            </div>
-            <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-top:6px;">{{ qzHint }}</div>
-          </sc-if>
-          <sc-if value="{{ qzChoice }}" hint-placeholder-val="{{ true }}">
-            <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
-              <sc-for list="{{ qzOptsV }}" as="op" hint-placeholder-count="4">
-                <button onClick="{{ op.pick }}" style="text-align:left;background:var(--bg,#FAF6EF);border:1.5px solid var(--line,#EFE4CF);border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;cursor:pointer;color:inherit;font-family:inherit;">{{ op.t }}</button>
-              </sc-for>
-            </div>
-          </sc-if>
-        </div>
-        <sc-if value="{{ qzFb }}" hint-placeholder-val="{{ false }}">
-          <div style="background:var(--card,#fff);border:1.5px solid {{ qzFbC }};border-radius:20px;padding:14px 16px;margin-top:10px;animation:pop .25s;">
-            <div style="font-size:15px;font-weight:800;color:{{ qzFbC }};">{{ qzFbTxt }}</div>
-            <sc-if value="{{ qzHasFbNote }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;line-height:1.6;margin-top:6px;">{{ qzFbNote }}</div></sc-if>
-            <button onClick="{{ qzNext }}" style="width:100%;margin-top:12px;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">{{ qzNextLabel }}</button>
-          </div>
-        </sc-if>
-      </sc-if>
-
-      <sc-if value="{{ qzResult }}" hint-placeholder-val="{{ false }}">
-        <div style="background:var(--card,#fff);border:1.5px solid {{ qzResC }};border-radius:20px;padding:20px 16px;text-align:center;">
-          <div style="font-size:42px;">{{ qzResEmoji }}</div>
-          <div style="font-family:Gaegu;font-size:38px;font-weight:700;color:{{ qzResC }};">{{ qzScoreTxt }}</div>
-          <div style="font-size:13px;font-weight:700;color:var(--sub,#8A8177);line-height:1.55;">{{ qzResultMsg }}</div>
-          <sc-if value="{{ qzPass }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:12px;background:var(--soft,#F7EAD2);border-radius:14px;padding:12px;font-size:14px;font-weight:800;color:var(--tx,#3F3A33);">{{ qzRwTxt }}</div>
-            <button onClick="{{ qzDone }}" style="width:100%;margin-top:12px;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">좋아! 닫기 🎉</button>
-          </sc-if>
-          <sc-if value="{{ qzFail }}" hint-placeholder-val="{{ false }}">
-            <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin-top:10px;">{{ qzTriesTxt }} · {{ qzCoolTxt }}</div>
-            <button onClick="{{ qzGoStudy }}" style="width:100%;margin-top:12px;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">📖 학습페이지로 복습하기</button>
-            <button onClick="{{ qzDone }}" style="width:100%;margin-top:8px;background:var(--bg,#FAF6EF);border:none;border-radius:14px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;color:inherit;font-family:inherit;">나중에 하기</button>
-          </sc-if>
-        </div>
-      </sc-if>
-
-      <sc-if value="{{ qzStudy }}" hint-placeholder-val="{{ false }}">
-        <div style="background:var(--soft,#F7EAD2);border:1px solid var(--line,#EFE4CF);border-radius:16px;padding:12px 14px;font-size:12px;font-weight:700;line-height:1.55;">📖 {{ qzStudyHint }}</div>
-        <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
-          <sc-for list="{{ qzStudyV }}" as="sv" hint-placeholder-count="2">
-            <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:18px;padding:14px 16px;">
-              <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);line-height:1.5;">{{ sv.q }}</div>
-              <div style="font-family:Gaegu;font-size:30px;font-weight:700;color:var(--ac,#F59E0B);margin:2px 0;">{{ sv.a }}</div>
-              <sc-if value="{{ sv.hasMask }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:700;color:var(--sub,#8A8177);letter-spacing:.1em;">따라 써보기 · {{ sv.mask }}</div></sc-if>
-              <sc-if value="{{ sv.hasEx }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:700;margin-top:7px;">{{ sv.ex }}</div></sc-if>
-              <div style="font-size:13px;line-height:1.65;margin-top:8px;background:var(--bg,#FAF6EF);border-radius:12px;padding:11px 12px;text-wrap:pretty;">{{ sv.note }}</div>
-              <button onClick="{{ sv.toggle }}" style="display:flex;align-items:center;gap:8px;background:none;border:none;padding:11px 0 0;cursor:pointer;color:inherit;font-family:inherit;">
-                <span style="width:24px;height:24px;border-radius:8px;border:2px solid {{ sv.ckBd }};background:{{ sv.ckBg }};color:var(--on,#fff);font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;">{{ sv.ck }}</span>
-                <span style="font-size:13px;font-weight:800;">읽고 이해했어요</span>
-              </button>
-            </div>
-          </sc-for>
-        </div>
-        <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:18px;padding:14px 16px;margin-top:10px;">
-          <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);">⏳ {{ qzCoolTxt }}</div>
-          <button onClick="{{ qzRetry }}" disabled="{{ qzRetryOff }}" style="width:100%;margin-top:10px;background:{{ qzRetryBg }};color:{{ qzRetryFg }};border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">{{ qzRetryLabel }}</button>
-          <button onClick="{{ qzDone }}" style="width:100%;margin-top:8px;background:var(--bg,#FAF6EF);border:none;border-radius:14px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;color:inherit;font-family:inherit;">닫고 나중에 도전</button>
-          <sc-if value="{{ qzHasMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;font-weight:800;color:#E5484D;margin-top:8px;">{{ qzMsg }}</div></sc-if>
-        </div>
-      </sc-if>
-    </div>
-  </div>
-</sc-if>
-
-<sc-if value="{{ qbOpen }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:55;">
-    <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:20px 18px 24px;width:100%;max-width:430px;box-sizing:border-box;max-height:92vh;overflow-y:auto;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-        <div style="flex:1;font-size:16px;font-weight:800;">{{ qbTitleTxt }}</div>
-        <button onClick="{{ qbClose }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:99px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;padding:0;">✕</button>
-      </div>
-      <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:6px;">과목 · 퀴즈 방식</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
-        <sc-for list="{{ qbSubjV }}" as="sj" hint-placeholder-count="6">
-          <button onClick="{{ sj.pick }}" style="background:{{ sj.bg }};color:{{ sj.fg }};border:1px solid {{ sj.bd }};border-radius:12px;padding:9px 4px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">{{ sj.l }}</button>
-        </sc-for>
-      </div>
-      <div style="background:var(--bg,#FAF6EF);border-radius:12px;padding:10px 12px;font-size:11px;font-weight:700;color:var(--sub,#8A8177);line-height:1.5;margin-bottom:12px;">{{ qbModeTxt }}</div>
-      <sc-if value="{{ qbShowLv }}" hint-placeholder-val="{{ true }}">
-        <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:6px;">난이도 · 스펠링 가리기</div>
-        <div style="display:flex;gap:6px;margin-bottom:12px;">
-          <sc-for list="{{ qbLvV }}" as="lv" hint-placeholder-count="3">
-            <button onClick="{{ lv.pick }}" style="flex:1;background:{{ lv.bg }};color:{{ lv.fg }};border:1px solid {{ lv.bd }};border-radius:12px;padding:8px 4px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;line-height:1.4;">{{ lv.l }}<span style="display:block;font-size:9px;font-weight:700;opacity:.75;">{{ lv.d }}</span></button>
-          </sc-for>
-        </div>
-      </sc-if>
-      <input value="{{ f.qbTitle }}" onChange="{{ on.qbTitle }}" placeholder="퀴즈 이름 (예: 3단원 영어 단어 10개)" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;margin-bottom:8px;">
-      <div style="display:flex;gap:6px;margin-bottom:8px;">
-        <div style="flex:1;"><div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:3px;">목표 점수</div><input value="{{ f.qbGoal }}" onChange="{{ on.qbGoal }}" type="number" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;"></div>
-        <div style="flex:1;"><div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:3px;">도전 횟수</div><input value="{{ f.qbTries }}" onChange="{{ on.qbTries }}" type="number" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;"></div>
-        <div style="flex:1;"><div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:3px;">생각시간(초)</div><input value="{{ f.qbThink }}" onChange="{{ on.qbThink }}" type="number" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;"></div>
-        <div style="flex:1;"><div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:3px;">대기(분)</div><input value="{{ f.qbCool }}" onChange="{{ on.qbCool }}" type="number" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;"></div>
-      </div>
-      <div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:3px;">아이 일정에 넣을 날짜</div><input value="{{ f.qbDate }}" onChange="{{ on.qbDate }}" type="date" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;"></div>
-      <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;margin-bottom:10px;">
-        <div style="font-size:12px;font-weight:800;margin-bottom:6px;">🎁 성공하면 줄 스티커</div>
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <div style="display:flex;gap:4px;flex:1;">
-            <sc-for list="{{ qbRwV }}" as="rw" hint-placeholder-count="8">
-              <button onClick="{{ rw.pick }}" style="width:30px;height:30px;border-radius:50%;background:{{ rw.bg }};border:1.5px solid {{ rw.bd }};font-size:15px;line-height:1;cursor:pointer;padding:0;">{{ rw.e }}</button>
-            </sc-for>
-          </div>
-          <div style="display:flex;align-items:center;gap:2px;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px;">
-            <button onClick="{{ qbRwDec }}" style="width:24px;height:24px;border-radius:50%;border:none;background:none;color:var(--sub,#8A8177);font-size:14px;font-weight:900;cursor:pointer;padding:0;">−</button>
-            <span style="min-width:32px;text-align:center;font-size:12px;font-weight:900;">×{{ qbRwN }}</span>
-            <button onClick="{{ qbRwInc }}" style="width:24px;height:24px;border-radius:50%;border:none;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);font-size:14px;font-weight:900;cursor:pointer;padding:0;">+</button>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;margin-bottom:14px;">
-        <div style="font-size:12px;font-weight:800;">🎟️ 재도전에 쓸 스티커</div>
-        <div style="font-size:10px;font-weight:700;color:var(--sub,#8A8177);margin:2px 0 6px;">아이가 이 스티커를 가지고 있어야 다시 도전할 수 있어요</div>
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <div style="display:flex;gap:4px;flex:1;">
-            <sc-for list="{{ qbFeeV }}" as="fe" hint-placeholder-count="8">
-              <button onClick="{{ fe.pick }}" style="width:30px;height:30px;border-radius:50%;background:{{ fe.bg }};border:1.5px solid {{ fe.bd }};font-size:15px;line-height:1;cursor:pointer;padding:0;">{{ fe.e }}</button>
-            </sc-for>
-          </div>
-          <div style="display:flex;align-items:center;gap:2px;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px;">
-            <button onClick="{{ qbFeeDec }}" style="width:24px;height:24px;border-radius:50%;border:none;background:none;color:var(--sub,#8A8177);font-size:14px;font-weight:900;cursor:pointer;padding:0;">−</button>
-            <span style="min-width:32px;text-align:center;font-size:12px;font-weight:900;">×{{ qbFeeN }}</span>
-            <button onClick="{{ qbFeeInc }}" style="width:24px;height:24px;border-radius:50%;border:none;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);font-size:14px;font-weight:900;cursor:pointer;padding:0;">+</button>
-          </div>
-        </div>
-      </div>
-      <div style="border-top:1px solid var(--line,#EFE4CF);padding-top:14px;">
-        <div style="font-size:13px;font-weight:800;">🤖 AI와 함께 문제 만들기</div>
-        <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 8px;line-height:1.5;">범위만 알려주면 부탁으로 걸어둬요. 처리되면 아래 퀴즈 목록에 올라오고, 그때 고치거나 지울 수 있어요.</div>
-        <div style="display:flex;gap:6px;margin-bottom:8px;">
-          <input value="{{ f.qbAiTopic }}" onChange="{{ on.qbAiTopic }}" placeholder="범위 (예: 초등 5학년 3단원 학교생활 단어)" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-          <input value="{{ f.qbAiN }}" onChange="{{ on.qbAiN }}" type="number" style="width:56px;box-sizing:border-box;padding:10px 8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-        </div>
-        <button onClick="{{ qbAi }}" style="width:100%;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:1.5px dashed var(--ac,#F59E0B);border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">{{ qbAiLabel }}</button>
-      </div>
-      <div style="border-top:1px solid var(--line,#EFE4CF);margin-top:14px;padding-top:14px;">
-        <div style="font-size:13px;font-weight:800;margin-bottom:8px;">✍️ 문제 직접 넣기</div>
-        <input value="{{ f.qbQ }}" onChange="{{ on.qbQ }}" placeholder="{{ qbQPh }}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;margin-bottom:6px;">
-        <input value="{{ f.qbA }}" onChange="{{ on.qbA }}" placeholder="{{ qbAPh }}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;margin-bottom:6px;">
-        <sc-if value="{{ qbChoice }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;gap:6px;margin-bottom:6px;">
-            <input value="{{ f.qbO1 }}" onChange="{{ on.qbO1 }}" placeholder="오답1" style="flex:1;min-width:0;box-sizing:border-box;padding:10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-            <input value="{{ f.qbO2 }}" onChange="{{ on.qbO2 }}" placeholder="오답2" style="flex:1;min-width:0;box-sizing:border-box;padding:10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-            <input value="{{ f.qbO3 }}" onChange="{{ on.qbO3 }}" placeholder="오답3" style="flex:1;min-width:0;box-sizing:border-box;padding:10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-          </div>
-        </sc-if>
-        <input value="{{ f.qbEx }}" onChange="{{ on.qbEx }}" placeholder="{{ qbExPh }}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;margin-bottom:6px;">
-        <textarea value="{{ f.qbNote }}" onChange="{{ on.qbNote }}" rows="2" placeholder="틀렸을 때 읽을 학습 설명 (학습페이지에 보여요)" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;resize:none;margin-bottom:8px;"></textarea>
-        <button onClick="{{ qbAddItem }}" style="width:100%;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;color:inherit;font-family:inherit;">+ 이 문제 넣기</button>
-      </div>
-      <div style="margin-top:14px;">
-        <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:6px;">{{ qbItemsTitle }}</div>
-        <sc-if value="{{ qbItemsEmpty }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px;color:var(--sub,#8A8177);">아직 문제가 없어요.</div></sc-if>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <sc-for list="{{ qbItemsV }}" as="qi" hint-placeholder-count="3">
-            <div style="display:flex;align-items:flex-start;gap:8px;background:var(--bg,#FAF6EF);border-radius:12px;padding:9px 11px;">
-              <span style="font-size:11px;font-weight:900;color:var(--ac,#F59E0B);">{{ qi.n }}</span>
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:12px;font-weight:800;">{{ qi.q }}</div>
-                <div style="font-size:12px;font-weight:700;color:var(--ac,#F59E0B);">정답 · {{ qi.a }}</div>
-                <sc-if value="{{ qi.hasOpts }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;font-weight:700;color:var(--sub,#8A8177);">보기 · {{ qi.opts }}</div></sc-if>
-                <sc-if value="{{ qi.hasNote }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;font-weight:700;color:var(--sub,#8A8177);line-height:1.45;margin-top:2px;">📖 {{ qi.note }}</div></sc-if>
-              </div>
-              <button onClick="{{ qi.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;padding:0;">✕</button>
-            </div>
-          </sc-for>
-        </div>
-      </div>
-      <sc-if value="{{ qbHasMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;font-weight:800;color:var(--ac,#F59E0B);margin-top:10px;line-height:1.5;">{{ qbMsg }}</div></sc-if>
-      <div style="display:flex;gap:8px;margin-top:14px;">
-        <button onClick="{{ qbClose }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;font-family:inherit;">취소</button>
-        <button onClick="{{ qbSave }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;font-family:inherit;">{{ qbSaveLabel }}</button>
-      </div>
-    </div>
-  </div>
-</sc-if>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;parentPassword&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;0000&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;보안&quot;},&quot;showFeedOnHome&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;홈 화면&quot;},&quot;showScores&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;아이 화면&quot;}}">
 const FMOTTOS=['서로 선은 넘지 맙시다. 나는 갯바위에서, 너는 바다 속에서!','오늘의 신사 협정: 찌가 가라앉으면 정당하게 협상 개시.','잡아도 칭찬, 놓쳐도 미소, 꽝 쳐도 품격 유지!','바늘은 거들 뿐, 승부는 신사답게.','물고기는 매너 입질, 낚시꾼은 안전 퇴근!','오늘의 서약: 바늘 끝엔 예의, 발 밑엔 안전.','손맛은 묵직하게, 쓰레기는 싹 다 가볍게!','잡혀줘서 고맙고, 살아서 돌아가니 반갑다!','용왕님도 인정하는 페어플레이 낚시꾼.','바다와의 비즈니스: 꽝 쳐도 절대 투정 금지!','No Trash, No Risk, Just Fishing.','안전 조행 100%, 매너 입질 100%.','물고기에겐 미안함, 바다에겐 고마움.','손맛 낚고, 추억 담고, 무사 귀가.','격식 있는 챔질, 매너 있는 귀가.','바다 위 신사들의 정당한 한판승부.','안전이 우선, 매너가 기본.','바다를 아끼는 진짜 낚시꾼의 품격.','찌끝에 담은 예의, 발끝에 둔 안전.','클린 캐스팅, 리스펙트 조행.','바다가 내어준 선물, 감사함으로 되돌려줍니다.','물고기와 나눈 짧은 대화, 긴 여운으로 남기는 하루.','파도 소리에 감사를, 바람 소리에 안녕을.','자연이 준 소중한 손맛, 내가 지키는 안전한 조행.','바다를 닮은 넓은 마음으로 낚시합니다.','내가 떠난 자리는 바다의 눈물 없이 깨끗하게.','작은 물고기 한 마리에도 경건함을 담아.','바다와 사람이 같이 웃는 소중한 순간.','무사히 집으로 다녀오는 것이 가장 큰 조과입니다.','푸른 바다 위, 나만의 신사적 낭만.','어종 불문, 크기 불문! 안전과 매너는 절대 성역.','발 밑은 조심조심, 바다 속엔 신사답게.','잡는 기쁨보다 지키는 보람을 낚습니다.','바다의 규칙을 지키는 자가 진짜 꾼이다.','나를 지키는 구명조끼, 바다를 지키는 클린마인드.','어린 생명은 놓아주고, 내 쓰레기는 가져오고.','바다 생명과의 약속, 신사적인 라이벌의 대결.','너와 나의 매너가 만날 때 완벽한 조행이 완성된다.','나도 무사히 집으로, 너도 무사히 바다로!','오늘도 신사답게 던지고, 정직하게 낚았습니다.'];
 
 class Component extends DCLogic {
-  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',mview:'list',parentOk:false,modal:null,editMode:false,calM:'',budM:'',tideM:'',tidePick:false,selDate:'',budSel:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],rcThumb:null,aiBusy:false,aiMsg:'',pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',qz:null,now:0,qMsg:'',qbKid:'',qbSubj:'engw',qbLv:2,qbRwE:'🌟',qbRwN:2,qbFeeE:'🌟',qbFeeN:1,qbItems:[],qbMsg:'',qbAi:false,qbEditId:null};
+  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',mview:'list',parentOk:false,modal:null,editMode:false,calM:'',budM:'',tideM:'',tidePick:false,selDate:'',budSel:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],rcThumb:null,aiBusy:false,aiMsg:'',pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:''};
   KEY = 'famdiary_v1';
   KART={'가자미':{i:'🐟',a:'#E2D3B4',b:'#7D6746'},'우럭':{i:'🐠',a:'#B9C6AD',b:'#43533F'},'볼락':{i:'🐡',a:'#FFC0AC',b:'#A3392A'},'쥐노래미':{i:'🐟',a:'#DBE4AC',b:'#66743A'},'고등어':{i:'🐟',a:'#C8E7F5',b:'#25587A'},'전갱이':{i:'🐠',a:'#E2F2F8',b:'#54798F'},'학꽁치':{i:'🐟',a:'#EAF5FC',b:'#7691A6'},'보리멸':{i:'🐟',a:'#F6ECD4',b:'#A08554'},'황어':{i:'🐟',a:'#FFE7AD',b:'#94741F'},'삼치':{i:'🐟',a:'#D3E7F2',b:'#37627F'},'붕장어':{i:'🐍',a:'#E0D1B8',b:'#645440'},'장어':{i:'🐍',a:'#DCCFBA',b:'#5B4C3A'},'방어':{i:'🐠',a:'#FFE6B0',b:'#A5761D'},'광어':{i:'🐟',a:'#E6EEF6',b:'#5A6A79'},'감성돔':{i:'🐟',a:'#DFE9F2',b:'#41576B'},'참돔':{i:'🐠',a:'#FFD6D4',b:'#A4413C'}};
   KFISH={'장어':{len:68,diff:5},'삼치':{len:52,diff:3},'방어':{len:74,diff:4},'볼락':{len:24,diff:2},'광어':{len:45,diff:3},'감성돔':{len:31,diff:3},'참돔':{len:38,diff:4}};
@@ -3180,7 +2931,7 @@ class Component extends DCLogic {
       settings:{useTT:true,parentPw:String(this.props.parentPassword??'0000'),tideRegion:'south'},
       events:[], ddays:[], todos:[], checks:{kid1:{},kid2:{}},
       journal:[], scores:[], stlog:[], exch:[], sttrash:[], fishlog:[], err:[], trades:[], appr:[],
-      quizzes:[], qruns:[], stkRate:{kid1:200,kid2:200},
+      stkRate:{kid1:200,kid2:200},
       rewards:[], allow:[], tx:[], budgets:[], fixed:[], fixedPaid:{},
       accounts:[], feed:[], tt:[], calDeco:[], goals:[],
       rwV2:1, histSeeded:1, kfV2:1
@@ -3188,7 +2939,6 @@ class Component extends DCLogic {
   }
 
   componentDidMount(){
-    this.qTimer=setInterval(()=>this.qTick(),500);
     this.feedPaste=async e=>{const S=this.state;if(S.tab!=='feed'||!S.user||S.modal)return;
       const its=Array.from((e.clipboardData||{}).items||[]).filter(x=>x.type&&x.type.indexOf('image/')===0);if(!its.length)return;
       e.preventDefault();const files=its.map(x=>x.getAsFile()).filter(Boolean);if(!files.length)return;
@@ -3206,8 +2956,6 @@ class Component extends DCLogic {
       if(!data.stkRate)data.stkRate=this.seed().stkRate;
       if(!data.rwV2){data.rewards=this.seed().rewards;data.rwV2=1;}
       if(!data.histSeeded){const cm=this.today().slice(0,7);data.tx=data.tx.concat(this.seed().tx.filter(x=>x.d.slice(0,7)!==cm));data.histSeeded=1;}
-      if(!data.quizzes){const sd=this.seed();data.quizzes=sd.quizzes;data.qruns=[];data.events=data.events.concat(sd.events.filter(x=>x.qid));}
-      if(!data.qruns)data.qruns=[];
       if(!data.calDeco)data.calDeco=[];
       if(!data.goals)data.goals=[];
       if(!data.appr)data.appr=[];
@@ -3220,11 +2968,7 @@ class Component extends DCLogic {
       this.setState({data,calM:t.slice(0,7),budM:t.slice(0,7),tideM:t.slice(0,7),selDate:t,budSel:t},()=>this.fcBackfill());
     });
   }
-  componentWillUnmount(){if(this.qTimer)clearInterval(this.qTimer);if(this.feedPaste)document.removeEventListener('paste',this.feedPaste);}
-  qTick(){const S=this.state;if(!S.data)return;
-    if(S.qz&&S.qz.phase==='play'&&!S.qz.fb&&S.qz.deadline&&Date.now()>S.qz.deadline){this.qAnswer(null);return;}
-    if(S.qz||(S.tab==='my'&&S.kview==='quiz'))this.setState({now:Date.now()});
-  }
+  componentWillUnmount(){if(this.feedPaste)document.removeEventListener('paste',this.feedPaste);}
   save(data,fn){this.setState({data});window.FamilyStore.save(data,fn);}
   mut(fn){const d=JSON.parse(JSON.stringify(this.state.data));fn(d);this.save(d,fn);}
   setF(k,v){this.setState(s=>({f:{...s.f,[k]:v}}));}
@@ -3485,256 +3229,11 @@ class Component extends DCLogic {
     return s;
   }
 
-  QSUBJ=[{v:'engw',l:'영어 단어',e:'🔤',mode:'spell'},{v:'engs',l:'영어 문장',e:'💬',mode:'choice'},{v:'math',l:'수학',e:'➗',mode:'choice'},{v:'sci',l:'과학',e:'🔬',mode:'choice'},{v:'soc',l:'사회',e:'🌏',mode:'choice'},{v:'etc',l:'기타',e:'🧩',mode:'choice'}];
-  QLV=[{v:1,l:'쉬움',d:'한두 글자'},{v:2,l:'보통',d:'한 칸씩'},{v:3,l:'어려움',d:'첫 글자만'}];
-  QSTK=['🌟','🏅','💖','🔥','🏆','🍀','💎','🦄'];
-  qchip(sk,on){return on?{bg:sk.ac,fg:sk.on,bd:sk.ac}:{bg:sk.card,fg:sk.tx,bd:sk.line};}
-  qSubj(v){return this.QSUBJ.find(x=>x.v===v)||this.QSUBJ[5];}
-  qFind(D,id){return (D.quizzes||[]).find(x=>x.id===id);}
-  qRuns(D,qid){return (D.qruns||[]).filter(x=>x.qid===qid).slice().sort((a,b)=>a.at-b.at);}
-  qMask(w,lv){const ch=String(w).split('');const li=[];ch.forEach((c,i)=>{if(/[a-z]/i.test(c))li.push(i);});const hide=[];
-    if(lv>=3)li.slice(1).forEach(i=>hide.push(i));
-    else if(lv>=2)li.forEach((i,n)=>{if(n%2===1)hide.push(i);});
-    else{if(li.length>2)hide.push(li[Math.floor(li.length/2)]);if(li.length>5)hide.push(li[li.length-2]);}
-    return ch.map((c,i)=>hide.indexOf(i)>=0?'_':c).join(' ');}
-  qStkHave(D,k,e){return (D.stlog||[]).filter(x=>x.k===k&&x.e===e).length;}
-  qMMSS(ms){const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
-  qStat(D,q){const runs=this.qRuns(D,q.id);const used=runs.length;const tries=q.tries||3;
-    const best=runs.reduce((a,r)=>Math.max(a,r.pct||0),0);const passed=runs.some(r=>r.pass);const last=runs[runs.length-1]||null;
-    const coolLeft=(!passed&&last)?Math.max(0,last.at+(q.cool||0)*60000-Date.now()):0;
-    const feeE=(q.fee&&q.fee.e)||'🌟',feeN=(q.fee&&q.fee.n)||1;
-    const bal=this.trAvail(D,q.k),have=this.qStkHave(D,q.k,feeE);
-    return {runs,used,left:Math.max(0,tries-used),best,passed,last,coolLeft,coolReady:coolLeft<=0,
-      feeOk:used===0||(bal>=feeN&&have>=feeN),bal,have,feeE,feeN};}
-  qOpts(it,n){const arr=[String(it.a)].concat(it.opts||[]);const k=((n||1)*3)%arr.length;return arr.slice(k).concat(arr.slice(0,k));}
-  qNorm(s){return String(s==null?'':s).trim().toLowerCase().replace(/[.,!?"']/g,'').replace(/\s+/g,' ');}
-  qOpen(q){this.setState({qz:{qid:q.id,phase:'intro',n:0,i:0,ans:{},fb:null,deadline:null,studyOk:{},wrong:[]},qMsg:''});}
-  qStart(q){const D=this.state.data,st=this.qStat(D,q);
-    if(st.passed||st.left<=0)return;
-    const n=st.used+1;
-    if(n>1){
-      if(!st.coolReady){this.setState({qMsg:'아직 재도전 대기시간이야 · '+this.qMMSS(st.coolLeft)+' 남았어'});return;}
-      if(!st.feeOk){this.setState({qMsg:'재도전엔 '+st.feeE+' '+st.feeN+'개가 필요해 (지금 '+Math.min(st.have,st.bal)+'개)'});return;}
-      this.mut(d=>{d.exch.push({id:this.uid(),k:q.k,d:this.today(),name:'퀴즈 재도전 · '+q.title,cost:st.feeN,e:st.feeE});});}
-    this.setState({qz:{qid:q.id,phase:'play',n,i:0,ans:{},fb:null,deadline:Date.now()+(q.think||20)*1000,studyOk:{},wrong:[]},qMsg:''});}
-  qAnswer(val){const S=this.state,qz=S.qz;if(!qz||qz.phase!=='play'||qz.fb)return;
-    const q=this.qFind(S.data,qz.qid);if(!q)return;const it=q.items[qz.i];
-    const ok=this.qNorm(val)!==''&&this.qNorm(val)===this.qNorm(it.a);
-    this.setState({qz:{...qz,ans:{...qz.ans,[it.id]:{v:val==null?'':val,ok}},fb:{ok,a:it.a,note:it.note||'',timeout:val==null},deadline:null}});}
-  qNext(){const S=this.state,qz=S.qz;if(!qz)return;const q=this.qFind(S.data,qz.qid);
-    if(qz.i+1>=q.items.length){this.qFinish();return;}
-    this.setState({qz:{...qz,i:qz.i+1,fb:null,deadline:Date.now()+(q.think||20)*1000}});}
-  qFinish(){const S=this.state,qz=S.qz;const q=this.qFind(S.data,qz.qid);if(!q)return;
-    const total=q.items.length;const okN=q.items.filter(it=>(qz.ans[it.id]||{}).ok).length;
-    const pct=Math.round(okN/total*100);const pass=pct>=(q.goal||80);
-    const wrong=q.items.filter(it=>!(qz.ans[it.id]||{}).ok).map(it=>it.id);
-    const at=Date.now(),td=this.today(),rw=q.rw||{e:'🌟',n:1};
-    this.mut(d=>{d.qruns=d.qruns||[];
-      d.qruns.push({id:this.uid(),qid:q.id,k:q.k,n:qz.n,score:okN,total,pct,pass,wrong,at,d:td});
-      if(pass){for(let i=0;i<Math.max(1,rw.n);i++){const tag='quiz_'+q.id+'_'+qz.n+'#'+i;
-        if(!d.stlog.some(x=>x.auto===tag))d.stlog.push({id:this.uid(),k:q.k,e:rw.e,from:'퀴즈 성공 자동지급',msg:q.title+' '+pct+'점!',d:td,auto:tag});}}});
-    this.setState({qz:{...qz,phase:'result',fb:null,deadline:null,lastPct:pct,lastOk:okN,lastPass:pass,wrong}});}
-  qGoStudy(){this.setState(s=>({qz:{...s.qz,phase:'study'}}));}
-  qStudyToggle(id){this.setState(s=>({qz:{...s.qz,studyOk:{...s.qz.studyOk,[id]:!s.qz.studyOk[id]}}}));}
-  qClose(){const S=this.state;
-    if(S.qz&&S.qz.phase==='play'){if(!confirm('지금 나가면 이번 도전이 기록돼요. 나갈까요?'))return;this.qFinish();return;}
-    this.setState({qz:null,qMsg:''});}
-  // 문제 만들기는 담당(VS코드)에게 맡긴다 — 완성된 퀴즈가 아래 목록에 올라온다
-  async qbGenerate(subj,mode,lv,topic,n){
-    const S=this.state,f=S.f||{},sub=this.qSubj(subj);
-    const kid=S.qbKid||((S.data.profiles.find(p=>p.role==='kid')||{}).id||'');
-    if(!kid){this.setState({qbMsg:'먼저 어느 아이의 퀴즈인지 골라 주세요'});return;}
-    this.setState({qbAi:true,qbMsg:''});
-    const me=(S.data.profiles.find(p=>p.id===S.user)||{}).name||'';
-    const r=await window.FamilyStore.ask('quiz',{
-      kid,subj,subjLabel:sub.l,mode,lv,topic:String(topic||''),n:Math.max(1,Math.min(12,n||6)),
-      title:String(f.qbTitle||''),goal:Number(f.qbGoal||80),tries:Number(f.qbTries||3),
-      think:Number(f.qbThink||25),cool:Number(f.qbCool||10),
-      rw:{e:S.qbRwE,n:S.qbRwN},fee:{e:S.qbFeeE,n:S.qbFeeN},date:f.qbDate||this.today()
-    },[],me);
-    this.setState({qbAi:false,qbMsg:r.ok
-      ?'📮 부탁해뒀어요 — 만들어지면 아래 퀴즈 목록에 올라와요. 그때 고치거나 지울 수 있어요'
-      :'😢 맡기지 못했어요. 인터넷 연결을 확인해 주세요'});}
-  qbEdit(q){this.setState(s=>({modal:{t:'qbuild'},qbEditId:q.id,qbKid:q.k,qbSubj:q.subj,qbLv:q.lv||2,qbRwE:q.rw.e,qbRwN:q.rw.n,qbFeeE:q.fee.e,qbFeeN:q.fee.n,qbItems:q.items.slice(),qbMsg:'',
-    f:{...s.f,qbTitle:q.title,qbGoal:String(q.goal),qbTries:String(q.tries||3),qbThink:String(q.think),qbCool:String(q.cool),qbDate:q.d||this.today(),qbQ:'',qbA:'',qbEx:'',qbNote:'',qbO1:'',qbO2:'',qbO3:''}}));}
-
-  qKidVals(D,u,sk,f,S,t){
-    const V={kvQuiz:false,kqEmpty:true,kqListV:[]};
-    if(!u||u.role!=='kid')return V;
-    const kvNow=S.tab==='sticker'?'sticker':(S.tab==='money'?'money':S.kview);
-    V.kvQuiz=kvNow==='quiz';
-    const list=(D.quizzes||[]).filter(x=>x.k===u.id).slice().sort((a,b)=>String(b.d||'').localeCompare(String(a.d||'')));
-    V.kqEmpty=list.length===0;
-    V.kqListV=list.map(q=>{const st=this.qStat(D,q),sub=this.qSubj(q.subj);
-      const badge=st.passed?{l:'성공 ✓',c:'#2E9E63',bg:'#E8F6EE'}
-        :(st.left<=0?{l:'도전 끝',c:'#8A8177',bg:sk.bg}
-        :(st.used===0?{l:'새 퀴즈',c:sk.ac,bg:sk.soft}
-        :(st.coolLeft>0?{l:'대기 '+this.qMMSS(st.coolLeft),c:'#3B82F6',bg:'#E8F0FE'}:{l:'재도전 가능',c:sk.ac,bg:sk.soft})));
-      const lvl=(this.QLV.find(x=>x.v===(q.lv||2))||{}).l;
-      return{title:q.title,subjE:sub.e,bd:st.passed?'#9BD5B4':sk.line,stLabel:badge.l,stC:badge.c,stBg:badge.bg,
-        meta:sub.l+' · '+q.items.length+'문항 · 목표 '+(q.goal||80)+'점 · 문제당 '+(q.think||20)+'초'+(q.mode==='spell'?' · 난이도 '+lvl:''),
-        dotsV:Array.from({length:q.tries||3},(x,i)=>({c:i<st.used?((st.runs[i]||{}).pass?'#2E9E63':'#E5484D'):sk.line})),
-        bestTxt:st.used?'최고 '+st.best+'점':'아직 안 풀었어',
-        canGo:!st.passed&&st.left>0,
-        goLabel:st.used===0?'도전하기 ✏️':(st.coolLeft>0?('대기 '+this.qMMSS(st.coolLeft)):('재도전하기 '+st.feeE+'×'+st.feeN)),
-        go:()=>this.qOpen(q),
-        hasStudy:st.used>0&&!st.passed&&(((st.last||{}).wrong)||[]).length>0,
-        study:()=>this.setState({qz:{qid:q.id,phase:'study',n:st.used,i:0,ans:{},fb:null,deadline:null,studyOk:{},wrong:((st.last||{}).wrong)||[]},qMsg:''}),
-        hasNote:!st.passed&&st.used>0,
-        noteC:st.left<=0?'#E5484D':sk.sub,
-        note:st.left<=0?'도전을 모두 썼어. 학습페이지로 복습하고 엄마·아빠에게 새 퀴즈를 부탁해 보자'
-          :(!st.feeOk?('재도전엔 '+st.feeE+' '+st.feeN+'개가 필요해 (지금 '+Math.min(st.have,st.bal)+'개)')
-          :'학습페이지를 읽고 다시 도전하면 성공할 수 있어!')};});
-    return V;}
-
-  qPlayVals(D,u,sk,f,S,t){
-    const V={qzOpen:false,qzIntro:false,qzPlay:false,qzResult:false,qzFail:false,qzStudy:false,qzTitle:'',qzSubTxt:'',qzClose:()=>{},
-      qzSpell:false,qzChoice:false,qzQ:'',qzHint:'',qzEx:'',qzHasEx:false,qzMask:'',qzHasMask:false,qzIdx:'',qzBar:0,qzBarC:sk.ac,qzTimeTxt:'',
-      qzOptsV:[],qzInput:'',qzOnInput:()=>{},qzSubmit:()=>{},qzFb:false,qzFbC:'#2E9E63',qzFbTxt:'',qzFbNote:'',qzHasFbNote:false,qzNext:()=>{},qzNextLabel:'다음',
-      qzStart:()=>{},qzStartLabel:'시작하기',qzIntroMeta:'',qzIntroRw:'',qzIntroFee:'',qzScoreTxt:'',qzResultMsg:'',qzResC:'#2E9E63',qzResEmoji:'🎉',qzPass:false,qzRwTxt:'',
-      qzTriesTxt:'',qzGoStudy:()=>{},qzDone:()=>{},qzStudyV:[],qzStudyHint:'',qzCoolTxt:'',qzRetry:()=>{},qzRetryLabel:'',qzRetryOff:true,qzRetryBg:sk.bg,qzRetryFg:sk.sub,
-      qzHasMsg:false,qzMsg:''};
-    if(!S.qz||!u)return V;
-    const q=this.qFind(D,S.qz.qid);if(!q)return V;
-    if(u.role!=='kid'||q.k!==u.id)return V;
-    const qz=S.qz,st=this.qStat(D,q),sub=this.qSubj(q.subj),rw=q.rw||{e:'🌟',n:1},fee=q.fee||{e:'🌟',n:1};
-    V.qzOpen=true;V.qzTitle=sub.e+' '+q.title;V.qzClose=()=>this.qClose();
-    V.qzHasMsg=!!S.qMsg;V.qzMsg=S.qMsg;V.qzDone=()=>this.setState({qz:null,qMsg:''});
-    V.qzSubTxt=q.items.length+'문항 · 목표 '+(q.goal||80)+'점 · 문제당 '+(q.think||20)+'초';
-    V.qzIntro=qz.phase==='intro';V.qzPlay=qz.phase==='play';V.qzResult=qz.phase==='result';V.qzStudy=qz.phase==='study';
-    V.qzIntroMeta='도전 '+st.used+'/'+(q.tries||3)+' 사용 · 남은 도전 '+st.left+'번'+(st.used?' · 최고 '+st.best+'점':'');
-    V.qzIntroRw='성공하면 '+rw.e+' ×'+rw.n+' 자동 지급';
-    V.qzIntroFee='재도전엔 '+fee.e+' ×'+fee.n+' 사용 · 대기 '+(q.cool||0)+'분';
-    V.qzStart=()=>this.qStart(q);
-    V.qzStartLabel=st.used===0?'시작하기 ✏️':(st.coolLeft>0?('대기 '+this.qMMSS(st.coolLeft)):(st.feeOk?('재도전하기 ('+fee.e+'×'+fee.n+' 사용)'):(fee.e+' '+fee.n+'개가 필요해')));
-    if(V.qzPlay){const it=q.items[qz.i]||{};
-      V.qzIdx=(qz.i+1)+' / '+q.items.length;
-      const total=(q.think||20)*1000,left=qz.deadline?Math.max(0,qz.deadline-Date.now()):0;
-      V.qzBar=qz.fb?0:Math.round(left/total*100);
-      V.qzBarC=left<total*0.25?'#E5484D':sk.ac;
-      V.qzTimeTxt=qz.fb?'':(Math.ceil(left/1000)+'초');
-      V.qzSpell=q.mode==='spell';V.qzChoice=q.mode!=='spell';
-      V.qzQ=q.mode==='spell'?(it.q+' · 영어로 쓰면?'):(it.q||'');
-      V.qzEx=it.ex||'';V.qzHasEx=!!it.ex;
-      V.qzMask=q.mode==='spell'?this.qMask(it.a,q.lv||2):'';V.qzHasMask=!!V.qzMask;
-      V.qzHint=q.mode==='spell'?('글자 수 '+String(it.a).replace(/\s/g,'').length+'개 · 밑줄이 숨은 글자야'):'';
-      V.qzInput=f.qzIn||'';
-      V.qzOnInput=e=>this.setF('qzIn',e.target.value);
-      V.qzSubmit=()=>{this.qAnswer(f.qzIn||'');this.clearF(['qzIn']);};
-      V.qzOptsV=q.mode==='spell'?[]:this.qOpts(it,qz.n).map(o=>({t:o,pick:()=>this.qAnswer(o)}));
-      V.qzFb=!!qz.fb;
-      if(qz.fb){V.qzFbC=qz.fb.ok?'#2E9E63':'#E5484D';
-        V.qzFbTxt=qz.fb.ok?'정답이야! 🎉':(qz.fb.timeout?'시간 초과! 정답은 '+qz.fb.a:'아쉽다! 정답은 '+qz.fb.a);
-        V.qzFbNote=qz.fb.note;V.qzHasFbNote=!!qz.fb.note;}
-      V.qzNext=()=>{this.clearF(['qzIn']);this.qNext();};
-      V.qzNextLabel=qz.i+1>=q.items.length?'결과 보기 →':'다음 문제 →';}
-    if(V.qzResult){const pct=qz.lastPct||0,pass=!!qz.lastPass;
-      V.qzPass=pass;V.qzFail=!pass;V.qzResC=pass?'#2E9E63':'#E0654F';V.qzResEmoji=pass?'🎉':'💪';
-      V.qzScoreTxt=pct+'점';
-      V.qzResultMsg=(qz.lastOk||0)+' / '+q.items.length+'문제 정답 · '+(pass?('목표 '+(q.goal||80)+'점을 넘었어!'):('목표 '+(q.goal||80)+'점까지 조금만 더! 틀린 문제를 학습페이지에서 읽고 다시 도전해 보자'));
-      V.qzRwTxt=pass?(rw.e+' ×'+rw.n+' 스티커가 자동으로 도착했어!'):'';
-      V.qzTriesTxt='남은 도전 '+st.left+'번';}
-    if(V.qzResult||V.qzStudy){
-      const wrongIds=(qz.wrong&&qz.wrong.length)?qz.wrong:(((st.last||{}).wrong)||[]);
-      const items=q.items.filter(it=>wrongIds.indexOf(it.id)>=0);
-      V.qzGoStudy=()=>this.qGoStudy();
-      V.qzStudyV=items.map(it=>{const on=!!qz.studyOk[it.id];
-        return{q:q.mode==='spell'?('뜻 · '+it.q):it.q,a:it.a,ex:it.ex||'',hasEx:!!it.ex,
-          mask:q.mode==='spell'?this.qMask(it.a,1):'',hasMask:q.mode==='spell',
-          note:it.note||'이 문제는 설명이 아직 없어요. 엄마·아빠와 함께 확인해 보자!',
-          ck:on?'✓':'',ckBg:on?sk.ac:'transparent',ckBd:on?sk.ac:sk.line,toggle:()=>this.qStudyToggle(it.id)};});
-      const allOk=items.length>0&&items.every(it=>qz.studyOk[it.id]);
-      V.qzCoolTxt=st.coolLeft>0?('재도전 대기시간 '+this.qMMSS(st.coolLeft)+' 남았어'):'대기시간 끝! 이제 도전할 수 있어';
-      V.qzStudyHint='틀린 문제 설명을 읽고 체크해 줘. 모두 체크하고 대기시간이 끝나면 재도전 버튼이 열려!';
-      const ok=allOk&&st.coolReady&&st.feeOk&&st.left>0&&!st.passed;
-      V.qzRetryOff=!ok;V.qzRetryBg=ok?sk.ac:sk.bg;V.qzRetryFg=ok?sk.on:sk.sub;
-      V.qzRetryLabel=st.left<=0?'도전 횟수를 모두 썼어'
-        :(!allOk?'설명을 읽고 모두 체크해 줘'
-        :(!st.coolReady?('대기 '+this.qMMSS(st.coolLeft)+' 후에 열려')
-        :(!st.feeOk?(fee.e+' '+fee.n+'개가 있어야 도전할 수 있어'):('재도전하기 ('+fee.e+'×'+fee.n+' 사용)'))));
-      V.qzRetry=()=>this.qStart(q);}
-    return V;}
-
-  qParentVals(D,u,sk,f,S,t){
-    const V={pqEmpty:true,pqListV:[],qbKidPickV:[],qbNew:()=>{},qbOpen:false,qbTitleTxt:'',qbSubjV:[],qbLvV:[],qbShowLv:false,qbModeTxt:'',
-      qbRwV:[],qbFeeV:[],qbRwN:2,qbFeeN:1,qbRwDec:()=>{},qbRwInc:()=>{},qbFeeDec:()=>{},qbFeeInc:()=>{},
-      qbItemsV:[],qbItemsEmpty:true,qbItemsTitle:'넣은 문제',qbAddItem:()=>{},qbSave:()=>{},qbClose:()=>{},qbSpell:false,qbChoice:false,
-      qbHasMsg:false,qbMsg:'',qbAi:()=>{},qbAiLabel:'🤖 AI에게 문제 만들어 달라고 하기',qbSaveLabel:'퀴즈 저장',qbQPh:'',qbAPh:'',qbExPh:''};
-    if(!u||u.role==='kid')return V;
-    const kids=D.profiles.filter(p=>p.role==='kid');
-    const kid=S.qbKid||(kids[0]||{}).id;
-    V.qbKidPickV=kids.map(p=>({name:p.emoji+' '+p.name,...this.qchip(sk,kid===p.id),pick:()=>this.setState({qbKid:p.id})}));
-    const list=(D.quizzes||[]).filter(x=>x.k===kid).slice().reverse();
-    V.pqEmpty=list.length===0;
-    V.pqListV=list.map(q=>{const st=this.qStat(D,q),sub=this.qSubj(q.subj);
-      return{title:q.title,subjE:sub.e,
-        meta:sub.l+' · '+q.items.length+'문항 · 목표 '+(q.goal||80)+'점 · 도전 '+(q.tries||3)+'번 · 생각 '+(q.think||20)+'초 · 대기 '+(q.cool||0)+'분 · '+this.dShort(q.d||t)+' 일정',
-        rwTxt:'성공 '+(q.rw||{}).e+'×'+(q.rw||{}).n,feeTxt:'재도전 '+(q.fee||{}).e+'×'+(q.fee||{}).n,
-        stLabel:st.passed?('성공 ✓ '+st.best+'점'):(st.used?('도전 '+st.used+'/'+(q.tries||3)+' · 최고 '+st.best+'점'):'아직 안 풀었어요'),
-        stC:st.passed?'#2E9E63':(st.used?sk.ac:sk.sub),
-        hasRuns:st.runs.length>0,
-        runsV:st.runs.map(r=>({t:r.n+'차 · '+r.pct+'점 '+(r.pass?'성공':'실패')+' · '+this.dShort(r.d),c:r.pass?'#2E9E63':'#E5484D'})),
-        edit:()=>this.qbEdit(q),
-        del:()=>{if(confirm('이 퀴즈를 삭제할까요?'))this.mut(d=>{d.quizzes=(d.quizzes||[]).filter(x=>x.id!==q.id);d.qruns=(d.qruns||[]).filter(x=>x.qid!==q.id);d.events=d.events.filter(x=>x.qid!==q.id);});}};});
-    V.qbNew=()=>this.setState({modal:{t:'qbuild'},qbEditId:null,qbItems:[],qbMsg:'',qbSubj:'engw',qbLv:2,qbRwE:'🌟',qbRwN:2,qbFeeE:'🌟',qbFeeN:1,qbKid:kid,
-      f:{...f,qbTitle:'',qbGoal:'80',qbTries:'3',qbThink:'25',qbCool:'10',qbDate:t,qbQ:'',qbA:'',qbEx:'',qbNote:'',qbO1:'',qbO2:'',qbO3:'',qbAiTopic:'',qbAiN:'6'}});
-    if(!(S.modal&&S.modal.t==='qbuild'))return V;
-    const subj=S.qbSubj||'engw',sub=this.qSubj(subj),mode=sub.mode,lv=S.qbLv||2;
-    const items=S.qbItems||[];
-    V.qbOpen=true;V.qbClose=()=>this.setState({modal:null,qbMsg:''});
-    V.qbTitleTxt=S.qbEditId?'📝 퀴즈 수정':'📝 새 학습 퀴즈';
-    V.qbSaveLabel=S.qbEditId?'수정 저장':'퀴즈 저장 · 일정에 넣기';
-    V.qbSpell=mode==='spell';V.qbChoice=mode!=='spell';V.qbShowLv=mode==='spell';
-    V.qbModeTxt=mode==='spell'?'스펠링 빈칸 방식 · 뜻을 보고 단어를 직접 적어요. 난이도로 가리는 글자 수를 정해요.':'4지선다 방식 · 정답 1개와 오답 3개를 넣어요. 문장·수학·과학·사회 모두 이 방식이에요.';
-    V.qbQPh=mode==='spell'?'한국어 뜻 (예: 도서관)':'문제 (예: 빈칸에 알맞은 말은? She ___ to school.)';
-    V.qbAPh=mode==='spell'?'영어 단어 (예: library)':'정답 보기';
-    V.qbExPh=mode==='spell'?'예문 (예: I borrow books at the ___.)':'참고 문장·힌트 (선택)';
-    V.qbSubjV=this.QSUBJ.map(x=>({l:x.e+' '+x.l,...this.qchip(sk,subj===x.v),pick:()=>this.setState({qbSubj:x.v})}));
-    V.qbLvV=this.QLV.map(x=>({l:x.l,d:x.d,...this.qchip(sk,lv===x.v),pick:()=>this.setState({qbLv:x.v})}));
-    const rwE=S.qbRwE||'🌟',feeE=S.qbFeeE||'🌟';
-    V.qbRwV=this.QSTK.map(e=>({e,bg:rwE===e?sk.soft:sk.bg,bd:rwE===e?sk.ac:sk.line,pick:()=>this.setState({qbRwE:e})}));
-    V.qbFeeV=this.QSTK.map(e=>({e,bg:feeE===e?sk.soft:sk.bg,bd:feeE===e?sk.ac:sk.line,pick:()=>this.setState({qbFeeE:e})}));
-    V.qbRwN=S.qbRwN||2;V.qbFeeN=S.qbFeeN||1;
-    V.qbRwDec=()=>this.setState({qbRwN:Math.max(1,(S.qbRwN||2)-1)});
-    V.qbRwInc=()=>this.setState({qbRwN:Math.min(9,(S.qbRwN||2)+1)});
-    V.qbFeeDec=()=>this.setState({qbFeeN:Math.max(1,(S.qbFeeN||1)-1)});
-    V.qbFeeInc=()=>this.setState({qbFeeN:Math.min(9,(S.qbFeeN||1)+1)});
-    V.qbItemsEmpty=items.length===0;
-    V.qbItemsTitle='넣은 문제 '+items.length+'개';
-    V.qbItemsV=items.map((it,i)=>({n:i+1,q:it.q,a:it.a,note:it.note||'',hasNote:!!it.note,
-      opts:(it.opts||[]).join(' / '),hasOpts:mode!=='spell'&&(it.opts||[]).length>0,
-      del:()=>this.setState({qbItems:items.filter((x,j)=>j!==i)})}));
-    V.qbAddItem=()=>{const q1=(f.qbQ||'').trim(),a1=(f.qbA||'').trim();
-      if(!q1||!a1){this.setState({qbMsg:'문제와 정답을 모두 적어 주세요'});return;}
-      const it={id:this.uid(),q:q1,a:a1,ex:(f.qbEx||'').trim(),note:(f.qbNote||'').trim()};
-      if(mode!=='spell'){it.opts=[f.qbO1,f.qbO2,f.qbO3].map(x=>String(x||'').trim()).filter(Boolean);
-        if(it.opts.length<2){this.setState({qbMsg:'객관식은 오답 보기를 2개 이상 넣어 주세요'});return;}}
-      this.setState({qbItems:items.concat([it]),qbMsg:''});this.clearF(['qbQ','qbA','qbEx','qbNote','qbO1','qbO2','qbO3']);};
-    V.qbHasMsg=!!S.qbMsg;V.qbMsg=S.qbMsg;
-    V.qbAiLabel=S.qbAi?'🤖 부탁하는 중...':'🤖 AI에게 문제 만들어 달라고 부탁하기';
-    V.qbAi=()=>{if(S.qbAi)return;this.qbGenerate(subj,mode,lv,(f.qbAiTopic||'').trim(),Number(f.qbAiN||6));};
-    V.qbSave=()=>{
-      if(!items.length){this.setState({qbMsg:'문제를 1개 이상 넣어 주세요'});return;}
-      const title=(f.qbTitle||'').trim()||(sub.l+' 퀴즈 '+items.length+'문항');
-      const rec={id:S.qbEditId||this.uid(),k:kid,subj,mode,lv,title,
-        goal:Math.max(10,Math.min(100,Number(f.qbGoal||80))),tries:Math.max(1,Math.min(9,Number(f.qbTries||3))),
-        think:Math.max(5,Number(f.qbThink||25)),cool:Math.max(0,Number(f.qbCool||10)),
-        rw:{e:rwE,n:V.qbRwN},fee:{e:feeE,n:V.qbFeeN},d:f.qbDate||t,items};
-      this.mut(d=>{d.quizzes=d.quizzes||[];
-        const ix=d.quizzes.findIndex(x=>x.id===rec.id);
-        if(ix>=0)d.quizzes[ix]=rec;else d.quizzes.push(rec);
-        d.events=d.events.filter(x=>x.qid!==rec.id);
-        d.events.push({id:this.uid(),d:rec.d,t:'📝 퀴즈: '+rec.title,m:kid,time:'',qid:rec.id,by:u.id,
-          memo:'목표 '+rec.goal+'점 · 성공하면 '+rec.rw.e+'×'+rec.rw.n+' 자동 지급'});});
-      this.setState({modal:null,qbMsg:''});};
-    return V;}
-
   renderVals(){
     const S=this.state,D=S.data;
     if(!D)return{loading:true,noUser:false,hasUser:false,skinBg:'#FAF6EF',skinCard:'#fff',skinAc:'#F59E0B',skinOn:'#fff',skinSoft:'#F7EAD2',skinLine:'#EFE4CF',skinTx:'#3F3A33',skinSub:'#8A8177',f:{},on:{},modalPw:false,modalEvent:false,modalDday:false,modalProfile:false,modalPing:false,hasPings:false,pingsV:[]};
     const FL=['evTitle','evTime','evMemo','evDate','evClItem','evClDue','evMember','jSubj','jMin','jText','scSubj','scName','scScore','txDate','txAmt','txCat','txMemo','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDate','kfTm','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','bName','bAmt','bCat','acName','acOrg','acAmt','acDay','rwName','rwCost','fxName','fxAmt','fxDay','fxCat','goTitle','goDate','gdMemo'];
     const on={};FL.forEach(k=>on[k]=e=>this.setF(k,e.target.value));
-    ['qbTitle','qbGoal','qbTries','qbThink','qbCool','qbDate','qbQ','qbA','qbEx','qbNote','qbO1','qbO2','qbO3','qbAiTopic','qbAiN'].forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     const f=S.f,t=this.today(),W=this.won.bind(this);
     const u=D.profiles.find(p=>p.id===S.user)||null;
     const sk=this.SKINS[u?u.skin:'cream']||this.SKINS.cream;
@@ -3778,7 +3277,7 @@ class Component extends DCLogic {
     if(!u)return V;
 
     V.uName=u.name;V.uEmoji=u.emoji;V.uPhoto=u.photo;V.uHasPhoto=!!u.photo;V.uNoPhoto=!u.photo;
-    V.logout=()=>this.setState({user:null,parentOk:false,editMode:false,qz:null,qMsg:''});
+    V.logout=()=>this.setState({user:null,parentOk:false,editMode:false});
     const isKid=u.role==='kid';
     const tabs=[{id:'home',label:'홈',ico:'🏠'},{id:'feed',label:'피드',ico:'📸'}];
     if(!isKid)tabs.push({id:'fish',label:'낚시 도감',ico:'🎣'});
@@ -3852,9 +3351,7 @@ class Component extends DCLogic {
       return{title:ev.t,time:ev.time||'종일',memo:ev.memo||'',hasMemo:!!(ev.memo||'').trim(),c:evCol(ev),who:String(ev.m||'fam').split(',').map(mName).filter(Boolean).join('·'),canEdit,
       imp:!!ev.imp,hasCl:(ev.cl||[]).some(c=>!c.dn&&clItemMine(ev,c)),
       clV:(ev.cl||[]).filter(c=>!c.dn&&clItemMine(ev,c)).map(c=>({t:c.t,due:clDueLabel(c),hasDue:!!c.due,dueC:c.due&&c.due<t?'#E5484D':'var(--sub,#8A8177)',who:clWho(c),hasWho:!!clWho(c),tog:e=>{e.stopPropagation();clSet(ev.id,c.id,true);}})),
-      open:()=>{if(ev.qid){const qq=this.qFind(D,ev.qid);
-        if(qq&&u.role==='kid'&&qq.k===u.id){this.setState({modal:null});this.qOpen(qq);return;}
-        if(qq&&u.role!=='kid'){this.setState({modal:null,tab:'parent',pview:'kids',qbKid:qq.k});return;}}
+      open:()=>{
       if(canEdit)this.setState({modal:{t:'event',id:ev.id},f:{...f,evTitle:ev.t,evDate:ev.d,evTime:ev.time||'',evMemo:ev.memo||'',evMembers:String(ev.m||'fam').split(','),evImp:!!ev.imp,evCl:(ev.cl||[]).map(x=>({...x})),evClItem:'',evClDue:'',evClM:['fam']}});else evFlash('🔒 '+(mName(ev.by)||'작성한 사람')+'만 수정할 수 있어요');},
       del:e=>{e.stopPropagation();this.mut(d=>{d.events=d.events.filter(x=>x.id!==ev.id);});}};});
     // 📌 고정 체크리스트: 다른 날짜 일정의 안 끝난 할일도 마감일과 함께 끝날 때까지 이 자리에 계속 보인다
@@ -3887,9 +3384,6 @@ class Component extends DCLogic {
       this.mut(d=>{(d.calDeco=d.calDeco||[]).push({id:this.uid(),m:S.calM,s,x:px,y:py,r:Math.round(-15+Math.random()*30),by:u.id});});
       this.setState({calStkSel:null});};
     V.calPlaceCancel=()=>this.setState({calStkSel:null});
-    Object.assign(V,this.qKidVals(D,u,sk,f,S,t));
-    Object.assign(V,this.qPlayVals(D,u,sk,f,S,t));
-    Object.assign(V,this.qParentVals(D,u,sk,f,S,t));
     V.dayGoFeed=()=>this.setState({modal:null,tab:'feed'});
     V.ddRef=this.ddRef;
     V.ddPrev=()=>this.ddNudge(-1);V.ddNext=()=>this.ddNudge(1);
@@ -4290,7 +3784,6 @@ class Component extends DCLogic {
       const st=this.streak(k);
       V.streakMsg=st>=2?'🔥 '+st+'일 연속 올클리어! 대단해!':(st===1?'🔥 어제 올클리어! 오늘도 가보자':'오늘도 하나씩 해보자 🌱');
       const kviews=[{id:'todo',label:'✅ 할일'},{id:'study',label:'✏️ 공부기록'}];
-      kviews.push({id:'quiz',label:'📝 퀴즈'});
       if(this.props.showScores??true)kviews.push({id:'score',label:'💯 성적'});
       kviews.push({id:'deco',label:'🎨 꾸미기'});
       V.kviewsV=kviews.map(kv=>({...kv,...chip(S.kview===kv.id),go:()=>this.setState({tab:'my',kview:kv.id})}));

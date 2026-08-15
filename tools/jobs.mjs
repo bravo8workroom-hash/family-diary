@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────
 //  우리집 다이어리 — AI 부탁 처리 도구 (VS코드 담당 전용)
 //
-//  가족이 앱에서 걸어둔 부탁(캡처 정리 / 퀴즈 만들기)을 읽고,
+//  가족이 앱에서 걸어둔 부탁(캡처 정리)을 읽고,
 //  처리한 결과를 앱 데이터에 넣는다. 클로드가 이 파일을 통해 일한다.
 //
 //    node tools/jobs.mjs list                  대기 중인 부탁 보기 (사진도 내려받음)
@@ -107,14 +107,9 @@ async function cmdList(db) {
   for (const j of jobs) {
     const when = new Date(j.created_at).toLocaleString('ko-KR');
     console.log('─'.repeat(58));
-    console.log(`[${j.id}] ${j.kind === 'receipt' ? '가계부 캡처 정리' : '학습 퀴즈 만들기'}  ·  ${j.asked_by || '가족'}  ·  ${when}`);
+    console.log(`[${j.id}] ${j.kind === 'receipt' ? '가계부 캡처 정리' : j.kind}  ·  ${j.asked_by || '가족'}  ·  ${when}`);
 
     const p = j.payload || {};
-    if (j.kind === 'quiz') {
-      console.log(`     과목 ${p.subjLabel} / 방식 ${p.mode === 'spell' ? '영어 스펠링' : '4지선다'} / 난이도 ${p.lv} / ${p.n}문항`);
-      console.log(`     범위: ${p.topic || '(범위 안 적음 — 교과 기본 내용으로)'}`);
-      console.log(`     제목: ${p.title || '(비어 있음 — 알아서 지어주세요)'} / 목표 ${p.goal}점 / 아이 ${p.kid}`);
-    }
     const shots = p.photos || [];
     if (shots.length) {
       const dir = path.join(INBOX, String(j.id));
@@ -156,33 +151,6 @@ async function cmdApply(db, id, file) {
         });
       }
       return `가계부 ${list.length}건 넣음`;
-    });
-  } else if (job.kind === 'quiz') {
-    const q = result.quiz;
-    if (!q || !(q.items || []).length) die('결과에 quiz.items 가 없습니다.');
-    const p = job.payload || {};
-    note = await editDoc(db, doc => {
-      const rec = {
-        id: uid(), k: q.k || p.kid, subj: q.subj || p.subj, mode: q.mode || p.mode,
-        lv: q.lv || p.lv, title: q.title || p.title || (p.subjLabel + ' 퀴즈'),
-        goal: q.goal || p.goal || 80, tries: q.tries || p.tries || 3,
-        think: q.think || p.think || 25, cool: q.cool != null ? q.cool : (p.cool != null ? p.cool : 10),
-        rw: q.rw || p.rw || { e: '🌟', n: 1 }, fee: q.fee || p.fee || { e: '🌟', n: 1 },
-        d: q.d || p.date || today(),
-        items: q.items.map(x => {
-          const it = { id: uid(), q: String(x.q || '').trim(), a: String(x.a || '').trim(), ex: String(x.ex || '').trim(), note: String(x.note || '').trim() };
-          if ((q.mode || p.mode) !== 'spell') it.opts = (x.opts || []).map(String).slice(0, 3);
-          return it;
-        })
-      };
-      doc.quizzes = doc.quizzes || [];
-      doc.quizzes.push(rec);
-      doc.events = doc.events || [];
-      doc.events.push({
-        id: uid(), d: rec.d, t: '📝 퀴즈: ' + rec.title, m: rec.k, time: '', qid: rec.id,
-        memo: '목표 ' + rec.goal + '점 · 성공하면 ' + rec.rw.e + '×' + rec.rw.n + ' 자동 지급'
-      });
-      return `퀴즈 "${rec.title}" ${rec.items.length}문항 올림`;
     });
   } else {
     die('모르는 부탁 종류입니다: ' + job.kind);
