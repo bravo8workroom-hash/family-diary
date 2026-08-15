@@ -3,49 +3,59 @@ name: card-statement
 description: 카드 이용대금명세서·통장 입출금 캡처(은행 문자 알림 / 은행 앱 거래내역)를 돈이 틀리지 않게 읽어내는 기술 — 버튼에 가려진 숫자 살리기, 카드사 합계·잔액 체인으로 검산하기, 연속 스크롤 캡처의 겹침·빈틈 판단, 할부·취소·선결제·0원 줄 처리, 가계부 대상 밖 계좌 걸러내기. 가계부 캡처를 읽을 때(💳 가계부 담당 `ledger-clerk`), "명세서 정리", "카드 내역 읽어줘", "입출금 캡처", 영수증 캡처에서 금액을 뽑아야 할 때 실행.
 ---
 
-# 카드 명세서 판독
+# Reading card statements
 
-가계부에 들어가는 숫자는 **틀리면 안 되고, 모르면 비워야 한다.**
-아래는 2026-08-15 신한카드·롯데카드 명세서 13장을 실제로 처리하며 검증된 방법이다.
+Numbers that enter the ledger **must not be wrong, and must be left blank when unknown.**
+What follows was verified on 2026-08-15 against 13 real Shinhan / Lotte card statements.
 
-## ⛔ 자료는 넣고 나면 버린다 (사장님 지시 2026-08-15 — 예외 없음)
+## ⛔ Source material is destroyed once it is entered (owner's order, 2026-08-15 — no exceptions)
 
 > "내가 가계부에 올리는 모든 자료는 **데이터 업데이트 후 모두 버리도록** 해. 보관하지 마."
 
-가족이 가계부에 건넨 **모든 원자료** — 캡처 사진, 은행에서 내려받은 거래내역 파일(`.xls`),
-영수증 사진 — 은 **앱에 반영이 끝나는 즉시 지운다.** 쌓아두지 않는다.
+**Every raw item** the family handed to the ledger — capture images, transaction files
+downloaded from the bank (`.xls`), receipt photos — **is deleted the moment it has been
+applied to the app.** Nothing is stockpiled.
 
-| 어디에 있는 것을 | 언제·누가 |
+| What | When / by whom |
 |---|---|
-| `tools/_inbox/<번호>/` 에 내려받은 사진 | `apply`·`done` 이 **자동으로** 지운다 (손댈 것 없음) |
-| 가족이 올린 사진 원본 (Supabase 사진 창고) | `apply`·`done` 이 **자동으로** 지운다 — ⚠ **되돌릴 수 없다.** 아래 ⛔ |
-| 사장님이 건네준 폴더의 파일 (`Downloads\엑셀\*.xls` 등) | 반영을 확인한 뒤 **내가 지운다** |
-| 일하며 만든 중간 파일 (확대본 PNG·정리용 JSON) | 스크래치패드에만 두고 **프로젝트 폴더에는 만들지도 마라** |
+| images downloaded into `tools/_inbox/<번호>/` | `apply` / `done` delete them **automatically** (nothing to do) |
+| the family's original uploads (Supabase image storage) | `apply` / `done` delete them **automatically** — ⚠ **irreversible.** See ⛔ below |
+| files handed over in a folder by the owner (`Downloads\엑셀\*.xls` etc.) | **I delete them** after confirming the data landed |
+| intermediate files made while working (zoomed PNGs, working JSON) | keep them in the scratchpad — **never create them inside the project folder** |
 
-- **순서를 뒤집지 마라.** `node tools/jobs.mjs state` 로 건수·잔액이 실제로 들어간 것을 **보고 나서** 지운다.
-  넣기 전에 지우면 되돌릴 방법이 없다.
-- 통장번호·잔액·상호가 찍힌 자료다. **git 에 올라가는 자리(프로젝트 폴더)로 복사하지 마라.**
-- 지운 뒤 **무엇을 몇 개 지웠는지 보고**한다 (§7).
+- **Never reverse the order.** Run `node tools/jobs.mjs state`, **see** the counts and
+  balances actually land, and only then delete. Delete before entering and nothing can
+  bring it back.
+- This material carries account numbers, balances and merchant names. **Never copy it
+  anywhere that gets committed to git (the project folder).**
+- After deleting, **report what was deleted and how many** (§7).
 
-### ⛔ `apply`·`done` 은 사진을 영영 지운다 — 다 읽고 나서 눌러라
+### ⛔ `apply` / `done` erase the photos for good — read everything first
 
-가족이 앱 보관함에 담아 맡긴 사진은 `apply`(반영) 또는 `done`(닫기) 순간
-**사진 창고에서 실물까지 지워진다.** 같은 캡처가 두 번 처리돼 없는 지출이 부풀지 않게 한 장치다.
+Photos the family left in the app's tray are deleted **from the image storage itself**
+the moment `apply` (enter) or `done` (close) runs. That is deliberate: it stops the same
+capture being processed twice and inflating spending that never happened.
 
-- 다시 볼 수 없으니 **읽을 것을 다 읽고 검산(§5)까지 끝낸 뒤에** 눌러라.
-- 못 읽겠으면 `apply`·`done` 이 아니라 **`fail <번호> "이유"`** 로 남겨라 — 실패 건은 사진을 지우지 않는다.
-- 앱 쪽 보관함은 맡기는 순간 비워진다. 가족 화면에서 사라졌다고 사고가 아니다.
+- You cannot look again, so press it **only after reading everything and finishing the
+  reconciliation (§5)**.
+- If it cannot be read, do not use `apply` / `done` — leave **`fail <번호> "이유"`**.
+  Failed jobs keep their photos.
+- The app-side tray empties the moment the job is submitted. Its disappearance from the
+  family's screen is not a bug.
 
-### 📷 사진에 붙은 이름표 (`payload.tags`)
+### 📷 Labels attached to a photo (`payload.tags`)
 
-가족이 **「고치는 칸」에서 그 거래에 붙여 담은 캡처**에는 이름표가 따라온다.
-`list` 가 `📷 사진 3번 = 8/14 · 롯데하이마트 할부 (36/36) · 26,100원` 처럼 찍어 준다.
+A capture the family attached **to a specific transaction from 「고치는 칸」** arrives with
+a label. `list` prints it as
+`📷 사진 3번 = 8/14 · 롯데하이마트 할부 (36/36) · 26,100원`.
 
-- 그 사진은 **새 거래가 아니라 이미 있는 그 거래의 증빙**이다. 거래를 새로 만들지 마라 — 부풀어 들어간다.
-- 할 일은 그 줄을 **채우는 것**이다: 할부면 산 물건(`installBuys`), 소분류(`sub`), 상호 정정.
-- 🧾 이름표(요청 답변)와는 다르다. 🧾 는 「무엇을 샀나」 캡처 요청에 답한 것이다.
+- That photo is **evidence for an existing transaction, not a new one.** Do not create a
+  transaction — it would double-count.
+- The job is to **fill that row in**: what was bought on an instalment (`installBuys`),
+  the subcategory (`sub`), a merchant-name correction.
+- Distinct from the 🧾 label (request answer), which answers a "what did you buy" request.
 
-## 0. 순서 (이대로만 하면 된다)
+## 0. The order (just do this)
 
 ```
 1. 캡처를 훑어 「무슨 화면인지」부터 정한다   → §1 (통장이면 §1-1)
@@ -56,42 +66,48 @@ description: 카드 이용대금명세서·통장 입출금 캡처(은행 문자
 6. 그제서야 가계부 규칙으로 옮긴다             → §6
 ```
 
-**5번을 건너뛰지 마라.** 합계가 맞으면 그 화면의 모든 숫자가 한꺼번에 증명된다.
-합계가 안 맞으면 어딘가 틀린 것이니, 맞을 때까지 가계부에 넣지 마라.
+**Never skip step 5.** When the total matches, every number on that screen is proven at
+once. When it does not match, something is wrong — keep it out of the ledger until it does.
 
 ---
 
-## 1. 무슨 화면인지 먼저 정한다
+## 1. Decide what the screen is, first
 
-| 단서 | 무슨 화면 |
+| Clue | What it is |
 |---|---|
-| 「이용대금명세서」 + 소계/청구합계 | **한 달치 청구서.** 아래에 합계가 있다 → 검산 가능 |
-| 「N월 N일 명세서」 + 총 N건 | 롯데(LOCA) 청구서. **명세서 날짜 = 결제일** |
-| 「이용내역」 + 필터(전체카드/일시불) | 조회 화면. 필터 때문에 **일부만 보이는 것일 수 있다** |
-| `[Web발신]` + 계좌번호 + 「잔액」 | **은행 문자 알림.** 통장 캡처다 → §1-1 ① |
-| 날짜 머리글 + 줄마다 시각·잔액 | **은행 앱 거래내역.** 통장 캡처다 → §1-1 ② |
+| 「이용대금명세서」 + 소계/청구합계 | **one month's bill.** A total sits at the bottom → reconcilable |
+| 「N월 N일 명세서」 + 총 N건 | Lotte (LOCA) bill. **The statement date is the payment date** |
+| 「이용내역」 + filters (전체카드/일시불) | a lookup screen. Filters mean **you may be seeing only part of it** |
+| `[Web발신]` + account number + 「잔액」 | **bank SMS alert.** This is an account capture → §1-1 ① |
+| date heading + per-row time and balance | **bank app transaction list.** An account capture → §1-1 ② |
 
-- **카드가 여러 장 섞인다.** 줄마다 「본인0307」·「본인985*」처럼 카드 표시가 다르면 **다른 카드**다. 한 장으로 뭉뚱그리지 마라.
-- 청구계좌(「청구합계-○○은행 \*\*\*374」 — **은행과 뒷자리만**)가 보이면 그게 **카드값이 빠져나가는 통장**이다. 통장으로 등록할 값이다.
-- 카드사 로고가 흐려 어디인지 모르겠으면 **「불명」으로 두고 넘어가라.** 화면 안의 다른 단서(계열사 배너 등)로 나중에 정해진다.
+- **Several cards get mixed together.** When the card marker differs per row
+  (「본인0307」 vs 「본인985*」) they are **different cards**. Never lump them into one.
+- A visible billing account (「청구합계-○○은행 \*\*\*374」 — **bank plus last digits only**)
+  is **the account the card bill is drawn from**. Register it as an account.
+- If the card issuer's logo is too blurry to tell, **leave it 「불명」 and move on.** Another
+  clue on the screen (an affiliate banner, etc.) usually settles it later.
 
-## 1-1. 통장 입출금은 세 가지 길로 들어온다 (2026-08-15 실측으로 등록)
+## 1-1. Account transactions arrive by three routes (added from field work, 2026-08-15)
 
-가족은 카드 명세서뿐 아니라 **입출금도 보낸다.** 들어오는 길은 셋뿐이다.
+The family sends more than card statements — **they send account activity too.** There are
+exactly three routes.
 
-| 길 | 무엇 | 어떻게 |
+| Route | What | How |
 |---|---|---|
-| **① 은행 문자 알림** | 문자·RCS 대화창 캡처 | 아래 ① — 눈으로 판독 |
-| **② 은행 앱 거래내역** | 계좌 상세 화면 캡처 | 아래 ② — 눈으로 판독 |
-| **③ 은행에서 내려받은 거래내역 파일** | `.xls` 등 | 판독이 필요 없다. `node tools/jobs.mjs import <결과.json>` 로 바로 넣는다 |
+| **① bank SMS alert** | capture of an SMS / RCS thread | ① below — read by eye |
+| **② bank app transaction list** | capture of the account detail screen | ② below — read by eye |
+| **③ transaction file downloaded from the bank** | `.xls` etc. | no reading needed. Enter directly with `node tools/jobs.mjs import <결과.json>` |
 
-③은 숫자가 이미 정확하므로 §3·§4가 필요 없지만, **§1-1 ③(대상 계좌 거르기)과 §5(잔액 체인)는 똑같이 적용된다.**
-그리고 세 길 모두 **반영이 끝나면 원자료를 지운다** (맨 위 ⛔절).
+③ is already numerically exact, so §3 and §4 do not apply — but **§1-1 ③ (filtering out
+non-ledger accounts) and §5 (the balance chain) apply exactly the same.**
+And all three routes **destroy the source material once entered** (⛔ section at the top).
 
-캡처(①②)가 카드 명세서와 결정적으로 다른 점: **「총 N건·소계」 같은 합계가 없다.**
-대신 줄마다 **잔액**이 찍혀 있고, 그 잔액이 합계를 대신하는 검산 도구다 → §5.
+The decisive difference between captures (①②) and a card statement: **there is no
+「총 N건·소계」 total.** Instead every row carries a **balance**, and that balance is the
+reconciliation tool that replaces the total → §5.
 
-### ① 은행 문자 알림 (문자·RCS 대화창을 찍은 캡처)
+### ① Bank SMS alert (a capture of the SMS / RCS thread)
 
 ```
 [Web발신]
@@ -102,15 +118,15 @@ description: 카드 이용대금명세서·통장 입출금 캡처(은행 문자
 현장발권-s             ← 상대처(가맹점·이체 상대)
 ```
 
-| 함정 | 대처 |
+| Trap | What to do |
 |---|---|
-| **연도가 없다** (`08/14` 뿐) | 캡처를 받은 날의 연도로 본다. **12월↔1월 경계에서는 해가 바뀐다** — 애매하면 지어내지 말고 물어라 |
-| 말풍선 **밖** 회색 글씨(`(어제) 오후 12:33`) | 그건 **문자를 받은 시각**이지 거래 시각이 아니다. 반드시 **본문 안** 시각을 써라 |
-| 맨 위는 뒤로가기·상대 이름 뱃지에, 맨 아래는 입력창(`문자 메시지 · RCS`)에 가린다 | 반쯤 나온 말풍선은 **버리고**, 다음 캡처에 온전히 나온 줄을 쓴다 |
-| 상대처 이름이 짧게 잘려 온다 (`주식회사 버킷?`) | 물음표·기호까지 이름의 일부일 수 있다. 앱 내역과 표기도 다르다(`우아한형제들` ↔ `(주)우아한형제`) → 이름은 §6 규칙으로 **한 가지로 통일** |
-| 한 대화창에 **여러 계좌**의 알림이 섞인다 | 계좌번호 줄을 **매 건마다** 읽어라. 잔액이 갑자기 튀면 대개 다른 계좌다 |
+| **no year** (only `08/14`) | use the year the capture arrived. **The year flips across the Dec↔Jan boundary** — if ambiguous, ask instead of inventing |
+| grey text **outside** the bubble (`(어제) 오후 12:33`) | that is when the message was received, not when the transaction happened. Always use the time **inside** the body |
+| the top is covered by the back button / contact badge, the bottom by the input bar (`문자 메시지 · RCS`) | **discard** half-visible bubbles and use the row that appears whole in the next capture |
+| the counterparty name arrives truncated (`주식회사 버킷?`) | the question mark and symbols may be part of the name, and the app spells it differently (`우아한형제들` ↔ `(주)우아한형제`) → unify the name with the §6 rule |
+| **several accounts** are mixed in one thread | read the account-number line **on every single entry**. A balance that suddenly jumps usually means a different account |
 
-### ② 은행 앱 거래내역 (계좌 상세 화면)
+### ② Bank app transaction list (account detail screen)
 
 ```
 7월 29일                       ← 날짜 머리글 — 그 아래 줄 전부에 적용된다
@@ -118,233 +134,298 @@ description: 카드 이용대금명세서·통장 입출금 캡처(은행 문자
 21:36:03 · 체크카드     410원   ← 시각 · 거래수단 / 이 거래가 끝난 뒤 잔액
 ```
 
-| 함정 | 대처 |
+| Trap | What to do |
 |---|---|
-| ★ **오른쪽 아래 작은 숫자는 금액이 아니라 잔액이다** | 큰 숫자가 거래액이다. 둘을 뒤집으면 가계부가 통째로 틀린다. 이 화면에서 가장 흔한 사고 |
-| **계좌번호가 화면에 없다** — 스크롤하면 계좌 이름·번호가 위로 사라진다 | 어느 통장인지 모르면 **넣지 마라.** 계좌 이름이 보이는 **맨 위 화면 1장**을 함께 받아라 |
-| 상단 필터 `3개월 · 전체 · 최신순` | 기간·정렬을 먼저 확인. **최신순이면 위가 최신**이라 잔액 검산 방향이 뒤집힌다 |
-| 떠 있는 `↑` 버튼이 아래쪽 금액을 가린다 | §4 확대로 살리고, 그래도 안 되면 **잔액 역산**(§5) |
-| 날짜 머리글 **위에서** 캡처가 잘렸다 | 그 줄들은 **날짜 미상**이다. 날짜 머리글이 함께 보이게 다시 받아라 |
-| `체크카드` 로 찍힌 줄 | 통장 내역이지만 결제수단은 카드다(`pay:"card"`). **신용카드 명세서에는 안 나오므로** 명세서와 겹칠 걱정은 없다 |
+| ★ **the small number at the bottom right is the balance, not the amount** | the large number is the transaction. Swapping them makes the whole ledger wrong. The most common accident on this screen |
+| **the account number is not on screen** — scrolling pushes the account name and number off the top | if you do not know which account it is, **do not enter it.** Ask for **one capture of the very top** where the account name is visible |
+| the top filter `3개월 · 전체 · 최신순` | check period and sort order first. **Newest-first means the newest is on top**, which reverses the direction of the balance check |
+| the floating `↑` button covers amounts near the bottom | recover it by zooming (§4); failing that, **derive it from the balances** (§5) |
+| the capture is cut off **above** a date heading | those rows have **no known date**. Ask again for a capture that includes the date heading |
+| rows marked `체크카드` | account activity, but the payment method is a card (`pay:"card"`). **They never appear on a credit-card statement**, so there is no risk of double entry |
 
-### ③ 가계부 대상이 아닌 계좌가 섞여 온다
+### ③ Accounts that are not part of the ledger get mixed in
 
-가족이 문자함·계좌를 통째로 캡처하면 **가계부와 상관없는 개인 계좌**가 같이 찍힌다.
+When the family captures a whole SMS inbox or account list, **personal accounts unrelated
+to the ledger** are caught in the frame.
 
-> ## ⛔ 계좌번호는 오직 비공개 저장소에서만 가져온다 (사장님 지시 2026-08-15)
+> ## ⛔ Account numbers come only from the private repository (owner's order, 2026-08-15)
 >
-> **이 프로젝트(`family-diary`)는 공개 저장소다.** 여기 적는 것은 전부 인터넷에 보인다.
-> 계좌번호의 정본은 담당 규정 **`%USERPROFILE%\.claude\agents\ledger-clerk.md` 의 「가계부 대상 계좌」 표** 하나뿐이다 (비공개).
+> **This project (`family-diary`) is a public repository.** Anything written here is
+> visible on the internet. The only source of truth for account numbers is the
+> **「가계부 대상 계좌」 table in `%USERPROFILE%\.claude\agents\ledger-clerk.md`** (private).
 >
-> - 대조할 때 **그 표를 열어서 본다.** 외워서 판단하지 마라.
-> - 읽은 번호를 **이 프로젝트 안 어디에도 옮겨 적지 마라** — 문서·주석·메모·결과 JSON·커밋 메시지·보고문 전부 포함. **앞자리만 남긴 마스킹 형태도 안 된다** (앞자리가 곧 은행·지점 단서다).
-> - 가족에게 보내는 보고에도 번호 대신 **통장 이름**으로 쓴다 (`신한은행 통합계좌`).
+> - **Open that table and look** when checking. Never judge from memory.
+> - **Never copy a number you read into anywhere in this project** — documents, comments,
+>   memos, result JSON, commit messages and reports all included. **Not even a masked form
+>   that keeps the leading digits** (the leading digits themselves identify bank and branch).
+> - In reports to the family, use the **account's name** instead of a number
+>   (`신한은행 통합계좌`).
 >
-> ### 커밋·배포 전 개인정보 점검 (사장님 지시 2026-08-15 — 세 줄 다 지켜라)
+> ### Personal-data check before committing / deploying (owner's order, 2026-08-15 — all three)
 >
-> 1. **커밋·배포 때 계좌번호는 「은행 + 뒷자리」만 보이게 한다.** 앞자리는 은행·지점 단서라 반드시 가린다
->    (예: `○○은행 ***374`). 판독 예시를 문서에 적을 때도 이 형태만 쓴다.
-> 2. **마스킹은 내 마음대로 하지 않는다.** 개인정보가 보이는 자리를 찾으면 **어떻게 가릴지 사장님께 여쭙고
->    승인받은 뒤에** 고친다. 임의로 지우거나 바꾸지 마라.
-> 3. **그럼에도 보고는 반드시 한다.** 개인정보라서 말하기 껄끄럽다고 숨기면 안 된다 —
->    **무엇이 · 어느 파일 몇 줄에 · 이미 공개됐는지**를 그대로 알린다. 조용히 넘어가는 것이 가장 나쁘다.
+> 1. **On commit and deploy, an account number may show only 「bank + last digits」.**
+>    The leading digits identify bank and branch, so they must always be hidden
+>    (e.g. `○○은행 ***374`). Worked examples in documents use only this form.
+> 2. **Masking is not my call.** When personal data is found somewhere visible, **ask the
+>    owner how to hide it and change it only after approval.** Never delete or alter it
+>    on my own initiative.
+> 3. **Report it regardless.** Awkwardness is not a reason to stay quiet — state
+>    **what, in which file and line, and whether it is already public.** Quietly moving on
+>    is the worst option.
 >
-> ⚠ **파일을 고쳐도 지난 커밋에는 남는다.** 완전히 지우려면 히스토리 재작성이 따로 필요하니, 그 판단도 사장님께 여쭙는다.
+> ⚠ **Fixing a file does not remove it from past commits.** Erasing it completely needs a
+> history rewrite, so that decision goes to the owner too.
 
-- 계좌번호가 다른 줄은 위 표와 대조해라.
-- **대상 밖이면 읽지도 넣지도 마라.** 잔액 체인(§5)도 계좌별로 따로 본다.
-- 표에 **없는 번호**가 나오면 넣지 말고 가족에게 물어라.
+- Compare every row with a different account number against that table.
+- **If it is out of scope, do not read it and do not enter it.** The balance chain (§5) is
+  also tracked per account.
+- If a number appears that is **not in the table**, do not enter it — ask the family.
 
-## 2. 겹침과 중복을 먼저 걸러낸다
+## 2. Filter out overlaps and duplicates first
 
-명세서를 스크롤하며 찍은 캡처는 **위아래가 겹친다.** 그대로 다 넣으면 지출이 부풀어 오른다.
+Captures taken while scrolling a statement **overlap top and bottom.** Entering all of them
+inflates spending.
 
-- **같은 파일이 여러 번**: `node tools/jobs.mjs list` 가 `⚠ N번과 같은 사진` 으로 알려준다. 그 부탁은 `done` 으로 닫고 **거래를 두 번 넣지 마라.**
-- **겹치는 줄**: 앞 캡처의 마지막 줄 = 다음 캡처의 첫 줄인 경우가 많다. 상호·금액·날짜가 같으면 **한 건이다.**
-- **빈틈**: 앞 캡처가 6월 23일에서 끝났는데 다음이 7월 4일에서 시작하면 사이가 비었을 수 있다. §5 검산이 맞으면 **빈틈에 거래가 없었던 것**이고, 안 맞으면 **캡처가 빠진 것**이다.
-- 잘린 줄(맨 위/맨 아래 반쯤 나온 줄)은 대개 옆 캡처에 온전히 있다. 없으면 비워 둔다.
-- **화면 종류가 달라도 같은 거래일 수 있다**: 문자 알림 1건과 앱 내역 1줄이 같은 거래다. `계좌 + 날짜 + 금액` 이 같으면 **한 건**이다 (시각은 초 단위까지 안 맞을 수 있으니 시각으로 가르지 마라).
+- **The same file submitted repeatedly**: `node tools/jobs.mjs list` flags it with
+  `⚠ N번과 같은 사진`. Close that job with `done` and **do not enter the transactions twice.**
+- **Overlapping rows**: the last row of one capture is often the first row of the next.
+  Same merchant, amount and date means **one transaction**.
+- **Gaps**: if one capture ends on 23 June and the next starts on 4 July, the middle may be
+  missing. If the §5 reconciliation matches, **there were no transactions in the gap**;
+  if it does not, **a capture is missing**.
+- Truncated rows (half-visible at the very top or bottom) are usually whole in the
+  neighbouring capture. If not, leave them blank.
+- **Different screen types can still be the same transaction**: one SMS alert and one app
+  row can be the same event. Same `account + date + amount` means **one transaction**
+  (do not separate by time — the seconds will not agree).
 
-## 3. 줄을 그대로 옮긴다 (해석은 나중에)
+## 3. Transcribe the rows as they are (interpret later)
 
-이 단계에서는 분류·이체 판정을 하지 마라. **보이는 글자와 숫자만** 적는다.
+At this stage do no categorising and no transfer judgements. Write down **only the letters
+and digits you can see.**
 
-각 줄: `날짜머리글 / 상호명 / 금액 / 종류(일시불·할부N/M·취소·선결제) / 카드표시`
+Per row: `날짜머리글 / 상호명 / 금액 / 종류(일시불·할부N/M·취소·선결제) / 카드표시`
 
-- 날짜 머리글은 **그 아래 줄 전부**에 적용된다.
-- 롯데(LOCA)는 「2023년」 같은 **연도 띠**가 따로 있다. 할부 줄의 날짜는 **원래 산 날**이지 이번 달이 아니다.
-- 금액이 한 자리라도 안 보이면 **비운다.** 그럴듯한 숫자로 메우는 것이 이 일의 최악이다.
+- A date heading applies to **every row beneath it**.
+- Lotte (LOCA) carries a separate **year band** such as 「2023년」. The date on an instalment
+  row is **the day it was originally bought**, not this month.
+- If even one digit of an amount is unreadable, **leave it blank.** Filling it with a
+  plausible number is the worst thing that can happen in this job.
 
-## 4. 가려진 숫자 살리기 (실제로 통한다)
+## 4. Recovering hidden numbers (this genuinely works)
 
-폰 캡처는 **떠 있는 버튼**(↑ 스크롤 버튼, 「연관메뉴 +」 알약, 「LOCA」 배지)이 금액 위에 겹친다.
-버튼이 **반투명**이면 확대하면 읽힌다. 원본이 작아서 안 보이는 것뿐이다.
+On phone captures, **floating buttons** (the `↑` scroll button, the 「연관메뉴 +」 pill, the
+「LOCA」 badge) sit on top of amounts. When a button is **semi-transparent**, zooming makes
+the digits readable — they were only lost to the small source resolution.
 
 ```powershell
 Add-Type -AssemblyName System.Drawing
-$src = [System.Drawing.Image]::FromFile("<캡처.jpg>")
-$rect = New-Object System.Drawing.Rectangle(0, <잘라낼 y>, $src.Width, <높이>)
-$s = 5   # 5배
-$bmp = New-Object System.Drawing.Bitmap ($src.Width*$s), (<높이>*$s)
+$src = [System.Drawing.Image]::FromFile("<capture.jpg>")
+$rect = New-Object System.Drawing.Rectangle(0, <crop y>, $src.Width, <height>)
+$s = 5   # 5x
+$bmp = New-Object System.Drawing.Bitmap ($src.Width*$s), (<height>*$s)
 $g = [System.Drawing.Graphics]::FromImage($bmp)
 $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
 $g.PixelOffsetMode   = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-$g.DrawImage($src, (New-Object System.Drawing.Rectangle(0,0,($src.Width*$s),(<높이>*$s))), $rect, [System.Drawing.GraphicsUnit]::Pixel)
-$bmp.Save("<확대본.png>", [System.Drawing.Imaging.ImageFormat]::Png)
+$g.DrawImage($src, (New-Object System.Drawing.Rectangle(0,0,($src.Width*$s),(<height>*$s))), $rect, [System.Drawing.GraphicsUnit]::Pixel)
+$bmp.Save("<zoomed.png>", [System.Drawing.Imaging.ImageFormat]::Png)
 $g.Dispose(); $bmp.Dispose(); $src.Dispose()
 ```
 
-그리고 확대본을 **Read 로 다시 열어 본다.** (실측: 507×1100 캡처의 가려진 금액 3건을 5배 확대로 전부 살렸다.)
+Then **open the zoomed file again with Read.** (Measured: all 3 hidden amounts on a
+507×1100 capture were recovered at 5× zoom.)
 
-- 먼저 `$src.Width/$src.Height` 로 원본 크기를 확인해라. 폰 캡처는 대개 폭 500~1200px.
-- 금액은 오른쪽 끝에 있으니 **아래쪽 띠(y = 높이-200 부터)** 를 자르면 대개 잡힌다.
-- **불투명하게 덮인 자리는 확대해도 안 나온다.** 흰 여백만 보이면 그 줄은 **원래 금액이 없는 줄**이다 (§6의 0원 줄).
-- 살렸어도 **§5 검산으로 한 번 더 확인**해라. 확대 판독만 믿지 마라.
+- Check the source size first with `$src.Width/$src.Height`. Phone captures are usually
+  500–1200px wide.
+- Amounts sit at the right edge, so cropping the **bottom band (y = height-200 onward)**
+  usually catches them.
+- **An opaque overlay stays unreadable at any zoom.** If only white space shows, that row
+  **has no amount at all** (the 0-won row in §6).
+- Even when recovered, **confirm it once more with the §5 reconciliation.** Never trust
+  zoom-reading alone.
 
-## 5. ★ 카드사 합계로 검산한다 (이 절이 이 문서의 핵심)
+## 5. ★ Reconcile against the card issuer's own total (the heart of this document)
 
-명세서에는 카드사가 직접 찍어둔 숫자가 있다:
+A statement carries numbers the issuer printed itself:
 `총 N건 · 소계 · 청구합계 · 상단 청구금액`
 
-**내가 읽은 금액을 더해서 그 숫자와 1원까지 맞춰라.**
+**Add up the amounts you read and match that number to the last won.**
 
 ```
 맞으면  → 그 화면의 모든 금액·건수가 한꺼번에 증명된다. 빠진 거래도 없다.
 안 맞으면 → 넣지 마라. 아래를 의심하라.
 ```
 
-| 차이 | 의심할 것 |
+| Difference | Suspect |
 |---|---|
-| 딱 한 건의 금액만큼 부족 | 그 줄을 빠뜨렸다 (겹침 캡처에서 잘린 줄) |
-| 두 배 가까이 많다 | **두 달치를 섞었다.** 명세서 화면은 지난달 이용내역까지 같이 보여준다 |
-| 어중간하게 많다 | 취소·선결제 줄을 안 뺐다 |
-| 어중간하게 적다 | 할부 줄을 빠뜨렸다 |
-| 건수는 맞는데 금액이 남는다 | **금액 없는 0원 줄**이 있다 (§6) |
+| short by exactly one entry's amount | that row was missed (cut off in an overlapping capture) |
+| nearly twice too much | **two months got mixed.** The statement screen also shows the previous month's activity |
+| moderately too much | cancellations or prepayments were not subtracted |
+| moderately too little | an instalment row was missed |
+| the count matches but money is left over | there is a **row with no amount** (0 won, §6) |
 
-**실측 사례 (2026-08-15):**
-- 신한 0307 명세서에 5월~7월 거래가 다 나왔는데 소계는 583,253원. 전부 더하면 1,131,818원으로 두 배였다. **7월분(7/4~7/19)만** 더하니 583,253원과 정확히 일치 — 6월분은 지난달 청구분이었다. → 두 배가 나오면 **달로 잘라 보라.**
-- 롯데 명세서에 「DB손해보험 할부(2/5)」가 두 줄인데 두 번째는 금액 칸이 백지. 나머지 5건 합이 총액과 정확히 같아 **두 번째 줄은 0원**임이 증명됐다. → 안 보이는 값을 **합계 역산으로** 확정할 수 있다.
-- 가려져 못 읽던 192,200원·15,340원은, 그 값을 넣어야만 합계가 583,253원이 되어 **수학적으로 확정**됐다.
+**Field cases (2026-08-15):**
+- The Shinhan 0307 statement showed May–July transactions but its subtotal was 583,253 won.
+  Everything summed to 1,131,818 — twice as much. Summing **only July (7/4–7/19)** hit
+  583,253 exactly; June had been the previous month's billing. → When you get double,
+  **cut it by month.**
+- A Lotte statement had 「DB손해보험 할부(2/5)」 on two rows, the second with a blank amount
+  column. The other 5 entries summed exactly to the total, proving **the second row was
+  0 won.** → An invisible value can be **fixed by deriving it from the total.**
+- The unreadable 192,200 and 15,340 were **mathematically confirmed**: only those values
+  make the total come to 583,253.
 
-**검산할 합계가 아예 없는 화면**(스크롤 중간 캡처)은 그 화면만으로 확정하지 말고, 합계가 있는 캡처와 묶어서 판단해라. 끝내 검산이 안 되면 그 사실을 보고에 적어라.
+**A screen with no total to check against** (a mid-scroll capture) must not be settled on
+its own — judge it together with a capture that has the total. If reconciliation is
+ultimately impossible, say so in the report.
 
-### 통장에는 합계가 없다 — **잔액 체인**으로 검산한다 (2026-08-15 신설)
+### An account has no total — reconcile with the **balance chain** (added 2026-08-15)
 
-문자 알림에도 앱 내역에도 「총 N건·소계」가 없다. 그래서 §5를 못 쓴다고 생각하기 쉬운데, 아니다.
-**줄마다 찍힌 잔액이 이웃 줄과 이어지는지**가 카드사 합계와 똑같은 힘을 가진다.
+Neither SMS alerts nor app lists carry 「총 N건·소계」, so it is tempting to conclude §5 does
+not apply. It does. **Whether the balance printed on each row connects to its neighbour**
+carries exactly the same force as the issuer's total.
 
 ```
 (오래된 줄의 잔액) − 출금 + 입금 = (그 다음 줄의 잔액)
 ```
-※ 앱 내역이 **최신순**이면 화면에서는 **아래 → 위** 방향이다. 정렬을 먼저 확인해라(§1-1 ②).
+※ When the app list is **newest-first**, the direction on screen is **bottom → top**.
+Check the sort order first (§1-1 ②).
 
-**이어지면 그 구간에는 빠진 거래가 없다.** 캡처 사이의 빈틈(§2)이 「거래가 없던 날」인지
-「캡처가 빠진 것」인지를 이걸로 가른다 — 추측이 아니라 증명이다.
+**If it connects, no transaction is missing from that stretch.** This is what separates a
+gap between captures (§2) that was 「a day with no transactions」 from one where 「a capture
+is missing」 — proof, not guesswork.
 
-**실측 (2026-08-15):**
+**Field cases (2026-08-15):**
 
-- 문자 알림 4건 — `159,421 −7,400→ 152,021 −71,010→ 81,011 −11,800→ 69,211`
-  네 건이 한 줄로 이어져 **그 사이에 누락이 없음이 증명**됐다.
-- 앱 내역 7건 — `24,680 −17,000→ 7,680 −6,300→ 1,380 +20,000→ 21,380 −9,200→ 12,180 −5,000→ 7,180 −6,770→ 410`
-  7월 27일과 29일이 그대로 이어졌다 → **7월 28일은 캡처가 빠진 게 아니라 거래가 없던 날**이다.
-- 같은 화면에서 `↑` 버튼에 가려진 `-18,0??원` 은 **못 살렸다.** 그 줄 *이전* 잔액이 화면 밖이라 역산할 짝이 없었다.
-  → **역산은 양쪽 잔액이 다 보일 때만 된다.** 한쪽만 있으면 비워 두고 캡처를 더 받아라.
+- 4 SMS alerts — `159,421 −7,400→ 152,021 −71,010→ 81,011 −11,800→ 69,211`
+  All four linked up, **proving nothing was missing between them.**
+- 7 app rows — `24,680 −17,000→ 7,680 −6,300→ 1,380 +20,000→ 21,380 −9,200→ 12,180 −5,000→ 7,180 −6,770→ 410`
+  27 July connected straight to 29 July → **28 July was a day with no transactions, not a
+  missing capture.**
+- On the same screen, `-18,0??원` hidden under the `↑` button **could not be recovered** —
+  the balance *before* that row was off-screen, so there was no pair to derive from.
+  → **Derivation works only when both balances are visible.** With only one, leave it blank
+  and ask for more captures.
 
-| 체인이 안 맞으면 | 뜻 |
+| If the chain does not match | Meaning |
 |---|---|
-| 차액이 **딱 한 건 금액**과 같다 | 그 줄을 빠뜨렸다 (가려졌거나 겹침에서 잘렸다) |
-| 차액이 어중간하다 | 사이에 **안 보이는 거래**가 있다 — 캡처를 더 받아라 |
-| 잔액대가 아예 동떨어진다 | **다른 계좌다.** 계좌번호를 다시 봐라 (§1-1 ①·③) |
-| 금액이 가려져 못 읽었다 | 양쪽 잔액이 보이면 **잔액 차이로 역산해 확정한다.** 확대 판독(§4)보다 강하다 |
+| the gap equals **exactly one entry's amount** | that row was missed (hidden, or cut from an overlap) |
+| the gap is an odd figure | there is an **invisible transaction** in between — ask for more captures |
+| the balance range is wildly different | **it is a different account.** Re-read the account number (§1-1 ①·③) |
+| the amount was hidden and unreadable | if both balances are visible, **derive it from the balance difference.** Stronger than zoom-reading (§4) |
 
-**덤 — 잔액도 함께 확정된다**: 통장 자료는 §5를 통과하면 **그 시점의 잔액**까지 같이 증명된다.
-`accounts[].amt` 에 실어 보내면 `apply`·`import` 가 🏦 자산의 통장 잔액을 **최신으로 갈아끼운다**
-(사장님 지시 2026-08-15 "현 통장 잔액에 맞출 것" — 이름이 같은 통장은 잔액만 덮어쓴다).
+**Bonus — the balance is confirmed too**: account material that passes §5 also proves
+**the balance at that moment**. Send it in `accounts[].amt` and `apply` / `import` will
+**replace** the account balance under 🏦 자산 with the latest figure (owner's order
+2026-08-15 "현 통장 잔액에 맞출 것" — an account with a matching name has only its balance
+overwritten).
 
-⚠ **덮어쓰기이므로 「가장 마지막 줄의 잔액」만 보내라.** 체인 중간의 잔액을 보내면 통장이 과거로 되돌아간다.
-정렬을 먼저 확인해라 — 앱 내역이 **최신순이면 맨 윗줄**, 문자 알림이면 **가장 나중 시각**의 잔액이다.
-그리고 **캡처의 계좌와 등록된 통장이 같은 것인지 확인한 뒤에** 보내라 (§1-1 ③).
+⚠ **It is an overwrite, so send only 「the balance of the very last row」.** Sending a
+balance from the middle of the chain sends the account back in time.
+Check the sort order first — **the top row** when the app list is newest-first, the
+**latest timestamp** for SMS alerts.
+And confirm **the captured account really is the registered account** before sending
+(§1-1 ③).
 
-## 6. 가계부로 옮길 때 (줄 종류별 처리표)
+## 6. Moving it into the ledger (per row type)
 
-| 명세서·통장에 이렇게 나오면 | 가계부에는 |
+| What the statement / account shows | What goes in the ledger |
 |---|---|
-| **일시불** | 그대로 1건. 날짜 = **이용일** |
-| **할부 (N/M)** | 그 달에 실제로 빠져나가는 돈이다. 날짜 = **명세서 결제일**(예: 롯데 「8월 14일 명세서」 → `2026-08-14`). 원래 산 날(2023년 등)에 넣지 마라 |
-| **취소 (같은 날·같은 상호·금액 같음)** | 결제와 취소 **둘 다 빼라.** 실제로 나간 돈이 0이다 |
-| **취소 (부분)** | 원 거래 금액에서 **빼고** 한 건으로 넣는다. memo에 `(취소 N원 반영)` |
-| **선결제 (마이너스)** | **넣지 마라.** 원 거래를 이미 넣었으므로 두 번 세는 것이다 |
-| **금액이 백지인 줄** | 0원이다. 넣지 마라 (§5로 확인) |
-| **0원으로 찍힌 할부 마지막 회차** | 넣지 마라 |
-| **카드대금 결제 (통장 → 카드사)** | ⛔ **넣지 마라** (2026-08-15 지시로 바뀜 — 전에는 `tr` 이었다). 카드 쓴 날 이미 지출로 잡혔다 |
-| **통장 — `체크카드` 로 찍힌 줄** | 지출 1건. `pay:"card"` (통장에서 빠져나가도 결제수단은 카드다) |
-| **통장 — 우리 통장끼리·식구끼리 오간 돈** (사람 이름 + 이체) | ⛔ **넣지 마라. 거래로도, `tr` 로도 안 넣는다.** 대신 `accounts[].amt` 로 **잔액만** 맞춘다 → 아래 ⛔절 |
-| **통장 — 밖에서 들어온 / 밖으로 나간 돈** | `in` / `out` 으로 넣는다. **우리 식구인지 남인지 모르면 넣지 말고 물어라** |
-| **통장 — 계좌인증 1원 · 0원 줄 · 예적금 해지** | 넣지 마라 |
-| **통장 — 가계부 대상 밖 계좌의 줄** | 넣지 마라 (§1-1 ③) |
-| **통장 — `자판기`·`현장발권` 처럼 상대처가 기계** | 그대로 지출 1건. 상호가 없어도 보이는 글자를 memo 로 쓴다 (지어내지 마라) |
+| **일시불** (single payment) | one entry as-is. Date = **the day it was used** |
+| **할부 (N/M)** (instalment) | this is money actually leaving this month. Date = **the statement's payment date** (e.g. Lotte 「8월 14일 명세서」 → `2026-08-14`). Do not date it to the original purchase (2023 etc.) |
+| **취소** (cancellation — same day, same merchant, same amount) | **drop both the payment and the cancellation.** Net money moved is zero |
+| **취소 (부분)** (partial cancellation) | **subtract** it from the original and enter one entry. Put `(취소 N원 반영)` in the memo |
+| **선결제** (prepayment, negative) | **do not enter.** The original transaction is already in, so this double-counts |
+| **a row with a blank amount** | it is 0 won. Do not enter (confirm via §5) |
+| **a final instalment printed as 0 won** | do not enter |
+| **card bill payment (account → card issuer)** | ⛔ **do not enter** (changed by the 2026-08-15 order — it used to be `tr`). The spending was already recorded on the day the card was used |
+| **account — a row marked `체크카드`** | one spending entry. `pay:"card"` (it leaves the account, but the method is a card) |
+| **account — money moved between our own accounts or between family members** (a person's name + transfer) | ⛔ **do not enter. Not as a transaction, not as `tr`.** Instead correct the **balance only** via `accounts[].amt` → ⛔ section below |
+| **account — money that came from or went outside the family** | enter as `in` / `out`. **If you cannot tell whether it is family or an outsider, ask instead of entering** |
+| **account — 1-won account verification · 0-won rows · deposit closures** | do not enter |
+| **account — rows from an account outside the ledger's scope** | do not enter (§1-1 ③) |
+| **account — a machine counterparty such as `자판기` or `현장발권`** | one spending entry as-is. With no merchant name, use the visible text as the memo (never invent one) |
 
-> 🧩 **분류는 두 칸이다** — 대분류 `c` 를 잡고 그 안에서 소분류 `sub` 까지 고른다 (외식비·식재료비·차량유지비 …).
-> 쓸 수 있는 이름은 `node tools/jobs.mjs list` 의 「🧩 쓸 수 있는 소분류」 표가 정본이고, 고르는 법은 `ledger-clerk` 의 ①-1 절에 있다.
-> **쿠팡·11번가·네이버페이처럼 무엇을 샀는지 안 남는 결제는 넘겨짚지 말고** 결과 JSON 의 `asks` 로 캡처를 부탁해라.
+> 🧩 **Categorising has two levels** — set the main category `c`, then pick the subcategory
+> `sub` within it (외식비 · 식재료비 · 차량유지비 …).
+> The usable names are defined by the 「🧩 쓸 수 있는 소분류」 table in
+> `node tools/jobs.mjs list`, and how to choose is in §①-1 of `ledger-clerk`.
+> **When a payment does not record what was bought (Coupang, 11st, Naver Pay), do not
+> guess** — request a capture via `asks` in the result JSON.
 
-### ⛔ 우리끼리 오간 돈은 「기록」이 아니라 「잔액」으로 맞춘다 (사장님 지시 2026-08-15)
+### ⛔ Money moved among ourselves is settled by 「balance」, not by 「records」 (owner's order, 2026-08-15)
 
 > "통장 식구간 오간 기록은 없이 **현 통장 잔액에 맞추어야 됨.**"
 
-통장 자료에는 **우리 통장끼리·식구끼리 오간 돈**이 잔뜩 섞여 있다. 그걸 다 적으면
-가계부가 우리 돈이 왔다 갔다 한 기록으로 뒤덮여 **정작 밖으로 나간 돈이 안 보인다.**
+Account material is full of **money moved between our own accounts and between family
+members**. Recording all of it buries the ledger under our own money going back and forth,
+**hiding the money that actually left the household.**
 
 ```
 ✅ 밖으로 나간 돈 / 밖에서 들어온 돈  → 거래로 넣는다
 ⛔ 우리끼리 오간 돈                    → 안 넣는다. 대신 accounts[].amt 로 잔액만 맞춘다
 ```
 
-⛔ 로 빼는 것 (2026-08-15 실측에서 260건 중 **157건**이 여기 해당했다):
-**식구·내 통장끼리 이체 · 카드값 갚기 · 계좌인증 1원 · 예적금 해지 · 0원 줄**
+What gets dropped by ⛔ (in the 2026-08-15 pass, **157 of 260 entries** fell here):
+**transfers between family members or our own accounts · card-bill payments · 1-won account
+verification · deposit closures · 0-won rows**
 
-- **`tr` 로도 넣지 마라.** 예전 규칙(`tr` 이체로 기록)은 이 지시로 **바뀌었다. 되돌리지 마라.**
-- 뺀 만큼 통장이 안 맞는 것처럼 보이지만, **잔액을 최신값으로 갈아끼우면 그대로 맞는다**(§5 「덤」).
-- 뺀 건수는 **보고에 종류별로** 적는다 (§7). 조용히 버리면 가족은 사라진 줄 안다.
-- ⚠ 판단이 서지 않는 이체(모르는 사람 이름)는 **빼지도 넣지도 말고 물어라.** 밖으로 나간 돈일 수 있다.
+- **Do not enter it as `tr` either.** The old rule (record as a `tr` transfer) **was changed
+  by this order. Do not revert it.**
+- Dropping them makes the account look off, but **replacing the balance with the current
+  figure makes it right again** (§5 "Bonus").
+- Report the dropped count **broken down by type** (§7). Dropping them silently makes the
+  family think entries went missing.
+- ⚠ A transfer you cannot judge (an unfamiliar person's name) is **neither dropped nor
+  entered — ask.** It may be money that left the household.
 
-### 할부 이름 짓기 — 회차는 괄호로
+### Naming an instalment — the sequence goes in brackets
 
 ```
 memo:  "롯데하이마트 할부 (35/36)"   ← 다음 달엔 (36/36)
 고정비: "롯데하이마트 할부"           ← 회차 없이
 ```
-도구가 `(N/M)` 을 지우고 이름을 맞추므로(`jobs.mjs` 의 `norm`), 회차가 달라져도 **같은 항목으로 이어진다.**
-회차를 괄호 없이 쓰면(`할부 35/36`) 매달 새 항목이 생겨 되풀이 탐지가 죽는다.
+The tool strips `(N/M)` before matching names (`norm` in `jobs.mjs`), so **the item stays
+linked** as the sequence advances. Writing the sequence without brackets (`할부 35/36`)
+creates a new item every month and kills recurrence detection.
 
-### 할부는 「무엇을 샀는지」도 남긴다 (사장님 지시 2026-08-15)
+### An instalment also records **what was bought** (owner's order, 2026-08-15)
 
-명세서에는 **가게 이름만** 찍힌다. 몇 달 뒤 `롯데하이마트 할부 (35/36)` 만 보면 그 돈이 뭐였는지 아무도 모른다.
+Statements print **only the shop name**. Months later, `롯데하이마트 할부 (35/36)` tells
+nobody what the money was for.
 
 ```
 tx: { "memo": "롯데하이마트 할부 (35/36)", "buy": "냉장고" }
 ```
 
-- **한 번만 넣으면 된다.** 앱이 `이름 + 총 회차`(`롯데하이마트할부#36`)를 열쇠로 삼아 매달 내역에 `📦 냉장고` 를 이어 붙인다.
-- 총 회차가 열쇠에 들어가므로 **같은 가게에서 두 번 할부해도**(36개월짜리 / 12개월짜리) 서로 안 섞인다.
-- 아직 안 적힌 할부는 `jobs.mjs list`·`state` 의 **「── 할부 ──」** 칸에 `⚠` 로 뜬다.
-- **캡처에 없으면 지어내지 마라.** 가족에게 물어보고, 답을 받기 전까지는 비워 둔다.
+- **Enter it once.** The app keys on `name + total instalments`
+  (`롯데하이마트할부#36`) and carries `📦 냉장고` into every month's rows from then on.
+- Because the total is part of the key, **two instalments at the same shop** (a 36-month
+  and a 12-month one) never merge.
+- Instalments still missing this appear with a `⚠` in the **「── 할부 ──」** block of
+  `jobs.mjs list` / `state`.
+- **Never invent one that is not in the capture.** Ask the family and leave it blank until
+  they answer.
 
-### 같은 상호가 카드만 다를 때
+### The same merchant on different cards
 
 ```
 memo = 고정비 이름 = "KT통신요금 (신한)" / "KT통신요금 (롯데)"
 ```
-**둘을 똑같이 맞춰라.** 이름이 갈리면 되풀이 탐지가 갈라지고 고정비가 중복 등록된다.
+**Keep the two identical.** If the names diverge, recurrence detection splits and the fixed
+cost gets registered twice.
 
-## 7. 보고할 때 반드시 밝힐 것
+## 7. What the report must always state
 
-- 검산이 **맞은 화면**과 **못 한 화면**을 나눠서
-- 확대로 **살린 숫자**와, 끝내 **못 읽어 뺀 줄**
-- **겹쳐서 안 넣은** 캡처가 몇 장인지
-- 캡처 사이에 **빈틈**이 있어 못 넣은 기간
-- 통장 캡처는 **잔액 체인이 이어진 구간**과 **끊긴 구간**을 나눠서 (끊긴 구간은 캡처를 더 달라고 요청)
-- 가계부 **대상 밖 계좌**라서 뺀 줄이 몇 건인지
-- **버린 원자료**가 무엇이고 몇 개인지 (⛔ 절 — 지웠다는 말을 안 하면 사장님은 아직 남은 줄 아신다)
+- Which screens **reconciled** and which **could not**, separately
+- Which numbers were **recovered by zooming**, and which rows were **dropped as unreadable**
+- How many captures were **not entered because they overlapped**
+- Which periods could not be entered because of a **gap** between captures
+- For account captures, the stretches where the **balance chain connected** and where it
+  **broke** (ask for more captures for the broken stretches)
+- How many rows were dropped for belonging to an **account outside the ledger's scope**
+- **What source material was destroyed and how many items** (⛔ section — if I do not say it
+  was deleted, the owner assumes it is still there)
 
-> 가족은 숫자가 맞는지 스스로 확인할 방법이 없다. **어디까지 확인됐는지 말해 주는 것이 담당의 일이다.**
+> The family has no way to check the numbers themselves. **Telling them how far it has been
+> verified is the desk's job.**
