@@ -2590,7 +2590,7 @@ class Component extends DCLogic {
       return o.toDataURL('image/png');
     }
     function cut(im,sx,sy,sw,sh){
-      const k=Math.min(1.6,OUT/Math.max(sw,sh));             // 원본보다 억지로 키우지 않는다
+      const k=Math.min(1,OUT/Math.max(sw,sh));               // 큰 사진만 줄인다 — 작은 것을 억지로 키우면 흐려지기만 한다
       const w=Math.max(20,Math.round(sw*k)),h=Math.max(20,Math.round(sh*k));
       const c=document.createElement('canvas');c.width=w;c.height=h;
       const g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
