@@ -13,6 +13,7 @@
 // ─────────────────────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -79,6 +80,41 @@ function api(cfg, token) {
 
 const uid = () => Date.now() + '-' + Math.random().toString(36).slice(2, 7);
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const W = n => Number(n || 0).toLocaleString('ko-KR');
+
+// 상호명 비교용 — 공백·꼬리표를 지우고 소문자로 맞춘다.
+//   "SK텔레콤 " ≡ "sk텔레콤(고정비)"
+//   할부 회차는 달마다 바뀌므로 지운다 — 안 지우면 "하이마트 할부 (35/36)"과 "(36/36)"이 남남이 되어
+//   되풀이 탐지가 죽고 매달 새 고정비가 생긴다.
+const norm = s => String(s || '')
+  .replace(/\(고정비\)/g, '')
+  .replace(/\(\s*\d{1,3}\s*\/\s*\d{1,3}\s*\)/g, '')
+  .replace(/\s+/g, '').toLowerCase();
+
+// 되풀이 후보 — 같은 상호가 서로 다른 달에 2번 이상 나간 것 중, 아직 고정비로 등록 안 된 것
+function repeatCandidates(D) {
+  const known = new Set((D.fixed || []).map(f => norm(f.name)));
+  const g = {};
+  for (const x of (D.tx || [])) {
+    if (x.ty !== 'out') continue;
+    const k = norm(x.memo);
+    if (!k || k === '-' || known.has(k)) continue;
+    (g[k] = g[k] || []).push(x);
+  }
+  return Object.values(g).map(list => {
+    const months = [...new Set(list.map(x => x.d.slice(0, 7)))].sort();
+    const amts = list.map(x => Number(x.a) || 0);
+    const days = list.map(x => Number(x.d.slice(8, 10)) || 1);
+    const last = list.slice().sort((a, b) => a.d.localeCompare(b.d)).pop();
+    return {
+      name: last.memo, months, n: list.length,
+      avg: Math.round(amts.reduce((s, v) => s + v, 0) / amts.length),
+      min: Math.min(...amts), max: Math.max(...amts),
+      day: Math.round(days.reduce((s, v) => s + v, 0) / days.length),
+      c: last.c, pay: last.pay || 'card'
+    };
+  }).filter(r => r.months.length >= 2).sort((a, b) => b.months.length - a.months.length || b.avg - a.avg);
+}
 
 // 앱 데이터는 한 행에 통째로 있다. 다른 가족이 그 사이에 저장했으면
 // rev 가 어긋나므로, 최신 문서를 다시 읽어 같은 변경을 얹어 재시도한다.
@@ -103,7 +139,18 @@ async function cmdList(db) {
   const jobs = await db.get(`family_jobs?status=eq.${encodeURIComponent('대기')}&order=created_at.asc&select=*`);
   if (!jobs.length) { console.log('\n대기 중인 부탁이 없습니다.\n'); return; }
 
-  console.log('\n대기 중인 부탁 ' + jobs.length + '건\n');
+  // 캡처 정리에는 「지금 우리집 상태」가 필요하다 — 어느 통장·카드인지, 이미 등록된 고정비가 뭔지,
+  // 되풀이되는 지출이 뭔지 모르면 계정별 구분도 고정비 판정도 못 한다. 부탁에 담긴 옛 값 대신 최신 문서를 읽는다.
+  let D = null;
+  if (jobs.some(j => j.kind === 'receipt')) {
+    const rows = await db.get('family_state?id=eq.main&select=doc');
+    D = rows.length ? rows[0].doc : null;
+  }
+
+  console.log('\n대기 중인 부탁 ' + jobs.length + '건');
+  if (D) printLedgerContext(D);
+
+  const seen = new Map(), dupJobs = [];
   for (const j of jobs) {
     const when = new Date(j.created_at).toLocaleString('ko-KR');
     console.log('─'.repeat(58));
@@ -120,18 +167,54 @@ async function cmdList(db) {
     if (shots.length) {
       const dir = path.join(INBOX, String(j.id));
       fs.mkdirSync(dir, { recursive: true });
-      let n = 0;
+      let n = 0, dupOf = null;
       for (const sp of shots) {
         const dest = path.join(dir, String(++n) + '.jpg');
         const ok = await db.download(sp, dest);
-        console.log(`     사진 ${n}: ${ok ? path.relative(ROOT, dest) : '(내려받기 실패)'}`);
+        if (!ok) { console.log(`     사진 ${n}: (내려받기 실패)`); continue; }
+        // 같은 사진을 여러 번 맡기면 가계부에 없는 지출이 부풀어 들어간다 — 여기서 막는다
+        const sig = crypto.createHash('md5').update(fs.readFileSync(dest)).digest('hex');
+        const first = seen.get(sig);
+        if (first) { dupOf = dupOf || first; console.log(`     사진 ${n}: ${path.relative(ROOT, dest)}  ⚠ ${first}번과 같은 사진`); }
+        else { seen.set(sig, j.id); console.log(`     사진 ${n}: ${path.relative(ROOT, dest)}`); }
       }
-      if (p.accounts && p.accounts.length) {
-        console.log('     우리 통장: ' + p.accounts.map(a => `${a.name}(${a.purp || '일반'}${a.org ? ', ' + a.org : ''})`).join(', '));
+      if (dupOf) {
+        dupJobs.push(j.id);
+        console.log(`     ⚠ 이 부탁은 ${dupOf}번과 겹칩니다 — 정리하지 말고 아래 명령으로 닫으세요:`);
+        console.log(`        node tools/jobs.mjs done ${j.id} "${dupOf}번과 같은 사진이라 함께 정리했어요"`);
       }
     }
   }
-  console.log('─'.repeat(58) + '\n');
+  console.log('─'.repeat(58));
+  if (dupJobs.length) {
+    console.log(`\n⚠ 겹치는 부탁 ${dupJobs.length}건: ${dupJobs.join(', ')}번`);
+    console.log('  같은 사진이라 그대로 정리하면 없는 지출이 부풀어 들어갑니다. 위 done 명령으로 닫으세요.');
+  }
+  console.log('');
+}
+
+// 캡처를 읽는 담당이 「계정별 구분」과 「고정비 판정」을 할 수 있게 지금 상태를 붙여 준다.
+function printLedgerContext(D) {
+  const PURPL = { salary: '급여', living: '생활비', saving: '저축', emergency: '비상금', invest: '투자', custom: '' };
+  const accs = D.accounts || [];
+  const banks = accs.filter(a => a.kind === 'bank'), cards = accs.filter(a => a.kind === 'card');
+
+  console.log('\n     ── 우리집 계정 (거래마다 acc 에 이 이름을 그대로 적어라) ──');
+  if (!accs.length) console.log('     (등록된 통장·카드가 없습니다 — acc 는 비워 두세요)');
+  banks.forEach(a => console.log(`     🏦 ${a.name}${a.org ? ' · ' + a.org : ''}${a.purp ? ' · ' + (a.purp === 'custom' ? (a.purpTxt || '') : PURPL[a.purp] || '') : ''}`));
+  cards.forEach(a => console.log(`     💳 ${a.name}${a.org ? ' · ' + a.org : ''}${a.day ? ' · 매월 ' + a.day + '일 결제' : ''}`));
+
+  const fx = D.fixed || [];
+  const FQ = { w: '매주', m: '매월', q: '분기', h: '반년', y: '매년' };
+  console.log('\n     ── 이미 등록된 고정비 (이 상호가 나오면 tx 에 fx:"이름" 을 붙여라) ──');
+  if (!fx.length) console.log('     (아직 없습니다)');
+  fx.forEach(f => console.log(`     🔁 ${f.name} · ${FQ[f.freq] || '매월'}${f.day ? ' ' + f.day + '일' : ''} · 보통 ${W(f.a)}원${f.vary ? '(변동)' : ''} · ${f.c} · ${f.pay}`));
+
+  const rc = repeatCandidates(D).slice(0, 12);
+  console.log('\n     ── 되풀이 후보 (아직 고정비 아님 · 이번 캡처에도 또 나오면 fixed 로 등록해라) ──');
+  if (!rc.length) console.log('     (되풀이로 보이는 지출이 아직 없습니다)');
+  rc.forEach(r => console.log(`     · ${r.name} — ${r.months.length}개월(${r.months.join(',')}) · 보통 ${W(r.avg)}원${r.min !== r.max ? `(${W(r.min)}~${W(r.max)})` : ''} · 보통 ${r.day}일 · ${r.c} · ${r.pay}`));
+  console.log('');
 }
 
 async function cmdApply(db, id, file) {
@@ -143,20 +226,85 @@ async function cmdApply(db, id, file) {
 
   let note = '';
   if (job.kind === 'receipt') {
+    // 결과 형식: { tx:[{d,a,ty,c,memo,pay,acc,fx}], fixed:[{...}], accounts:[{name,kind,org,day,purp}] }
+    //   acc = 어느 통장·카드인지 (list 가 알려준 이름) · fx = 이 거래가 갚은 고정비 이름
     const list = result.tx || [];
-    if (!list.length) die('결과에 tx 항목이 없습니다.');
+    const newFixed = result.fixed || [];
+    const newAccs = result.accounts || [];
+    if (!list.length && !newFixed.length && !newAccs.length) die('결과에 tx 항목이 없습니다.');
     note = await editDoc(db, doc => {
-      doc.tx = doc.tx || [];
+      doc.tx = doc.tx || []; doc.fixed = doc.fixed || [];
+      doc.fixedPaid = doc.fixedPaid || {}; doc.accounts = doc.accounts || [];
+
+      // ⓪ 캡처에서 새로 찾은 통장·카드 등록 (이름이 같은 게 이미 있으면 건너뛴다)
+      let addedAcc = 0;
+      for (const a of newAccs) {
+        const nm = String(a.name || '').trim();
+        if (!nm || doc.accounts.some(z => norm(z.name) === norm(nm))) continue;
+        doc.accounts.push({
+          id: uid(), kind: a.kind === 'card' ? 'card' : 'bank', name: nm,
+          org: String(a.org || '').trim(), amt: Math.abs(Number(a.amt) || 0),
+          day: a.kind === 'card' ? String(a.day || '') : '',
+          purp: a.kind === 'card' ? '' : (['salary', 'living', 'saving', 'emergency', 'invest', 'custom'].includes(a.purp) ? a.purp : 'living'),
+          purpTxt: a.purp === 'custom' ? String(a.purpTxt || '').trim() : ''
+        });
+        addedAcc++;
+      }
+
+      // ① 새로 찾은 되풀이 지출을 고정비로 등록 (이름이 같은 게 이미 있으면 건너뛴다)
+      let addedFx = 0;
+      for (const f of newFixed) {
+        const nm = String(f.name || '').trim();
+        if (!nm || doc.fixed.some(z => norm(z.name) === norm(nm))) continue;
+        const q = ['w', 'm', 'q', 'h', 'y'].includes(f.freq) ? f.freq : 'm';
+        doc.fixed.push({
+          id: uid(), name: nm, a: Math.abs(Number(f.a) || 0), freq: q,
+          day: q === 'w' ? null : Math.min(31, Math.max(1, Number(f.day) || 1)),
+          wd: q === 'w' ? (Number(f.wd) || 0) : null,
+          mo: ['q', 'h', 'y'].includes(q) ? Math.min(12, Math.max(1, Number(f.mo) || 1)) : null,
+          c: f.c || '기타', pay: ['bank', 'card', 'cash'].includes(f.pay) ? f.pay : 'card',
+          vary: f.vary ? 1 : 0
+        });
+        addedFx++;
+      }
+
+      // ② 거래 넣기 — acc 는 등록된 통장·카드 이름으로 맞춰 붙인다
+      const findAcc = v => {
+        const k = norm(v); if (!k) return null;
+        return doc.accounts.find(a => a.id === v)
+          || doc.accounts.find(a => norm(a.name) === k)
+          || doc.accounts.find(a => norm(a.name).includes(k) || k.includes(norm(a.name)))
+          || null;
+      };
+      let paidN = 0, accN = 0;
       for (const x of list) {
-        doc.tx.push({
-          id: uid(), d: x.d || today(),
+        const id = uid(), d = x.d || today();
+        const acc = findAcc(x.acc);
+        const rec = {
+          id, d,
           ty: x.ty === 'in' ? 'in' : (x.ty === 'tr' ? 'tr' : 'out'),
           a: Math.abs(Number(x.a) || 0),
           c: x.c || '기타', memo: x.memo || '-',
-          pay: ['bank', 'card', 'cash'].includes(x.pay) ? x.pay : 'bank'
-        });
+          pay: ['bank', 'card', 'cash'].includes(x.pay) ? x.pay : (acc ? acc.kind : 'bank')
+        };
+        if (acc) { rec.acc = acc.name; accN++; }
+        doc.tx.push(rec);
+
+        // ③ 고정비를 갚은 거래면 그 달 납부로 표시 (앱 🔁 고정비 화면이 「납부 완료」로 바뀐다)
+        if (x.fx && rec.ty === 'out') {
+          const f = doc.fixed.find(z => norm(z.name) === norm(x.fx));
+          const ym = d.slice(0, 7);
+          if (f) {
+            doc.fixedPaid[ym] = doc.fixedPaid[ym] || {};
+            if (!doc.fixedPaid[ym][f.id]) { doc.fixedPaid[ym][f.id] = { a: rec.a, txId: id }; paidN++; }
+          }
+        }
       }
-      return `가계부 ${list.length}건 넣음`;
+      return `가계부 ${list.length}건 넣음`
+        + (addedAcc ? ` · 통장/카드 ${addedAcc}개 등록` : '')
+        + (accN ? ` · ${accN}건 계정 구분` : '')
+        + (addedFx ? ` · 고정비 ${addedFx}건 새로 등록` : '')
+        + (paidN ? ` · 고정비 납부 ${paidN}건 표시` : '');
     });
   } else if (job.kind === 'report') {
     // 결과 형식: { title, stars, summary, blocks:[{t,v,h1,h2,h3,rows}] }
@@ -184,6 +332,14 @@ async function cmdApply(db, id, file) {
   console.log('\n[완료] ' + id + '번 · ' + note + '\n');
 }
 
+// 데이터를 바꾸지 않고 부탁만 닫는다 (같은 사진이 여러 번 올라온 경우 등)
+async function cmdDone(db, id, note) {
+  await db.patch(`family_jobs?id=eq.${id}`, { status: '완료', note: note || '따로 정리했어요', done_at: new Date().toISOString() });
+  const dir = path.join(INBOX, String(id));
+  if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+  console.log('[닫음] ' + id + '번 · ' + (note || ''));
+}
+
 async function cmdFail(db, id, reason) {
   await db.patch(`family_jobs?id=eq.${id}`, { status: '실패', note: reason || '처리하지 못했습니다', done_at: new Date().toISOString() });
   console.log('\n[실패로 표시] ' + id + '번 · ' + (reason || '') + '\n');
@@ -196,5 +352,6 @@ const db = api(cfg, await signIn(cfg));
 
 if (cmd === 'list') await cmdList(db);
 else if (cmd === 'apply') { if (!a1 || !a2) die('사용법: node tools/jobs.mjs apply <번호> <결과.json>'); await cmdApply(db, a1, a2); }
+else if (cmd === 'done') { if (!a1) die('사용법: node tools/jobs.mjs done <번호> "메모"'); await cmdDone(db, a1, a2); }
 else if (cmd === 'fail') { if (!a1) die('사용법: node tools/jobs.mjs fail <번호> "이유"'); await cmdFail(db, a1, a2); }
-else console.log('\n사용법:\n  node tools/jobs.mjs list\n  node tools/jobs.mjs apply <번호> <결과.json>\n  node tools/jobs.mjs fail  <번호> "이유"\n');
+else console.log('\n사용법:\n  node tools/jobs.mjs list\n  node tools/jobs.mjs apply <번호> <결과.json>\n  node tools/jobs.mjs done  <번호> "메모"   (데이터 변경 없이 닫기 — 겹친 사진 등)\n  node tools/jobs.mjs fail  <번호> "이유"\n');
