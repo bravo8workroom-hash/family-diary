@@ -244,6 +244,39 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
             <sc-if value="{{ rq.noAns }}" hint-placeholder-val="{{ false }}">
               <div style="font-size:11.5px;color:var(--sub);margin-top:5px;word-break:keep-all;line-height:1.55;">{{ rq.why }}</div>
             </sc-if>
+            <!-- 담은 답은 이 블록 안에 그대로 보인다 — 아래 보관함까지 내려가 확인하지 않게 (사장님 지시) -->
+            <sc-if value="{{ rq.hasAns }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+                <sc-for list="{{ rq.ansV }}" as="an" hint-placeholder-count="1">
+                  <div style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 9px;">
+                    <sc-if value="{{ an.isPhoto }}" hint-placeholder-val="{{ false }}">
+                      <span style="flex-shrink:0;width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background-image:url('{{ an.thumb }}');background-size:cover;background-position:center;"></span>
+                    </sc-if>
+                    <span style="flex:1;min-width:0;font-size:12.5px;line-height:1.55;word-break:keep-all;">{{ an.label }}</span>
+                    <button onClick="{{ an.drop }}" title="이 답 빼기" style="flex-shrink:0;width:32px;height:32px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--sub);font-size:14px;font-weight:800;line-height:1;cursor:pointer;">✕</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <!-- 📎 담기를 누르면 이 자리에서 바로 사진·답변을 담는다 (아래 🤖 칸으로 안 내려간다) -->
+            <sc-if value="{{ rq.open }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:9px;background:var(--card);border:1px solid var(--ac);border-radius:12px;padding:11px;">
+                <label style="display:block;text-align:center;background:var(--bg);border:1.5px dashed var(--ac);border-radius:12px;padding:11px;font-size:13px;font-weight:800;color:var(--ac);cursor:pointer;word-break:keep-all;line-height:1.6;">📷 캡처 사진 담기 (여러 장 가능)<input type="file" accept="image/*" multiple onChange="{{ rq.onShot }}" style="display:none;"></label>
+                <div style="font-size:13px;font-weight:800;margin:10px 0 3px;">✍️ 답변</div>
+                <div style="font-size:11.5px;color:var(--sub);margin-bottom:7px;word-break:keep-all;line-height:1.6;">사진이 없어도 돼요 — 무엇을 샀는지, 어느 항목으로 넣을지 적어 주시면 그대로 갈라 드려요</div>
+                <textarea value="{{ rq.note }}" onChange="{{ rq.onNote }}" rows="2" placeholder="예: 사무용품이랑 포장 테이프 샀어요 / 이건 차량유지비로 넣어주세요" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:14px;line-height:1.6;resize:vertical;"></textarea>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <select value="{{ rq.cat }}" onChange="{{ rq.onCat }}" style="width:118px;flex-shrink:0;padding:11px 8px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:inherit;font-size:13px;">
+                    <option value="">항목 안 정함</option>
+                    <sc-for list="{{ catsV }}" as="ct3" hint-placeholder-count="5"><option value="{{ ct3.v }}">{{ ct3.v }}</option></sc-for>
+                  </select>
+                  <button onClick="{{ rq.addNote }}" style="flex:1;min-height:44px;background:var(--ac);color:var(--on);border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;">＋ 이 답 담기</button>
+                </div>
+                <sc-if value="{{ rq.hasMsg }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:11.5px;font-weight:800;color:var(--ac);margin-top:8px;word-break:keep-all;line-height:1.6;">{{ rq.msg }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
           </div>
         </sc-for>
       </div>
@@ -1297,7 +1330,8 @@ class Component extends DCLogic {
     acEdit:null, acOpen:false, aiBusy:false, aiMsg:'', aiProg:'',
     budEdit:null, budOpen:false,
     rview:'now', openRep:null, repMsg:'',
-    reqPick:null, callOpen:false, callTxt:'', callMsg:'',
+    reqPick:null, reqNote:'', reqCat:'', reqMsg:'',
+    callOpen:false, callTxt:'', callMsg:'',
     noteTxt:'', noteCat:''
   };
 
@@ -1785,6 +1819,25 @@ class Component extends DCLogic {
     // 요청에 답한 것이면 요청 칸으로 되돌려 준다 — 손으로 위까지 스크롤하지 않게 (사장님 지시)
     if(rq)setTimeout(()=>{const el=document.getElementById('askBox');
       if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},80);
+  }
+
+  // 🧾 자료 요청 블록 안에서 바로 담기 — 아래 🤖 칸으로 내려가지 않게 (사장님 지시).
+  // 담기는 곳은 같은 보관함이라, 부를 때 한꺼번에 나가는 것은 그대로다.
+  async reqShot(e,rq){
+    const files=Array.from(e.target.files||[]);if(!files.length)return;e.target.value='';
+    // 이름표(reqKey)는 addShots가 state.reqPick에서 가져간다 — 눌린 요청으로 못박고 담는다
+    this.setState({reqPick:rq,reqMsg:''},()=>this.addShots(files));
+  }
+  reqAddNote(rq){
+    if(this.state.aiBusy){this.setState({reqMsg:'⏳ 맡기는 중이에요 — 끝나면 담아 주세요'});return;}
+    const txt=(this.state.reqNote||'').trim();
+    if(!txt){this.setState({reqMsg:'✍️ 적을 내용을 먼저 써 주세요'});return;}
+    const cat=this.state.reqCat||'';
+    this.mut(d=>{d.ledgerShots=(d.ledgerShots||[]).concat([{id:this.uid(),
+      at:this.today(),who:this.whoName(),text:txt,cat,reqKey:rq.key,reqLabel:rq.label}]);});
+    // 칸만 비우고 블록은 열어 둔다 — 이어서 더 적거나 사진을 붙이는 일이 잦다
+    this.setState({reqNote:'',reqCat:'',
+      reqMsg:'📎 담았어요'+(cat?' (항목: '+cat+')':'')+' — 관리자를 부를 때 한꺼번에 나가요'});
   }
 
   // 뺀 사진은 창고에서도 지운다 — 문서에서만 빼면 사진이 창고에 그대로 남는다
@@ -2490,21 +2543,34 @@ class Component extends DCLogic {
     V.reqCount=String(reqAll.length);V.reqEmpty=reqAll.length===0;
     const ansCnt=reqAll.filter(r=>ansN[r.key]).length;
     V.hasReqAns=ansCnt>0;V.reqAnsLabel='· 답 담김 '+ansCnt+'건';
-    // 답한 것은 위로, 아직 안 한 것은 아래로 (사장님 지시) —
-    // 아직 안 한 것이 아래 🤖 담는 칸과 가까워야 담고 나서 위로 멀리 스크롤하지 않는다.
-    reqAll.sort((a,b)=>(ansN[b.key]?1:0)-(ansN[a.key]?1:0));
+    // 답한 것은 위로, 아직 안 한 것은 아래로 (사장님 지시).
+    // 단 지금 열어 놓고 적는 중인 것은 제자리에 둔다 — 담자마자 블록이 위로 뛰면 적던 칸을 놓친다.
+    const rank=r=>(ansN[r.key]&&!(S.reqPick&&S.reqPick.key===r.key))?1:0;
+    reqAll.sort((a,b)=>rank(b)-rank(a));
+    const shBox=this.shotBox();
     V.reqsV=reqAll.map(r=>{const on2=!!S.reqPick&&S.reqPick.key===r.key;
       const an=ansN[r.key],has=!!an;
       const anTxt=has?[an.p?'사진 '+an.p+'장':'',an.n?'메모 '+an.n+'개':''].filter(Boolean).join(' · '):'';
       return{title:r.title,why:r.why,hasAns:has,noAns:!has,
         ansLabel:has?('✅ 답 담았어요 ('+anTxt+') — 아직 안 맡겼어요, 아래 🤖에서 맡기면 끝나요'):'',
+        // 담은 답을 이 블록 안에 그대로 펼친다 (사진은 작은 그림, 적은 것은 글 그대로)
+        ansV:has?shBox.filter(s=>s.reqKey===r.key).map(s=>({
+          isPhoto:!s.text,thumb:s.url||'',
+          label:s.text?((s.cat?'['+s.cat+'] ':'')+s.text):'📷 담은 캡처',
+          drop:()=>this.dropShot(s.id)})):[],
+        // 이 블록 안에서 적는 칸 — 열려 있을 때만 그린다
+        open:on2,note:on2?(S.reqNote||''):'',cat:on2?(S.reqCat||''):'',
+        onNote:e=>this.setState({reqNote:e.target.value}),
+        onCat:e=>this.setState({reqCat:e.target.value}),
+        onShot:e=>this.reqShot(e,{key:r.key,label:r.title}),
+        addNote:()=>this.reqAddNote({key:r.key,label:r.title}),
+        hasMsg:on2&&!!(S.aiProg||S.reqMsg),msg:S.aiProg||S.reqMsg||'',
         bg:has?IN_C+'14':sk.bg,
         bd:has?IN_C:(on2?sk.ac:sk.line),pickBg:on2?sk.ac:(has?sk.card:sk.soft),pickFg:on2?sk.on:sk.ac,
-        pickLabel:on2?'📎 담는 중':(has?'📎 더 담기':'📎 담기'),
-        pick:()=>this.setState({reqPick:on2?null:{key:r.key,label:r.title},mview:'list',aiMsg:''},()=>{
-          if(on2)return;
-          const el=document.getElementById('shotBox');
-          if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}),
+        pickLabel:on2?'✕ 접기':(has?'📎 더 담기':'📎 담기'),
+        // 여기서 바로 적으므로 아래 🤖 칸으로 내려보내지 않는다 (사장님 지시)
+        pick:()=>this.setState({reqPick:on2?null:{key:r.key,label:r.title},
+          reqNote:'',reqCat:'',reqMsg:'',aiMsg:''}),
         skip:()=>{if(confirm('「'+r.title+'」 자료 요청을 넘길까요?\n\n같은 곳에서 결제가 더 생기면 다시 알려드려요.'))
           this.closeAsks([r.key],'넘김');}};});
     // 지금 어느 요청에 답하는 중인지 — 캡처 담는 칸에 그대로 띄운다
