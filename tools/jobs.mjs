@@ -107,9 +107,15 @@ async function cmdList(db) {
   for (const j of jobs) {
     const when = new Date(j.created_at).toLocaleString('ko-KR');
     console.log('─'.repeat(58));
-    console.log(`[${j.id}] ${j.kind === 'receipt' ? '가계부 캡처 정리' : j.kind}  ·  ${j.asked_by || '가족'}  ·  ${when}`);
+    const KINDL = { receipt: '가계부 캡처 정리', report: '가계부 보고서 자세히' };
+    console.log(`[${j.id}] ${KINDL[j.kind] || j.kind}  ·  ${j.asked_by || '가족'}  ·  ${when}`);
 
     const p = j.payload || {};
+    if (j.kind === 'report') {
+      console.log(`     ${p.kind === 'now' ? '현재' : '월'} 보고서 · ${p.ym || ''} · ${p.title || ''}`);
+      console.log(`     앱이 계산한 요약: ${p.summary || '(없음)'}`);
+      console.log(`     ※ 앱 계산본은 payload.blocks 에 그대로 들어 있습니다 — 숫자는 그걸 쓰고 해석만 새로 쓰세요.`);
+    }
     const shots = p.photos || [];
     if (shots.length) {
       const dir = path.join(INBOX, String(j.id));
@@ -151,6 +157,22 @@ async function cmdApply(db, id, file) {
         });
       }
       return `가계부 ${list.length}건 넣음`;
+    });
+  } else if (job.kind === 'report') {
+    // 결과 형식: { title, stars, summary, blocks:[{t,v,h1,h2,h3,rows}] }
+    // t 는 h(소제목) · p(문단) · stat(※수치) · cmp(◐비교) · judge(→판단) · table · do(▶실행)
+    if (!Array.isArray(result.blocks) || !result.blocks.length) die('결과에 blocks 항목이 없습니다.');
+    const p = job.payload || {};
+    note = await editDoc(db, doc => {
+      doc.moneyReports = doc.moneyReports || [];
+      const no = doc.moneyReports.reduce((mx, r) => Math.max(mx, Number(r.no) || 0), 0) + 1;
+      doc.moneyReports.unshift({
+        id: uid(), no, kind: p.kind === 'now' ? 'now' : 'month', ym: p.ym || today().slice(0, 7),
+        date: today(), title: result.title || p.title || '가계부 보고서',
+        stars: Math.min(5, Math.max(1, Number(result.stars) || 3)),
+        summary: result.summary || p.summary || '', blocks: result.blocks, by: '담당'
+      });
+      return `보고서 #${no} 올림 · ${result.title || p.title || ''}`;
     });
   } else {
     die('모르는 부탁 종류입니다: ' + job.kind);

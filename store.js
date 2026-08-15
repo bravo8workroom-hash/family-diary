@@ -156,9 +156,12 @@
   async function putPhoto(dataUrl) {
     if (!sb || !dataUrl || dataUrl.indexOf('data:') !== 0) return dataUrl;
     try {
-      var name = Date.now() + '-' + Math.random().toString(36).slice(2, 10) + '.jpg';
+      // 스티커는 배경이 뚫린 PNG 라서 JPEG 로 바꾸면 뚫린 자리가 검게 찬다 — 원래 형식 그대로 올린다
+      var mime = (dataUrl.match(/^data:([^;,]+)/) || [, 'image/jpeg'])[1];
+      var ext = mime === 'image/png' ? '.png' : (mime === 'image/webp' ? '.webp' : '.jpg');
+      var name = Date.now() + '-' + Math.random().toString(36).slice(2, 10) + ext;
       var up = await sb.storage.from(BUCKET).upload(name, dataUrlToBlob(dataUrl), {
-        contentType: 'image/jpeg', upsert: false
+        contentType: mime, upsert: false
       });
       if (up.error) throw up.error;
       var s = await sb.storage.from(BUCKET).createSignedUrl(name, 60 * 60 * 8);

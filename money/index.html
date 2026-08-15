@@ -929,7 +929,7 @@ class Component extends DCLogic {
             c3:over?'초과 '+Math.round((sp-b.a)/b.a*100)+'%':Math.round(sp/b.a*100)+'%',
             c3c:over?OUT_C:IN_C};})}));
       const overs=ms.filter(b=>(cs[b.c]||0)>b.a);
-      if(overs.length)todo.push(overs.map(b=>b.name).join('·')+' 예산을 실제 지출에 맞게 다시 잡기');
+      if(overs.length)todo.push('예산 「'+overs.map(b=>b.name).join('·')+'」을 실제 지출에 맞게 다시 잡기');
     }
 
     const ps={card:0,cash:0,bank:0};
@@ -981,7 +981,7 @@ class Component extends DCLogic {
             c3:left<0?'이미 초과':(dday&&dday<=dim?dday+'일쯤':'여유'),
             c3c:left<0?OUT_C:((dday&&dday<=dim)?'#B27417':IN_C)};})}));
       const risky=ms.filter(b=>(cs[b.c]||0)>b.a);
-      if(risky.length)todo.push(risky.map(b=>b.name).join('·')+' 예산을 이미 넘겼습니다 — 이달 남은 기간은 다른 칸에서 아끼세요');
+      if(risky.length)todo.push('예산 「'+risky.map(b=>b.name).join('·')+'」을 이미 넘겼습니다 — 이달 남은 기간은 다른 칸에서 아끼세요');
     }
 
     const un=fx.rows.filter(r=>!r.paid);
@@ -1048,7 +1048,14 @@ class Component extends DCLogic {
 
   renderVals(){
     const S=this.state,D=S.data;
-    if(!D||!S.budM)return{loading:true,ready:false,f:{},on:{}};
+    if(!D||!S.budM){
+      // 불러오는 동안에도 반복 목록은 빈 배열이어야 한다 (숨겨진 화면도 값을 읽으므로)
+      const E={loading:true,ready:false,f:{},on:{},nf:{freqV:[],payV:[],moV:[],wdV:[],catsV:[]}};
+      ['mviewsV','adviceV','liveBlocksV','boxV','stMonthsV','stCatsV','stPaysV','payFilterV','txV','catsV',
+       'paysV','dayHeads','budCellsV','budDayV','budgetsV','fxFilterV','fxRowsV','bankAccsV','cardAccsV',
+       'acPurpV'].forEach(k=>E[k]=[]);
+      return E;
+    }
     const V={loading:false,ready:true};
     const W=this.won.bind(this),t=this.today(),f=S.f,sk=SK;
     const on={};FL.forEach(k=>on[k]=e=>this.setF(k,e.target.value));

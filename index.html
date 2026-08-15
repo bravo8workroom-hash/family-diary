@@ -1584,7 +1584,7 @@ input,button,textarea,select{font-family:inherit;}
       <div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:12px;">지금까지 받음 <b style="color:#3FA45B;">{{ pmStEarned }}개</b> · 사용 <b style="color:#E0654F;">{{ pmStSpent }}개</b> · 남음 <b style="color:var(--tx,#3F3A33);">{{ pmStickers }}개</b></div>
       <div style="display:flex;gap:6px;margin-bottom:12px;">
         <button onClick="{{ pmTabHist }}" style="flex:1;background:{{ pmTbHBg }};color:{{ pmTbHFg }};border:1px solid {{ pmTbHBd }};border-radius:12px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;min-height:40px;">📜 기록</button>
-        <button onClick="{{ pmTabTrash }}" style="flex:1;background:{{ pmTbTBg }};color:{{ pmTbTFg }};border:1px solid {{ pmTbTBd }};border-radius:12px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;min-height:40px;">🗑 휴지통 {{ pmTrashN }}</button>
+        <button onClick="{{ pmTabTrash }}" style="flex:1;background:{{ pmTbTBg }};color:{{ pmTbTFg }};border:1px solid {{ pmTbTBd }};border-radius:12px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;min-height:40px;">🗑️ 휴지통 {{ pmTrashN }}</button>
       </div>
       <sc-if value="{{ pmHasStMsg }}" hint-placeholder-val="{{ false }}">
         <div style="background:var(--bg,#FAF6EF);border:1px solid #E0654F;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;font-weight:700;color:#E0654F;line-height:1.6;word-break:keep-all;">🔒 {{ pmStMsg }}</div>
@@ -1616,7 +1616,7 @@ input,button,textarea,select{font-family:inherit;}
       </sc-if>
       <sc-if value="{{ pmTrashOpen }}" hint-placeholder-val="{{ false }}">
         <sc-if value="{{ pmTrashEmpty }}" hint-placeholder-val="{{ true }}">
-          <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:20px;text-align:center;font-size:13px;font-weight:700;color:var(--sub,#8A8177);margin-bottom:14px;line-height:1.7;">휴지통이 비어 있어요<br><span style="font-size:11px;font-weight:600;">기록에서 🗑 을 누르면 여기로 옮겨져요</span></div>
+          <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:20px;text-align:center;font-size:13px;font-weight:700;color:var(--sub,#8A8177);margin-bottom:14px;line-height:1.7;">휴지통이 비어 있어요<br><span style="font-size:11px;font-weight:600;">기록에서 🗑️ 을 누르면 여기로 옮겨져요</span></div>
         </sc-if>
         <div style="max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
           <sc-for list="{{ pmTrashV }}" as="tr" hint-placeholder-count="2">
@@ -1758,7 +1758,7 @@ input,button,textarea,select{font-family:inherit;}
               </div>
               <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);line-height:1.85;">
                 <div>🎣 채비 · {{ fr.rig }}</div>
-                <div>🪱 미끼 · {{ fr.bait }}</div>
+                <div>🐛 미끼 · {{ fr.bait }}</div>
                 <div>🕘 시간 · {{ fr.when }}</div>
                 <div>💡 {{ fr.tip }}</div>
               </div>
@@ -2028,7 +2028,7 @@ input,button,textarea,select{font-family:inherit;}
         </div>
 
         <div style="position:relative;flex:none;display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid rgba(255,255,255,.92);border-radius:14px;box-shadow:inset 0 1px 0 #fff,0 2px 5px rgba(30,60,90,.14);background-image:linear-gradient(100deg,rgba(255,255,255,.55),rgba(255,255,255,.42) 45%,rgba(255,255,255,.55));">
-          <span style="flex:none;font-size:18px;">🪱</span>
+          <span style="flex:none;font-size:18px;">🐛</span>
           <div style="flex:1;text-align:center;min-width:0;">
             <div style="font-weight:900;font-size:15px;line-height:1.15;color:#26313D;">미끼</div>
             <div style="font-weight:700;font-size:12px;color:#47586A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ fcBait }}</div>
@@ -2070,7 +2070,7 @@ input,button,textarea,select{font-family:inherit;}
         <button onClick="{{ fcEdit }}" style="flex:1;padding:13px 0;border-radius:24px;cursor:pointer;border:3px solid #fff;background-image:linear-gradient(180deg,#fff,#D8E7F4);box-shadow:0 5px 0 #A9C4DA;font-size:15px;color:#16528C;font-family:inherit;">✏️ 수정</button>
       </sc-if>
       <sc-if value="{{ fcMine }}" hint-placeholder-val="{{ true }}">
-        <button onClick="{{ fcDel }}" style="flex:none;padding:13px 16px;border-radius:24px;cursor:pointer;border:3px solid #fff;background-image:linear-gradient(180deg,#FFB3AB,#D63B2C);box-shadow:0 5px 0 #8D1B0F;font-size:15px;color:#fff;font-family:inherit;">🗑</button>
+        <button onClick="{{ fcDel }}" style="flex:none;padding:13px 16px;border-radius:24px;cursor:pointer;border:3px solid #fff;background-image:linear-gradient(180deg,#FFB3AB,#D63B2C);box-shadow:0 5px 0 #8D1B0F;font-size:15px;color:#fff;font-family:inherit;">🗑️</button>
       </sc-if>
       <sc-if value="{{ fcGuest }}" hint-placeholder-val="{{ false }}">
         <button onClick="{{ fcLike }}" style="flex:1;padding:13px 0;border-radius:24px;cursor:pointer;border:3px solid #fff;background-image:{{ fcLikeBg }};box-shadow:0 5px 0 #D2879A;font-size:15px;color:#A5265A;font-family:inherit;">❤️ 좋아요 {{ fcLikes }}</button>
@@ -2250,7 +2250,7 @@ class Component extends DCLogic {
     {n:'볼락',e:'🐡',left:'13%',top:'72%',fs:'30px',ring:'52px',dur:'3.6s',c:'#B8382A',lb:'볼락'},
     {n:'감성돔',e:'',left:'75%',top:'63%',fs:'0px',ring:'64px',dur:'4.4s',c:'#41576B',lb:''}
   ];
-  KGROUPS=[{k:'kfWater',label:'💧 속성',o:['바다','민물']},{k:'kfBait',label:'🪱 미끼',o:['오징어','지렁이','고등어','직접작성']},{k:'kfWind',label:'🌬️ 풍량',o:['약함','보통','강함']},{k:'kfWave',label:'🌊 파도',o:['잔잔','보통','거침']},{k:'kfTime',label:'☀️ 시간대',o:['낮','밤']},{k:'kfSpot',label:'🏝️ 장소 특이점',o:['방파제','해변','기수지역','직접작성']},{k:'kfRank',label:'👑 등급',o:['기본 단계 🐟','1단계 대물 👑']}];
+  KGROUPS=[{k:'kfWater',label:'💧 속성',o:['바다','민물']},{k:'kfBait',label:'🐛 미끼',o:['오징어','지렁이','고등어','직접작성']},{k:'kfWind',label:'🌬️ 풍량',o:['약함','보통','강함']},{k:'kfWave',label:'🌊 파도',o:['잔잔','보통','거침']},{k:'kfTime',label:'☀️ 시간대',o:['낮','밤']},{k:'kfSpot',label:'🏝️ 장소 특이점',o:['방파제','해변','기수지역','직접작성']},{k:'kfRank',label:'👑 등급',o:['기본 단계 🐟','1단계 대물 👑']}];
   TIDERG=[
     {id:'south',n:'남해',sub:'부산·통영·여수·거제',s:8},
     {id:'east',n:'동해',sub:'포항·강릉·속초',s:8},
@@ -2369,9 +2369,14 @@ class Component extends DCLogic {
   PCOLORS = ['#F97316','#EF4444','#EC4899','#A855F7','#8B5CF6','#3B82F6','#0EA5E9','#14B8A6','#10B981','#84CC16','#EAB308','#78716C'];
   DAYS = ['일','월','화','수','목','금','토'];
   STK = ['🌟','💖','🏆','🍀','🦄','🔥','👍','🐥','🍩','🎀','🌈','💎'];
-  DECO = ['🎀','🌸','⭐','💖','🍓','🐰','🦋','✨','🌈','🍑','🫧','🐻','⚽','🎮','🎧','🍀','🌙','💜','🧸','🍒','😎','🤙','🔥','💫'];
+  DECO = ['🎀','🌸','⭐','💖','🍓','🐰','🦋','✨','🌈','🍑','🍭','🐻','⚽','🎮','🎧','🍀','🌙','💜','🧸','🍒','😎','🤙','🔥','💫'];
   DSTK = ['img:ham1','img:ham2','img:ham3','img:chick1','img:chick2','img:chick3','img:chick4','img:chick5','img:petit1','img:petit2','img:petit3','img:petit4','img:bear','img:fish','img:star','img:rainbow','img:cake','img:flower','🥰','🎉','👍','💖','🍀','⚽'];
-  dv(s){s=String(s);return s.slice(0,4)==='img:'?{isImg:true,isEmo:false,img:'assets/stickers/'+s.slice(4)+'.png'}:{isImg:false,isEmo:true,e:s};}
+  // 스티커 한 개를 화면에 그릴 모양으로 푼다 — 'img:이름'은 기본 그림, 'my:번호'는 제작소에서 만든 것, 나머지는 이모지
+  dv(s){s=String(s);
+    if(s.slice(0,4)==='img:')return{isImg:true,isEmo:false,img:'assets/stickers/'+s.slice(4)+'.png'};
+    if(s.slice(0,3)==='my:'){const m=(((this.state.data||{}).mystk)||[]).find(x=>x.id===s.slice(3));
+      return m?{isImg:true,isEmo:false,img:m.url}:{isImg:false,isEmo:true,e:'🌟'};}   // 지워진 스티커는 별로 남는다
+    return{isImg:false,isEmo:true,e:s};}
   phl(po){return (po.photos&&po.photos.length)?po.photos:(po.photo?[po.photo]:[]);}   // 예전 글은 photo 한 장, 새 글은 photos 배열
 
   iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -2425,6 +2430,10 @@ class Component extends DCLogic {
       if(!data.goals)data.goals=[];
       if(!data.appr)data.appr=[];
       if(!data.sttrash)data.sttrash=[];
+      if(!data.mystk)data.mystk=[];
+      // 예전 반응 🥹 는 2021년에 나온 글자라 폰·PC 폰트에 없으면 네모로 깨진다 — 🥺 로 옮긴다
+      data.feed.forEach(po=>{if(po.likes&&po.likes['🥹']!==undefined){
+        po.likes['🥺']=(po.likes['🥺']||0)+po.likes['🥹'];delete po.likes['🥹'];}});
       data.stlog.concat(data.exch).forEach(x=>{if(x.id===undefined)x.id=this.uid();});
       if(!data.kfV2){data.fishlog=this.seed().fishlog;data.kfV2=1;}
       // 퀴즈 기능을 없앴다 — 남아 있던 퀴즈 자료와 퀴즈 일정을 한 번만 지운다
@@ -2604,7 +2613,7 @@ class Component extends DCLogic {
     // 미끼
     rr(L,310,R-L,46,14);x.fillStyle='rgba(255,255,255,.5)';x.fill();
     x.strokeStyle='rgba(255,255,255,.92)';x.lineWidth=1;x.stroke();
-    x.fillStyle='#5A3F0D';x.font='18px sans-serif';x.fillText('🪱',L+10,333);
+    x.fillStyle='#5A3F0D';x.font='18px sans-serif';x.fillText('🐛',L+10,333);
     x.font=FT(12);const stW=x.measureText(stars).width;
     const midX=(L+36+R-14-stW)/2;x.textAlign='center';
     x.font=FT(15);x.fillStyle='#26313D';x.fillText('미끼',midX,325);
@@ -2721,7 +2730,7 @@ class Component extends DCLogic {
       })),
     };
     if(S.modal&&S.modal.t==='pw'){const p=D.profiles.find(x=>x.id===S.modal.id);V.pwName=p.name;V.pwEmoji=p.emoji;
-      V.tryPw=()=>{if((f.pw||'')===p.pw){this.unlockSet(p.id,f.pw||'');this.setState({user:p.id,tab:'home',parentOk:false,modal:null,pwErr:'',editMode:false,f:{...f,pw:''}});}else this.setState({pwErr:'비밀번호가 틀렸어요 🥲'});};}
+      V.tryPw=()=>{if((f.pw||'')===p.pw){this.unlockSet(p.id,f.pw||'');this.setState({user:p.id,tab:'home',parentOk:false,modal:null,pwErr:'',editMode:false,f:{...f,pw:''}});}else this.setState({pwErr:'비밀번호가 틀렸어요 😢'});};}
     else{V.pwName='';V.pwEmoji='';V.tryPw=()=>{};}
     if(S.modal&&S.modal.t==='profile'){const pid=S.modal.id;
       V.pickProfilePhoto=async e=>{const file=e.target.files[0];if(!file)return;const url=await this.compress(file,240);this.mut(d=>{d.profiles.find(x=>x.id===pid).photo=url;});};
@@ -2973,7 +2982,7 @@ class Component extends DCLogic {
         return{n:fi.n,i:a.i,cbg:a.a,cbd:a.b+'40',cfg:a.b,how:fi.how,hbg:h.s,hfg:h.b,
           hit:fit(fi)===0,rig:fi.rig,bait:fi.bait,when:fi.when,tip:fi.tip};});
       V.tideRecNone=top.length===0;
-      V.tideBaitLine=top.length?('🪱 이 날 챙길 미끼 — '+top.map(fi=>fi.bt).filter((b,ix,ar)=>ar.indexOf(b)===ix).join(' · ')):'🪱 청갯지렁이 한 통이면 대부분 어종에 통해요.';
+      V.tideBaitLine=top.length?('🐛 이 날 챙길 미끼 — '+top.map(fi=>fi.bt).filter((b,ix,ar)=>ar.indexOf(b)===ix).join(' · ')):'🐛 청갯지렁이 한 통이면 대부분 어종에 통해요.';
       V.tideNight=top.filter(fi=>fi.when.indexOf('밤')>=0).length>=2;   // 밤 어종이 많은 날은 야간 출조 안내
     }
     const fv=S.fview||'map';
@@ -3009,7 +3018,7 @@ class Component extends DCLogic {
     const tile=l=>({species:l.species,len:l.len+'cm',stars:kstars(l.diff),icon:kart(l.species).i,artBg:kbg(l.species),
       photo:l.photo,hasPhoto:!!l.photo,noPhoto:!l.photo,
       owner:l.by===u.id?'내 카드':byName(l.by).name,
-      actions:l.by===u.id?'✏️ 🗑':'❤️ '+((l.likes||[]).length),tap:kOpen(l.id)});
+      actions:l.by===u.id?'✏️ 🗑️':'❤️ '+((l.likes||[]).length),tap:kOpen(l.id)});
     const mineL=kSort.filter(l=>l.by===u.id);
     V.kAlbumV=(fv==='tank'?mineL:kSort).map(tile);
     V.kAlbumTitle=fv==='tank'?'🧰 내 피싱 카드함':'🗺️ 바다 도감 앨범';
@@ -3093,7 +3102,7 @@ class Component extends DCLogic {
         this.mut(d=>{d.fishlog=d.fishlog||[];
           d.fishlog.unshift(JSON.parse(JSON.stringify(full)));
           d.feed.unshift({id:this.uid(),by:u.id,d:rec.d,fcid:nid,txt:'🎣 '+rec.species+' '+rec.len+'cm 낚았다! ('+rec.point+')',
-            likes:{'❤️':0,'👏':0,'😆':0,'🥹':0},comments:[]});});
+            likes:{'❤️':0,'👏':0,'😆':0,'🥺':0},comments:[]});});
         done(nid);this.fcPaint(full);};
     }
 
@@ -3101,7 +3110,7 @@ class Component extends DCLogic {
     V.feedPhotosV=S.feedPhotos.map((u2,i)=>({u:u2,rm:()=>this.setState({feedPhotos:this.state.feedPhotos.filter((_,j)=>j!==i)})}));
     V.hasFeedPhoto=S.feedPhotos.length>0;
     V.pickFeedPhoto=async e=>{const files=Array.from(e.target.files||[]);if(!files.length)return;e.target.value='';const urls=[];for(const file of files)urls.push(await window.FamilyStore.putPhoto(await this.compress(file,640)));this.setState({feedPhotos:this.state.feedPhotos.concat(urls)});};
-    V.addFeed=()=>{if(!(f.fdText||'').trim()&&!S.feedPhotos.length)return;const phs=S.feedPhotos.slice();this.mut(d=>{d.feed.unshift({id:this.uid(),by:u.id,d:t,txt:(f.fdText||'').trim(),photo:phs[0]||null,photos:phs,likes:{'❤️':0,'👏':0,'😆':0,'🥹':0}});});this.setState({feedPhotos:[]});this.clearF(['fdText']);};
+    V.addFeed=()=>{if(!(f.fdText||'').trim()&&!S.feedPhotos.length)return;const phs=S.feedPhotos.slice();this.mut(d=>{d.feed.unshift({id:this.uid(),by:u.id,d:t,txt:(f.fdText||'').trim(),photo:phs[0]||null,photos:phs,likes:{'❤️':0,'👏':0,'😆':0,'🥺':0}});});this.setState({feedPhotos:[]});this.clearF(['fdText']);};
     V.feedV=D.feed.map(po=>{const author=D.profiles.find(p=>p.id===po.by);const cms=po.comments||[];const ck='cm_'+po.id;
       const phs=this.phl(po);
       return{emoji:byName(po.by).emoji,by:byName(po.by).name,date:this.dShort(po.d),txt:po.txt,photosV:phs.map(u2=>({u:u2})),hasPhoto:phs.length>0,
@@ -3119,7 +3128,7 @@ class Component extends DCLogic {
         this.mut(d=>{const p2=d.feed.find(z=>z.id===po.id);if(p2)(p2.stks=p2.stks||[]).push({id:this.uid(),s:sel.s,x:px,y:py,r:Math.round(-15+Math.random()*30),by:u.id});});
         this.setState({fdStkSel:null});},
       placeCancel:()=>this.setState({fdStkSel:null}),
-      reacts:['❤️','👏','😆','🥹'].map(e=>({e,n:(po.likes&&po.likes[e])||0,bg:((po.likes&&po.likes[e])||0)>0?sk.soft:sk.card,
+      reacts:['❤️','👏','😆','🥺'].map(e=>({e,n:(po.likes&&po.likes[e])||0,bg:((po.likes&&po.likes[e])||0)>0?sk.soft:sk.card,
         tap:()=>this.mut(d=>{const p2=d.feed.find(x=>x.id===po.id);p2.likes=p2.likes||{};p2.likes[e]=(p2.likes[e]||0)+1;})})),
       canPraise:u.role==='parent'&&author&&author.role==='kid'&&po.by!==u.id,
       praised:!!(S.praised&&S.praised[po.id]),praiseLabel:(S.praised&&S.praised[po.id])?((S.praised[po.id]===true?'🌟':S.praised[po.id])+' 보냈어요 ✓'):'🌟 칭찬 스티커',
@@ -3559,10 +3568,10 @@ class Component extends DCLogic {
           return{m:Number(m.slice(0,4))+'년 '+Number(m.slice(5,7))+'월',inN:g.inn.length,outN:g.out.reduce((s2,x)=>s2+x.cost,0),
             items:g.inn.map(x=>{const ok=stAvail>=1;
               return{sd:x.d,date:this.dShort(x.d),txt:x.e+' '+(x.msg||x.from||'받음'),amt:'+1',c:'#3FA45B',
-                delIcon:ok?'🗑':'🔒',delOp:ok?'1':'0.45',delTip:ok?'휴지통으로 보내기':lockTip,
+                delIcon:ok?'🗑️':'🔒',delOp:ok?'1':'0.45',delTip:ok?'휴지통으로 보내기':lockTip,
                 del:()=>{if(!ok)return stWarn(lockMsg);this.stDel('in',x);}};})
               .concat(g.out.map(x=>({sd:x.d,date:this.dShort(x.d),txt:'🎁 '+x.name,amt:'-'+x.cost,c:'#E0654F',
-                delIcon:'🗑',delOp:'1',delTip:'휴지통으로 보내기',del:()=>this.stDel('out',x)})))
+                delIcon:'🗑️',delOp:'1',delTip:'휴지통으로 보내기',del:()=>this.stDel('out',x)})))
               .sort((a,b)=>b.sd.localeCompare(a.sd))};});
         V.pmHistEmpty=V.pmHistMonV.length===0;
         const stTrash=(D.sttrash||[]).filter(x=>x.it&&x.it.k===pmKid.id);
