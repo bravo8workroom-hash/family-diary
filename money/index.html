@@ -403,7 +403,10 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
         <sc-if value="{{ hasAiMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:800;margin-top:10px;text-align:center;">{{ aiMsg }}</div></sc-if>
       </div>
 
-      <div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
+      <div id="txForm" style="background:var(--card);border:1px solid {{ txFormBd }};border-radius:18px;padding:16px;">
+        <sc-if value="{{ txEditing }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--soft);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:12px;font-weight:800;color:var(--ac);word-break:keep-all;line-height:1.6;">✏️ {{ txEditLabel }} 고치는 중 — 바꾼 뒤 아래 「수정」을 눌러 주세요</div>
+        </sc-if>
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <button onClick="{{ txSetOut }}" style="flex:1;background:{{ txOutBg }};color:{{ txOutFg }};border:1px solid var(--line);border-radius:12px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;">지출 -</button>
           <button onClick="{{ txSetIn }}" style="flex:1;background:{{ txInBg }};color:{{ txInFg }};border:1px solid var(--line);border-radius:12px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;">수입 +</button>
@@ -428,6 +431,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
             <div style="font-size:11px;font-weight:800;color:{{ txBuyHintC }};margin-top:6px;line-height:1.6;">{{ txBuyHint }}</div>
           </div>
         </sc-if>
+        <sc-if value="{{ txCatRuleOn }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:11px;font-weight:800;color:var(--ac);margin-top:8px;word-break:keep-all;line-height:1.6;">{{ txCatRuleMsg }}</div>
+        </sc-if>
         <div style="display:flex;gap:8px;margin-top:8px;">
           <button onClick="{{ addTx }}" style="flex:1;background:var(--ac);color:var(--on);border:none;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ txSaveLabel }}</button>
           <sc-if value="{{ txEditing }}" hint-placeholder-val="{{ false }}"><button onClick="{{ txCancelEdit }}" style="flex:1;background:var(--soft);color:var(--tx);border:none;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;">취소</button></sc-if>
@@ -445,6 +451,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
         </div>
         <sc-if value="{{ txEmpty }}" hint-placeholder-val="{{ false }}">
           <div class="empty">이 달엔 해당 내역이 없어요</div>
+        </sc-if>
+        <sc-if value="{{ hasCatRules }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ applyCatRules }}" style="width:100%;margin-bottom:8px;min-height:44px;background:var(--card);color:var(--sub);border:1px dashed var(--line);border-radius:12px;font-size:12px;font-weight:800;cursor:pointer;word-break:keep-all;line-height:1.6;">🏷️ 정해둔 구매처 <span class="num">{{ catRuleCount }}</span>곳 규칙으로 지난 내역 한꺼번에 맞추기</button>
         </sc-if>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ txV }}" as="tx" hint-placeholder-count="5">
@@ -1151,6 +1160,31 @@ class Component extends DCLogic {
   buyOf(memo){const k=this.buyKeyFor(memo);if(!k)return '';
     return String((((this.state.data||{}).installBuys)||{})[k]||'');}
 
+  // ── 🏷️ 같은 구매처는 늘 같은 항목으로 (사장님 지시 2026-08-15) ──
+  // 내역을 고쳐 항목을 바꾸면 그 구매처를 catRules 에 적어 둔다. 다음부터 같은·비슷한 구매처가
+  // 들어오면 손대지 않아도 그 항목으로 골라진다 — 한 건씩 사람이 다시 읽고 고치지 않게.
+  // 열쇠는 「가게 이름」만 남긴다. 지점·괄호 설명·할부 회차는 달마다 달라서 열쇠에 넣으면 안 이어진다.
+  //   "김양희(고고싱..." → "김양희"   "GS25 강남점" → "gs25강남점" (앞이 같아 "gs25" 규칙에 걸린다)
+  // ⚠ 이 규칙은 tools/jobs.mjs 의 catKey/catOf 와 똑같아야 한다 — 한쪽만 고치면 반입한 거래가 규칙을 비켜간다.
+  catKey(memo){return String(memo||'')
+    .replace(/\(\s*\d{1,3}\s*\/\s*\d{1,3}\s*\)/g,'')
+    .replace(/\([^)]*\)?/g,'')
+    .replace(/[·\-_.,/\\]/g,'')
+    .replace(/\s+/g,'').toLowerCase();}
+  catOf(memo){const R=((this.state.data||{}).catRules)||{},k=this.catKey(memo);
+    if(!k||k==='-')return '';
+    if(R[k])return R[k];
+    // 비슷한 구매처: 한쪽 이름이 다른 쪽으로 시작하면 같은 가게로 본다 (gs25강남점 ≈ gs25).
+    // 짧은 이름은 우연히 겹치므로 세 글자부터만 본다. 여럿이 걸리면 가장 긴(구체적인) 규칙이 이긴다.
+    let best='';
+    Object.keys(R).forEach(x=>{if(Math.min(x.length,k.length)<3)return;
+      if((k.indexOf(x)===0||x.indexOf(k)===0)&&x.length>best.length)best=x;});
+    return best?R[best]:'';}
+  // 이체는 항목이 늘 '이체'로 고정돼 규칙으로 삼을 게 없다
+  learnCat(d,memo,cat){const k=this.catKey(memo);
+    if(!k||k==='-'||!cat||cat==='이체')return;
+    d.catRules=d.catRules||{};d.catRules[k]=cat;}
+
   componentDidMount(){
     const t=this.today();
     this._paste=ev=>this.onPaste(ev);
@@ -1165,6 +1199,7 @@ class Component extends DCLogic {
     ['tx','budgets','fixed','accounts','moneyReports','profiles'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[];});
     if(!d.fixedPaid||typeof d.fixedPaid!=='object')d.fixedPaid={};
     if(!d.installBuys||typeof d.installBuys!=='object')d.installBuys={};   // 할부 열쇠 → 산 물건
+    if(!d.catRules||typeof d.catRules!=='object')d.catRules={};            // 구매처 열쇠 → 항목(분류)
     return d;}
 
   // 매달 1일 이후 처음 열면 지난달 마감 보고서를 한 번 자동으로 만들어 보고서함에 넣는다
@@ -1452,8 +1487,9 @@ class Component extends DCLogic {
     const W=this.won.bind(this),t=this.today(),f=S.f,sk=SK;
     const on={};FL.forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     // 할부 내용을 치면 전에 적어 둔 물건 이름을 스스로 채운다 (매달 다시 안 적게)
-    on.txMemo=e=>{const v=e.target.value,b=this.buyOf(v);
-      this.setState(s=>({f:{...s.f,txMemo:v,...(b?{txBuy:b}:{})}}));};
+    // 항목도 같이 채운다 — 전에 이 구매처로 정해 둔 항목이 있으면 저절로 골라진다
+    on.txMemo=e=>{const v=e.target.value,b=this.buyOf(v),c=this.catOf(v);
+      this.setState(s=>({f:{...s.f,txMemo:v,...(b?{txBuy:b}:{}),...(c?{txCat:c}:{})}}));};
     V.f=f;V.on=on;
     const chip=a=>a?{bg:sk.ac,fg:sk.on,bd:sk.ac}:{bg:sk.card,fg:sk.tx,bd:sk.line};
     const bm=S.budM;
@@ -1526,20 +1562,34 @@ class Component extends DCLogic {
     V.txSetOut=()=>this.setF('txType','out');V.txSetIn=()=>this.setF('txType','in');V.txSetTr=()=>this.setF('txType','tr');
     V.txEditing=!!S.txEdit;V.txSaveLabel=S.txEdit?'수정':'저장';
     V.txCancelEdit=()=>{this.setState({txEdit:null,aiMsg:''});this.clearF(['txAmt','txMemo','txBuy','txType']);};
+    // 고치는 칸은 화면 맨 위에 있다 — 무엇을 고치는 중인지 이름으로 못박고 테두리를 세운다
+    const exTx=S.txEdit?D.tx.find(x=>x.id===S.txEdit):null;
+    V.txFormBd=exTx?sk.ac:sk.line;
+    V.txEditLabel=exTx?(this.dShort(exTx.d)+' · '+exTx.memo):'';
     // 할부면 「산 물건」 칸을 띄우고, 비어 있으면 저장을 막는다 (사장님 지시 — 할부는 반드시 무엇을 샀는지 남긴다)
     const txMemoNow=(f.txMemo||'').trim(),txBuyNow=(f.txBuy||'').trim();
     V.txIsInstall=this.isInstall(txMemoNow);
     V.txBuyHint=txBuyNow?'📦 매달 이 할부가 나갈 때 내역에 함께 보여요':'📦 할부는 산 물건을 꼭 적어야 저장돼요';
     V.txBuyHintC=txBuyNow?sk.sub:OUT_C;V.txBuyLine=txBuyNow?sk.line:OUT_C;
+    // 🏷️ 구매처 규칙 — 정해둔 항목이 있으면 알려주고, 없으면 저장이 규칙을 만든다고 미리 알린다
+    const txRuleCat=this.catOf(txMemoNow);
+    V.txCatRuleOn=!!txMemoNow&&txTy!=='tr';
+    V.txCatRuleMsg=txRuleCat
+      ?'🏷️ 「'+txMemoNow+'」는 전에 정한 대로 '+txRuleCat+'(으)로 골라뒀어요'
+      :'🏷️ 여기서 고른 항목을 「'+txMemoNow+'」의 항목으로 기억해요 — 다음부터 비슷한 이름도 같이 따라와요';
     V.addTx=()=>{if(!f.txAmt)return;
       const memo=txMemoNow||'-',bk=this.buyKeyFor(memo);
       if(bk&&!txBuyNow){this.setState({aiMsg:'📦 할부는 무엇을 샀는지 꼭 적어 주세요'});return;}
       const keepBuy=d=>{if(bk){d.installBuys=d.installBuys||{};d.installBuys[bk]=txBuyNow;}};
-      if(S.txEdit){this.mut(d=>{const x=d.tx.find(y=>y.id===S.txEdit);if(x){x.d=f.txDate||x.d;x.ty=txTy;x.a=Number(f.txAmt);
-        x.c=txTy==='tr'?'이체':(f.txCat||x.c);x.memo=memo;x.pay=f.txPay||x.pay||'bank';}keepBuy(d);});
-        this.setState({txEdit:null,aiMsg:'✏️ 수정했어요'});}
+      if(S.txEdit){let newC='';
+        this.mut(d=>{const x=d.tx.find(y=>y.id===S.txEdit);if(x){x.d=f.txDate||x.d;x.ty=txTy;x.a=Number(f.txAmt);
+        x.c=txTy==='tr'?'이체':(f.txCat||x.c);x.memo=memo;x.pay=f.txPay||x.pay||'bank';
+        newC=x.c;this.learnCat(d,memo,x.c);}keepBuy(d);});
+        this.setState({txEdit:null,aiMsg:newC&&newC!=='이체'&&memo!=='-'
+          ?'✏️ 수정했어요 · 앞으로 「'+memo+'」는 '+newC+'(으)로 골라져요'
+          :'✏️ 수정했어요'});}
       else{this.mut(d=>{d.tx.push({id:this.uid(),d:f.txDate||t,ty:txTy,a:Number(f.txAmt),
-        c:txTy==='tr'?'이체':(f.txCat||'기타'),memo:memo,pay:f.txPay||'bank'});keepBuy(d);});
+        c:txTy==='tr'?'이체':(f.txCat||this.catOf(memo)||'기타'),memo:memo,pay:f.txPay||'bank'});keepBuy(d);});
         this.setState({aiMsg:''});}
       this.clearF(['txAmt','txMemo','txBuy']);};
     const txClr=ty=>ty==='in'?IN_C:(ty==='tr'?sk.sub:OUT_C);
@@ -1563,9 +1613,25 @@ class Component extends DCLogic {
       sub,hasSub:!!sub,needBuy:this.isInstall(tx.memo)&&!buy,
       photo:tx.photo,hasPhoto:!!tx.photo,amt:txSign(tx.ty)+W(tx.a),c:txClr(tx.ty),
       payIcon:(PAYS.find(p=>p.v===(tx.pay||'bank'))||PAYS[0]).ic,
+      // 고치는 칸은 이 목록보다 한참 위에 있다. 눌러도 화면이 그대로면 「안 먹힌다」로 보이므로 데려간다
       edit:()=>this.setState({txEdit:tx.id,mview:'list',aiMsg:'',budM:tx.d.slice(0,7),
-        f:{...f,txDate:tx.d,txAmt:String(tx.a),txCat:tx.c,txMemo:tx.memo==='-'?'':tx.memo,txBuy:buy,txType:tx.ty,txPay:tx.pay||'bank'}}),
+        f:{...f,txDate:tx.d,txAmt:String(tx.a),txCat:tx.c,txMemo:tx.memo==='-'?'':tx.memo,txBuy:buy,txType:tx.ty,txPay:tx.pay||'bank'}},
+        ()=>{const el=document.getElementById('txForm');
+          if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}),
       del:()=>this.mut(d=>{d.tx=d.tx.filter(x=>x.id!==tx.id);})};});
+
+    // 🏷️ 정해둔 구매처 규칙으로 지난 내역을 한꺼번에 맞춘다 (한 건씩 손으로 고치지 않게)
+    const rules=D.catRules||{},ruleN=Object.keys(rules).length;
+    V.hasCatRules=ruleN>0;V.catRuleCount=String(ruleN);
+    V.applyCatRules=()=>{
+      const hit=D.tx.filter(x=>x.ty!=='tr'&&this.catOf(x.memo)&&this.catOf(x.memo)!==x.c);
+      if(!hit.length){alert('🏷️ 규칙과 다른 내역이 없어요 — 이미 다 맞아요');return;}
+      if(!confirm('구매처 규칙과 다른 내역 '+hit.length+'건의 항목을 규칙대로 바꿀까요?\n\n'
+        +hit.slice(0,5).map(x=>'· '+x.memo+' : '+x.c+' → '+this.catOf(x.memo)).join('\n')
+        +(hit.length>5?'\n· 그 밖 '+(hit.length-5)+'건':'')))return;
+      const fix={};hit.forEach(x=>{fix[x.id]=this.catOf(x.memo);});
+      this.mut(d=>{d.tx.forEach(x=>{if(fix[x.id])x.c=fix[x.id];});});
+      alert('🏷️ '+hit.length+'건의 항목을 규칙대로 바꿨어요');};
 
     // ── 🗓️ 달력 ──
     const spendBy={};D.tx.filter(x=>x.ty==='out').forEach(x=>{spendBy[x.d]=(spendBy[x.d]||0)+x.a;});

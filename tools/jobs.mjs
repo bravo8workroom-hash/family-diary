@@ -115,6 +115,29 @@ const buyKeyFor = (s, B) => {
   return hits.length === 1 ? hits[0] : k;
 };
 
+// 🏷️ 같은 구매처는 늘 같은 항목으로 (사장님 지시 2026-08-15).
+// 가족이 앱에서 내역의 항목을 고치면 doc.catRules 에 「구매처 → 항목」이 적힌다.
+// 반입하는 거래도 그 규칙을 따라야 한 건씩 다시 고치는 일이 안 생긴다.
+// ⚠ 이 규칙은 money/index.html 의 catKey/catOf 와 똑같아야 한다 — 한쪽만 고치면 규칙을 비켜간다.
+const catKey = s => String(s || '')
+  .replace(/\(\s*\d{1,3}\s*\/\s*\d{1,3}\s*\)/g, '')
+  .replace(/\([^)]*\)?/g, '')
+  .replace(/[·\-_.,/\\]/g, '')
+  .replace(/\s+/g, '').toLowerCase();
+const catOf = (s, R) => {
+  const box = R || {}, k = catKey(s);
+  if (!k || k === '-') return '';
+  if (box[k]) return box[k];
+  // 비슷한 구매처: 한쪽 이름이 다른 쪽으로 시작하면 같은 가게로 본다 (gs25강남점 ≈ gs25).
+  // 짧은 이름은 우연히 겹치므로 세 글자부터만 본다. 여럿이면 가장 긴(구체적인) 규칙이 이긴다.
+  let best = '';
+  for (const x of Object.keys(box)) {
+    if (Math.min(x.length, k.length) < 3) continue;
+    if ((k.indexOf(x) === 0 || x.indexOf(k) === 0) && x.length > best.length) best = x;
+  }
+  return best ? box[best] : '';
+};
+
 // 되풀이 후보 — 같은 상호가 서로 다른 달에 2번 이상 나간 것 중, 아직 고정비로 등록 안 된 것
 function repeatCandidates(D) {
   const known = new Set((D.fixed || []).map(f => norm(f.name)));
@@ -244,6 +267,13 @@ function printLedgerContext(D) {
     fxOff.forEach(f => console.log(`     ⏸ ${f.name} · ${f.stop}부터 안 나감 · 보통 ${W(f.a)}원 · ${f.c} · ${f.pay}`));
   }
 
+  // 가족이 앱에서 직접 정한 「이 구매처는 이 항목」. 반입할 때 이게 c 를 이기므로 미리 보여 준다.
+  const CR = D.catRules || {}, crK = Object.keys(CR);
+  if (crK.length) {
+    console.log('\n     ── 🏷️ 구매처 항목 규칙 (가족이 직접 정함 · 반입 때 c 보다 이게 이긴다) ──');
+    crK.sort().forEach(k => console.log(`     🏷️ ${k} → ${CR[k]}`));
+  }
+
   // 할부는 산 물건이 명세서 어디에도 없다 — 한 번 적어 두면 매달 내역에 함께 붙는다.
   const buys = D.installBuys || {}, byBuy = {}, buyOrder = [];
   for (const x of [...(D.tx || [])].sort((a, b) => String(a.d).localeCompare(String(b.d)))) {
@@ -336,15 +366,18 @@ async function putLedger(db, result) {
           || doc.accounts.find(a => norm(a.name).includes(k) || k.includes(norm(a.name)))
           || null;
       };
-      let paidN = 0, accN = 0, buyN = 0;
+      let paidN = 0, accN = 0, buyN = 0, ruleN = 0;
       for (const x of list) {
         const id = uid(), d = x.d || today();
         const acc = findAcc(x.acc);
+        // 가족이 앱에서 정해 둔 구매처 규칙이 있으면 그게 이긴다 — 사람이 직접 고친 뜻이라 짐작보다 세다
+        const ruled = x.ty === 'tr' ? '' : catOf(x.memo, doc.catRules);
+        if (ruled && ruled !== x.c) ruleN++;
         const rec = {
           id, d,
           ty: x.ty === 'in' ? 'in' : (x.ty === 'tr' ? 'tr' : 'out'),
           a: Math.abs(Number(x.a) || 0),
-          c: x.c || '기타', memo: x.memo || '-',
+          c: ruled || x.c || '기타', memo: x.memo || '-',
           pay: ['bank', 'card', 'cash'].includes(x.pay) ? x.pay : (acc ? acc.kind : 'bank')
         };
         if (acc) { rec.acc = acc.name; accN++; }
@@ -377,6 +410,7 @@ async function putLedger(db, result) {
         + (backFx ? ` · ⏸ 빠졌던 고정비 ${backFx}건 되살림` : '')
         + (paidN ? ` · 고정비 납부 ${paidN}건 표시` : '')
         + (buyN ? ` · 할부 산 물건 ${buyN}건 기록` : '')
+        + (ruleN ? ` · 🏷️ 구매처 규칙대로 항목 ${ruleN}건 고침` : '')
         + (noBuy ? ` · ⚠ 할부 ${noBuy}건은 산 물건이 비어 있음(가족에게 물어보세요)` : '');
   });
 }
