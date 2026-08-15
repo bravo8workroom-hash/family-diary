@@ -217,11 +217,14 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
     </div>
 
     <!-- ══ 🧾 자료 요청 — 무엇을 샀는지 안 남는 결제는 캡처를 받아야 항목을 가른다 ══ -->
-    <div class="wide" style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px 16px;">
+    <div id="askBox" class="wide" style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px 16px;">
       <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
         <span style="font-size:16px;">🧾</span>
         <span style="font-size:14px;font-weight:800;">이 자료를 보내 주세요</span>
         <span style="margin-left:auto;font-size:11px;font-weight:800;color:var(--sub);">요청 <span class="num">{{ reqCount }}</span>건</span>
+        <sc-if value="{{ hasReqAns }}" hint-placeholder-val="{{ true }}">
+          <span style="font-size:11px;font-weight:800;color:#2E9E63;">{{ reqAnsLabel }}</span>
+        </sc-if>
       </div>
       <div style="font-size:11.5px;color:var(--sub);word-break:keep-all;line-height:1.6;">쿠팡·11번가·네이버페이처럼 <b>가게 이름만 찍히는 결제</b>는 무엇을 샀는지 통장·카드 내역에 안 남아요. 주문 내역을 캡처하시거나 <b>무엇을 샀는지 말로 적어</b> 주시면 아래 🤖 자동 정리로 함께 보내 항목까지 갈라 드려요</div>
       <sc-if value="{{ reqEmpty }}" hint-placeholder-val="{{ true }}">
@@ -229,13 +232,18 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
       </sc-if>
       <div style="display:flex;flex-direction:column;gap:9px;margin-top:11px;">
         <sc-for list="{{ reqsV }}" as="rq" hint-placeholder-count="2">
-          <div style="background:var(--bg);border:1px solid {{ rq.bd }};border-radius:14px;padding:12px 13px;">
-            <div style="font-size:13.5px;font-weight:800;word-break:keep-all;line-height:1.5;">{{ rq.title }}</div>
-            <div style="font-size:11.5px;color:var(--sub);margin-top:4px;word-break:keep-all;line-height:1.6;">{{ rq.why }}</div>
-            <div style="display:flex;gap:8px;margin-top:10px;">
-              <button onClick="{{ rq.pick }}" style="flex:1;min-height:44px;background:{{ rq.pickBg }};color:{{ rq.pickFg }};border:none;border-radius:11px;font-size:12.5px;font-weight:800;cursor:pointer;word-break:keep-all;">{{ rq.pickLabel }}</button>
-              <button onClick="{{ rq.skip }}" style="min-width:76px;min-height:44px;background:var(--card);color:var(--sub);border:1px solid var(--line);border-radius:11px;font-size:12.5px;font-weight:800;cursor:pointer;">넘기기</button>
+          <div style="background:{{ rq.bg }};border:1px solid {{ rq.bd }};border-radius:14px;padding:10px 12px;">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+              <span style="flex:1;min-width:140px;font-size:13px;font-weight:800;word-break:keep-all;line-height:1.45;">{{ rq.title }}</span>
+              <button onClick="{{ rq.pick }}" style="flex-shrink:0;min-height:40px;padding:0 13px;background:{{ rq.pickBg }};color:{{ rq.pickFg }};border:none;border-radius:11px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">{{ rq.pickLabel }}</button>
+              <button onClick="{{ rq.skip }}" style="flex-shrink:0;min-height:40px;padding:0 12px;background:var(--card);color:var(--sub);border:1px solid var(--line);border-radius:11px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;">넘기기</button>
             </div>
+            <sc-if value="{{ rq.hasAns }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size:11.5px;font-weight:800;color:#2E9E63;margin-top:6px;word-break:keep-all;line-height:1.55;">{{ rq.ansLabel }}</div>
+            </sc-if>
+            <sc-if value="{{ rq.noAns }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:11.5px;color:var(--sub);margin-top:5px;word-break:keep-all;line-height:1.55;">{{ rq.why }}</div>
+            </sc-if>
           </div>
         </sc-for>
       </div>
@@ -1772,8 +1780,11 @@ class Component extends DCLogic {
     this.mut(d=>{d.ledgerShots=(d.ledgerShots||[]).concat([{id:this.uid(),
       at:this.today(),who:this.whoName(),text:txt,cat,
       reqKey:rq?rq.key:'',reqLabel:rq?rq.label:''}]);});
-    this.setState({noteTxt:'',noteCat:'',aiProg:'',
+    this.setState({noteTxt:'',noteCat:'',aiProg:'',reqPick:null,
       aiMsg:'📎 보관함에 적어 담았어요'+(cat?' (항목: '+cat+')':'')+' — 관리자를 부를 때 한꺼번에 나가요'});
+    // 요청에 답한 것이면 요청 칸으로 되돌려 준다 — 손으로 위까지 스크롤하지 않게 (사장님 지시)
+    if(rq)setTimeout(()=>{const el=document.getElementById('askBox');
+      if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},80);
   }
 
   // 뺀 사진은 창고에서도 지운다 — 문서에서만 빼면 사진이 창고에 그대로 남는다
@@ -2472,11 +2483,24 @@ class Component extends DCLogic {
     const manReq=(AS.items||[]).map(z=>({key:z.key,title:z.label||'자료 요청',
       why:z.why||'가계부 관리자가 부탁한 자료예요'}));
     const reqAll=manReq.concat(autoReq);
+    // 답을 담았는지 한눈에 — 보관함(ledgerShots)에 그 요청 이름표가 붙은 사진·메모가 있으면 「답 담음」이다.
+    // (맡기기 전까지는 요청이 목록에 그대로 남으므로, 표시가 없으면 답한 것과 안 한 것이 똑같아 보인다)
+    const ansN={};this.shotBox().forEach(s=>{if(!s.reqKey)return;
+      const z=ansN[s.reqKey]||(ansN[s.reqKey]={p:0,n:0});if(s.text)z.n++;else z.p++;});
     V.reqCount=String(reqAll.length);V.reqEmpty=reqAll.length===0;
+    const ansCnt=reqAll.filter(r=>ansN[r.key]).length;
+    V.hasReqAns=ansCnt>0;V.reqAnsLabel='· 답 담김 '+ansCnt+'건';
+    // 답한 것은 위로, 아직 안 한 것은 아래로 (사장님 지시) —
+    // 아직 안 한 것이 아래 🤖 담는 칸과 가까워야 담고 나서 위로 멀리 스크롤하지 않는다.
+    reqAll.sort((a,b)=>(ansN[b.key]?1:0)-(ansN[a.key]?1:0));
     V.reqsV=reqAll.map(r=>{const on2=!!S.reqPick&&S.reqPick.key===r.key;
-      return{title:r.title,why:r.why,
-        bd:on2?sk.ac:sk.line,pickBg:on2?sk.ac:sk.soft,pickFg:on2?sk.on:sk.ac,
-        pickLabel:on2?'📎 지금 이 자료를 담는 중':'📎 이 자료 담기 (사진·설명)',
+      const an=ansN[r.key],has=!!an;
+      const anTxt=has?[an.p?'사진 '+an.p+'장':'',an.n?'메모 '+an.n+'개':''].filter(Boolean).join(' · '):'';
+      return{title:r.title,why:r.why,hasAns:has,noAns:!has,
+        ansLabel:has?('✅ 답 담았어요 ('+anTxt+') — 아직 안 맡겼어요, 아래 🤖에서 맡기면 끝나요'):'',
+        bg:has?IN_C+'14':sk.bg,
+        bd:has?IN_C:(on2?sk.ac:sk.line),pickBg:on2?sk.ac:(has?sk.card:sk.soft),pickFg:on2?sk.on:sk.ac,
+        pickLabel:on2?'📎 담는 중':(has?'📎 더 담기':'📎 담기'),
         pick:()=>this.setState({reqPick:on2?null:{key:r.key,label:r.title},mview:'list',aiMsg:''},()=>{
           if(on2)return;
           const el=document.getElementById('shotBox');
