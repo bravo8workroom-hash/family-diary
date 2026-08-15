@@ -360,6 +360,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
         <div style="font-size:15px;font-weight:800;">🤖 캡처로 통장 자동 정리</div>
         <div style="font-size:12px;color:var(--sub);margin:4px 0 10px;">영수증·카드 알림·계좌 내역 캡처를 한꺼번에 올려두면, 거래를 읽어 이 화면 내역에 넣어드려요. 내 계좌끼리 옮긴 돈은 계좌간 이체로 분류돼요</div>
         <label style="display:block;text-align:center;background:var(--bg);border:1.5px dashed var(--ac);border-radius:14px;padding:14px;font-size:14px;font-weight:800;color:var(--ac);cursor:pointer;">📷 캡처 사진 올리기 (여러 장 가능)<input type="file" accept="image/*" multiple onChange="{{ onReceipt }}" style="display:none;"></label>
+        <div style="font-size:12px;color:var(--sub);margin-top:8px;text-align:center;word-break:keep-all;line-height:1.6;">캡처를 복사했다면 이 화면에서 <b>Ctrl+V</b>(맥은 ⌘+V)로 바로 붙여넣어도 돼요</div>
         <sc-if value="{{ aiBusy }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:800;margin-top:10px;text-align:center;">📮 맡기는 중이에요... {{ aiProg }}</div></sc-if>
         <sc-if value="{{ hasAiMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:800;margin-top:10px;text-align:center;">{{ aiMsg }}</div></sc-if>
       </div>
@@ -827,6 +828,8 @@ class Component extends DCLogic {
 
   componentDidMount(){
     const t=this.today();
+    this._paste=ev=>this.onPaste(ev);
+    document.addEventListener('paste',this._paste);
     window.FamilyStore.start({seed:()=>({}), onRemote:doc=>this.setState({data:this.fill(doc)})})
       .then(doc=>{
         this.setState({data:this.fill(doc||{}),budM:t.slice(0,7),budSel:t},()=>this.autoMonthly());
@@ -1021,7 +1024,7 @@ class Component extends DCLogic {
     if(!silent)this.flash('📚 보고서함에 넣었어요');
   }
   flash(msg){this.setState({repMsg:msg});clearTimeout(this._rt);this._rt=setTimeout(()=>this.setState({repMsg:''}),2600);}
-  componentWillUnmount(){clearTimeout(this._rt);}
+  componentWillUnmount(){clearTimeout(this._rt);document.removeEventListener('paste',this._paste);}
 
   async askDeep(rep){
     this.flash('📮 담당에게 맡기는 중이에요…');
@@ -1032,6 +1035,21 @@ class Component extends DCLogic {
 
   async receipt(e){
     const files=Array.from(e.target.files||[]);if(!files.length)return;e.target.value='';
+    this.sendShots(files);
+  }
+
+  // 캡처를 복사해서 붙여넣기(Ctrl+V)로도 올릴 수 있다 — 내역 화면에서만 받는다
+  onPaste(ev){
+    if(this.state.mview!=='list'||this.state.aiBusy)return;
+    const items=Array.from((ev.clipboardData&&ev.clipboardData.items)||[]);
+    const files=items.filter(it=>it.kind==='file'&&(it.type||'').indexOf('image/')===0)
+      .map(it=>it.getAsFile()).filter(Boolean);
+    if(!files.length)return;
+    ev.preventDefault();
+    this.sendShots(files);
+  }
+
+  async sendShots(files){
     this.setState({aiBusy:true,aiMsg:'',aiProg:files.length>1?'(0/'+files.length+')':''});
     const shots=[];
     for(let i=0;i<files.length;i++){
