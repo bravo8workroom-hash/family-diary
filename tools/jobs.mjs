@@ -332,6 +332,16 @@ async function cmdApply(db, id, file) {
   console.log('\n[완료] ' + id + '번 · ' + note + '\n');
 }
 
+// 대기 부탁이 없어도 지금 가계부 상태를 본다 (담당이 확인용으로, 그리고 도구 점검용으로)
+async function cmdState(db) {
+  const rows = await db.get('family_state?id=eq.main&select=doc');
+  if (!rows.length) die('앱 데이터가 아직 없습니다.');
+  const D = rows[0].doc;
+  console.log('\n거래 ' + (D.tx || []).length + '건 · 통장/카드 ' + (D.accounts || []).length
+    + '개 · 고정비 ' + (D.fixed || []).length + '건');
+  printLedgerContext(D);
+}
+
 // 데이터를 바꾸지 않고 부탁만 닫는다 (같은 사진이 여러 번 올라온 경우 등)
 async function cmdDone(db, id, note) {
   await db.patch(`family_jobs?id=eq.${id}`, { status: '완료', note: note || '따로 정리했어요', done_at: new Date().toISOString() });
@@ -351,7 +361,8 @@ const cfg = readConfig();
 const db = api(cfg, await signIn(cfg));
 
 if (cmd === 'list') await cmdList(db);
+else if (cmd === 'state') await cmdState(db);
 else if (cmd === 'apply') { if (!a1 || !a2) die('사용법: node tools/jobs.mjs apply <번호> <결과.json>'); await cmdApply(db, a1, a2); }
 else if (cmd === 'done') { if (!a1) die('사용법: node tools/jobs.mjs done <번호> "메모"'); await cmdDone(db, a1, a2); }
 else if (cmd === 'fail') { if (!a1) die('사용법: node tools/jobs.mjs fail <번호> "이유"'); await cmdFail(db, a1, a2); }
-else console.log('\n사용법:\n  node tools/jobs.mjs list\n  node tools/jobs.mjs apply <번호> <결과.json>\n  node tools/jobs.mjs done  <번호> "메모"   (데이터 변경 없이 닫기 — 겹친 사진 등)\n  node tools/jobs.mjs fail  <번호> "이유"\n');
+else console.log('\n사용법:\n  node tools/jobs.mjs list\n  node tools/jobs.mjs state                    (지금 가계부 상태만 보기)\n  node tools/jobs.mjs apply <번호> <결과.json>\n  node tools/jobs.mjs done  <번호> "메모"   (데이터 변경 없이 닫기 — 겹친 사진 등)\n  node tools/jobs.mjs fail  <번호> "이유"\n');

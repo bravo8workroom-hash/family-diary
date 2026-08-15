@@ -428,8 +428,10 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
               <span class="num" style="font-size:12px;color:var(--sub);min-width:42px;">{{ tx.date }}</span>
               <span style="font-size:13px;flex-shrink:0;">{{ tx.payIcon }}</span>
               <span style="background:var(--soft);border-radius:8px;padding:2px 8px;font-size:11px;font-weight:800;flex-shrink:0;">{{ tx.cat }}</span>
-              <span style="flex:1;min-width:0;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tx.memo }}</span>
-              <sc-if value="{{ tx.hasAcc }}" hint-placeholder-val="{{ false }}"><span style="border:1px solid var(--line);border-radius:8px;padding:1px 7px;font-size:10px;font-weight:700;color:var(--sub);flex-shrink:0;max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tx.acc }}</span></sc-if>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;">
+                <span style="font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tx.memo }}</span>
+                <sc-if value="{{ tx.hasAcc }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tx.acc }}</span></sc-if>
+              </div>
               <sc-if value="{{ tx.hasPhoto }}" hint-placeholder-val="{{ false }}"><div style="width:28px;height:28px;border-radius:6px;background-image:url('{{ tx.photo }}');background-size:cover;background-position:center;flex-shrink:0;"></div></sc-if>
               <span class="num" style="font-size:14px;font-weight:900;color:{{ tx.c }};white-space:nowrap;">{{ tx.amt }}</span>
               <button onClick="{{ tx.edit }}" title="고치기" style="background:none;border:none;color:var(--sub);font-size:14px;cursor:pointer;min-width:30px;min-height:30px;">✎</button>
