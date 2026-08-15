@@ -1386,42 +1386,6 @@ input,button,textarea,select{font-family:inherit;}
               <button onClick="{{ addReward }}" style="background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;">추가</button>
             </div>
           </div>
-          <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="flex:1;font-size:15px;font-weight:800;">📝 학습 퀴즈</div>
-              <button onClick="{{ qbNew }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">+ 퀴즈 만들기</button>
-            </div>
-            <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);line-height:1.55;margin:5px 0 10px;">아이 일정에 퀴즈가 함께 올라가요. 목표 점수를 넘기면 스티커가 자동 지급되고, 실패하면 학습페이지를 읽은 뒤 지정한 스티커를 써서 재도전해요.</div>
-            <div style="display:flex;gap:6px;margin-bottom:10px;">
-              <sc-for list="{{ qbKidPickV }}" as="qk" hint-placeholder-count="2">
-                <button onClick="{{ qk.pick }}" style="flex:1;background:{{ qk.bg }};color:{{ qk.fg }};border:1px solid {{ qk.bd }};border-radius:12px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">{{ qk.name }}</button>
-              </sc-for>
-            </div>
-            <sc-if value="{{ pqEmpty }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px;color:var(--sub,#8A8177);">아직 만든 퀴즈가 없어요. 영어 단어부터 시작해 보세요 🔤</div></sc-if>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              <sc-for list="{{ pqListV }}" as="pq" hint-placeholder-count="2">
-                <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:11px 12px;">
-                  <div style="display:flex;align-items:center;gap:7px;">
-                    <span style="font-size:16px;">{{ pq.subjE }}</span>
-                    <span style="flex:1;font-size:13px;font-weight:800;">{{ pq.title }}</span>
-                    <button onClick="{{ pq.edit }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:8px;width:26px;height:26px;font-size:12px;cursor:pointer;color:var(--sub,#8A8177);padding:0;">✎</button>
-                    <button onClick="{{ pq.del }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:8px;width:26px;height:26px;font-size:12px;cursor:pointer;color:var(--sub,#8A8177);padding:0;">✕</button>
-                  </div>
-                  <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-top:5px;line-height:1.5;">{{ pq.meta }}</div>
-                  <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;">
-                    <span style="background:var(--card,#fff);border-radius:99px;padding:3px 9px;font-size:10px;font-weight:900;">{{ pq.rwTxt }}</span>
-                    <span style="background:var(--card,#fff);border-radius:99px;padding:3px 9px;font-size:10px;font-weight:900;">{{ pq.feeTxt }}</span>
-                    <span style="border-radius:99px;padding:3px 9px;font-size:10px;font-weight:900;color:{{ pq.stC }};background:var(--card,#fff);">{{ pq.stLabel }}</span>
-                  </div>
-                  <sc-if value="{{ pq.hasRuns }}" hint-placeholder-val="{{ false }}">
-                    <div style="display:flex;flex-direction:column;gap:2px;margin-top:7px;">
-                      <sc-for list="{{ pq.runsV }}" as="rv" hint-placeholder-count="1"><span style="font-size:11px;font-weight:800;color:{{ rv.c }};">{{ rv.t }}</span></sc-for>
-                    </div>
-                  </sc-if>
-                </div>
-              </sc-for>
-            </div>
-          </div>
         </sc-if>
 
         <sc-if value="{{ pvStk }}" hint-placeholder-val="{{ false }}">
@@ -2090,41 +2054,6 @@ input,button,textarea,select{font-family:inherit;}
         </sc-if>
 
         <sc-if value="{{ pvSetOrKids }}" hint-placeholder-val="{{ false }}">
-          <sc-if value="{{ pvKids }}" hint-placeholder-val="{{ true }}">
-          <div style="font-size:13px;font-weight:800;color:var(--sub,#8A8177);padding:2px 2px 0;">⚙️ 자녀 일정 설정</div>
-          <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div style="flex:1;"><div style="font-size:14px;font-weight:800;">학원·방과후 시간표 사용</div><div style="font-size:12px;color:var(--sub,#8A8177);">끄면 홈과 아이 화면에서 숨겨져요</div></div>
-              <button onClick="{{ toggleTT }}" style="width:52px;height:30px;border-radius:99px;border:none;background:{{ ttSwBg }};position:relative;cursor:pointer;padding:0;">
-                <span style="position:absolute;top:3px;left:{{ ttKnob }}px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></span>
-              </button>
-            </div>
-            <sc-if value="{{ useTT }}" hint-placeholder-val="{{ false }}">
-              <div style="border-top:1px solid var(--line,#EFE4CF);margin:14px 0 10px;"></div>
-              <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
-                <sc-for list="{{ ttListV }}" as="tl" hint-placeholder-count="4">
-                  <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;">
-                    <span>{{ tl.emoji }} {{ tl.kid }}</span><span style="color:var(--ac,#F59E0B);">{{ tl.day }}</span><span style="color:var(--sub,#8A8177);">{{ tl.time }}</span><span style="flex:1;">{{ tl.name }}</span>
-                    <button onClick="{{ tl.del }}" style="background:none;border:none;color:var(--sub,#8A8177);cursor:pointer;">✕</button>
-                  </div>
-                </sc-for>
-              </div>
-              <div style="display:flex;gap:6px;margin-bottom:8px;">
-                <sc-for list="{{ ttKidPickV }}" as="tk" hint-placeholder-count="2">
-                  <button onClick="{{ tk.pick }}" style="flex:1;background:{{ tk.bg }};color:{{ tk.fg }};border:1px solid {{ tk.bd }};border-radius:12px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;">{{ tk.name }}</button>
-                </sc-for>
-                <select value="{{ f.ttDay }}" onChange="{{ on.ttDay }}" style="width:64px;box-sizing:border-box;padding:8px 6px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                  <sc-for list="{{ dayOptsV }}" as="dop" hint-placeholder-count="7"><option value="{{ dop.v }}">{{ dop.d }}</option></sc-for>
-                </select>
-              </div>
-              <div style="display:flex;gap:6px;">
-                <input value="{{ f.ttTime }}" onChange="{{ on.ttTime }}" type="time" style="width:100px;box-sizing:border-box;padding:8px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                <input value="{{ f.ttName }}" onChange="{{ on.ttName }}" placeholder="학원·활동 이름" style="flex:1;box-sizing:border-box;padding:8px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-                <button onClick="{{ addTT }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:8px 14px;font-weight:800;cursor:pointer;">추가</button>
-              </div>
-            </sc-if>
-          </div>
-          </sc-if>
           <sc-if value="{{ pvSet }}" hint-placeholder-val="{{ false }}">
           <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:14px 16px;font-size:12px;color:var(--sub,#8A8177);line-height:1.5;">🔑 부모방은 바로 열려요. 잠그고 싶으면 ⚙️ 내 정보에서 <b>내 프로필 비밀번호</b>를 설정하세요 — 프로필로 들어올 때 비밀번호를 물어봐요.</div>
           <button onClick="{{ resetData }}" style="background:none;border:1.5px solid #E5484D;color:#E5484D;border-radius:14px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;">데이터 전체 초기화</button>
@@ -4592,7 +4521,6 @@ class Component extends DCLogic {
         const stHist=D.stlog.filter(x=>x.k===kp.id).map(x=>({d:x.d,txt:x.e+' '+(x.msg||x.from||'받음'),amt:'+1',c:'#3FA45B'}))
           .concat(kExch.map(x=>({d:x.d,txt:'🎁 '+x.name,amt:'-'+x.cost,c:'#E0654F'})))
           .sort((a,b)=>b.d.localeCompare(a.d));
-        const histOpen=S.stHistOpen===kp.id;
         return{name:kp.name,emoji:kp.emoji,done,total:tds.length,pct:tds.length?Math.round(done/tds.length*100):0,weekMin:wk,
           lastScore:lastSc?lastSc.s+' '+lastSc.v+'점':'—',stickers:stkN,hasJ:!!lastJ,lastJ:lastJ?'['+lastJ.s+'] '+lastJ.txt:'',
           ptVal:f[fk]||'',ptOn:e=>this.setF(fk,e.target.value),
@@ -4609,8 +4537,8 @@ class Component extends DCLogic {
           ddBg:f['saMode_'+kp.id]==='deduct'?sk.soft:sk.card,ddFg:f['saMode_'+kp.id]==='deduct'?sk.tx:sk.sub,ddBd:f['saMode_'+kp.id]==='deduct'?sk.ac:sk.line,
           saBonus:()=>this.setF('saMode_'+kp.id,'bonus'),saDeduct:()=>this.setF('saMode_'+kp.id,'deduct'),
           hasAppr:kAppr.length>0,apprV:kAppr.map(x=>({title:x.title,rew:(x.rs||'🌟')+(Number(x.rn||1)>1?' ×'+x.rn:''),date:this.dShort(x.d),ok:()=>this.apprOk(x.id),no:()=>this.apprNo(x.id)})),
-          hasStHist:stHist.length>0,stHistV:stHist.slice(0,histOpen?40:5).map(x=>({date:this.dShort(x.d),txt:x.txt,amt:x.amt,c:x.c})),
-          histMore:stHist.length>5,histArrow:histOpen?'접기 ▴':'더보기 ▾',histToggle:()=>this.setState({stHistOpen:histOpen?'':kp.id}),
+          hasStHist:stHist.length>0,stHistV:stHist.slice(0,2).map(x=>({date:this.dShort(x.d),txt:x.txt,amt:x.amt,c:x.c})),
+          histMore:stHist.length>2,histArrow:'더보기 ▸',histToggle:()=>this.setState({modal:{t:'psthist',kid:kp.id},pmTrashOpen:false,pmPurgeAsk:''}),
           hasTds:tds.length>0,
           tdListV:tds.map(td=>{const dn=!!ck[td.id];const pend=(D.appr||[]).some(x=>x.tag==='td_'+td.id+'_'+t);
             const rs=td.rs||'🌟',rn=Math.max(1,Number(td.rn||1));const ed=S.ptdEdit===td.id;
@@ -5012,8 +4940,6 @@ class Component extends DCLogic {
       V.useTT=D.settings.useTT;
       V.ttSwBg=D.settings.useTT?sk.ac:sk.line;V.ttKnob=D.settings.useTT?25:3;
       V.toggleTT=()=>this.mut(d=>{d.settings.useTT=!d.settings.useTT;});
-      V.ttListV=D.tt.slice().sort((a,b)=>a.k.localeCompare(b.k)||a.day-b.day).map(x=>{const kp=byName(x.k);return{emoji:kp.emoji,kid:kp.name,day:this.DAYS[x.day],time:x.time,name:x.name,del:()=>this.mut(d=>{d.tt=d.tt.filter(y=>y.id!==x.id);})};});
-      V.ttKidPickV=kids.map(kp=>({name:kp.emoji+' '+kp.name,...softChip(S.ttKid===kp.id),pick:()=>this.setState({ttKid:kp.id})}));
       V.dayOptsV=this.DAYS.map((d,i)=>({v:String(i),d}));
       V.addTT=()=>{if(!(f.ttName||'').trim()||!f.ttTime)return;this.mut(d=>{d.tt.push({id:this.uid(),k:S.ttKid,day:Number(f.ttDay||1),time:f.ttTime,name:f.ttName.trim()});});this.clearF(['ttName','ttTime']);};
       V.changePw=()=>{if(!(f.newPw||'').trim())return;this.mut(d=>{d.settings.parentPw=f.newPw.trim();});this.setState({setMsg:'비밀번호가 변경되었어요 ✅'});this.clearF(['newPw']);setTimeout(()=>this.setState({setMsg:''}),2500);};
