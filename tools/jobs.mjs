@@ -91,6 +91,18 @@ const norm = s => String(s || '')
   .replace(/\(\s*\d{1,3}\s*\/\s*\d{1,3}\s*\)/g, '')
   .replace(/\s+/g, '').toLowerCase();
 
+// 할부는 「무엇을 샀는지」를 꼭 남긴다 (사장님 지시 2026-08-15).
+// 명세서에는 가게 이름만 찍히므로, 산 물건은 doc.installBuys 에 한 번만 적어 두고
+// 아래 열쇠로 이어 매달 내역에 저절로 따라붙게 한다. 열쇠에 총 회차를 남겨
+// 같은 가게에서 두 번 할부해도 서로 다른 물건으로 갈라지게 한다.
+// ⚠ 이 규칙은 money/index.html 의 buyKey 와 똑같아야 한다 — 한쪽만 고치면 물건 이름이 사라진다.
+const isInstall = s => /할부/.test(String(s || ''));
+const buyKey = s => {
+  const v = String(s || ''); if (!isInstall(v)) return '';
+  const m = v.match(/\(\s*\d{1,3}\s*\/\s*(\d{1,3})\s*\)/);
+  return norm(v) + (m ? '#' + m[1] : '');
+};
+
 // 되풀이 후보 — 같은 상호가 서로 다른 달에 2번 이상 나간 것 중, 아직 고정비로 등록 안 된 것
 function repeatCandidates(D) {
   const known = new Set((D.fixed || []).map(f => norm(f.name)));
@@ -210,6 +222,22 @@ function printLedgerContext(D) {
   if (!fx.length) console.log('     (아직 없습니다)');
   fx.forEach(f => console.log(`     🔁 ${f.name} · ${FQ[f.freq] || '매월'}${f.day ? ' ' + f.day + '일' : ''} · 보통 ${W(f.a)}원${f.vary ? '(변동)' : ''} · ${f.c} · ${f.pay}`));
 
+  // 할부는 산 물건이 명세서 어디에도 없다 — 한 번 적어 두면 매달 내역에 함께 붙는다.
+  const buys = D.installBuys || {}, byBuy = {}, buyOrder = [];
+  for (const x of [...(D.tx || [])].sort((a, b) => String(a.d).localeCompare(String(b.d)))) {
+    const k = buyKey(x.memo); if (!k) continue;
+    if (!byBuy[k]) { byBuy[k] = { name: x.memo, months: [] }; buyOrder.push(k); }
+    byBuy[k].name = x.memo; byBuy[k].months.push(String(x.d).slice(0, 7));
+  }
+  console.log('\n     ── 할부 (tx 에 buy:"산 물건" 을 붙여라 · 한 번 붙이면 매달 저절로 따라붙는다) ──');
+  if (!buyOrder.length) console.log('     (할부 거래가 없습니다)');
+  buyOrder.forEach(k => {
+    const v = byBuy[k], ms = [...new Set(v.months)].sort().join(',');
+    console.log(buys[k]
+      ? `     📦 ${v.name} — ${buys[k]} · ${ms}`
+      : `     ⚠ ${v.name} — 산 물건이 안 적혀 있음 (가족에게 물어보고 buy 로 넣어라) · ${ms}`);
+  });
+
   const rc = repeatCandidates(D).slice(0, 12);
   console.log('\n     ── 되풀이 후보 (아직 고정비 아님 · 이번 캡처에도 또 나오면 fixed 로 등록해라) ──');
   if (!rc.length) console.log('     (되풀이로 보이는 지출이 아직 없습니다)');
@@ -226,8 +254,9 @@ async function cmdApply(db, id, file) {
 
   let note = '';
   if (job.kind === 'receipt') {
-    // 결과 형식: { tx:[{d,a,ty,c,memo,pay,acc,fx}], fixed:[{...}], accounts:[{name,kind,org,day,purp}] }
+    // 결과 형식: { tx:[{d,a,ty,c,memo,pay,acc,fx,buy}], fixed:[{...}], accounts:[{name,kind,org,day,purp}] }
     //   acc = 어느 통장·카드인지 (list 가 알려준 이름) · fx = 이 거래가 갚은 고정비 이름
+    //   buy = 할부로 산 물건 (할부 거래에만. 한 번 넣으면 다음 달부터는 안 넣어도 앱이 이어 붙인다)
     const list = result.tx || [];
     const newFixed = result.fixed || [];
     const newAccs = result.accounts || [];
@@ -276,7 +305,7 @@ async function cmdApply(db, id, file) {
           || doc.accounts.find(a => norm(a.name).includes(k) || k.includes(norm(a.name)))
           || null;
       };
-      let paidN = 0, accN = 0;
+      let paidN = 0, accN = 0, buyN = 0;
       for (const x of list) {
         const id = uid(), d = x.d || today();
         const acc = findAcc(x.acc);
@@ -290,6 +319,10 @@ async function cmdApply(db, id, file) {
         if (acc) { rec.acc = acc.name; accN++; }
         doc.tx.push(rec);
 
+        // ②-1 할부로 산 물건 — 앱이 매달 이 이름을 내역에 이어 붙인다
+        const bk = buyKey(rec.memo), buy = String(x.buy || '').trim();
+        if (bk && buy) { doc.installBuys = doc.installBuys || {}; doc.installBuys[bk] = buy; buyN++; }
+
         // ③ 고정비를 갚은 거래면 그 달 납부로 표시 (앱 🔁 고정비 화면이 「납부 완료」로 바뀐다)
         if (x.fx && rec.ty === 'out') {
           const f = doc.fixed.find(z => norm(z.name) === norm(x.fx));
@@ -300,11 +333,15 @@ async function cmdApply(db, id, file) {
           }
         }
       }
+      // 할부인데 산 물건을 아직 모르는 건은 숨기지 말고 티를 낸다 (가족에게 물어 앱에서 채우면 된다)
+      const noBuy = list.filter(x => isInstall(x.memo) && !(doc.installBuys || {})[buyKey(x.memo)]).length;
       return `가계부 ${list.length}건 넣음`
         + (addedAcc ? ` · 통장/카드 ${addedAcc}개 등록` : '')
         + (accN ? ` · ${accN}건 계정 구분` : '')
         + (addedFx ? ` · 고정비 ${addedFx}건 새로 등록` : '')
-        + (paidN ? ` · 고정비 납부 ${paidN}건 표시` : '');
+        + (paidN ? ` · 고정비 납부 ${paidN}건 표시` : '')
+        + (buyN ? ` · 할부 산 물건 ${buyN}건 기록` : '')
+        + (noBuy ? ` · ⚠ 할부 ${noBuy}건은 산 물건이 비어 있음(가족에게 물어보세요)` : '');
     });
   } else if (job.kind === 'report') {
     // 결과 형식: { title, stars, summary, blocks:[{t,v,h1,h2,h3,rows}] }
