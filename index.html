@@ -133,6 +133,21 @@ input,button,textarea,select{font-family:inherit;}
           <button onClick="{{ openEvent }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;">+ 일정</button>
         </div>
         <sc-if value="{{ dayEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--sub,#8A8177);padding:6px 0;">일정이 없어요. 여유로운 하루! ☁️</div></sc-if>
+        <sc-if value="{{ upShow }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px dashed var(--line,#EFE4CF);margin-top:6px;padding-top:10px;">
+            <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:6px;">🔜 다가오는 가족 일정</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <sc-for list="{{ upcomingV }}" as="uv" hint-placeholder-count="0">
+                <button onClick="{{ uv.go }}" title="누르면 그 날짜로 이동해요" style="display:flex;align-items:center;gap:9px;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:9px 11px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%;min-height:44px;">
+                  <span style="width:4px;height:22px;border-radius:4px;background:{{ uv.c }};flex-shrink:0;"></span>
+                  <span style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);min-width:56px;flex-shrink:0;font-variant-numeric:tabular-nums;">{{ uv.date }}</span>
+                  <span style="flex:1;font-size:13px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ uv.title }}</span>
+                  <span style="font-size:11px;font-weight:700;color:{{ uv.c }};flex-shrink:0;">{{ uv.who }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ dayEventsV }}" as="ev" hint-placeholder-count="2">
             <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:10px 12px;">
@@ -3094,6 +3109,12 @@ class Component extends DCLogic {
     V.hasEvMsg=!!S.evMsg;V.evMsg=S.evMsg;
     const dayEvs=(evByDate[S.selDate]||[]).slice().sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
     V.dayEmpty=!dayEvs.length;
+    // 선택한 날이 비면 다가오는 가족 일정을 대신 보여준다 — "일정이 없어요"만 보고 가족 일정이 아예 없는 줄 아는 일이 없게
+    const upcoming=dayEvs.length?[]:D.events.filter(ev=>ev.d>S.selDate).sort((a,b)=>a.d.localeCompare(b.d)||String(a.time||'99').localeCompare(b.time||'99')).slice(0,4);
+    V.upShow=upcoming.length>0;
+    V.upcomingV=upcoming.map(ev=>({date:this.dShort(ev.d)+' ('+this.DAYS[new Date(ev.d+'T00:00:00').getDay()]+')',title:ev.t,c:evCol(ev),
+      who:String(ev.m||'fam').split(',').map(mName).filter(Boolean).join('·'),
+      go:()=>this.setState({selDate:ev.d})}));
     const ddCalc=ds=>{const diff=Math.round((new Date(ds+'T00:00:00')-new Date(t+'T00:00:00'))/86400000);return diff===0?'D-DAY':(diff>0?'D-'+diff:'D+'+(-diff));};
     const clMine=ev=>!ev.by||ev.by===u.id;
     // 체크리스트: 담당자(m)가 지정된 항목은 그 사람들(가족 모두면 전원)에게 보이고, 지정이 없으면 예전처럼 만든 사람에게만
