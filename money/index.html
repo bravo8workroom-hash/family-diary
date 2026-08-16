@@ -726,7 +726,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
             <div class="num" style="font-size:11px;font-weight:800;color:{{ fr.diffC }};margin-top:7px;">{{ fr.diffLabel }}</div>
           </sc-if>
           <sc-if value="{{ fr.paid }}" hint-placeholder-val="{{ false }}">
-            <div style="font-size:11px;font-weight:700;color:#2E9E63;margin-top:7px;">✓ 가계부 지출로 반영됨 · {{ fr.txDateLabel }}</div>
+            <div style="font-size:11px;font-weight:700;color:#2E9E63;margin-top:7px;line-height:1.6;word-break:keep-all;">{{ fr.paidNote }}</div>
           </sc-if>
           <sc-if value="{{ fr.paying }}" hint-placeholder-val="{{ false }}">
             <div style="font-size:11px;font-weight:700;color:var(--sub);margin:10px 0 6px;">실제로 낸 금액을 확인해 주세요 · 저장하면 가계부 지출로 들어가요</div>
@@ -788,7 +788,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
             <sc-if value="{{ fr.canPay }}" hint-placeholder-val="{{ true }}">
               <button onClick="{{ fr.openPay }}" style="flex:1;background:var(--soft);color:var(--tx);border:none;border-radius:11px;padding:11px;font-size:12px;font-weight:800;cursor:pointer;">냈어요 · 금액 기록</button>
             </sc-if>
-            <sc-if value="{{ fr.paid }}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{ fr.canUndo }}" hint-placeholder-val="{{ false }}">
               <button onClick="{{ fr.undo }}" style="flex:1;background:var(--bg);color:var(--sub);border:none;border-radius:11px;padding:11px;font-size:12px;font-weight:800;cursor:pointer;">납부 취소 (지출도 삭제)</button>
             </sc-if>
             <sc-if value="{{ fr.skip }}" hint-placeholder-val="{{ false }}">
@@ -1496,8 +1496,31 @@ class Component extends DCLogic {
     const diff=((Number(ym.slice(5,7))-(Number(x.mo)||1))%12+12)%12;
     return q==='y'?diff===0:(q==='q'?diff%3===0:diff%6===0);}
   fxOff(x,ym){return !!(x.stop&&ym>=x.stop);}
-  fxLastPaid(id){const fp=(this.state.data||{}).fixedPaid||{};
-    return Object.keys(fp).filter(ym=>fp[ym]&&fp[ym][id]).sort().pop()||'';}
+  // 🔁 그 달에 냈나 — 「냈어요」를 누르면 fixedPaid 에 찍히지만, 통장·카드 자료로 들어온 지출에는 그 기록이 없다.
+  // 고정비를 나중에 등록하면 이미 들어와 있던 지난 지출에 소급되지 않아
+  // 「📋 내역엔 냈다고 나오는데 🔁 고정비엔 미납」으로 어긋난다 (2026-08-16 사장님 지적).
+  // 그래서 기록이 없으면 그 달 내역에서 이름이 똑같은 지출을 찾아 납부로 인정한다. 등록 순서와 무관해진다.
+  // ⚠ 이름이 「완전히 같을 때만」 인정한다 — 「쿠팡 와우 멤버십」과 「쿠팡」처럼 한쪽이 다른 쪽에 들어가는 것까지
+  //    인정하면 장 본 쿠팡 결제가 멤버십 납부로 둔갑한다. 느슨하게 풀지 마라.
+  fxNorm(s){return String(s||'').replace(/\(고정비\)/g,'')
+    .replace(/\(\s*\d{1,3}\s*\/\s*\d{1,3}\s*\)/g,'').replace(/\s+/g,'').toLowerCase();}
+  fxPaidOf(x,ym){const D=this.state.data||{};
+    const rec=((D.fixedPaid||{})[ym]||{})[x.id];
+    if(rec)return {a:Number(rec.a),txId:rec.txId,d:'',auto:false};
+    const k=this.fxNorm(x.name);if(!k||k==='-')return null;
+    const hit=(D.tx||[]).filter(z=>z.ty==='out'&&String(z.d).slice(0,7)===ym&&this.fxNorm(z.memo)===k)
+      .sort((a,b)=>String(a.d).localeCompare(String(b.d)))[0];
+    return hit?{a:Number(hit.a)||0,txId:hit.id,d:hit.d,auto:true}:null;}
+  fxLastPaid(id){const D=this.state.data||{},fp=D.fixedPaid||{};
+    let last=Object.keys(fp).filter(ym=>fp[ym]&&fp[ym][id]).sort().pop()||'';
+    // 내역에서 확인된 납부도 「마지막으로 낸 달」로 친다 — 안 그러면 멀쩡히 나가는 고정비를
+    // autoStopFixed 가 「안 나감」으로 보고 목록에서 빼 버린다.
+    const x=(D.fixed||[]).find(z=>z.id===id);
+    if(x){const k=this.fxNorm(x.name);
+      if(k&&k!=='-')for(const z of (D.tx||[])){
+        if(z.ty!=='out'||this.fxNorm(z.memo)!==k)continue;
+        const ym=String(z.d).slice(0,7);if(ym>last)last=ym;}}
+    return last;}
   autoStopFixed(){
     const D=this.state.data;if(!D||!(D.fixed||[]).length)return;
     const cur=this.today().slice(0,7),out=[],back=[];
@@ -1524,14 +1547,14 @@ class Component extends DCLogic {
   // 고정비: 그 달에 해당하는 항목과 낼 금액 (화면 계산과 같은 규칙)
   fixOf(ym){
     const D=this.state.data,y=Number(ym.slice(0,4)),m=Number(ym.slice(5,7));
-    const dim=new Date(y,m,0).getDate(),paid=(D.fixedPaid||{})[ym]||{};
+    const dim=new Date(y,m,0).getDate();
     const wk=x=>{let c=0;for(let i=1;i<=dim;i++)if(new Date(y,m-1,i).getDay()===(Number(x.wd)||0))c++;return c;};
     const due=x=>this.fxDueM(x,ym);
     const day=x=>{const q=x.freq||'m';
       if(q==='w'){for(let i=1;i<=dim;i++)if(new Date(y,m-1,i).getDay()===(Number(x.wd)||0))return i;return 1;}
       return Math.min(dim,Math.max(1,Number(x.day)||1));};
     const rows=(D.fixed||[]).filter(x=>!this.fxOff(x,ym)&&due(x)).map(x=>{
-      const p=paid[x.id],exp=(x.freq||'m')==='w'?(Number(x.a)||0)*wk(x):(Number(x.a)||0);
+      const p=this.fxPaidOf(x,ym),exp=(x.freq||'m')==='w'?(Number(x.a)||0)*wk(x):(Number(x.a)||0);
       return {name:x.name,day:day(x),exp,paid:!!p,amt:p?Number(p.a):exp};});
     return {rows,total:rows.reduce((s,r)=>s+r.amt,0),done:rows.filter(r=>r.paid).length,
       left:rows.filter(r=>!r.paid).reduce((s,r)=>s+r.amt,0)};
@@ -2335,11 +2358,12 @@ class Component extends DCLogic {
     // 「그만 나가는」 것으로 표시된 항목은 그 달부터 목록·합계·보고서에서 빠진다 (그 전 달에는 그대로 보인다)
     const fixed=(D.fixed||[]).filter(x=>!this.fxOff(x,bm));
     const fxStopped=(D.fixed||[]).filter(x=>this.fxOff(x,bm));
-    const fpAll=D.fixedPaid||{},paidM=fpAll[bm]||{},paidPv=fpAll[this.shiftM(bm,-1)]||{};
+    // 납부 여부는 fxPaidOf 하나로만 판정한다 — fixedPaid 기록이 없어도 내역에 같은 이름의 지출이 있으면 낸 것으로 본다
+    const pvM=this.shiftM(bm,-1),paidOf=x=>this.fxPaidOf(x,bm),paidPvOf=x=>this.fxPaidOf(x,pvM);
     const bmY=Number(bm.slice(0,4)),bmM=Number(bm.slice(5,7));
     const dimM=new Date(bmY,bmM,0).getDate();
     const fqOf=x=>x.freq||'m';
-    const expOf=x=>{const p=paidPv[x.id];return (x.vary&&p&&fqOf(x)!=='w')?Number(p.a):(Number(x.a)||0);};
+    const expOf=x=>{const p=paidPvOf(x);return (x.vary&&p&&fqOf(x)!=='w')?Number(p.a):(Number(x.a)||0);};
     const isCurM=bm===t.slice(0,7),todayD=Number(t.slice(8,10));
     const wkCount=x=>{const wd=Number(x.wd)||0;let c=0;for(let i=1;i<=dimM;i++)if(new Date(bmY,bmM-1,i).getDay()===wd)c++;return c;};
     const dueIn=x=>this.fxDueM(x,bm);
@@ -2357,7 +2381,7 @@ class Component extends DCLogic {
     const sorted=fixed.slice().sort((a,b)=>(dueIn(b)?1:0)-(dueIn(a)?1:0)||dueDay(a)-dueDay(b));
     let fxT=0,fxP=0,fxLf=0,fxDone=0,fxDueN=0;const byPay={bank:0,card:0,cash:0};
     sorted.forEach(x=>{if(!dueIn(x))return;fxDueN++;
-      const p=paidM[x.id],amt=p?Number(p.a):monthAmt(x);
+      const p=paidOf(x),amt=p?Number(p.a):monthAmt(x);
       fxT+=amt;byPay[x.pay]=(byPay[x.pay]||0)+amt;
       if(p){fxP+=Number(p.a);fxDone++;}else fxLf+=amt;});
     V.fxTotal=W(fxT)+'원';V.fxPaidSum=W(fxP)+'원';V.fxLeft=W(fxLf)+'원';
@@ -2404,8 +2428,8 @@ class Component extends DCLogic {
         saveLabel:id==='new'?'추가하기':'수정 저장',
         save:()=>saveFx(id),cancel:()=>this.setState({fxEdit:null,fxD:null})};};
     V.fxRowsV=sorted.filter(x=>ffv==='all'||x.pay===ffv).map(x=>{
-      const p=paidM[x.id],due=dueIn(x),exp=monthAmt(x),amt=p?Number(p.a):exp;
-      const pv=paidPv[x.id]?Number(paidPv[x.id].a):null;
+      const p=paidOf(x),due=dueIn(x),exp=monthAmt(x),amt=p?Number(p.a):exp;
+      const pvp=paidPvOf(x),pv=pvp?Number(pvp.a):null;
       const diff=(p&&pv!=null)?Number(p.a)-pv:0;
       const dday=dueDay(x);
       const late=due&&!p&&isCurM&&dday<todayD;
@@ -2420,7 +2444,11 @@ class Component extends DCLogic {
         stateLabel:!due?'해당 없음':(p?'납부 완료':(late?'납부일 지남':'예정')),
         stateC:!due?sk.sub:(p?IN_C:(late?OUT_C:sk.sub)),
         bd:editing?sk.ac:(late?'#E9B7B8':sk.line),
-        txDateLabel:bmM+'월 '+dday+'일 지출로 기록',
+        // 내역에서 찾아낸 납부는 「언제 나갔는지」를 그 거래 날짜로 보여준다 (고정비 예정일이 아니라 실제 날짜)
+        paidNote:!p?'':(p.auto
+          ?('✓ 📋 내역에 있는 지출로 확인했어요 · '+Number(String(p.d).slice(5,7))+'월 '+Number(String(p.d).slice(8,10))+'일')
+          :('✓ 가계부 지출로 반영됨 · '+bmM+'월 '+dday+'일 지출로 기록')),
+        canUndo:!!p&&!p.auto,
         hasDiff:!!p&&pv!=null&&diff!==0,
         diffLabel:(diff>0?'▲ ':'▼ ')+W(Math.abs(diff))+'원 (지난달 '+W(pv)+'원)',
         diffC:diff>0?OUT_C:IN_C,
@@ -2434,7 +2462,10 @@ class Component extends DCLogic {
             d.fixedPaid[bm][x.id]={a:va,txId};
             d.tx.push({id:txId,d:bm+'-'+String(dday).padStart(2,'0'),ty:'out',a:va,c:x.c,memo:x.name+' (고정비)',pay:x.pay});});
           this.setState({fxPayId:null,fxAmtDraft:null});},
-        undo:()=>{const tid=p&&p.txId;this.mut(d=>{if(d.fixedPaid&&d.fixedPaid[bm])delete d.fixedPaid[bm][x.id];
+        // ⚠ 내역에서 찾아낸 납부(auto)는 되돌릴 수 없다 — 그 거래는 가족이 실제로 쓴 지출이라 지우면 안 된다.
+        //    (버튼도 canUndo 로 감춰 두었다. 고치려면 📋 내역에서 그 줄을 고쳐야 한다.)
+        undo:()=>{if(p&&p.auto)return;const tid=p&&p.txId;
+          this.mut(d=>{if(d.fixedPaid&&d.fixedPaid[bm])delete d.fixedPaid[bm][x.id];
           if(tid)d.tx=d.tx.filter(y=>y.id!==tid);});},
         editing,editBg:editing?sk.soft:'transparent',
         toggleEdit:()=>{if(editing)this.setState({fxEdit:null,fxD:null});

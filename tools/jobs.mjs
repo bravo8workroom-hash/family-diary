@@ -186,6 +186,42 @@ const fitSub = (c, s) => (s && subsOf(c).includes(s)) ? s : '';
 // 소분류도 구매처 규칙을 탄다 (앱에서 가족이 고른 것 = doc.subRules)
 const subOf = (s, R) => catOf(s, R);
 
+// 🔁 「진짜 고정비인가」 판정 — 사장님 지시 2026-08-16
+//   "기본적으로 고정비로 판단되는 것만 고정비로 선택하고, 그외 매월 고정적으로 나가지만 …
+//    할부, 통행료같은거 이런것 포함하지말고, 고정비로 넣으면 좋을것같은건 나한테 조언해두고
+//    답변을 주면 넣는 방식으로 하자"
+//
+// 「매달 나간다」와 「고정비다」는 다르다. 고정비 = 계약이 걸려 있어 안 쓰려면 해지해야 하는 돈이다.
+// 통행료·주유는 매달 나가도 쓴 만큼 달라지고, 할부는 회차가 끝나면 사라진다 — 둘 다 고정비가 아니다.
+//
+//   yes = 그냥 등록해도 되는 것 (통신·공과금·대출·보험·구독·학원·렌탈)
+//   no  = 매달 나가도 등록 금지 (할부·통행료·주유·쇼핑몰·마트·식비·병원)
+//   ask = 그 사이 — 사장님께 여쭙고 답을 받아야 등록한다 (결과 JSON 에 ok:1 을 붙여야 들어간다)
+const FX_NO = [
+  /할부/, /통행료|하이패스|주차/, /주유|충전소/,   // ⚠ 「○○에너지」는 도시가스 회사일 수 있어 여기 안 넣는다 — 여쭙는 쪽으로 보낸다
+  /쿠팡/, /11번가|네이버페이|지마켓|g마켓|옥션|위메프|티몬|알리|테무/i,
+  /이마트|홈플러스|롯데마트|트레이더스|코스트코|gs25|cu편의점|세븐일레븐|편의점|다이소/i,
+  /병원|의원|약국|한의원/
+];
+const FX_YES = [
+  /통신|\bkt\b|lg ?u\+|sk텔레콤|\bskt\b|알뜰폰/i,
+  /도시가스|전기요금|한국전력|수도요금|상하수도|관리비/,
+  /대출|원리금|이자/, /보험료|생명보험|손해보험/,
+  /와우|멤버십|구독|넷플릭스|유튜브|웨이브|티빙|디즈니|스포티파이/i,
+  /학원비|학습지|교습|과외|등록금/, /렌탈|정수기|쿠쿠/
+];
+// 순서가 뜻이다: ①할부는 무엇이든 이긴다 ②확실한 고정비 ③확실히 아닌 것 ④나머지는 여쭙는다.
+// ⚠ 「쿠팡 와우 멤버십」처럼 no 와 yes 에 함께 걸리는 이름이 있으므로 yes 를 먼저 본다.
+function fixedKind(name, c) {
+  const s = String(name || '');
+  if (isInstall(s)) return { k: 'no', why: '할부 — 회차가 끝나면 사라지는 지출이라 고정비가 아니다' };
+  if (FX_YES.some(r => r.test(s))) return { k: 'yes', why: '' };
+  const hit = FX_NO.find(r => r.test(s));
+  if (hit) return { k: 'no', why: '쓴 만큼 달라지거나 그때그때 사는 것이라 고정비가 아니다' };
+  if (['식비', '의료'].includes(c)) return { k: 'no', why: `${c} — 매달 나가도 계약이 걸린 돈이 아니다` };
+  return { k: 'ask', why: '고정비인지 아닌지 이름만으로는 못 가른다 — 사장님께 여쭤라' };
+}
+
 // 되풀이 후보 — 같은 상호가 서로 다른 달에 2번 이상 나간 것 중, 아직 고정비로 등록 안 된 것
 function repeatCandidates(D) {
   const known = new Set((D.fixed || []).map(f => norm(f.name)));
@@ -378,10 +414,18 @@ function printLedgerContext(D) {
       : `     ⚠ ${v.name} — 산 물건이 안 적혀 있음 (가족에게 물어보고 buy 로 넣어라) · ${ms}`);
   });
 
-  const rc = repeatCandidates(D).slice(0, 12);
-  console.log('\n     ── 되풀이 후보 (아직 고정비 아님 · 이번 캡처에도 또 나오면 fixed 로 등록해라) ──');
-  if (!rc.length) console.log('     (되풀이로 보이는 지출이 아직 없습니다)');
-  rc.forEach(r => console.log(`     · ${r.name} — ${r.months.length}개월(${r.months.join(',')}) · 보통 ${W(r.avg)}원${r.min !== r.max ? `(${W(r.min)}~${W(r.max)})` : ''} · 보통 ${r.day}일 · ${r.c} · ${r.pay}`));
+  // 되풀이 후보를 세 갈래로 갈라 보여준다 (사장님 지시 2026-08-16) — 「매달 나간다」와 「고정비다」는 다르다.
+  const rc = repeatCandidates(D).map(r => ({ ...r, j: fixedKind(r.name, r.c) }));
+  const ln = r => `     · ${r.name} — ${r.months.length}개월(${r.months.join(',')}) · 보통 ${W(r.avg)}원${r.min !== r.max ? `(${W(r.min)}~${W(r.max)})` : ''} · 보통 ${r.day}일 · ${r.c} · ${r.pay}`;
+  const yes = rc.filter(r => r.j.k === 'yes').slice(0, 8);
+  const ask = rc.filter(r => r.j.k === 'ask').slice(0, 8);
+  const no = rc.filter(r => r.j.k === 'no').slice(0, 8);
+  console.log('\n     ── 🔁 고정비로 올려도 되는 것 (또 나오면 fixed 로 등록해라) ──');
+  console.log(yes.length ? yes.map(ln).join('\n') : '     (없음)');
+  console.log('\n     ── ❓ 사장님께 여쭐 것 (마음대로 등록하지 마라 · 답을 받으면 그 항목에 "ok":1 을 붙여 등록) ──');
+  console.log(ask.length ? ask.map(ln).join('\n') : '     (없음)');
+  console.log('\n     ── ⛔ 되풀이돼도 고정비가 아닌 것 (등록 금지 · 할부·통행료·주유·쇼핑몰·마트·식비·병원) ──');
+  console.log(no.length ? no.map(r => `     · ${r.name} — ${r.j.why}`).join('\n') : '     (없음)');
   console.log('');
 }
 
@@ -395,7 +439,8 @@ async function putLedger(db, result) {
   const newAccs = result.accounts || [];
   const newAsks = result.asks || [];
   if (!list.length && !newFixed.length && !newAccs.length && !newAsks.length) die('결과에 tx 항목이 없습니다.');
-  return editDoc(db, doc => {
+  const held = [];   // 고정비로 올리려다 「사장님 답이 필요하다」고 막힌 것 (아래에서 화면에 찍는다)
+  const out = await editDoc(db, doc => {
       doc.tx = doc.tx || []; doc.fixed = doc.fixed || [];
       doc.fixedPaid = doc.fixedPaid || {}; doc.accounts = doc.accounts || [];
 
@@ -430,11 +475,16 @@ async function putLedger(db, result) {
       // ① 새로 찾은 되풀이 지출을 고정비로 등록 (이름이 같은 게 이미 있으면 건너뛴다)
       //    안 나가서 빠졌던 것(stop)이 다시 나오면 새로 만들지 않고 그 항목을 되살린다 — 안 그러면 같은 게 두 줄이 된다.
       let addedFx = 0, backFx = 0;
+      held.length = 0;   // editDoc 은 rev 가 어긋나면 다시 부른다 — 그때 목록이 겹쳐 쌓이지 않게 비운다
       for (const f of newFixed) {
         const nm = String(f.name || '').trim();
         if (!nm) continue;
         const same = doc.fixed.find(z => norm(z.name) === norm(nm));
         if (same) { if (same.stop) { delete same.stop; delete same.keepM; backFx++; } continue; }
+        // 「매달 나간다」고 다 고정비가 아니다 (사장님 지시 2026-08-16).
+        // 확실한 것만 그냥 올리고, 나머지는 사장님 답을 받아야 올린다 — 답을 받았으면 f.ok 를 붙여 보내라.
+        const j = fixedKind(nm, f.c);
+        if (j.k !== 'yes' && !f.ok) { held.push({ name: nm, a: Math.abs(Number(f.a) || 0), ...j }); continue; }
         const q = ['w', 'm', 'q', 'h', 'y'].includes(f.freq) ? f.freq : 'm';
         doc.fixed.push({
           id: uid(), name: nm, a: Math.abs(Number(f.a) || 0), freq: q,
@@ -525,6 +575,21 @@ async function putLedger(db, result) {
         + (ruleN ? ` · 🏷️ 구매처 규칙대로 항목 ${ruleN}건 고침` : '')
         + (noBuy ? ` · ⚠ 할부 ${noBuy}건은 산 물건이 비어 있음(가족에게 물어보세요)` : '');
   });
+
+  // 막힌 고정비를 조용히 버리면 아무도 모른다 — 왜 안 올렸는지 여기서 보여주고, 여쭐 것만 사장님께 가져간다.
+  if (held.length) {
+    const ask = held.filter(h => h.k === 'ask'), no = held.filter(h => h.k === 'no');
+    if (no.length) {
+      console.log('\n     ⛔ 고정비로 안 올린 것 (매달 나가도 고정비가 아니다)');
+      no.forEach(h => console.log(`        · ${h.name} ${W(h.a)}원 — ${h.why}`));
+    }
+    if (ask.length) {
+      console.log('\n     ❓ 사장님께 여쭐 것 (답을 받으면 결과 JSON 의 그 항목에 "ok":1 을 붙여 다시 넣어라)');
+      ask.forEach(h => console.log(`        · ${h.name} ${W(h.a)}원 — ${h.why}`));
+    }
+    console.log('');
+  }
+  return out;
 }
 
 async function cmdApply(db, id, file) {
