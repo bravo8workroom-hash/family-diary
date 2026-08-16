@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>우리집 가계부</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>💰</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config.js"></script>
 <script src="../store.js"></script>
@@ -90,11 +91,12 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
 .rb-cmp{font-size:12.5px;font-weight:700;color:var(--sub)}
 .rb-judge{font-size:13.5px;font-weight:700;background:var(--soft);border-radius:10px;padding:10px 13px}
 .rb-t{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.rb-tr{display:grid;grid-template-columns:minmax(0,1fr) 92px 76px;gap:8px;padding:8px 11px;font-size:12.5px;
+.rb-tr{display:grid;grid-template-columns:minmax(0,1fr) 92px 86px;gap:8px;padding:8px 11px;font-size:12.5px;
   border-top:1px solid var(--line);align-items:baseline}
 .rb-tr:first-child{border-top:none}
 .rb-th{background:var(--bg);font-weight:800;color:var(--sub);font-size:11px;letter-spacing:.02em}
 .rb-tr .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:800}
+.rb-tr:not(.rb-th) .n{white-space:nowrap}
 .rb-do{background:var(--bg);border:1px dashed var(--ac);border-radius:12px;padding:12px 14px}
 .rb-do-h{font-size:12px;font-weight:800;color:var(--ac);margin-bottom:6px}
 .rb-do-i{font-size:13px;font-weight:700;padding:3px 0}
@@ -408,7 +410,12 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
             </button>
           </sc-for>
         </div>
-        <div style="font-size:11px;color:var(--sub);text-align:center;margin-top:10px;">월을 누르면 화면 전체가 그 달로 바뀌어요</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;">
+          <button onClick="{{ budPrev }}" title="더 옛날 달" style="width:44px;height:44px;background:var(--bg);border:1px solid var(--line);border-radius:10px;font-size:16px;cursor:pointer;color:inherit;">‹</button>
+          <button onClick="{{ budToday }}" style="min-height:44px;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:0 16px;font-size:12px;font-weight:800;cursor:pointer;color:inherit;">이번 달로</button>
+          <button onClick="{{ budNext }}" title="더 최근 달" style="width:44px;height:44px;background:var(--bg);border:1px solid var(--line);border-radius:10px;font-size:16px;cursor:pointer;color:inherit;">›</button>
+        </div>
+        <div style="font-size:11px;color:var(--sub);text-align:center;margin-top:8px;">월을 누르면 화면 전체가 그 달로 바뀌어요 · ‹ ›로 옛날·최근 달을 오가요</div>
       </div>
 
       <div style="background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;">
