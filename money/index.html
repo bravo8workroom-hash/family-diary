@@ -728,6 +728,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:
           <sc-if value="{{ fr.paid }}" hint-placeholder-val="{{ false }}">
             <div style="font-size:11px;font-weight:700;color:#2E9E63;margin-top:7px;line-height:1.6;word-break:keep-all;">{{ fr.paidNote }}</div>
           </sc-if>
+          <sc-if value="{{ fr.waiting }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:11px;font-weight:700;color:var(--sub);margin-top:7px;line-height:1.6;word-break:keep-all;">{{ fr.waitNote }}</div>
+          </sc-if>
           <sc-if value="{{ fr.paying }}" hint-placeholder-val="{{ false }}">
             <div style="font-size:11px;font-weight:700;color:var(--sub);margin:10px 0 6px;">실제로 낸 금액을 확인해 주세요 · 저장하면 가계부 지출로 들어가요</div>
             <div style="display:flex;gap:6px;">
@@ -1492,7 +1495,9 @@ class Component extends DCLogic {
   // 지우는 게 아니라 stop('이 달부터 안 나감')만 단다 — 지난달까지 기록·보고서는 그대로 남는다.
   // 되살아나는 길 둘: ① 그 달 납부가 뒤늦게 찍히면 저절로 ② 손으로 「다시 넣기」(keepM 에 그 달을 적어
   // 시계를 되돌린다 — 이게 없으면 되살리는 즉시 또 빠진다).
-  fxDueM(x,ym){const q=x.freq||'m';if(q==='m'||q==='w')return true;
+  // 아직 시작 안 한 고정비는 그 달에 해당하지 않는다 (차량대출처럼 다음 달 첫 회차인 것)
+  fxDueM(x,ym){if(x.from&&ym<x.from)return false;
+    const q=x.freq||'m';if(q==='m'||q==='w')return true;
     const diff=((Number(ym.slice(5,7))-(Number(x.mo)||1))%12+12)%12;
     return q==='y'?diff===0:(q==='q'?diff%3===0:diff%6===0);}
   fxOff(x,ym){return !!(x.stop&&ym>=x.stop);}
@@ -1511,6 +1516,20 @@ class Component extends DCLogic {
     const hit=(D.tx||[]).filter(z=>z.ty==='out'&&String(z.d).slice(0,7)===ym&&this.fxNorm(z.memo)===k)
       .sort((a,b)=>String(a.d).localeCompare(String(b.d)))[0];
     return hit?{a:Number(hit.a)||0,txId:hit.id,d:hit.d,auto:true}:null;}
+  // 📭 「안 냈다」와 「아직 모른다」는 다르다 (사장님 지적 2026-08-16).
+  // 카드 명세서는 한 달쯤 늦게 온다. 그 카드의 8월 자료가 아직 안 들어왔는데 화면이 빨갛게 「납부일 지남」이라고 하면,
+  // 대조해 보고 안 냈다고 말하는 꼴이 된다 — 대조할 자료가 없었는데도.
+  // 그래서 그 고정비가 나가던 계정(카드·통장)의 자료가 어디까지 들어와 있는지를 보고 가른다.
+  fxAccOf(x){const k=this.fxNorm(x.name);if(!k||k==='-')return '';
+    const hits=(this.state.data.tx||[]).filter(z=>z.ty==='out'&&z.acc&&this.fxNorm(z.memo)===k)
+      .sort((a,b)=>String(a.d).localeCompare(String(b.d)));
+    return hits.length?hits[hits.length-1].acc:'';}
+  fxDataUntil(x){const D=this.state.data||{},a=this.fxAccOf(x);
+    // 그 고정비가 나가던 계정이 있으면 그 계정 자료의 끝, 없으면 같은 결제수단 자료의 끝을 본다
+    const pool=a?(D.tx||[]).filter(z=>z.acc===a):(D.tx||[]).filter(z=>z.ty==='out'&&(z.pay||'card')===x.pay);
+    let last='';for(const z of pool)if(String(z.d)>last)last=String(z.d);return last;}
+  fxWaiting(x,ym,dday){const u=this.fxDataUntil(x);
+    return !u||u<ym+'-'+String(dday).padStart(2,'0');}
   fxLastPaid(id){const D=this.state.data||{},fp=D.fixedPaid||{};
     let last=Object.keys(fp).filter(ym=>fp[ym]&&fp[ym][id]).sort().pop()||'';
     // 내역에서 확인된 납부도 「마지막으로 낸 달」로 친다 — 안 그러면 멀쩡히 나가는 고정비를
@@ -2432,7 +2451,10 @@ class Component extends DCLogic {
       const pvp=paidPvOf(x),pv=pvp?Number(pvp.a):null;
       const diff=(p&&pv!=null)?Number(p.a)-pv:0;
       const dday=dueDay(x);
-      const late=due&&!p&&isCurM&&dday<todayD;
+      // 자료가 아직 안 들어온 것은 「안 냈다」가 아니라 「모른다」 — 빨간 경고를 달지 않는다
+      const waiting=due&&!p&&this.fxWaiting(x,bm,dday);
+      const late=due&&!p&&!waiting&&isCurM&&dday<todayD;
+      const dUntil=waiting?this.fxDataUntil(x):'';
       const editing=S.fxEdit===x.id,q=fqOf(x);
       const row={icon:PAYI[x.pay]||'🏦',name:x.name,cat:x.c,vary:!!x.vary,
         freqTag:FTAG[q],freqBg:FCLR[q],
@@ -2441,8 +2463,11 @@ class Component extends DCLogic {
         amtLabel:due?W(amt)+'원':'-',amtC:p?sk.tx:sk.sub,op:due?1:0.62,
         paid:!!p,canPay:due&&!p&&!editing&&S.fxPayId!==x.id,
         skip:!due,skipLabel:'이번 달은 해당 없어요',
-        stateLabel:!due?'해당 없음':(p?'납부 완료':(late?'납부일 지남':'예정')),
+        stateLabel:!due?'해당 없음':(p?'납부 완료':(waiting?'자료 기다리는 중':(late?'납부일 지남':'예정'))),
         stateC:!due?sk.sub:(p?IN_C:(late?OUT_C:sk.sub)),
+        waiting,
+        waitNote:!waiting?'':('📭 아직 대조할 자료가 없어요 · '+(this.fxAccOf(x)||PAYL[x.pay]||'이 결제수단')+' 자료는 '
+          +(dUntil?Number(dUntil.slice(5,7))+'월 '+Number(dUntil.slice(8,10))+'일':'아직 아무것도')+' 까지 들어와 있어요'),
         bd:editing?sk.ac:(late?'#E9B7B8':sk.line),
         // 내역에서 찾아낸 납부는 「언제 나갔는지」를 그 거래 날짜로 보여준다 (고정비 예정일이 아니라 실제 날짜)
         paidNote:!p?'':(p.auto
