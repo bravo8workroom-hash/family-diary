@@ -346,6 +346,14 @@ And confirm **the captured account really is the registered account** before sen
 | **account — rows from an account outside the ledger's scope** | do not enter (§1-1 ③) |
 | **account — a machine counterparty such as `자판기` or `현장발권`** | one spending entry as-is. With no merchant name, use the visible text as the memo (never invent one) |
 
+> 📅 **A consequence of the two date rules above — keep it in mind, do not "fix" it.**
+> Inside one statement the dates split: 일시불 rows land on the **use date** (a July telecom bill from the
+> August statement → `2026-07-13`), while 할부 rows land on the **payment date** (`2026-08-14`).
+> So a card's newest ledger date can be August while its August spending has not been billed yet.
+> The app allows for this — `fxDataUntil` in `money/index.html` ignores 할부 when it works out how far a
+> card's data has arrived, so a fixed cost whose statement has not come out yet reads 「📭 자료 기다리는 중」
+> instead of a red 「납부일 지남」 (2026-08-16). Do not re-date rows to make the months line up.
+
 > 🧩 **Categorising has two levels** — set the main category `c`, then pick the subcategory
 > `sub` within it (외식비 · 식재료비 · 차량유지비 …).
 > The usable names are defined by the 「🧩 쓸 수 있는 소분류」 table in
