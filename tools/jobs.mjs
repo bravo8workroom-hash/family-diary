@@ -212,8 +212,13 @@ const FX_YES = [
 ];
 // 순서가 뜻이다: ①할부는 무엇이든 이긴다 ②확실한 고정비 ③확실히 아닌 것 ④나머지는 여쭙는다.
 // ⚠ 「쿠팡 와우 멤버십」처럼 no 와 yes 에 함께 걸리는 이름이 있으므로 yes 를 먼저 본다.
-function fixedKind(name, c) {
+// ★ 사장님이 「아니다」라고 답하신 것은 doc.fxNo 에 적어 두고 두 번 여쭙지 않는다 (CLAUDE.md §8-0 ⑤).
+//   물어보기만 하고 답을 안 남기면 같은 것을 달마다 다시 여쭙게 된다 — 그게 소음이다.
+//   열쇠는 catKey (괄호·회차를 뗀 상호명), 값은 사장님이 말씀하신 까닭 그대로.
+function fixedKind(name, c, no) {
   const s = String(name || '');
+  const pinned = (no || {})[catKey(s)];
+  if (pinned) return { k: 'no', why: pinned };
   if (isInstall(s)) return { k: 'no', why: '할부 — 회차가 끝나면 사라지는 지출이라 고정비가 아니다' };
   if (FX_YES.some(r => r.test(s))) return { k: 'yes', why: '' };
   const hit = FX_NO.find(r => r.test(s));
@@ -415,7 +420,7 @@ function printLedgerContext(D) {
   });
 
   // 되풀이 후보를 세 갈래로 갈라 보여준다 (사장님 지시 2026-08-16) — 「매달 나간다」와 「고정비다」는 다르다.
-  const rc = repeatCandidates(D).map(r => ({ ...r, j: fixedKind(r.name, r.c) }));
+  const rc = repeatCandidates(D).map(r => ({ ...r, j: fixedKind(r.name, r.c, D.fxNo) }));
   const ln = r => `     · ${r.name} — ${r.months.length}개월(${r.months.join(',')}) · 보통 ${W(r.avg)}원${r.min !== r.max ? `(${W(r.min)}~${W(r.max)})` : ''} · 보통 ${r.day}일 · ${r.c} · ${r.pay}`;
   const yes = rc.filter(r => r.j.k === 'yes').slice(0, 8);
   const ask = rc.filter(r => r.j.k === 'ask').slice(0, 8);
@@ -483,7 +488,7 @@ async function putLedger(db, result) {
         if (same) { if (same.stop) { delete same.stop; delete same.keepM; backFx++; } continue; }
         // 「매달 나간다」고 다 고정비가 아니다 (사장님 지시 2026-08-16).
         // 확실한 것만 그냥 올리고, 나머지는 사장님 답을 받아야 올린다 — 답을 받았으면 f.ok 를 붙여 보내라.
-        const j = fixedKind(nm, f.c);
+        const j = fixedKind(nm, f.c, doc.fxNo);
         if (j.k !== 'yes' && !f.ok) { held.push({ name: nm, a: Math.abs(Number(f.a) || 0), ...j }); continue; }
         const q = ['w', 'm', 'q', 'h', 'y'].includes(f.freq) ? f.freq : 'm';
         doc.fixed.push({
