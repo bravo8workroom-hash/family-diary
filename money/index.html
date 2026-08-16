@@ -1527,7 +1527,11 @@ class Component extends DCLogic {
   fxDataUntil(x){const D=this.state.data||{},a=this.fxAccOf(x);
     // 그 고정비가 나가던 계정이 있으면 그 계정 자료의 끝, 없으면 같은 결제수단 자료의 끝을 본다
     const pool=a?(D.tx||[]).filter(z=>z.acc===a):(D.tx||[]).filter(z=>z.ty==='out'&&(z.pay||'card')===x.pay);
-    let last='';for(const z of pool)if(String(z.d)>last)last=String(z.d);return last;}
+    // ⚠ 할부는 빼고 센다 (실측 2026-08-16). 한 장의 명세서 안에서도 **할부는 결제일**(8월 14일)에,
+    //    통신요금 같은 것은 **사용일**(7월 13일)에 찍힌다. 할부를 그대로 세면 8월 자료가 다 온 줄 알고
+    //    아직 명세서도 안 나온 통신요금에 빨간 「납부일 지남」을 달게 된다.
+    let last='';for(const z of pool){if(/할부/.test(String(z.memo||'')))continue;if(String(z.d)>last)last=String(z.d);}
+    return last;}
   fxWaiting(x,ym,dday){const u=this.fxDataUntil(x);
     return !u||u<ym+'-'+String(dday).padStart(2,'0');}
   fxLastPaid(id){const D=this.state.data||{},fp=D.fixedPaid||{};
