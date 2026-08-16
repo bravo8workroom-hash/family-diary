@@ -209,6 +209,60 @@ input,button,textarea,select{font-family:inherit;}
           </div>
         </sc-if>
       </div>
+      <div style="position:relative;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <button onClick="{{ calPrev }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">‹</button>
+          <div style="font-size:15px;font-weight:800;">{{ calLabel }}</div>
+          <button onClick="{{ calNext }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">›</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:4px;">
+          <sc-for list="{{ dayHeads }}" as="dh" hint-placeholder-count="7"><div style="text-align:center;font-size:11px;font-weight:700;color:{{ dh.c }};padding:3px 0;">{{ dh.d }}</div></sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;">
+          <sc-for list="{{ calCellsV }}" as="c" hint-placeholder-count="35">
+            <button onClick="{{ c.sel }}" style="background:{{ c.bg }};border:none;border-radius:10px;padding:4px 2px;display:flex;flex-direction:column;align-items:stretch;gap:2px;cursor:pointer;min-height:54px;min-width:0;overflow:hidden;">
+              <span style="font-size:12px;font-weight:700;color:{{ c.fg }};text-align:center;">{{ c.num }}</span>
+              <sc-for list="{{ c.items }}" as="ci" hint-placeholder-count="0">
+                <span style="display:block;background:{{ ci.bg }};color:{{ ci.fg }};border-radius:4px;padding:1px 3px;font-size:9px;font-weight:700;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;">{{ ci.t }}</span>
+              </sc-for>
+              <sc-if value="{{ c.hasMore }}" hint-placeholder-val="{{ false }}"><span style="font-size:8px;color:var(--sub,#8A8177);text-align:left;padding:0 3px;">+{{ c.more }}</span></sc-if>
+            </button>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+          <div style="font-size:11px;color:var(--sub,#8A8177);">달력 위 아무 데나 스티커를 붙여보세요</div>
+          <button onClick="{{ calStkToggle }}" style="background:var(--soft,#F7EAD2);border:none;border-radius:99px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;color:inherit;">🧸 스티커</button>
+        </div>
+        <sc-if value="{{ calStkOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:8px;background:var(--bg,#FAF6EF);border-radius:14px;padding:10px 12px;animation:pop .25s;">
+            <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:7px;">스티커를 고른 뒤, 달력 위 원하는 곳을 콕!</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <sc-for list="{{ calStkPickV }}" as="cp" hint-placeholder-count="12">
+                <button onClick="{{ cp.pick }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:12px;width:44px;height:44px;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;">
+                  <sc-if value="{{ cp.isImg }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:32px;height:32px;background-image:url('{{ cp.img }}');background-size:contain;background-repeat:no-repeat;background-position:center;"></span></sc-if>
+                  <sc-if value="{{ cp.isEmo }}" hint-placeholder-val="{{ false }}"><span style="font-size:24px;line-height:1;">{{ cp.e }}</span></sc-if>
+                </button>
+              </sc-for>
+            </div>
+            <button onClick="{{ openStudio }}" style="width:100%;box-sizing:border-box;margin-top:9px;display:flex;align-items:center;gap:9px;background:var(--card,#fff);border:1px dashed var(--ac,#F59E0B);border-radius:12px;padding:10px 12px;cursor:pointer;color:inherit;font-family:inherit;text-align:left;min-height:44px;">
+              <span style="font-size:17px;flex-shrink:0;">🎨</span>
+              <span style="flex:1;min-width:0;"><span style="display:block;font-size:12px;font-weight:800;">스티커 제작소</span><span style="display:block;font-size:10px;font-weight:700;color:var(--sub,#8A8177);line-height:1.5;margin-top:1px;">배경 지운 사진으로 나만의 스티커 만들기</span></span>
+              <span style="font-size:13px;color:var(--sub,#8A8177);flex-shrink:0;">→</span>
+            </button>
+          </div>
+        </sc-if>
+        <sc-for list="{{ calDecoV }}" as="cd" hint-placeholder-count="0">
+          <button onClick="{{ cd.take }}" title="내가 붙인 스티커는 누르면 떨어져요" style="position:absolute;left:{{ cd.x }};top:{{ cd.y }};transform:translate(-50%,-50%) {{ cd.rot }};background:none;border:none;padding:0;cursor:pointer;z-index:3;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18));">
+            <sc-if value="{{ cd.isImg }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:42px;height:42px;background-image:url('{{ cd.img }}');background-size:contain;background-repeat:no-repeat;background-position:center;"></span></sc-if>
+            <sc-if value="{{ cd.isEmo }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:30px;line-height:1;">{{ cd.e }}</span></sc-if>
+          </button>
+        </sc-for>
+        <sc-if value="{{ calStkMode }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ calPlaceTap }}" style="position:absolute;inset:0;z-index:4;border:2px dashed var(--ac,#F59E0B);border-radius:20px;background:rgba(245,158,11,.05);cursor:crosshair;"></div>
+          <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:5;background:var(--ac,#F59E0B);color:var(--on,#fff);border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800;pointer-events:none;white-space:nowrap;">원하는 곳을 콕! 누르면 붙어요</div>
+          <button onClick="{{ calPlaceCancel }}" style="position:absolute;top:6px;right:6px;z-index:5;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:28px;height:28px;font-size:12px;cursor:pointer;padding:0;color:inherit;">✕</button>
+        </sc-if>
+      </div>
       <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="font-size:15px;font-weight:800;">⏳ 우리 가족 디데이</div>
@@ -332,60 +386,6 @@ input,button,textarea,select{font-family:inherit;}
           </div>
         </div>
       </sc-if>
-      <div style="position:relative;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <button onClick="{{ calPrev }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">‹</button>
-          <div style="font-size:15px;font-weight:800;">{{ calLabel }}</div>
-          <button onClick="{{ calNext }}" style="background:var(--bg,#FAF6EF);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;cursor:pointer;color:inherit;">›</button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:4px;">
-          <sc-for list="{{ dayHeads }}" as="dh" hint-placeholder-count="7"><div style="text-align:center;font-size:11px;font-weight:700;color:{{ dh.c }};padding:3px 0;">{{ dh.d }}</div></sc-for>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;">
-          <sc-for list="{{ calCellsV }}" as="c" hint-placeholder-count="35">
-            <button onClick="{{ c.sel }}" style="background:{{ c.bg }};border:none;border-radius:10px;padding:4px 2px;display:flex;flex-direction:column;align-items:stretch;gap:2px;cursor:pointer;min-height:54px;min-width:0;overflow:hidden;">
-              <span style="font-size:12px;font-weight:700;color:{{ c.fg }};text-align:center;">{{ c.num }}</span>
-              <sc-for list="{{ c.items }}" as="ci" hint-placeholder-count="0">
-                <span style="display:block;background:{{ ci.bg }};color:{{ ci.fg }};border-radius:4px;padding:1px 3px;font-size:9px;font-weight:700;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;">{{ ci.t }}</span>
-              </sc-for>
-              <sc-if value="{{ c.hasMore }}" hint-placeholder-val="{{ false }}"><span style="font-size:8px;color:var(--sub,#8A8177);text-align:left;padding:0 3px;">+{{ c.more }}</span></sc-if>
-            </button>
-          </sc-for>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
-          <div style="font-size:11px;color:var(--sub,#8A8177);">달력 위 아무 데나 스티커를 붙여보세요</div>
-          <button onClick="{{ calStkToggle }}" style="background:var(--soft,#F7EAD2);border:none;border-radius:99px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;color:inherit;">🧸 스티커</button>
-        </div>
-        <sc-if value="{{ calStkOpen }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:8px;background:var(--bg,#FAF6EF);border-radius:14px;padding:10px 12px;animation:pop .25s;">
-            <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:7px;">스티커를 고른 뒤, 달력 위 원하는 곳을 콕!</div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;">
-              <sc-for list="{{ calStkPickV }}" as="cp" hint-placeholder-count="12">
-                <button onClick="{{ cp.pick }}" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:12px;width:44px;height:44px;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;">
-                  <sc-if value="{{ cp.isImg }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:32px;height:32px;background-image:url('{{ cp.img }}');background-size:contain;background-repeat:no-repeat;background-position:center;"></span></sc-if>
-                  <sc-if value="{{ cp.isEmo }}" hint-placeholder-val="{{ false }}"><span style="font-size:24px;line-height:1;">{{ cp.e }}</span></sc-if>
-                </button>
-              </sc-for>
-            </div>
-            <button onClick="{{ openStudio }}" style="width:100%;box-sizing:border-box;margin-top:9px;display:flex;align-items:center;gap:9px;background:var(--card,#fff);border:1px dashed var(--ac,#F59E0B);border-radius:12px;padding:10px 12px;cursor:pointer;color:inherit;font-family:inherit;text-align:left;min-height:44px;">
-              <span style="font-size:17px;flex-shrink:0;">🎨</span>
-              <span style="flex:1;min-width:0;"><span style="display:block;font-size:12px;font-weight:800;">스티커 제작소</span><span style="display:block;font-size:10px;font-weight:700;color:var(--sub,#8A8177);line-height:1.5;margin-top:1px;">배경 지운 사진으로 나만의 스티커 만들기</span></span>
-              <span style="font-size:13px;color:var(--sub,#8A8177);flex-shrink:0;">→</span>
-            </button>
-          </div>
-        </sc-if>
-        <sc-for list="{{ calDecoV }}" as="cd" hint-placeholder-count="0">
-          <button onClick="{{ cd.take }}" title="내가 붙인 스티커는 누르면 떨어져요" style="position:absolute;left:{{ cd.x }};top:{{ cd.y }};transform:translate(-50%,-50%) {{ cd.rot }};background:none;border:none;padding:0;cursor:pointer;z-index:3;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18));">
-            <sc-if value="{{ cd.isImg }}" hint-placeholder-val="{{ false }}"><span style="display:block;width:42px;height:42px;background-image:url('{{ cd.img }}');background-size:contain;background-repeat:no-repeat;background-position:center;"></span></sc-if>
-            <sc-if value="{{ cd.isEmo }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:30px;line-height:1;">{{ cd.e }}</span></sc-if>
-          </button>
-        </sc-for>
-        <sc-if value="{{ calStkMode }}" hint-placeholder-val="{{ false }}">
-          <div onClick="{{ calPlaceTap }}" style="position:absolute;inset:0;z-index:4;border:2px dashed var(--ac,#F59E0B);border-radius:20px;background:rgba(245,158,11,.05);cursor:crosshair;"></div>
-          <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:5;background:var(--ac,#F59E0B);color:var(--on,#fff);border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800;pointer-events:none;white-space:nowrap;">원하는 곳을 콕! 누르면 붙어요</div>
-          <button onClick="{{ calPlaceCancel }}" style="position:absolute;top:6px;right:6px;z-index:5;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:28px;height:28px;font-size:12px;cursor:pointer;padding:0;color:inherit;">✕</button>
-        </sc-if>
-      </div>
     </div>
   </sc-if>
 
