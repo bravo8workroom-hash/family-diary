@@ -268,6 +268,31 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <div style="padding:12px 0;text-align:center;color:#B5B2A6;font-size:13px">게시물에서 ☆를 눌러 모아보세요</div>
           </sc-if>
         </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:13px;font-weight:700;color:#8B887C">📝 작업대기 <span style="font-weight:600;color:#B5B2A6">· VS코드에 전할 말</span></div>
+            <div style="font-size:14px;font-weight:800;color:{{tdColor}}">{{tdCount}}</div>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <input value="{{tdDraft}}" onChange="{{tdOnDraft}}" onKeyDown="{{tdOnKey}}" placeholder="예: 달력에 단체주문 색 구분 넣어줘" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13.5px;background:#FBFAF7;outline-color:{{accent}}">
+            <button onClick="{{tdAdd}}" style="flex:none;border:0;background:{{accent}};color:#fff;border-radius:{{radS}};padding:10px 15px;font-size:13px;font-weight:800;cursor:pointer">담기</button>
+          </div>
+          <sc-if value="{{tdEmpty}}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:11.5px;color:#B5B2A6;line-height:1.6;text-align:center;padding:6px 0">전할 말을 적어 두면 🏋️ 트레이너 호출 때 이것부터 봅니다</div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <sc-for list="{{tdRows}}" as="td" hint-placeholder-count="2">
+              <div style="display:flex;align-items:flex-start;gap:8px;background:{{chipBg}};border-radius:{{radS}};padding:9px 11px">
+                <span style="font-size:11px;font-weight:800;color:{{accent}};flex:none;padding-top:2px">{{td.no}}</span>
+                <div style="flex:1;min-width:0;font-size:12.5px;line-height:1.55;color:#1F1E1A">{{td.t}}</div>
+                <button onClick="{{td.done}}" title="처리됨으로 옮기기" style="flex:none;border:0;background:none;color:#17A673;font-size:13px;font-weight:800;cursor:pointer;padding:0 2px">✓</button>
+                <button onClick="{{td.del}}" title="지우기" style="flex:none;border:0;background:none;color:#B5B2A6;font-size:12px;cursor:pointer;padding:0 2px">✕</button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:10.5px;color:#B5B2A6;margin-top:9px;text-align:center">{{tdDoneNote}}</div>
+        </div>
       </div>
     </sc-if>
 
@@ -1125,9 +1150,9 @@ class Component extends DCLogic {
       set:{goalDate:'2026-08-10',startW:70,goalW:52,budget:10000,provider:'gemini',geminiKey:'',claudeKey:'',apiPass:'0000',diet:{kcal:1500,c:40,p:30,f:30},maint:{kcal:2000,c:50,p:25,f:25},
         rule:{winS:'10:00',winE:'18:00',kcalMin:1200,pG:100,fG:71,waterMl:2000,firstFatG:8,carbUp:{1:2,6:1}}},
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
-      water:{},cond:{},lifts:{},journal:{},combos:CB,carbUp:{},safe:{},
+      water:{},cond:{},lifts:{},journal:{},combos:CB,carbUp:{},safe:{},todo:{items:[],done:[]},
       stock:{shop:['아몬드','닭가슴살','귀리','단백질바 1박스','피자치즈(가져올 예정)'],home:[]},weekGoals:{},
-      cm:null,liftM:null,stockAdd:{shop:'',home:''},jTab:'decide',
+      cm:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',jTab:'decide',
       editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
   fmt(n){return (n==null||n===''||isNaN(+n))?'—':(+n).toLocaleString('ko-KR')}
@@ -1191,9 +1216,13 @@ class Component extends DCLogic {
   famUrl(){try{const p=String(location.pathname||'');if(/(^|\/)diet\/(index\.html)?$/.test(p))return '../'}catch(e){}
     return 'https://bravo8workroom-hash.github.io/family-diary/'}
   trainerBrief(){const T=this.TODAY,R=this.RULE(),s=this.sums(T),rows=this.absLines(T),kept=rows.filter(a=>a.ok).length,wk=this.weekPlan();
+    const td=((this.state.todo||{}).items)||[];
     const L=['/다이어트','','# 트레이너 호출 — '+T+' '+this.nowHM(),'',
       '사장님이 다이어트 다이어리 화면에서 트레이너를 부르셨다. 아래는 앱이 지금 들고 있는 그날 기록이다.',
       '「/다이어트」 스킬을 읽고 트레이너 자리로 답해라. 앱을 고쳐야 하면 C:\\projects\\diet-diary 의 CLAUDE.md 절차를 따른다.','',
+      '## ★ 작업대기 '+td.length+'건 — 이것부터 답해라','',
+      ...(td.length?td.map((x,i)=>(i+1)+'. '+x.t):['(비어 있음 — 사장님이 적어 두신 것이 없다)']),
+      '','처리한 것은 번호로 알려 드려라 — 사장님이 화면에서 ✓를 눌러 빼신다.','',
       '## 절대선 '+kept+'/6',''];
     rows.forEach(a=>L.push('- '+(a.ok?'OK':'X ')+' '+a.name+' — '+a.val));
     L.push('','## 오늘 합계','',
@@ -1353,7 +1382,7 @@ class Component extends DCLogic {
     }catch(err){this.setState({aiBusy:false});this.toast('AI 처리 중 문제가 생겼어요 · '+(err.message||'네트워크'))}
   }
   stripRef=React.createRef();
-  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','carbUp','safe','stock','weekGoals'];
+  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','carbUp','safe','stock','weekGoals','todo'];
   idb(){return new Promise((res,rej)=>{const q=indexedDB.open('dietgram',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
   async dbGet(k){try{const db=await this.idb();return await new Promise((res,rej)=>{const t=db.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error)})}catch(_){try{const s=localStorage.getItem('dgm_'+k);return s?JSON.parse(s):null}catch(e){return null}}}
   // 기록은 가족 저장소(Supabase)에 둔다 — family_state 문서의 diet 칸 하나를 쓴다.
@@ -1417,6 +1446,13 @@ class Component extends DCLogic {
     let cur=gset.startW;for(let i=0;i<14;i++){const w=S.weights[this.d(i)];if(w&&w.a!=null){cur=w.a;break}}
     const lost=+(gset.startW-cur).toFixed(1);
     const wStats=[{label:'시작',val:fmt(gset.startW),color:'#1F1E1A'},{label:'현재',val:fmt(cur),color:th.accent},{label:'감량',val:(lost>=0?'-':'+')+fmt(Math.abs(lost)),color:lost>=0?'#5B8DEF':'#E5484D'},{label:'목표',val:fmt(gset.goalW),color:'#1F1E1A'}];
+    const TD=S.todo||{items:[],done:[]},tdItems=TD.items||[],tdDone=TD.done||[];
+    const tdAdd=()=>{const t=String(S.tdDraft||'').trim();if(!t)return;
+      this.setState({todo:{items:[...tdItems,{id:'t'+(this.seq++),t}],done:tdDone},tdDraft:''});
+      this.toast('작업대기에 담았어요 📝')};
+    const tdRows=tdItems.map((x,i)=>({no:(i+1)+'.',t:x.t,
+      done:()=>{this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:[{...x,at:this.TODAY},...tdDone].slice(0,100)}});this.toast('처리됨으로 옮겼어요 ✓')},
+      del:()=>this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:tdDone}})}));
     const wkp=this.weekPlan();
     const wkColor=wkp.need<=0?'#17A673':th.accent;
     const wkStats=[{label:'주 시작(월)',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:'남은 감량',val:wkp.need>0?fmt(wkp.need):'달성 ✓',color:wkp.need>0?'#E5484D':'#17A673'}];
@@ -1695,6 +1731,10 @@ class Component extends DCLogic {
       stripRef:this.stripRef,stripDown:this.stripDown,stripMove:this.stripMove,stripUp:this.stripUp,stripClick:this.stripClick,
       woGroups,woTotal:woTotalToday>0?'총 '+fmtT(woTotalToday):'0:00',woTotalColor:woTotalToday>0?th.accent:'#B5B2A6',
       famUrl:this.famUrl(),callTrainer:()=>this.callTrainer(),
+      tdRows,tdCount:tdItems.length+'건',tdColor:tdItems.length?th.accent:'#B5B2A6',tdEmpty:!tdItems.length,
+      tdDraft:S.tdDraft||'',tdOnDraft:e=>this.setState({tdDraft:e.target.value}),
+      tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,
+      tdDoneNote:'처리되면 ✓를 눌러 빼 주세요'+(tdDone.length?(' · 처리됨 '+tdDone.length+'건'):''),
       wkRange:noDow(wkp.ws)+'~'+noDow(wkp.we),wkGoalText:fmt(wkp.goal)+' kg',wkColor,wkPct:wkp.pct,wkStats,
       wkNote:'주 '+wkp.pace+'kg 페이스 · 이번 주 '+wkp.daysLeft+'일 남음 · 최종 '+fmt(+gset.goalW)+'kg까지 약 '+wkp.weeksLeft+'주',
       sWeekGoal:wkp.manual?wkp.goal:'',sWeekPace:wkp.pace,onWeekPace:setRule('weekPace'),
