@@ -23,6 +23,52 @@
   var onRemote = null;      // 앱에 새 데이터를 밀어 넣는 콜백
   var seedFn = null;
 
+  // ── 로그인 기억함 ───────────────────────────────────────────
+  //  한 번 들어오면 다시 안 묻는다. 이 폰(브라우저)에만 저장되고
+  //  서버로는 나가지 않는다. btoa 는 자물쇠가 아니라 눈에 덜 띄게
+  //  하는 정도다 — 폰을 남에게 주지 않는다는 전제다.
+  var KEEP = 'family-diary/login';
+  var leaving = false;      // 내가 직접 누른 로그아웃인지
+
+  function remember(email, pw) {
+    try {
+      localStorage.setItem(KEEP, JSON.stringify({
+        e: email, p: btoa(unescape(encodeURIComponent(pw)))
+      }));
+    } catch (e) {}
+  }
+  function remembered() {
+    try {
+      var o = JSON.parse(localStorage.getItem(KEEP) || 'null');
+      if (!o || !o.e || !o.p) return null;
+      return { email: o.e, pw: decodeURIComponent(escape(atob(o.p))) };
+    } catch (e) { return null; }
+  }
+  function forget() {
+    try { localStorage.removeItem(KEEP); } catch (e) {}
+  }
+
+  // 아는 이메일 — config.js 에 넣어 뒀거나, 전에 이 폰에서 들어온 것
+  function knownEmail() {
+    var c = (CFG.familyEmail || '').trim();
+    if (c) return c;
+    var k = remembered();
+    return k ? k.email : '';
+  }
+
+  // 로그인이 풀렸을 때(토큰 만료 등) 기억해 둔 것으로 조용히 다시 들어간다
+  async function autoLogin() {
+    var k = remembered();
+    if (!k) return false;
+    var r = await sb.auth.signInWithPassword({ email: k.email, password: k.pw });
+    if (r.error) {
+      // 400 = 비밀번호가 바뀐 것. 그 밖(네트워크 등)은 기억을 지우지 않는다.
+      if (r.error.status === 400) forget();
+      return false;
+    }
+    return true;
+  }
+
   var urlOf = new Map();    // 'sb://경로' → 서명된 이미지 주소
   var pathOf = new Map();   // 서명된 이미지 주소 → 'sb://경로'
 
@@ -241,33 +287,63 @@
     setTimeout(function () { t.remove(); }, 3400);
   }
 
-  function buildGate() {
+  function buildGate(first) {
     gate = el('div', 'position:fixed;inset:0;z-index:9998;background:#FAF6EF;color:#3F3A33;' +
       'font-family:Pretendard,-apple-system,"Malgun Gothic",sans-serif;display:flex;align-items:center;' +
       'justify-content:center;padding:24px;box-sizing:border-box;word-break:keep-all;overflow-wrap:break-word;');
     var card = el('div', 'width:100%;max-width:340px;background:#fff;border:1px solid #EFE4CF;border-radius:24px;padding:28px 22px;text-align:center;');
     card.appendChild(el('div', 'font-size:44px;line-height:1;', '🏠'));
     card.appendChild(el('div', 'font-size:22px;font-weight:800;margin-top:8px;', '우리집 다이어리'));
-    card.appendChild(el('div', 'font-size:13px;color:#8A8177;margin-top:6px;line-height:1.6;', '우리 가족만 볼 수 있어요.<br>가족 계정으로 들어와 주세요.'));
+    var known = knownEmail();
+    var sub = el('div', 'font-size:13px;color:#8A8177;margin-top:6px;line-height:1.6;',
+      known ? '우리 가족만 볼 수 있어요.<br>가족 비밀번호를 넣어 주세요.'
+            : '우리 가족만 볼 수 있어요.<br>가족 계정으로 들어와 주세요.');
+    card.appendChild(sub);
 
     var inp = 'width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #EFE4CF;border-radius:12px;' +
       'background:#FAF6EF;color:#3F3A33;font-size:15px;outline:none;margin-top:10px;font-family:inherit;';
     var email = el('input', inp); email.type = 'email'; email.placeholder = '이메일'; email.autocomplete = 'username';
-    var pw = el('input', inp); pw.type = 'password'; pw.placeholder = '비밀번호'; pw.autocomplete = 'current-password';
+    var pw = el('input', inp); pw.type = 'password'; pw.autocomplete = 'current-password';
     var btn = el('button', 'width:100%;margin-top:14px;background:#F59E0B;color:#fff;border:none;border-radius:12px;' +
       'padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;min-height:44px;', '들어가기');
     gateMsg = el('div', 'font-size:12px;font-weight:700;color:#E5484D;margin-top:10px;line-height:1.5;min-height:18px;', '');
 
+    // 아는 이메일이 있으면 칸을 숨기고 「가족 비밀번호」 한 칸만 보여준다
+    var other = el('button', 'background:none;border:none;color:#B3AA9E;font-size:12px;font-weight:700;' +
+      'cursor:pointer;font-family:inherit;padding:10px;margin-top:6px;min-height:44px;', '다른 계정으로 들어가기');
+    function useKnown(on) {
+      email.style.display = on ? 'none' : '';
+      other.style.display = on ? '' : 'none';
+      pw.placeholder = on ? '가족 비밀번호' : '비밀번호';
+      sub.innerHTML = on ? '우리 가족만 볼 수 있어요.<br>가족 비밀번호를 넣어 주세요.'
+                         : '우리 가족만 볼 수 있어요.<br>가족 계정으로 들어와 주세요.';
+    }
+    email.value = known;
+    useKnown(!!known);
+    other.onclick = function () { email.value = ''; useKnown(false); email.focus(); };
+
     card.appendChild(email); card.appendChild(pw); card.appendChild(btn); card.appendChild(gateMsg);
+    card.appendChild(other);
     gate.appendChild(card);
     document.body.appendChild(gate);
+    setTimeout(function () { (known ? pw : email).focus(); }, 60);
+    if (first) gateMsg.textContent = first;
 
     async function go() {
-      if (!email.value || !pw.value) { gateMsg.textContent = '이메일과 비밀번호를 입력해 주세요'; return; }
+      var em = (email.value || '').trim();
+      var onlyPw = email.style.display === 'none';
+      if (!em || !pw.value) {
+        gateMsg.textContent = onlyPw ? '가족 비밀번호를 넣어 주세요' : '이메일과 비밀번호를 입력해 주세요';
+        return;
+      }
       btn.disabled = true; btn.textContent = '확인 중...'; gateMsg.textContent = '';
-      var r = await sb.auth.signInWithPassword({ email: email.value.trim(), password: pw.value });
+      var r = await sb.auth.signInWithPassword({ email: em, password: pw.value });
       btn.disabled = false; btn.textContent = '들어가기';
-      if (r.error) { gateMsg.textContent = '이메일이나 비밀번호가 맞지 않아요'; return; }
+      if (r.error) {
+        gateMsg.textContent = onlyPw ? '가족 비밀번호가 맞지 않아요' : '이메일이나 비밀번호가 맞지 않아요';
+        return;
+      }
+      remember(em, pw.value);   // 다음부터는 안 묻는다
       openApp();
     }
     btn.onclick = go;
@@ -291,6 +367,9 @@
     var b = el('button', 'background:none;border:none;color:#B3AA9E;font-size:12px;font-weight:700;' +
       'cursor:pointer;font-family:inherit;padding:8px 12px;min-height:44px;', '가족 계정 로그아웃');
     b.onclick = async function () {
+      if (!confirm('로그아웃하면 다음에 비밀번호를 다시 넣어야 해요. 나갈까요?')) return;
+      leaving = true;
+      forget();
       await sb.auth.signOut();
       location.reload();
     };
@@ -365,9 +444,21 @@
       showSetup('접속에 필요한 파일을 불러오지 못했어요.<br>인터넷 연결을 확인하고 새로고침해 주세요.');
       return;
     }
-    sb = window.supabase.createClient(CFG.url, CFG.anonKey);
+    sb = window.supabase.createClient(CFG.url, CFG.anonKey, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+    });
+
+    // 쓰는 도중에 로그인이 풀려도(토큰 만료 등) 화면을 안 뺏기게 조용히 다시 들어간다
+    sb.auth.onAuthStateChange(function (event) {
+      if (event !== 'SIGNED_OUT' || leaving) return;
+      setTimeout(function () {            // 콜백 안에서 바로 부르면 안 된다
+        autoLogin().then(function (ok) { if (!ok) location.reload(); });
+      }, 0);
+    });
+
     var s = await sb.auth.getSession();
-    if (s.data && s.data.session) openApp();
-    else buildGate();
+    if (s.data && s.data.session) { openApp(); return; }
+    if (await autoLogin()) { openApp(); return; }
+    buildGate(remembered() ? '다시 들어가지 못했어요. 비밀번호를 넣어 주세요.' : '');
   });
 })();
