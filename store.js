@@ -373,7 +373,52 @@
       await sb.auth.signOut();
       location.reload();
     };
+
+    // ── 비밀번호 바꾸기 ─────────────────────────────────────
+    //  바꾸면 이 폰의 기억함도 새 비밀번호로 갈아둔다. 다른 가족 폰은
+    //  다음에 열 때 옛 비밀번호가 안 먹혀 로그인 화면이 한 번 뜨고,
+    //  새 비밀번호를 넣으면 그 뒤로는 다시 안 묻는다.
+    var pwBtn = el('button', 'background:none;border:none;color:#B3AA9E;font-size:12px;font-weight:700;' +
+      'cursor:pointer;font-family:inherit;padding:8px 12px;min-height:44px;', '비밀번호 바꾸기');
+    var box = el('div', 'display:none;max-width:300px;margin:4px auto 0;background:#fff;border:1px solid #EFE4CF;' +
+      'border-radius:16px;padding:16px 14px;text-align:left;word-break:keep-all;');
+    var inp2 = 'width:100%;box-sizing:border-box;padding:11px 13px;border:1px solid #EFE4CF;border-radius:10px;' +
+      'background:#FAF6EF;color:#3F3A33;font-size:15px;outline:none;margin-top:8px;font-family:inherit;';
+    box.appendChild(el('div', 'font-size:13px;font-weight:800;color:#3F3A33;', '새 가족 비밀번호'));
+    box.appendChild(el('div', 'font-size:11px;color:#8A8177;margin-top:4px;line-height:1.6;',
+      '영문+숫자 12자 이상을 권합니다.<br>바꾸면 다른 가족 폰에서 한 번만 새로 넣으면 돼요.'));
+    var n1 = el('input', inp2); n1.type = 'password'; n1.placeholder = '새 비밀번호'; n1.autocomplete = 'new-password';
+    var n2 = el('input', inp2); n2.type = 'password'; n2.placeholder = '한 번 더'; n2.autocomplete = 'new-password';
+    var save = el('button', 'width:100%;margin-top:10px;background:#F59E0B;color:#fff;border:none;border-radius:10px;' +
+      'padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;min-height:44px;', '바꾸기');
+    var note = el('div', 'font-size:11px;font-weight:700;color:#E5484D;margin-top:8px;line-height:1.5;min-height:15px;', '');
+    box.appendChild(n1); box.appendChild(n2); box.appendChild(save); box.appendChild(note);
+
+    pwBtn.onclick = function () {
+      var on = box.style.display === 'none';
+      box.style.display = on ? 'block' : 'none';
+      if (on) n1.focus();
+    };
+    save.onclick = async function () {
+      note.style.color = '#E5484D';
+      if (n1.value.length < 8) { note.textContent = '8자 이상으로 정해 주세요'; return; }
+      if (n1.value !== n2.value) { note.textContent = '두 번 넣은 비밀번호가 서로 달라요'; return; }
+      save.disabled = true; save.textContent = '바꾸는 중...'; note.textContent = '';
+      var r = await sb.auth.updateUser({ password: n1.value });
+      save.disabled = false; save.textContent = '바꾸기';
+      if (r.error) { note.textContent = '바꾸지 못했어요 — ' + (r.error.message || ''); return; }
+      var k = remembered();
+      var em = (k && k.email) || (r.data && r.data.user && r.data.user.email) || '';
+      if (em) remember(em, n1.value);        // 이 폰은 새 비밀번호로 갈아둔다
+      n1.value = ''; n2.value = '';
+      box.style.display = 'none';
+      flash('비밀번호를 바꿨어요. 다른 가족 폰에서는 한 번만 새로 넣으면 됩니다.');
+    };
+
     wrap.appendChild(b);
+    wrap.appendChild(el('span', 'color:#E4DACA;font-size:12px;', '·'));
+    wrap.appendChild(pwBtn);
+    wrap.appendChild(box);
     document.body.appendChild(wrap);
   }
 
