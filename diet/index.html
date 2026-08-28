@@ -8,9 +8,9 @@
 <title>우리집 다이어트</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🥗</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../config.js"></script>
-<script src="../store.js"></script>
-<script src="./support.js"></script>
+<script src="../config.js?v=20260829b"></script>
+<script src="../store.js?v=20260829b"></script>
+<script src="./support.js?v=20260829b"></script>
 </head>
 <body>
 <x-dc>
@@ -80,7 +80,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           <sc-if value="{{hasGoal}}" hint-placeholder-val="{{ true }}">
             <div>
               <div style="font-size:26px;font-weight:800;letter-spacing:-0.5px;color:{{accent}}">{{ddayText}}</div>
-              <div style="font-size:12.5px;color:#8B887C;margin-top:2px">목표일 {{goalDateText}}</div>
+              <div style="font-size:12.5px;color:#8B887C;margin-top:2px">목표일 {{goalDateText}} · 이번 주 {{wkGoalText}}</div>
             </div>
           </sc-if>
           <sc-if value="{{noGoal}}" hint-placeholder-val="{{ false }}">
@@ -222,8 +222,20 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div style="font-size:13px;font-weight:700;color:#8B887C">💪 오늘 운동</div>
+            <div style="font-size:13px;font-weight:700;color:#8B887C">💪 {{woTitle}}</div>
             <div style="font-size:15px;font-weight:800;color:{{woTotalColor}}">{{woTotal}}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:11px">
+            <button onClick="{{woPrev}}" style="flex:none;border:0;background:{{chipBg}};width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:13px;color:#5C594E">◀</button>
+            <label style="position:relative;flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:7px 10px;border-radius:99px;background:{{woDateBg}}">
+              <span style="font-size:13px;font-weight:800;color:{{woDateColor}}">{{woDateLabel}}</span>
+              <span style="font-size:12px;opacity:.55">📅</span>
+              <input type="date" value="{{woDate}}" max="{{todayStr}}" onChange="{{woPick}}" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
+            </label>
+            <button onClick="{{woNext}}" disabled="{{woNextOff}}" style="flex:none;border:0;background:{{chipBg}};width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:13px;color:{{woNextColor}};opacity:{{woNextOpacity}}">▶</button>
+            <sc-if value="{{woNotToday}}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{woToday}}" style="flex:none;border:0;background:{{accent}};color:#fff;border-radius:99px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer">오늘</button>
+            </sc-if>
           </div>
           <div style="display:flex;flex-direction:column;gap:6px">
             <sc-for list="{{woGroups}}" as="g" hint-placeholder-count="2">
@@ -246,7 +258,6 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               </sc-for>
             </sc-for>
           </div>
-          <div style="font-size:11px;color:#B5B2A6;margin-top:10px;text-align:center">시간을 고르면 달력에 💪+운동시간으로 기록돼요</div>
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
@@ -275,23 +286,39 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <div style="font-size:14px;font-weight:800;color:{{tdColor}}">{{tdCount}}</div>
           </div>
           <div style="display:flex;gap:6px;margin-bottom:10px">
-            <input value="{{tdDraft}}" onChange="{{tdOnDraft}}" onKeyDown="{{tdOnKey}}" placeholder="예: 달력에 단체주문 색 구분 넣어줘" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13.5px;background:#FBFAF7;outline-color:{{accent}}">
+            <input value="{{tdDraft}}" onChange="{{tdOnDraft}}" onKeyDown="{{tdOnKey}}" onPaste="{{tdPaste}}" placeholder="예: 달력에 단체주문 색 구분 넣어줘" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:13.5px;background:#FBFAF7;outline-color:{{accent}}">
             <button onClick="{{tdAdd}}" style="flex:none;border:0;background:{{accent}};color:#fff;border-radius:{{radS}};padding:10px 15px;font-size:13px;font-weight:800;cursor:pointer">담기</button>
           </div>
-          <sc-if value="{{tdEmpty}}" hint-placeholder-val="{{ true }}">
-            <div style="font-size:11.5px;color:#B5B2A6;line-height:1.6;text-align:center;padding:6px 0">전할 말을 적어 두면 🏋️ 트레이너 호출 때 이것부터 봅니다</div>
+          <sc-if value="{{tdHasPh}}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px">
+              <sc-for list="{{tdPhDraft}}" as="dp" hint-placeholder-count="2">
+                <div style="position:relative;width:62px;height:62px;border-radius:{{radS}};background:{{dp.bg}}">
+                  <button onClick="{{dp.del}}" style="position:absolute;top:-6px;right:-6px;border:0;width:20px;height:20px;border-radius:99px;background:rgba(20,19,16,.72);color:#fff;font-size:11px;line-height:1;cursor:pointer;padding:0">✕</button>
+                </div>
+              </sc-for>
+            </div>
           </sc-if>
           <div style="display:flex;flex-direction:column;gap:7px">
             <sc-for list="{{tdRows}}" as="td" hint-placeholder-count="2">
               <div style="display:flex;align-items:flex-start;gap:8px;background:{{chipBg}};border-radius:{{radS}};padding:9px 11px">
                 <span style="font-size:11px;font-weight:800;color:{{accent}};flex:none;padding-top:2px">{{td.no}}</span>
-                <div style="flex:1;min-width:0;font-size:12.5px;line-height:1.55;color:#1F1E1A">{{td.t}}</div>
+                <div style="flex:1;min-width:0">
+                  <sc-if value="{{td.hasT}}" hint-placeholder-val="{{ true }}">
+                    <div style="font-size:12.5px;line-height:1.55;color:#1F1E1A">{{td.t}}</div>
+                  </sc-if>
+                  <sc-if value="{{td.hasPh}}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:{{td.phGap}}">
+                      <sc-for list="{{td.ph}}" as="tp" hint-placeholder-count="1">
+                        <div onClick="{{tp.zoom}}" style="width:66px;height:66px;border-radius:{{radS}};cursor:zoom-in;background:{{tp.bg}}"></div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
                 <button onClick="{{td.done}}" title="처리됨으로 옮기기" style="flex:none;border:0;background:none;color:#17A673;font-size:13px;font-weight:800;cursor:pointer;padding:0 2px">✓</button>
                 <button onClick="{{td.del}}" title="지우기" style="flex:none;border:0;background:none;color:#B5B2A6;font-size:12px;cursor:pointer;padding:0 2px">✕</button>
               </div>
             </sc-for>
           </div>
-          <div style="font-size:10.5px;color:#B5B2A6;margin-top:9px;text-align:center">{{tdDoneNote}}</div>
         </div>
       </div>
     </sc-if>
@@ -1152,7 +1179,7 @@ class Component extends DCLogic {
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,carbUp:{},safe:{},todo:{items:[],done:[]},
       stock:{shop:['아몬드','닭가슴살','귀리','단백질바 1박스','피자치즈(가져올 예정)'],home:[]},weekGoals:{},
-      cm:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',jTab:'decide',
+      cm:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,jTab:'decide',
       editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
   fmt(n){return (n==null||n===''||isNaN(+n))?'—':(+n).toLocaleString('ko-KR')}
@@ -1201,6 +1228,10 @@ class Component extends DCLogic {
   weekAvg(ds){let kcal=0,p=0,days=0;for(let i=0;i<7;i++){const k=this.addDays(ds,-i);if((this.state.foods[k]||[]).length){const t=this.sums(k);kcal+=t.kcal;p+=t.p;days++}}
     return {days,kcal:days?Math.round(kcal/days):0,p:days?Math.round(p/days):0}}
   weekStart(ds){const dt=new Date(ds+'T00:00:00');dt.setDate(dt.getDate()-((dt.getDay()+6)%7));return this.ymd(dt)}
+  weekEnd(ds){return this.addDays(this.weekStart(ds),6)}
+  /* 목표일은 1주 단위로 갱신된다 — 지나간 목표일은 이번 주 마감(일요일)으로 굴러간다. */
+  rollGoal(){const g=this.state.set||{};const we=this.weekEnd(this.TODAY);
+    if(!g.goalDate||g.goalDate<this.TODAY)this.setState({set:{...g,goalDate:we}})}
   wAt(ds){for(let i=0;i<28;i++){const w=(this.state.weights||{})[this.addDays(ds,-i)];if(w&&w.a!=null)return +w.a}return null}
   weekPlan(){const R=this.RULE(),g=this.state.set,ws=this.weekStart(this.TODAY),we=this.addDays(ws,6);
     const pace=+R.weekPace>0?+R.weekPace:0.5;
@@ -1221,7 +1252,7 @@ class Component extends DCLogic {
       '사장님이 다이어트 다이어리 화면에서 트레이너를 부르셨다. 아래는 앱이 지금 들고 있는 그날 기록이다.',
       '「/다이어트」 스킬을 읽고 트레이너 자리로 답해라. 앱을 고쳐야 하면 C:\\projects\\diet-diary 의 CLAUDE.md 절차를 따른다.','',
       '## ★ 작업대기 '+td.length+'건 — 이것부터 답해라','',
-      ...(td.length?td.map((x,i)=>(i+1)+'. '+x.t):['(비어 있음 — 사장님이 적어 두신 것이 없다)']),
+      ...(td.length?td.map((x,i)=>(i+1)+'. '+(x.t||'(글 없이 사진만)')+((x.ph&&x.ph.length)?(' 〔📷 사진 '+x.ph.length+'장 — 앱 홈 「작업대기」 카드에서 볼 수 있다〕'):'')):['(비어 있음 — 사장님이 적어 두신 것이 없다)']),
       '','처리한 것은 번호로 알려 드려라 — 사장님이 화면에서 ✓를 눌러 빼신다.','',
       '## 절대선 '+kept+'/6',''];
     rows.forEach(a=>L.push('- '+(a.ok?'OK':'X ')+' '+a.name+' — '+a.val));
@@ -1244,7 +1275,8 @@ class Component extends DCLogic {
       '- 안전 예외: '+((this.state.safe||{})[T]?'켜짐 — 클린보다 「먹는 것」이 먼저다':'꺼짐'),'',
       '## 할 일','',
       '1. 위 기록만 보고 「지금 무엇을 먹어야 하나」를 3~6줄로 답해라. 칼로리는 초과가 아니라 미달을 지적한다.',
-      '2. 사장님이 화면·기능을 고쳐 달라고 하시면 그때 앱을 고쳐라.');
+      '2. 이번 주 목표 체중은 1주 단위로 갱신한다. 지금 체중을 보고 이번 주(주말이면 다음 주) 목표 kg을 계산해 알려 드려라 — 사장님이 설정 → 「이번 주 목표 (kg)」에 적으신다.',
+      '3. 사장님이 화면·기능을 고쳐 달라고 하시면 그때 앱을 고쳐라.');
     return L.join('\n')}
   callTrainer(){const brief=this.trainerBrief();
     try{navigator.clipboard.writeText(brief)}catch(e){}
@@ -1422,7 +1454,7 @@ class Component extends DCLogic {
       this._doc=doc||{};
       let o=this._doc.diet,moved=false;
       if(!o){o=await this.importLocal();moved=!!o}
-      this.adopt(o,()=>{this._loaded=true;if(moved){this._saved='';this.persist()}})})}
+      this.adopt(o,()=>{this._loaded=true;this.rollGoal();if(moved){this._saved='';this.persist()}})})}
   stripDown=e=>{const el=this.stripRef.current;if(!el)return;this._sd={x:e.clientX,sl:el.scrollLeft,moved:false};try{el.setPointerCapture(e.pointerId)}catch(_){}}
   stripMove=e=>{const sd=this._sd;if(!sd)return;const dx=e.clientX-sd.x;if(Math.abs(dx)>5)sd.moved=true;this.stripRef.current.scrollLeft=sd.sl-dx}
   stripUp=e=>{if(this._sd&&this._sd.moved){this._noClick=true;setTimeout(()=>{this._noClick=false},60)}this._sd=null}
@@ -1447,10 +1479,20 @@ class Component extends DCLogic {
     const lost=+(gset.startW-cur).toFixed(1);
     const wStats=[{label:'시작',val:fmt(gset.startW),color:'#1F1E1A'},{label:'현재',val:fmt(cur),color:th.accent},{label:'감량',val:(lost>=0?'-':'+')+fmt(Math.abs(lost)),color:lost>=0?'#5B8DEF':'#E5484D'},{label:'목표',val:fmt(gset.goalW),color:'#1F1E1A'}];
     const TD=S.todo||{items:[],done:[]},tdItems=TD.items||[],tdDone=TD.done||[];
-    const tdAdd=()=>{const t=String(S.tdDraft||'').trim();if(!t)return;
-      this.setState({todo:{items:[...tdItems,{id:'t'+(this.seq++),t}],done:tdDone},tdDraft:''});
-      this.toast('작업대기에 담았어요 📝')};
-    const tdRows=tdItems.map((x,i)=>({no:(i+1)+'.',t:x.t,
+    const tdPh=S.tdPh||[];
+    const phUrl=src=>'url("'+src+'") center/cover no-repeat';
+    const tdAdd=()=>{const t=String(S.tdDraft||'').trim();if(!t&&!tdPh.length)return;
+      this.setState({todo:{items:[...tdItems,{id:'t'+(this.seq++),t,ph:tdPh}],done:tdDone},tdDraft:'',tdPh:[]});
+      this.toast(tdPh.length?('작업대기에 담았어요 📝 · 사진 '+tdPh.length+'장'):'작업대기에 담았어요 📝')};
+    const tdPaste=e=>{const cd=e.clipboardData;if(!cd)return;
+      const fl=Array.from(cd.items||[]).filter(it=>it.kind==='file'&&/^image\//.test(it.type)).map(it=>it.getAsFile()).filter(Boolean);
+      if(!fl.length)return;e.preventDefault();
+      Promise.all(fl.map(f=>this.shrink(f,1280,0.8))).then(srcs=>{this.setState({tdPh:[...(this.state.tdPh||[]),...srcs]});
+        this.toast('사진 '+srcs.length+'장 붙여넣었어요 📷')})};
+    const tdPhDraft=tdPh.map((src,i)=>({bg:phUrl(src),del:()=>this.setState({tdPh:(this.state.tdPh||[]).filter((_,j)=>j!==i)})}));
+    const tdRows=tdItems.map((x,i)=>({no:(i+1)+'.',t:x.t,hasT:!!String(x.t||'').trim(),
+      hasPh:!!(x.ph&&x.ph.length),phGap:String(x.t||'').trim()?'6px':'0px',
+      ph:(x.ph||[]).map(src=>({bg:phUrl(src),zoom:()=>this.setState({lb:{bg:phUrl(src),e:''}})})),
       done:()=>{this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:[{...x,at:this.TODAY},...tdDone].slice(0,100)}});this.toast('처리됨으로 옮겼어요 ✓')},
       del:()=>this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:tdDone}})}));
     const wkp=this.weekPlan();
@@ -1522,19 +1564,21 @@ class Component extends DCLogic {
     const pad2=n=>String(n).padStart(2,'0');
     const fmtT=m=>Math.floor(m/60)+':'+pad2(m%60);
     const woMin=ds=>Object.values(S.workouts[ds]||{}).reduce((a,b)=>a+b,0);
-    const woDay=S.workouts[this.TODAY]||{};
+    const woD8=(S.woDate&&S.woDate<=this.TODAY)?S.woDate:this.TODAY,woIsT=woD8===this.TODAY;
+    const woDay=S.workouts[woD8]||{};
     const woLbl=m=>m===0?'안 함':m<60?m+'분':fmtT(m);
-    const setWo=(k,m,msg)=>{const W2={...this.state.workouts};const day={...(W2[this.TODAY]||{})};if(m<=0)delete day[k];else day[k]=m;if(Object.keys(day).length)W2[this.TODAY]=day;else delete W2[this.TODAY];this.setState({workouts:W2,woOpen:null});if(m>0)this.toast(msg)};
+    const setWo=(k,m,msg)=>{const W2={...this.state.workouts};const day={...(W2[woD8]||{})};if(m<=0)delete day[k];else day[k]=m;if(Object.keys(day).length)W2[woD8]=day;else delete W2[woD8];this.setState({workouts:W2,woOpen:null});if(m>0)this.toast(msg)};
     const mkWoRow=(k,em)=>{const v=woDay[k]||0;const open=S.woOpen===k;
       const parseD=t=>{t=String(t||'').trim();if(!t)return null;if(t.includes(':')){const[h,m]=t.split(':');return (parseInt(h,10)||0)*60+(parseInt(m,10)||0)}return parseInt(t,10)||0};
-      const commit=()=>{const m=parseD(this.state.woD);if(m==null)return;setWo(k,m,this.say(k+' '+woLbl(m||0)+' 기록 완료 💪',k+' '+woLbl(m||0)+' 기록했사와요 💪'))};
+      const dp=woIsT?'':this.lbl(woD8)+' ';
+      const commit=()=>{const m=parseD(this.state.woD);if(m==null)return;setWo(k,m,this.say(dp+k+' '+woLbl(m||0)+' 기록 완료 💪',dp+k+' '+woLbl(m||0)+' 기록했사와요 💪'))};
       return {name:k,emoji:em,open,toggle:()=>this.setState({woOpen:open?null:k,woD:''}),
         dIn:open?S.woD:'',onD:e=>this.setState({woD:e.target.value}),onKey:e=>{if(e.key==='Enter')e.target.blur()},commitBlur:()=>commit(),
         bg:v>0?th.dietSoft:th.chipBg,timeLabel:v>0?fmtT(v):'시간 선택',timeColor:v>0?th.accent:'#B5B2A6',chev:open?'▴':'▾',
         opts:[0,15,30,45,60,75,90,105,120].map(m=>({label:woLbl(m),bg:m===v?th.accent:th.cardBg,color:m===v?'#fff':'#5C594E',
-          pick:()=>setWo(k,m,this.say(k+' '+woLbl(m)+' 기록 완료 💪 달력에서 확인!',k+' '+woLbl(m)+' 기록했사와요 💪'))}))}};
+          pick:()=>setWo(k,m,this.say(dp+k+' '+woLbl(m)+' 기록 완료 💪 달력에서 확인!',dp+k+' '+woLbl(m)+' 기록했사와요 💪'))}))}};
     const woGroups=[{name:'근력',color:th.accent,rows:[mkWoRow('하체','🦵'),mkWoRow('등','🏋️'),mkWoRow('가슴+어깨','💪')]},{name:'유산소',color:'#5B8DEF',rows:[mkWoRow('유산소','🏃')]}];
-    const woTotalToday=woMin(this.TODAY);
+    const woTotalToday=woMin(woD8);
     const [cy,cmn]=S.calM.split('-').map(Number);
     const mdays=new Date(cy,cmn,0).getDate(),fdow=new Date(cy,cmn-1,1).getDay();
     const calCells=[];for(let i=0;i<fdow;i++)calCells.push({num:'',bg:'transparent',border:'transparent',kcal:'',mark:'',wo:'',woColor:'#B5B2A6',numColor:'#B5B2A6',kcalColor:'#8B887C',cursor:'default',opacity:1,go:null});
@@ -1730,11 +1774,17 @@ class Component extends DCLogic {
       maintBtnBg:S.mode==='maint'?th.cardBg:'transparent',maintBtnColor:S.mode==='maint'?th.maint:'#8B887C',maintBtnShadow:S.mode==='maint'?'0 1px 4px rgba(0,0,0,.12)':'none',
       stripRef:this.stripRef,stripDown:this.stripDown,stripMove:this.stripMove,stripUp:this.stripUp,stripClick:this.stripClick,
       woGroups,woTotal:woTotalToday>0?'총 '+fmtT(woTotalToday):'0:00',woTotalColor:woTotalToday>0?th.accent:'#B5B2A6',
+      woTitle:woIsT?'오늘 운동':'운동 기록',woDate:woD8,woDateLabel:this.lbl(woD8)+(woIsT?' · 오늘':''),
+      woDateBg:woIsT?th.chipBg:th.dietSoft,woDateColor:woIsT?'#1F1E1A':th.accent,woNotToday:!woIsT,
+      woPrev:()=>this.setState({woDate:this.addDays(woD8,-1),woOpen:null}),
+      woNext:()=>{if(woD8<this.TODAY)this.setState({woDate:this.addDays(woD8,1),woOpen:null})},
+      woNextOff:woD8>=this.TODAY,woNextColor:woD8>=this.TODAY?'#D8D5CB':'#5C594E',woNextOpacity:woD8>=this.TODAY?.5:1,
+      woPick:e=>{const v=e.target.value;if(v&&v<=this.TODAY)this.setState({woDate:v,woOpen:null})},
+      woToday:()=>this.setState({woDate:this.TODAY,woOpen:null}),
       famUrl:this.famUrl(),callTrainer:()=>this.callTrainer(),
-      tdRows,tdCount:tdItems.length+'건',tdColor:tdItems.length?th.accent:'#B5B2A6',tdEmpty:!tdItems.length,
+      tdRows,tdCount:tdItems.length+'건'+(tdDone.length?(' · 처리됨 '+tdDone.length):''),tdColor:tdItems.length?th.accent:'#B5B2A6',tdEmpty:!tdItems.length,
       tdDraft:S.tdDraft||'',tdOnDraft:e=>this.setState({tdDraft:e.target.value}),
-      tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,
-      tdDoneNote:'처리되면 ✓를 눌러 빼 주세요'+(tdDone.length?(' · 처리됨 '+tdDone.length+'건'):''),
+      tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,tdPaste,tdPhDraft,tdHasPh:!!tdPh.length,
       wkRange:noDow(wkp.ws)+'~'+noDow(wkp.we),wkGoalText:fmt(wkp.goal)+' kg',wkColor,wkPct:wkp.pct,wkStats,
       wkNote:'주 '+wkp.pace+'kg 페이스 · 이번 주 '+wkp.daysLeft+'일 남음 · 최종 '+fmt(+gset.goalW)+'kg까지 약 '+wkp.weeksLeft+'주',
       sWeekGoal:wkp.manual?wkp.goal:'',sWeekPace:wkp.pace,onWeekPace:setRule('weekPace'),
