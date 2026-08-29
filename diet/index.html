@@ -1240,7 +1240,7 @@ class Component extends DCLogic {
     const WO={};WO[d(1)]={'하체':40,'유산소':30};WO[d(2)]={'유산소':60};WO[d(4)]={'등':50,'유산소':30};
     const CB=this.COMBO_CODES.map(c=>({id:'k'+(this.seq++),code:c,name:'',items:[]}));
     this.state={tab:'home',wide:this.isWide(),mode:'diet',selDate:this.TODAY,feedFilter:'all',sober:SB,calM:this.TODAY.slice(0,7),
-      set:{goalDate:'2026-08-10',startW:70,goalW:52,budget:10000,provider:'gemini',geminiKey:'',claudeKey:'',apiPass:'0000',diet:{kcal:1500,c:40,p:30,f:30},maint:{kcal:2000,c:50,p:25,f:25},
+      set:{goalDate:'2026-08-10',startW:70,goalW:50,budget:10000,provider:'gemini',geminiKey:'',claudeKey:'',apiPass:'0000',diet:{kcal:1500,c:40,p:30,f:30},maint:{kcal:2000,c:50,p:25,f:25},
         rule:{winS:'10:00',winE:'18:00',kcalMin:1200,pG:100,fG:71,waterMl:2000,firstFatG:8,carbUp:{1:2,6:1}}},
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,carbUp:{},safe:{},todo:{items:[],done:[]},
@@ -1275,7 +1275,7 @@ class Component extends DCLogic {
     '감량 속도가 주 체중의 1%를 넘으면 빠지는 것의 상당량이 근육이다. 60kg이면 주 0.6kg가 상한선. 주 0.5kg는 느린 게 아니라 정확한 것이다.',
     '체중이 멈춘 주에도 허리둘레·옷·사진은 계속 바뀐다. 지방이 빠진 자리를 물이 잠시 채우고 있을 뿐이다. 저울 하나만 보지 마라.',
     '식사창을 좁히면 총량이 저절로 줄어든다. 「무엇을」 고르기 전에 「언제까지」를 정하는 편이 훨씬 쉽다.',
-    '다이어트를 끝낸 사람이 되돌아오는 가장 큰 이유는 목표 체중에 도착한 다음 날 계획이 없기 때문이다. 52kg은 결승선이 아니라 갈아타는 지점이다.',
+    '다이어트를 끝낸 사람이 되돌아오는 가장 큰 이유는 목표 체중에 도착한 다음 날 계획이 없기 때문이다. 50kg은 결승선이 아니라 갈아타는 지점이다.',
     '물 2L를 채운 날과 못 채운 날의 간식 횟수를 세어 보면 대개 차이가 난다. 물은 살을 빼지 않지만 먹는 횟수를 줄인다.'];
   TNOTES=[
     {d:'2026-08-29',t:'웹 화면은 한 번에 한 칸만 본다',
@@ -1291,7 +1291,7 @@ class Component extends DCLogic {
     {d:'2026-08-28',t:'커피는 물 2L에 들어가지 않는다',
      b:'커피를 물로 계산하면 실제 수분은 계속 모자란 채로 간다. 공복에 많이 마시면 어지러움이 온다.\n\n물 2L는 살을 빼주는 장치가 아니라, 갈증을 식욕으로 잘못 읽는 것을 막는 장치다. 「배고픈 것 같다」의 상당수가 사실은 목마름이다.'},
     {d:'2026-08-28',t:'유산소는 근력의 대체재가 아니다',
-     b:'근육을 지키는 것은 단백질과 저항운동 둘뿐이다. 유산소만 늘리면 저울 숫자는 내려가도, 내려간 것의 상당량이 근육이다.\n\n같은 52kg이어도 근육을 데리고 도착한 몸과 근육을 버리고 도착한 몸은 완전히 다르다. 뒤쪽은 반드시 되돌아온다.'},
+     b:'근육을 지키는 것은 단백질과 저항운동 둘뿐이다. 유산소만 늘리면 저울 숫자는 내려가도, 내려간 것의 상당량이 근육이다.\n\n같은 50kg이어도 근육을 데리고 도착한 몸과 근육을 버리고 도착한 몸은 완전히 다르다. 뒤쪽은 반드시 되돌아온다.'},
     {d:'2026-08-28',t:'보상성 절식 금지 — 주 평균으로 본다',
      b:'「어제 많이 먹었으니 오늘 굶자」가 가장 위험한 습관이다. 굶은 날은 폭식으로 되돌아오고, 그 왕복이 대사를 깎는다.\n\n그래서 홈에 📊 주 평균 카드를 뒀다. 하루 숫자에 흔들리지 말고 7일 평균을 봐라. 한 끼 흔들렸다고 그날의 남은 끼니를 줄이지 않는다.'},
     {d:'2026-08-28',t:'어지러우면 지금 먹어라 — 안전이 클린보다 먼저다',
