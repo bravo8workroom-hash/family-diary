@@ -8,9 +8,9 @@
 <title>우리집 다이어트</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🥗</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../config.js?v=20260829c"></script>
-<script src="../store.js?v=20260829c"></script>
-<script src="./support.js?v=20260829c"></script>
+<script src="../config.js"></script>
+<script src="../store.js"></script>
+<script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
@@ -21,22 +21,18 @@
 <style>
 @media (min-width:600px){:root{--appw:560px}.app-shell{box-shadow:0 0 0 1px rgba(31,30,26,.08),0 18px 60px rgba(31,30,26,.12)}}
 @media (min-width:1024px){:root{--appw:640px}}
-/* web board (>=1024px, class set by JS): the phone shell unfolds - home/log/journal/calendar/feed all at once */
+/* web layout (>=1024px, class set by JS): one screen at a time - home is the board, the rest open from the left rail */
 .app-shell.wide{--appw:1200px}
 @media (min-width:1440px){.app-shell.wide{--appw:1560px}}
-.app-shell.wide .dash{display:grid!important;grid-template-columns:1fr 1fr;grid-template-areas:'home home' 'log cal' 'jr feed';align-items:start;gap:26px 28px;padding:22px 26px 34px 108px!important}
+.app-shell.wide .dash{display:block!important;padding:22px 26px 34px 108px!important}
 .app-shell.wide .dash>[data-screen-label]{min-width:0}
-.app-shell.wide .dash>[data-screen-label='홈']{grid-area:home}
-.app-shell.wide .dash>[data-screen-label='기록']{grid-area:log}
-.app-shell.wide .dash>[data-screen-label='일지']{grid-area:jr}
-.app-shell.wide .dash>[data-screen-label='달력']{grid-area:cal}
-.app-shell.wide .dash>[data-screen-label='피드']{grid-area:feed}
+.app-shell.wide .dash>[data-screen-label='기록'],.app-shell.wide .dash>[data-screen-label='트레이너'],.app-shell.wide .dash>[data-screen-label='달력'],.app-shell.wide .dash>[data-screen-label='피드']{max-width:940px;margin:0 auto}
 .app-shell.wide .dash>[data-screen-label]::before{content:attr(data-screen-label);font-size:12.5px;font-weight:800;letter-spacing:.05em;color:var(--accent,#8B887C);padding:0 2px 8px;border-bottom:2px solid var(--line,#EDEAE3)}
 .app-shell.wide .dash>[data-screen-label='홈']{display:block!important;column-count:2;column-gap:26px}
 @media (min-width:1440px){.app-shell.wide .dash>[data-screen-label='홈']{column-count:3}}
 .app-shell.wide .dash>[data-screen-label='홈']>*{break-inside:avoid;margin-bottom:14px}
 .app-shell.wide .dash>[data-screen-label='홈']::before{column-span:all;display:block;margin-bottom:12px}
-.app-shell.wide-set .dash{grid-template-columns:minmax(0,820px)!important;grid-template-areas:none!important;justify-content:center}
+.app-shell.wide-set .dash>[data-screen-label='설정']{max-width:820px;margin:0 auto}
 .app-shell.wide .tabbar{top:56px;right:auto!important;width:88px;grid-template-columns:1fr!important;grid-auto-rows:min-content;align-content:start;gap:2px;padding:14px 8px!important;border-top:0!important;border-right:1px solid var(--line,#EDEAE3)}
 .app-shell.wide .tabbar button{padding:11px 0!important;border-radius:12px}
 .app-shell.wide .tabbar button:hover{background:var(--chip,#F3F1EC)}
@@ -560,7 +556,73 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     </sc-if>
 
     <sc-if value="{{isJournal}}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="일지" style="display:flex;flex-direction:column;gap:14px">
+      <div data-screen-label="트레이너" style="display:flex;flex-direction:column;gap:14px">
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:18px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <div style="font-size:15px;font-weight:800">🗺 {{rmGoalW}}kg 로드맵</div>
+            <div style="font-size:11.5px;font-weight:700;color:#8B887C">{{rmPaceText}}</div>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:7px;margin-top:12px">
+            <span style="font-size:28px;font-weight:800;color:{{accent}};line-height:1">{{rmCurW}}</span>
+            <span style="font-size:13px;font-weight:700;color:#8B887C">kg · 남은 {{rmLeftW}}kg</span>
+          </div>
+          <div style="height:9px;border-radius:99px;background:{{chipBg}};margin-top:11px;overflow:hidden">
+            <div style="height:100%;width:{{rmPct}}%;background:{{accent}};border-radius:99px"></div>
+          </div>
+          <div style="font-size:12px;color:#8B887C;margin-top:8px;line-height:1.65">{{rmSummary}}</div>
+          <div style="margin-top:13px">
+            <sc-for list="{{rmSteps}}" as="rs" hint-placeholder-count="5">
+              <div style="display:flex;gap:10px;padding:12px 0;border-top:1px solid #F4F2ED">
+                <span style="font-size:14px;flex:none;width:20px;text-align:center;line-height:1.5">{{rs.mark}}</span>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+                    <span style="font-size:13.5px;font-weight:800;color:{{rs.titleColor}}">{{rs.title}}</span>
+                    <span style="font-size:11.5px;font-weight:700;color:{{rs.whenColor}};flex:none">{{rs.when}}</span>
+                  </div>
+                  <div style="font-size:11.5px;color:#B5B2A6;font-weight:700;margin-top:3px">{{rs.wText}}</div>
+                  <div style="font-size:12.5px;color:#6B6858;margin-top:6px;line-height:1.7">{{rs.desc}}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:4px">🏋️ 트레이너의 이번 주 계획</div>
+          <sc-for list="{{tpRows}}" as="tp" hint-placeholder-count="8">
+            <div style="display:flex;gap:9px;align-items:flex-start;padding:11px 0;border-top:1px solid #F7F6F2">
+              <span style="font-size:14px;flex:none;width:20px;text-align:center;line-height:1.4">{{tp.icon}}</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:800">{{tp.name}}</div>
+                <div style="font-size:12px;color:#8B887C;margin-top:3px;line-height:1.65">{{tp.note}}</div>
+              </div>
+              <span style="font-size:12px;font-weight:800;color:{{tp.valColor}};flex:none">{{tp.val}}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:4px">💬 트레이너의 생각</div>
+          <sc-for list="{{tvRows}}" as="tv" hint-placeholder-count="8">
+            <div style="padding:12px 0;border-top:1px solid #F7F6F2">
+              <div style="font-size:13px;font-weight:800">{{tv.t}}</div>
+              <div style="font-size:12.5px;color:#6B6858;margin-top:4px;line-height:1.75">{{tv.d}}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">🔥 다이어트 자극</div>
+          <div style="background:{{chipBg}};border-radius:{{radM}};padding:13px 15px;font-size:13px;font-weight:700;color:#4A4840;line-height:1.75">{{fuelToday}}</div>
+          <sc-for list="{{fuelRows}}" as="fu" hint-placeholder-count="7">
+            <div style="display:flex;gap:9px;padding:10px 0;border-top:1px solid #F7F6F2;margin-top:0">
+              <span style="font-size:12px;font-weight:800;color:{{accent}};flex:none;line-height:1.75">·</span>
+              <div style="font-size:12.5px;color:#6B6858;line-height:1.75">{{fu.t}}</div>
+            </div>
+          </sc-for>
+        </div>
+
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
           <button onClick="{{prevDay}}" style="border:0;background:{{chipBg}};width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:14px;color:#5C594E">◀</button>
           <label style="position:relative;display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 14px;border-radius:99px;background:{{chipBg}}">
@@ -572,26 +634,8 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
-            <div style="font-size:13px;font-weight:700;color:#8B887C">🛡 그날의 절대선</div>
-            <div style="font-size:13px;font-weight:800;color:{{jAbsColor}}">{{jAbsKept}} / 6</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:7px">
-            <sc-for list="{{jAbsRows}}" as="ja" hint-placeholder-count="6">
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:13px;width:18px;text-align:center;flex:none">{{ja.icon}}</span>
-                <span style="font-size:12px;font-weight:700;flex:1;min-width:0">{{ja.name}}</span>
-                <span style="font-size:11px;color:{{ja.valColor}};flex:none">{{ja.val}}</span>
-                <span style="font-size:13px;font-weight:800;flex:none;color:{{ja.markColor}}">{{ja.mark}}</span>
-              </div>
-            </sc-for>
-          </div>
-          <div style="font-size:11.5px;color:#8B887C;margin-top:11px;line-height:1.6">{{jCondLine}}</div>
-        </div>
-
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:8px">⚖️ 판단 / 결정</div>
-          <textarea value="{{jDecide}}" onChange="{{onJDecide}}" placeholder="예: 근력 주 2회 → 주 1회 유지 확정. 헬스장 위생 문제. 유산소는 주말." style="width:100%;box-sizing:border-box;min-height:120px;padding:12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;line-height:1.7;background:#FBFAF7;outline-color:{{accent}};resize:vertical"></textarea>
+          <textarea value="{{jDecide}}" onChange="{{onJDecide}}" placeholder="예: 근력 주 2회 → 주 1회 유지 확정. 헬스장 위생 문제. 유산소는 주말." style="width:100%;box-sizing:border-box;min-height:110px;padding:12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;line-height:1.7;background:#FBFAF7;outline-color:{{accent}};resize:vertical"></textarea>
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
@@ -613,6 +657,28 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <div onClick="{{jr.go}}" style="padding:11px 0;border-top:1px solid #F7F6F2;cursor:pointer">
               <div style="font-size:13px;font-weight:800;color:{{accent}}">{{jr.date}}</div>
               <div style="font-size:12.5px;color:#6B6858;margin-top:3px;line-height:1.6">{{jr.preview}}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:13px;font-weight:700;color:#8B887C">📌 다시 볼 대화</div>
+            <div style="font-size:12px;font-weight:800;color:{{accent}}">{{ntCount}}</div>
+          </div>
+          <div style="font-size:11.5px;color:#B5B2A6;line-height:1.6;margin-bottom:4px">트레이너와 나눈 이야기 중 두 번 세 번 봐야 할 것만 남겼어요. 제목을 누르면 펼쳐져요.</div>
+          <sc-for list="{{ntRows}}" as="nt" hint-placeholder-count="5">
+            <div style="border-top:1px solid #F7F6F2">
+              <button onClick="{{nt.toggle}}" style="width:100%;border:0;background:none;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;padding:12px 0">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:11px;font-weight:700;color:{{accent}}">{{nt.date}}</div>
+                  <div style="font-size:13.5px;font-weight:800;margin-top:3px;line-height:1.5">{{nt.title}}</div>
+                </div>
+                <span style="font-size:11px;color:#B5B2A6;flex:none">{{nt.chev}}</span>
+              </button>
+              <sc-if value="{{nt.open}}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:13px;color:#4A4840;line-height:1.9;white-space:pre-wrap;padding:0 0 14px">{{nt.body}}</div>
+              </sc-if>
             </div>
           </sc-for>
         </div>
@@ -852,7 +918,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     </sc-if>
   </div>
 
-  <div class="tabbar" style="position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-top:1px solid {{cardBorder}};display:grid;grid-template-columns:repeat(6,1fr);padding:8px 6px 20px;z-index:20">
+  <div class="tabbar" style="position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-top:1px solid {{cardBorder}};display:grid;grid-template-columns:repeat({{tabCols}},1fr);padding:8px 6px 20px;z-index:20">
     <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
       <button onClick="{{t.go}}" style="border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{t.color}}" stroke-width="{{t.sw}}" stroke-linecap="round" stroke-linejoin="round"><path d="{{t.path}}"></path></svg>
@@ -1179,7 +1245,7 @@ class Component extends DCLogic {
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,carbUp:{},safe:{},todo:{items:[],done:[]},
       stock:{shop:['아몬드','닭가슴살','귀리','단백질바 1박스','피자치즈(가져올 예정)'],home:[]},weekGoals:{},
-      cm:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,jTab:'decide',
+      cm:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,jTab:'decide',ntOpen:-1,
       editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
   fmt(n){return (n==null||n===''||isNaN(+n))?'—':(+n).toLocaleString('ko-KR')}
@@ -1192,6 +1258,44 @@ class Component extends DCLogic {
   COMBO_CODES=['A1','A2','A3','S1','S2','S3','S4','D1','D2','D3','D4'];
   CONDS=[{k:'dizzy',t:'어지러움',e:'😵',safe:true},{k:'shake',t:'손떨림',e:'🤲',safe:true},{k:'sweat',t:'식은땀',e:'💦',safe:true},{k:'nofood',t:'몇 시간째 못 먹음',e:'🕳',safe:true},{k:'afterlift',t:'근력 직후 고갈',e:'🪫',safe:true},{k:'heartburn',t:'속쓰림',e:'🔥'},{k:'period',t:'생리',e:'🩸'}];
   LIFTS=['하체','등','가슴+어깨','코어'];
+  /* 트레이너 자리 (일지 탭) — 생각 · 자극 · 다시 볼 대화. 화면 글자라 한글이다. */
+  TVIEW=[
+    {t:'저울은 하루에 1~2kg씩 출렁인다',d:'아침 공복, 화장실 다녀온 뒤, 같은 옷 — 조건을 고정하고 비교해라. 오늘 200g은 신호가 아니라 잡음이다.'},
+    {t:'부기 제품은 체지방과 무관하다',d:'수분이 빠진 것이지 살이 빠진 게 아니다. 저울이 잠깐 내려가는 것에 돈과 기대를 쓰지 마라.'},
+    {t:'약·주사는 기록만 한다',d:'용량과 증량 일정은 의사 영역이다. 앱과 트레이너는 적어 둘 뿐, 예측하거나 권하지 않는다.'},
+    {t:'정체기는 실패가 아니다',d:'2~3주 멈추는 것은 흔한 일이다. 여기서 더 굶는 것이 가장 흔한 실수다. 하던 것을 그대로 유지해라.'},
+    {t:'배고픔에도 종류가 있다',d:'위가 비어 꼬르륵거리는 것은 진짜, 화면을 보다 갑자기 생기는 것은 가짜다. 가짜는 물 한 컵과 15분이면 지나간다.'},
+    {t:'먹을 것을 미리 정해 두면 의지력을 안 쓴다',d:'조합식 서랍(A1~A3 · S1~S4 · D1~D4)이 그 장치다. 배고픈 상태에서 무엇을 먹을지 고르는 것이 가장 나쁜 순간이다.'},
+    {t:'집·가게 재고 안에서 먼저 찾아라',d:'배달과 가공식품은 기본값이 아니다. 설정의 🧺 재고에 있는 것으로 먼저 짜고, 모자랄 때만 밖을 본다.'},
+    {t:'잘한 날을 세라, 완벽한 날을 세지 마라',d:'절대선 6/6인 날만 세면 금방 지친다. 5/6인 날이 쌓이는 것이 곡선을 만든다.'}];
+  TFUEL=[
+    '단백질은 소화하는 데만 먹은 칼로리의 20~30%를 쓴다. 탄수는 5~10%, 지방은 0~3%. 같은 400kcal이어도 닭가슴살과 과자는 몸에 남는 양이 다르다.',
+    '근육 1kg은 가만히 있어도 하루 13kcal쯤 태운다. 작아 보이지만, 근육을 잃으면 「같은 걸 먹어도 찌는 몸」으로 바뀐다.',
+    '잠이 5시간 아래로 내려간 다음 날은 식욕 호르몬이 올라가고 포만 호르몬이 내려간다. 밤에 못 참는 건 의지가 아니라 호르몬 문제일 때가 많다.',
+    '감량 속도가 주 체중의 1%를 넘으면 빠지는 것의 상당량이 근육이다. 60kg이면 주 0.6kg가 상한선. 주 0.5kg는 느린 게 아니라 정확한 것이다.',
+    '체중이 멈춘 주에도 허리둘레·옷·사진은 계속 바뀐다. 지방이 빠진 자리를 물이 잠시 채우고 있을 뿐이다. 저울 하나만 보지 마라.',
+    '식사창을 좁히면 총량이 저절로 줄어든다. 「무엇을」 고르기 전에 「언제까지」를 정하는 편이 훨씬 쉽다.',
+    '다이어트를 끝낸 사람이 되돌아오는 가장 큰 이유는 목표 체중에 도착한 다음 날 계획이 없기 때문이다. 52kg은 결승선이 아니라 갈아타는 지점이다.',
+    '물 2L를 채운 날과 못 채운 날의 간식 횟수를 세어 보면 대개 차이가 난다. 물은 살을 빼지 않지만 먹는 횟수를 줄인다.'];
+  TNOTES=[
+    {d:'2026-08-29',t:'웹 화면은 한 번에 한 칸만 본다',
+     b:'넓은 화면에서 홈·기록·일지·달력·피드를 한 판에 다 깔았더니, 홈 안에 또 화면이 들어 있는 꼴이 됐다.\n\n그래서 웹에서는 홈만 판에 남기고 나머지는 왼쪽 버튼으로 하나씩 열게 바꿨다. 피드는 지우지 않고 잠시 숨겨 뒀다 — 부르면 그대로 돌아온다.'},
+    {d:'2026-08-29',t:'목표일은 이번 주 일요일로 계속 굴러간다',
+     b:'먼 목표일 하나를 잡아 두면 매일이 남 얘기가 된다.\n\n그래서 앱을 열 때마다 목표일을 이번 주 일요일로 옮긴다. 홈의 D-day는 늘 「이번 주 마감」을 가리키고, 그 옆에 이번 주 목표 체중이 붙는다.\n\n한 번에 18kg을 보지 말고 이번 주 0.5kg만 봐라. 그게 목표일을 굴리는 이유다.'},
+    {d:'2026-08-28',t:'절대선 6개 — 의지가 아니라 화면이 지키게 만든다',
+     b:'식사창 10:00–18:00 / 칼로리 하한 1,200 / 단백질 100g / 첫 끼에 지방 / 물 2L / 우유 금지.\n\n여섯 개 중 몇 개를 지켰는지가 홈 맨 위에 매일 뜬다. 「오늘 잘했나」를 기분으로 판단하지 않게 만드는 장치다.\n\n값은 설정에서 바꿀 수 있지만, 바꾸는 것과 어기는 것은 다르다.'},
+    {d:'2026-08-28',t:'칼로리 1,200은 상한이 아니라 하한이다',
+     b:'가장 많이 헷갈렸던 대목. 1,200은 「이 밑으로 내려가면 안 되는 선」이다.\n\n그 밑으로 먹은 날은 잘한 날이 아니라 손해 본 날이다. 몸은 부족분을 근육에서 꺼내 쓰고, 대사가 내려가서 같은 걸 먹어도 찌는 몸이 된다.\n\n그래서 앱은 초과가 아니라 미달을 경고한다.'},
+    {d:'2026-08-28',t:'지방을 무서워하지 마라 — 71g은 설계값이다',
+     b:'「기름진 것 피하라」는 증량 직후 며칠에만 해당하는 말이었다. 평소의 지방 71g은 일부러 잡아 둔 값이고, 목적은 담석 예방이다.\n\n오래 굶고 지방을 거의 안 먹으면 쓸개가 담즙을 비우지 않아 돌이 생긴다. 그래서 10시 첫 끼에 지방이 반드시 들어가야 한다.\n\n치즈·아몬드를 「지방이라서」 빼지 마라.'},
+    {d:'2026-08-28',t:'커피는 물 2L에 들어가지 않는다',
+     b:'커피를 물로 계산하면 실제 수분은 계속 모자란 채로 간다. 공복에 많이 마시면 어지러움이 온다.\n\n물 2L는 살을 빼주는 장치가 아니라, 갈증을 식욕으로 잘못 읽는 것을 막는 장치다. 「배고픈 것 같다」의 상당수가 사실은 목마름이다.'},
+    {d:'2026-08-28',t:'유산소는 근력의 대체재가 아니다',
+     b:'근육을 지키는 것은 단백질과 저항운동 둘뿐이다. 유산소만 늘리면 저울 숫자는 내려가도, 내려간 것의 상당량이 근육이다.\n\n같은 52kg이어도 근육을 데리고 도착한 몸과 근육을 버리고 도착한 몸은 완전히 다르다. 뒤쪽은 반드시 되돌아온다.'},
+    {d:'2026-08-28',t:'보상성 절식 금지 — 주 평균으로 본다',
+     b:'「어제 많이 먹었으니 오늘 굶자」가 가장 위험한 습관이다. 굶은 날은 폭식으로 되돌아오고, 그 왕복이 대사를 깎는다.\n\n그래서 홈에 📊 주 평균 카드를 뒀다. 하루 숫자에 흔들리지 말고 7일 평균을 봐라. 한 끼 흔들렸다고 그날의 남은 끼니를 줄이지 않는다.'},
+    {d:'2026-08-28',t:'어지러우면 지금 먹어라 — 안전이 클린보다 먼저다',
+     b:'어지러움 · 손떨림 · 식은땀 · 몇 시간째 못 먹음 · 근력운동 직후 고갈.\n\n이 중 하나라도 있으면 깨끗한 음식을 찾지 말고 손에 잡히는 것을 지금 먹는다. 「다이어트 중인데」는 이때 참으라는 뜻이 아니다.\n\n컨디션 칩을 누르면 앱이 자동으로 안전 예외를 켜고 홈에 배너를 띄운다.'}];
   RULE(){return Object.assign({winS:'10:00',winE:'18:00',kcalMin:1200,pG:100,fG:71,waterMl:2000,firstFatG:8,weekPace:0.5,carbUp:{1:2,6:1}},this.state.set.rule||{})}
   ymd(dt){const z=n=>String(n).padStart(2,'0');return dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate())}
   addDays(ds,n){const dt=new Date(ds+'T00:00:00');dt.setDate(dt.getDate()+n);return this.ymd(dt)}
@@ -1447,7 +1551,7 @@ class Component extends DCLogic {
   isWide(){try{return typeof window!=='undefined'&&!!window.matchMedia&&window.matchMedia('(min-width:1024px)').matches}catch(_){return false}}
   watchWide(){try{if(typeof window==='undefined'||!window.matchMedia)return;const m=window.matchMedia('(min-width:1024px)');this._mq=m;this._onMq=e=>this.setState({wide:e.matches});m.addEventListener?m.addEventListener('change',this._onMq):m.addListener(this._onMq);if(m.matches!==this.state.wide)this.setState({wide:m.matches})}catch(_){}}
   componentWillUnmount(){try{const m=this._mq;if(m&&this._onMq)m.removeEventListener?m.removeEventListener('change',this._onMq):m.removeListener(this._onMq)}catch(_){}}
-  scrollPane(k){const L={home:'\uD648',log:'\uAE30\uB85D',jr:'\uC77C\uC9C0',cal:'\uB2EC\uB825',feed:'\uD53C\uB4DC'}[k];if(!L||typeof document==='undefined')return;setTimeout(()=>{try{const el=document.querySelector('.dash>[data-screen-label="'+L+'"]');if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}},0)}
+  scrollPane(k){const L={home:'\uD648',log:'\uAE30\uB85D',jr:'\uD2B8\uB808\uC774\uB108',cal:'\uB2EC\uB825',feed:'\uD53C\uB4DC'}[k];if(!L||typeof document==='undefined')return;setTimeout(()=>{try{const el=document.querySelector('.dash>[data-screen-label="'+L+'"]');if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}},0)}
   componentDidMount(){this.watchWide();const el=this.stripRef.current;if(el)el.scrollLeft=el.scrollWidth;
     this._doc={};
     window.FamilyStore.start({seed:()=>({}),onRemote:doc=>{this._doc=doc;this.adopt(doc.diet)}}).then(async doc=>{
@@ -1461,7 +1565,6 @@ class Component extends DCLogic {
   stripClick=e=>{if(this._noClick){e.stopPropagation();e.preventDefault()}}
   renderVals(){
     const S=this.state,pr=this.props;
-    const board=!!S.wide&&S.tab!=='set';
     const themes={
       '공주님 핑크':{accent:'#E85D9F',accent2:'#F5A8CC',appBg:'#FDF1F6',cardBg:'#FFFFFF',cardBorder:'#F6D9E7',chipBg:'#F8ECF2',diet:'#E85D9F',dietSoft:'#FBE3EE',maint:'#9B7BD8',maintSoft:'#EFE9FA',logo:'🎀'},
       '클린 그린':{accent:'#17A673',accent2:'#7BD0AC',appBg:'#F5F4F0',cardBg:'#FFFFFF',cardBorder:'#ECEAE4',chipBg:'#F1F0EB',diet:'#17A673',dietSoft:'#DDF2E9',maint:'#5B8DEF',maintSoft:'#E1EAFD',logo:'D'},
@@ -1594,7 +1697,7 @@ class Component extends DCLogic {
           valColor:a.ok?'#17A673':a.na?'#B5B2A6':'#E5484D',
           mark:a.ok?'✓':a.na?'·':'✕',
           markColor:a.ok?'#17A673':a.na?'#D8D5CB':'#E5484D'}))}};
-    const absT=mkAbs(this.TODAY),absSel=mkAbs(S.selDate);
+    const absT=mkAbs(this.TODAY);
     const safeT=this.safeOn(this.TODAY);
     const toggleSafe=()=>{const SF={...(S.safe||{})};if(SF[this.TODAY])delete SF[this.TODAY];else SF[this.TODAY]=true;
       this.setState({safe:SF});
@@ -1631,7 +1734,49 @@ class Component extends DCLogic {
     const jSet=k=>e=>{const J={...(S.journal||{})};const day={...this.journalOf(S.selDate),[k]:e.target.value};
       if(day.decide||day.plan||day.memo)J[S.selDate]=day;else delete J[S.selDate];this.setState({journal:J})};
     const jKeys=Object.keys(S.journal||{}).filter(k=>{const v=S.journal[k]||{};return v.decide||v.plan||v.memo}).sort().reverse().slice(0,8);
-    const condNames=ds=>this.CONDS.filter(c=>this.condOf(ds)[c.k]).map(c=>c.e+' '+c.t);
+    /* 🗺 트레이너 — 로드맵은 시작 체중과 목표 체중 사이를 5단계로 나눈다 */
+    const md=ds=>(+ds.slice(5,7))+'월 '+(+ds.slice(8,10))+'일';
+    const rmStart=+gset.startW||wkp.cur,rmGoalW=+gset.goalW,rmCur=wkp.cur;
+    const rmTotal=Math.max(0.1,rmStart-rmGoalW),rmDone=Math.max(0,Math.min(rmTotal,rmStart-rmCur));
+    const RMDEF=[
+      {p:0.20,t:'1단계 · 습관 고정',d:'숫자보다 「빠짐없이」가 먼저다. 절대선 6개를 매일 다 지키는 것이 이 단계의 전부다.'},
+      {p:0.40,t:'2단계 · 첫 정체기 통과',d:'2~3주 멈추는 것은 정상이다. 여기서 굶으면 근육이 먼저 빠진다 — 단백질을 사수한다.'},
+      {p:0.60,t:'3단계 · 근육 지키며 감량',d:'저항운동 주 2회를 고정한다. 유산소는 근력의 대체재가 아니다.'},
+      {p:0.85,t:'4단계 · 마지막 구간',d:'속도가 느려지는 것이 정상이다. 주 0.3~0.5kg이면 충분히 잘 가고 있는 것이다.'},
+      {p:1.00,t:'완주 · 유지로 전환',d:'끝이 아니라 갈아타는 지점이다. 유지 모드로 바꾸고 칼로리를 천천히 올린다.'}];
+    const rmRaw=RMDEF.map(x=>{const w=+(rmStart-rmTotal*x.p).toFixed(1);
+      return {w,done:rmCur<=w+0.05,wk:Math.max(1,Math.ceil((rmCur-w)/wkp.pace)),t:x.t,d:x.d}});
+    const rmNow=rmRaw.findIndex(x=>!x.done);
+    const rmSteps=rmRaw.map((x,i)=>({mark:x.done?'✅':(i===rmNow?'🔵':'⚪'),title:x.t,desc:x.d,
+      titleColor:x.done?'#B5B2A6':(i===rmNow?th.accent:'#1F1E1A'),
+      when:x.done?'지나옴':(i===rmNow?'진행 중':'약 '+x.wk+'주 뒤'),
+      whenColor:i===rmNow?th.accent:'#B5B2A6',
+      wText:fmt(x.w)+'kg 지점'+(x.done?'':' · '+md(this.addDays(this.TODAY,x.wk*7))+' 무렵')}));
+    const rmEta=this.addDays(this.TODAY,Math.max(0,wkp.weeksLeft)*7);
+    let rmLift=0;for(let i=0;i<7;i++){if((this.liftsOf(this.addDays(wkp.ws,i))||[]).length)rmLift++}
+    const CUD=['일','월','화','수','목','금','토'],cuR=R52.carbUp||{};
+    const cuTxt=Object.keys(cuR).filter(k=>+cuR[k]>0).map(k=>CUD[+k]+' '+cuR[k]).join(' · ')||'없음';
+    const cuSum=Object.keys(cuR).reduce((a,k)=>a+(+cuR[k]||0),0);
+    const tpRows=[
+      {icon:'⚖️',name:'이번 주 목표 '+fmt(wkp.goal)+'kg',val:wkp.need>0?('-'+fmt(wkp.need)+'kg'):'달성',valColor:wkp.need>0?th.accent:'#17A673',
+       note:wkp.need>0?('오늘 '+fmt(wkp.cur)+'kg에서 '+fmt(wkp.need)+'kg 더. 이번 주 '+wkp.daysLeft+'일 남았다.'):'이번 주 몫은 이미 채웠다. 무리해서 더 깎지 마라.'},
+      {icon:'🍗',name:'단백질 매일 '+R52.pG+'g',val:'협상 불가',valColor:th.accent,
+       note:'이 하나가 근육을 지킨다. 못 채운 날은 다음 날 몰아 먹지 말고 그날 안에 채워라.'},
+      {icon:'🕙',name:'식사창 '+R52.winS+'–'+R52.winE,val:'매일',valColor:'#8B887C',
+       note:'첫 끼에 지방 '+R52.firstFatG+'g 이상 — 담석 예방이다. 창 밖의 끼니는 빨갛게 표시된다.'},
+      {icon:'🔥',name:'칼로리 '+fmt(R52.kcalMin)+' 하한',val:'하한',valColor:'#8B887C',
+       note:'상한이 아니라 하한이다. 이 밑으로 내려간 날은 다이어트가 아니라 손해 본 날이다.'},
+      {icon:'💧',name:'물 '+(R52.waterMl/1000)+'L',val:'매일',valColor:'#8B887C',
+       note:'커피는 여기에 들어가지 않는다. 갈증을 식욕으로 잘못 읽는 것을 막아 준다.'},
+      {icon:'🏋️',name:'근력 주 2회',val:rmLift+'/2회',valColor:rmLift>=2?'#17A673':th.accent,
+       note:'하체 · 등 · 가슴+어깨 · 코어 중 둘. 유산소는 이것의 대체재가 아니다.'},
+      {icon:'🍚',name:'탄수 얹기 '+cuTxt,val:'주 '+cuSum+'칸',valColor:'#8B887C',
+       note:'그 외 요일에는 자리가 없다. 미리 정해 두면 충동이 계획이 된다.'},
+      {icon:'🚨',name:'안전 예외',val:'항상',valColor:'#E5484D',
+       note:'어지러움·손떨림·식은땀·못 먹음·근력 직후에는 클린을 따지지 말고 지금 먹어라.'}];
+    const fuelIdx=(+this.TODAY.replace(/-/g,''))%this.TFUEL.length;
+    /* 잠시 숨겨 둔 탭 — 화면 코드는 그대로 살아 있다. 되살리려면 여기서 빼기만 하면 된다. */
+    const HIDE_TABS=['feed'];
     const setRule=(k,txt)=>e=>{const v=e.target.value;const R=Object.assign({},this.RULE());R[k]=txt?String(v):(+v||0);
       this.setState({set:{...this.state.set,rule:R}})};
     const setCarb=dow=>e=>{const R=Object.assign({},this.RULE());R.carbUp=Object.assign({},R.carbUp||{});R.carbUp[dow]=+e.target.value||0;
@@ -1700,9 +1845,15 @@ class Component extends DCLogic {
       lmNames:this.LIFTS.map(nm=>({name:nm,pick:()=>this.setState({liftM:{...this.state.liftM,name:nm}}),
         bg:lm&&lm.name===nm?th.accent:th.chipBg,color:lm&&lm.name===nm?'#fff':'#5C594E'})),
       lmCancel:()=>this.setState({liftM:null}),lmSave,
-      /* 일지 */
-      jAbsRows:absSel.rows,jAbsKept:absSel.kept,jAbsColor:absSel.color,
-      jCondLine:condNames(S.selDate).length?('컨디션 · '+condNames(S.selDate).join(' · ')+(this.condOf(S.selDate).note?(' — '+this.condOf(S.selDate).note):'')):'컨디션 기록 없음',
+      /* 일지 = 트레이너 자리 */
+      rmGoalW:fmt(rmGoalW),rmCurW:fmt(rmCur),rmLeftW:fmt(Math.max(0,+(rmCur-rmGoalW).toFixed(1))),
+      rmPct:Math.max(0,Math.min(100,Math.round(rmDone/rmTotal*100))),rmPaceText:'주 '+wkp.pace+'kg 페이스',
+      rmSummary:'시작 '+fmt(rmStart)+'kg에서 '+fmt(+rmDone.toFixed(1))+'kg 왔다 · 남은 약 '+wkp.weeksLeft+'주 · 이 페이스면 '+md(rmEta)+' 무렵 '+fmt(rmGoalW)+'kg',
+      rmSteps,tpRows,tvRows:this.TVIEW,
+      fuelToday:this.TFUEL[fuelIdx],fuelRows:this.TFUEL.filter((_,i)=>i!==fuelIdx).map(t=>({t})),
+      ntCount:this.TNOTES.length+'건',
+      ntRows:this.TNOTES.map((n,i)=>({date:this.lbl(n.d),title:n.t,body:n.b,open:S.ntOpen===i,chev:S.ntOpen===i?'▲':'▼',
+        toggle:()=>this.setState({ntOpen:this.state.ntOpen===i?-1:i})})),
       jDecide:jrn.decide,onJDecide:jSet('decide'),
       jPlan:jrn.plan,onJPlan:jSet('plan'),
       jMemo:jrn.memo,onJMemo:jSet('memo'),
@@ -1755,7 +1906,7 @@ class Component extends DCLogic {
       emptyStarMsg:royal?'게시물에서 ⭐를 누르면 여기 모인답니다':'게시물에서 ⭐를 눌러 모아보세요',
       emptyFeedMsg:royal?'아직 게시물이 없어요':'아직 게시물이 없어요',
       modeLabel:modeL(S.mode),modeColor:modeC(S.mode),modeBg:modeB(S.mode),
-      isHome:board||S.tab==='home',isLog:board||S.tab==='log',isFeed:board||S.tab==='feed',isSet:S.tab==='set',isCal:board||S.tab==='cal',isJournal:board||S.tab==='jr',
+      isHome:S.tab==='home',isLog:S.tab==='log',isFeed:S.tab==='feed',isSet:S.tab==='set',isCal:S.tab==='cal',isJournal:S.tab==='jr',
       shellCls:S.wide?(S.tab==='set'?'wide wide-set':'wide'):'',
       calLabel:cy+'년 '+cmn+'월',calCells,
       calPrev:()=>this.setState({calM:(cmn===1?cy-1:cy)+'-'+pad2(cmn===1?12:cmn-1)}),
@@ -1862,7 +2013,9 @@ class Component extends DCLogic {
       cInput:S.cInput,onCInput:e=>this.setState({cInput:e.target.value}),
       onCKey:e=>{if(e.key==='Enter'&&pmv.onSend)pmv.onSend()},
       toastOn:!!S.toastMsg,toastMsg:S.toastMsg,
-      tabs:[{k:'home',path:'M4.5 11.2 12 4.8l7.5 6.4M6.5 10v8a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-8',label:'홈'},{k:'log',path:'M5.5 18.5l.9-3.6L16.6 4.7a2 2 0 0 1 2.8 2.8L9.2 17.7l-3.7.8z',label:'기록'},{k:'jr',path:'M6.5 4.5h9A1.5 1.5 0 0 1 17 6v13.5l-3-2-3 2-3-2-2.5 1.7V6a1.5 1.5 0 0 1 1.5-1.5zM9.5 9h5M9.5 12.5h3.5',label:'일지'},{k:'cal',path:'M4.5 8.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zM4.5 10.5h15M8.5 3.5v3M15.5 3.5v3M8.5 14h.01M12 14h.01M15.5 14h.01',label:'달력'},{k:'feed',path:'M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zM5 15.5l3.5-3 3.5 3 3-2.5 4 3M9 8.5h.01',label:'피드'},{k:'set',path:'M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zM12 3.6v1.9M12 18.5v1.9M3.6 12h1.9M18.5 12h1.9M6.1 6.1l1.3 1.3M16.6 16.6l1.3 1.3M17.9 6.1l-1.3 1.3M7.4 16.6l-1.3 1.3',label:'설정'}].map(t=>({path:t.path,label:t.label,go:()=>{this.setState({tab:t.k});if(this.state.wide&&t.k!=='set')this.scrollPane(t.k)},color:S.tab===t.k?th.accent:'#B5B2A6',sw:S.tab===t.k?2.4:2})),
+      tabCols:6-HIDE_TABS.length,
+      tabs:[{k:'home',path:'M4.5 11.2 12 4.8l7.5 6.4M6.5 10v8a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-8',label:'홈'},{k:'log',path:'M5.5 18.5l.9-3.6L16.6 4.7a2 2 0 0 1 2.8 2.8L9.2 17.7l-3.7.8z',label:'기록'},{k:'jr',path:'M6.5 4.5h9A1.5 1.5 0 0 1 17 6v13.5l-3-2-3 2-3-2-2.5 1.7V6a1.5 1.5 0 0 1 1.5-1.5zM9.5 9h5M9.5 12.5h3.5',label:'트레이너'},{k:'cal',path:'M4.5 8.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zM4.5 10.5h15M8.5 3.5v3M15.5 3.5v3M8.5 14h.01M12 14h.01M15.5 14h.01',label:'달력'},{k:'feed',path:'M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zM5 15.5l3.5-3 3.5 3 3-2.5 4 3M9 8.5h.01',label:'피드'},{k:'set',path:'M12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4zM12 3.6v1.9M12 18.5v1.9M3.6 12h1.9M18.5 12h1.9M6.1 6.1l1.3 1.3M16.6 16.6l1.3 1.3M17.9 6.1l-1.3 1.3M7.4 16.6l-1.3 1.3',label:'설정'}].filter(t=>!HIDE_TABS.includes(t.k))
+        .map(t=>({path:t.path,label:t.label,go:()=>{this.setState({tab:t.k});if(this.state.wide&&t.k!=='set')this.scrollPane(t.k)},color:S.tab===t.k?th.accent:'#B5B2A6',sw:S.tab===t.k?2.4:2})),
       ...pmv};
   }
 }
