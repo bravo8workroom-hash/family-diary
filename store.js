@@ -386,7 +386,7 @@
       'background:#FAF6EF;color:#3F3A33;font-size:15px;outline:none;margin-top:8px;font-family:inherit;';
     box.appendChild(el('div', 'font-size:13px;font-weight:800;color:#3F3A33;', '새 가족 비밀번호'));
     box.appendChild(el('div', 'font-size:11px;color:#8A8177;margin-top:4px;line-height:1.6;',
-      '영문+숫자 12자 이상을 권합니다.<br>바꾸면 다른 가족 폰에서 한 번만 새로 넣으면 돼요.'));
+      '6자 이상.<br>바꾸면 다른 가족 폰에서 한 번만 새로 넣으면 돼요.'));
     var n1 = el('input', inp2); n1.type = 'password'; n1.placeholder = '새 비밀번호'; n1.autocomplete = 'new-password';
     var n2 = el('input', inp2); n2.type = 'password'; n2.placeholder = '한 번 더'; n2.autocomplete = 'new-password';
     var save = el('button', 'width:100%;margin-top:10px;background:#F59E0B;color:#fff;border:none;border-radius:10px;' +
@@ -401,7 +401,7 @@
     };
     save.onclick = async function () {
       note.style.color = '#E5484D';
-      if (n1.value.length < 8) { note.textContent = '8자 이상으로 정해 주세요'; return; }
+      if (n1.value.length < 6) { note.textContent = '6자 이상으로 정해 주세요'; return; }
       if (n1.value !== n2.value) { note.textContent = '두 번 넣은 비밀번호가 서로 달라요'; return; }
       save.disabled = true; save.textContent = '바꾸는 중...'; note.textContent = '';
       var r = await sb.auth.updateUser({ password: n1.value });
