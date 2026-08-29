@@ -1497,13 +1497,16 @@ class Component extends DCLogic {
     const pace=+R.weekPace>0?+R.weekPace:0.5;
     const cur=this.wAt(this.TODAY)!=null?this.wAt(this.TODAY):+g.startW;
     const swRaw=this.wIn(ws,this.TODAY),sw=swRaw!=null?swRaw:cur;
-    /* 목표는 늘 지금 체중에 붙는다 — 주중에 늘었으면 지금 체중이 기준이 된다. */
+    const daysLeft=Math.max(0,Math.round((new Date(we+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5)+1);
+    /* 남은 날수만큼만 요구한다. 주 페이스(1kg)를 남은 하루에 통째로 물리면 그건 굶으라는 말이고, 이 앱이 막으려는 바로 그 짓이다. */
+    const reach=cur-pace*(Math.min(7,Math.max(1,daysLeft))/7);
+    /* 빠졌으면 주 시작값에 붙어 목표가 도망가지 않고, 늘었으면 남은 날에 닿는 곳까지만 올라간다. */
+    const auto=Math.max(sw-pace,reach);
     const base=Math.max(sw,cur);
     const man=(this.state.weekGoals||{})[ws];
-    const goal=+Math.max(+g.goalW,(man!=null&&man!==''?+man:base-pace)).toFixed(1);
+    const goal=+Math.max(+g.goalW,(man!=null&&man!==''?+man:auto)).toFixed(1);
     const need=+(cur-goal).toFixed(1),span=+(base-goal).toFixed(1);
     const pct=span>0?Math.max(0,Math.min(100,Math.round((base-cur)/span*100))):(need<=0?100:0);
-    const daysLeft=Math.max(0,Math.round((new Date(we+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5)+1);
     const weeksLeft=Math.max(0,Math.ceil((cur-(+g.goalW))/pace));
     return {ws,we,pace,cur,sw,base,goal,need,pct,daysLeft,weeksLeft,manual:man!=null&&man!==''}}
   famUrl(){try{const p=String(location.pathname||'');if(/(^|\/)diet\/(index\.html)?$/.test(p))return '../'}catch(e){}
@@ -2112,7 +2115,7 @@ class Component extends DCLogic {
       tdDraft:S.tdDraft||'',tdOnDraft:e=>this.setState({tdDraft:e.target.value}),
       tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,tdPaste,tdPhDraft,tdHasPh:!!tdPh.length,
       wkRange:noDow(wkp.ws)+'~'+noDow(wkp.we),wkGoalText:fmt(wkp.goal)+' kg',wkColor,wkPct:wkp.pct,wkStats,
-      wkNote:'지금 '+fmt(wkp.cur)+'kg 기준 · 주 '+wkp.pace+'kg 페이스 · 이번 주 '+wkp.daysLeft+'일 남음 · 최종 '+fmt(+gset.goalW)+'kg까지 약 '+wkp.weeksLeft+'주',
+      wkNote:'남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg — 주 '+wkp.pace+'kg 페이스를 남은 날수로 나눈 몫이에요 · 최종 '+fmt(+gset.goalW)+'kg까지 약 '+wkp.weeksLeft+'주',
       sWeekGoal:wkp.manual?wkp.goal:'',sWeekPace:wkp.pace,onWeekPace:setRule('weekPace'),
       onWeekGoal:e=>{const v=String(e.target.value||'').trim();const WG={...(S.weekGoals||{})};
         if(v==='')delete WG[wkp.ws];else WG[wkp.ws]=+v||0;
