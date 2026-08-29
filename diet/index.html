@@ -162,35 +162,27 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           <div style="font-size:11px;color:#B5B2A6;margin-top:10px;line-height:1.55;text-align:center">{{wkNote}}</div>
         </div>
 
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:18px">
-          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">오늘 점수</div>
-          <sc-if value="{{hasTodayLog}}" hint-placeholder-val="{{ true }}">
-            <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px">
-              <div style="display:flex;align-items:baseline;gap:3px">
-                <span style="font-size:42px;font-weight:800;letter-spacing:-1px;line-height:1;color:{{modeColor}}">{{todayScore}}</span>
-                <span style="font-size:15px;font-weight:700;color:#8B887C">점</span>
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:11px">🧭 오늘의 조언 <span style="font-weight:600;color:#B5B2A6">· 그저께 · 어제 · 오늘</span></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+            <sc-for list="{{a3Rows}}" as="r" hint-placeholder-count="3">
+              <div style="background:{{r.bg}};border-radius:{{radS}};padding:10px 4px;text-align:center">
+                <div style="font-size:10.5px;font-weight:700;color:{{r.labelColor}}">{{r.label}}</div>
+                <div style="font-size:9.5px;color:#B5B2A6;margin-top:1px">{{r.date}}</div>
+                <div style="font-size:16px;font-weight:800;margin-top:6px;color:{{r.wColor}}">{{r.w}}<span style="font-size:10px;color:#B5B2A6;font-weight:600"> kg</span></div>
+                <div style="font-size:10.5px;color:#8B887C;font-weight:600;margin-top:6px">{{r.kcal}}</div>
+                <div style="font-size:10.5px;color:{{r.pColor}};font-weight:700;margin-top:2px">{{r.p}}</div>
               </div>
-              <div style="font-size:13px;color:#8B887C;font-weight:600">{{todayKcal}} / {{goalKcal}} kcal</div>
-            </div>
-            <div style="display:flex;height:10px;border-radius:99px;overflow:hidden;background:{{chipBg}}">
-              <div style="width:{{segC}}%;background:#E9A23B"></div>
-              <div style="width:{{segP}}%;background:#E4618C"></div>
-              <div style="width:{{segF}}%;background:#5B8DEF"></div>
-            </div>
-            <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap">
-              <sc-for list="{{macroLegend}}" as="m" hint-placeholder-count="3">
-                <div style="display:flex;align-items:center;gap:5px;font-size:12px">
-                  <span style="width:8px;height:8px;border-radius:99px;background:{{m.color}}"></span>
-                  <span style="font-weight:700">{{m.name}}</span>
-                  <span style="color:#1F1E1A;font-weight:600">{{m.a}}%</span>
-                  <span style="color:#B5B2A6">/ 목표 {{m.g}}%</span>
-                </div>
-              </sc-for>
-            </div>
-          </sc-if>
-          <sc-if value="{{noTodayLog}}" hint-placeholder-val="{{ false }}">
-            <div style="padding:18px 0;text-align:center;color:#B5B2A6;font-size:14px">{{emptyScoreMsg}}</div>
-          </sc-if>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:13px">
+            <sc-for list="{{a3Lines}}" as="l" hint-placeholder-count="4">
+              <div style="display:flex;gap:8px;align-items:flex-start">
+                <span style="font-size:13px;flex:none;width:18px;text-align:center;line-height:1.6">{{l.icon}}</span>
+                <div style="flex:1;min-width:0;font-size:12px;line-height:1.65;font-weight:600;color:{{l.color}}">{{l.t}}</div>
+              </div>
+            </sc-for>
+          </div>
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
@@ -378,6 +370,12 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
                 <button onClick="{{m.combo}}" title="조합식에서 담기" style="border:0;background:{{chipBg}};color:#5C594E;border-radius:99px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer">📦 조합식</button>
                 <button onClick="{{m.add}}" style="border:0;background:{{chipBg}};color:#5C594E;border-radius:99px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">＋ 추가</button>
               </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px">
+              <sc-for list="{{m.quick}}" as="q" hint-placeholder-count="3">
+                <button onClick="{{q.tap}}" style="border:1px solid {{cardBorder}};background:{{chipBg}};color:{{accent}};border-radius:99px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer">＋ {{q.label}}</button>
+              </sc-for>
+              <button onClick="{{m.favOpen}}" title="자주 먹는 음식 전부 보기" style="border:1.5px dashed #D8D5CB;background:none;color:#8B887C;border-radius:99px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer">⚡ 자주 먹는 것</button>
             </div>
             <sc-if value="{{m.empty}}" hint-placeholder-val="{{ false }}">
               <div style="padding:8px 0 4px;color:#B5B2A6;font-size:13px">{{emptyMealMsg}}</div>
@@ -1132,6 +1130,47 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     </div>
   </sc-if>
 
+  <sc-if value="{{fvOn}}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:45">
+      <div onClick="{{fvClose}}" style="position:absolute;inset:0;background:rgba(31,30,26,.45)"></div>
+      <div class="sheet" style="position:absolute;left:0;right:0;bottom:0;background:{{cardBg}};border-radius:{{radL}} {{radL}} 0 0;padding:20px 20px 28px;max-height:84%;overflow-y:auto;display:flex;flex-direction:column;gap:9px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:16px;font-weight:800">⚡ 자주 먹는 음식 · {{fvMealLabel}}</span>
+          <button onClick="{{fvClose}}" style="border:0;background:none;color:#8B887C;font-size:18px;cursor:pointer">✕</button>
+        </div>
+        <div style="font-size:11.5px;color:#8B887C;line-height:1.6">{{fvHint}}</div>
+        <div style="font-size:12px;font-weight:800;color:#8B887C;margin-top:2px">⭐ 내 목록</div>
+        <sc-if value="{{fvMineEmpty}}" hint-placeholder-val="{{ false }}">
+          <div style="color:#B5B2A6;font-size:12.5px">아직 비어 있어요 — 아래에서 ⭐를 누르면 여기로 올라와요</div>
+        </sc-if>
+        <sc-for list="{{fvMine}}" as="fr" hint-placeholder-count="6">
+          <div onClick="{{fr.tap}}" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid {{cardBorder}};background:{{cardBg}};border-radius:{{radM}};padding:11px 13px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{fr.name}}</div>
+              <div style="font-size:11px;color:#8B887C;margin-top:2px">{{fr.summary}}</div>
+            </div>
+            <span style="font-size:12px;font-weight:800;flex:none;color:{{accent}}">담기</span>
+            <button onClick="{{fr.del}}" title="목록에서 빼기" style="border:0;background:none;color:#B5B2A6;font-size:14px;cursor:pointer;flex:none;padding:4px">✕</button>
+          </div>
+        </sc-for>
+        <div style="font-size:12px;font-weight:800;color:#8B887C;margin-top:6px">🕘 최근 기록에서</div>
+        <sc-if value="{{fvNoRecent}}" hint-placeholder-val="{{ false }}">
+          <div style="color:#B5B2A6;font-size:12.5px">최근 30일에 적어 둔 다른 음식이 아직 없어요</div>
+        </sc-if>
+        <sc-for list="{{fvRecent}}" as="fh" hint-placeholder-count="5">
+          <div onClick="{{fh.tap}}" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid {{cardBorder}};background:{{cardBg}};border-radius:{{radM}};padding:11px 13px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{fh.name}}</div>
+              <div style="font-size:11px;color:#8B887C;margin-top:2px">{{fh.summary}}</div>
+            </div>
+            <span style="font-size:12px;font-weight:800;flex:none;color:{{accent}}">담기</span>
+            <button onClick="{{fh.pin}}" title="내 목록에 넣기" style="border:0;background:none;color:{{accent}};font-size:15px;cursor:pointer;flex:none;padding:4px">⭐</button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
   <sc-if value="{{lmOn}}" hint-placeholder-val="{{ false }}">
     <div style="position:absolute;inset:0;z-index:45">
       <div onClick="{{lmCancel}}" style="position:absolute;inset:0;background:rgba(31,30,26,.45)"></div>
@@ -1239,13 +1278,14 @@ class Component extends DCLogic {
     const SB={};SB[d(1)]=true;SB[d(2)]=false;SB[d(3)]=true;SB[d(4)]=true;SB[d(6)]=true;SB[d(9)]=false;
     const WO={};WO[d(1)]={'하체':40,'유산소':30};WO[d(2)]={'유산소':60};WO[d(4)]={'등':50,'유산소':30};
     const CB=this.COMBO_CODES.map(c=>({id:'k'+(this.seq++),code:c,name:'',items:[]}));
+    const FV=this.FAV_SEED.map(x=>({id:'v'+(this.seq++),...x}));
     this.state={tab:'home',wide:this.isWide(),mode:'diet',selDate:this.TODAY,feedFilter:'all',sober:SB,calM:this.TODAY.slice(0,7),
       set:{goalDate:'2026-08-10',startW:70,goalW:50,budget:10000,provider:'gemini',geminiKey:'',claudeKey:'',apiPass:'0000',diet:{kcal:1500,c:40,p:30,f:30},maint:{kcal:2000,c:50,p:25,f:25},
         rule:{winS:'10:00',winE:'18:00',kcalMin:1200,pG:100,fG:71,waterMl:2000,firstFatG:8,carbUp:{1:2,6:1}}},
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
-      water:{},cond:{},lifts:{},journal:{},combos:CB,carbUp:{},safe:{},todo:{items:[],done:[]},
+      water:{},cond:{},lifts:{},journal:{},combos:CB,favs:FV,carbUp:{},safe:{},todo:{items:[],done:[]},
       stock:{shop:['아몬드','닭가슴살','귀리','단백질바 1박스','피자치즈(가져올 예정)'],home:[]},weekGoals:{},
-      cm:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,jTab:'decide',ntOpen:-1,
+      cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,jTab:'decide',ntOpen:-1,
       editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
   fmt(n){return (n==null||n===''||isNaN(+n))?'—':(+n).toLocaleString('ko-KR')}
@@ -1258,6 +1298,22 @@ class Component extends DCLogic {
   COMBO_CODES=['A1','A2','A3','S1','S2','S3','S4','D1','D2','D3','D4'];
   CONDS=[{k:'dizzy',t:'어지러움',e:'😵',safe:true},{k:'shake',t:'손떨림',e:'🤲',safe:true},{k:'numb',t:'손저림',e:'🫱',safe:true},{k:'sweat',t:'식은땀',e:'💦',safe:true},{k:'nofood',t:'몇 시간째 못 먹음',e:'🕳',safe:true},{k:'afterlift',t:'근력 직후 고갈',e:'🪫',safe:true},{k:'heartburn',t:'속쓰림',e:'🔥'},{k:'belly',t:'배 꾸르륵·설사',e:'🌀'},{k:'period',t:'생리',e:'🩸'}];
   LIFTS=['하체','등','가슴+어깨','코어'];
+  /* 자주 먹는 음식 씨앗 — 52kg 절대선 식단. 사장님 화면에 뜨는 글자라 한글이다.
+     저장된 목록(state.favs)이 있으면 그쪽이 이긴다 — 사장님이 여기에 더 담으실 수 있다. */
+  FAV_SEED=[
+    {name:'삶은 달걀 2개',amt:100,unit:'g',kcal:155,c:1,p:13,f:11,meal:'아침'},
+    {name:'아보카도 반 개',amt:70,unit:'g',kcal:112,c:6,p:1.4,f:10,meal:'아침'},
+    {name:'그릭요거트(무가당)',amt:100,unit:'g',kcal:60,c:4,p:10,f:0.4,meal:'아침'},
+    {name:'닭가슴살',amt:100,unit:'g',kcal:110,c:0,p:23,f:1.5,meal:'점심'},
+    {name:'참치캔(기름 뺀 것)',amt:100,unit:'g',kcal:116,c:0,p:26,f:1,meal:'점심'},
+    {name:'현미밥',amt:100,unit:'g',kcal:150,c:33,p:3,f:1,meal:'점심'},
+    {name:'브로콜리',amt:100,unit:'g',kcal:34,c:7,p:2.8,f:0.4,meal:'점심'},
+    {name:'연어구이',amt:100,unit:'g',kcal:208,c:0,p:20,f:13,meal:'저녁'},
+    {name:'소고기 우둔살',amt:100,unit:'g',kcal:135,c:0,p:22,f:5,meal:'저녁'},
+    {name:'두부 반 모',amt:150,unit:'g',kcal:120,c:3,p:13,f:7,meal:'저녁'},
+    {name:'프로틴쉐이크(물)',amt:30,unit:'g',kcal:120,c:2,p:24,f:1.5,meal:'간식'},
+    {name:'아몬드',amt:20,unit:'g',kcal:116,c:4,p:4,f:10,meal:'간식'},
+    {name:'방울토마토',amt:100,unit:'g',kcal:18,c:4,p:0.9,f:0.2,meal:'간식'}];
   /* 트레이너 자리 (일지 탭) — 생각 · 자극 · 다시 볼 대화. 화면 글자라 한글이다. */
   TVIEW=[
     {t:'저울은 하루에 1~2kg씩 출렁인다',d:'아침 공복, 화장실 다녀온 뒤, 같은 옷 — 조건을 고정하고 비교해라. 오늘 200g은 신호가 아니라 잡음이다.'},
@@ -1339,15 +1395,68 @@ class Component extends DCLogic {
     const list=Object.keys(hit).sort((a,b)=>hit[b]-hit[a]).map(t=>t+' '+hit[t]+'일');
     const alarm=this.CONDS.some(c=>c.safe&&hit[c.t]);
     return {days:days.length,safeN,alarm,text:list.length?list.join(' · '):'특이 없음',last:days[0]||''}}
+  /* 자주 먹는 음식 — 내 목록(favs)과 최근 30일 기록을 한 줄로 세운다.
+     점수 = 그 끼니에서 먹은 횟수 ×3 + 아무 끼니에서 먹은 횟수. 씨앗은 끼니가 맞으면 +2. */
+  favPool(meal){const F=this.state.foods||{},hit={};
+    for(let i=0;i<30;i++){for(const x of (F[this.addDays(this.TODAY,-i)]||[])){
+      const nm=String(x.name||'').trim();if(!nm)continue;
+      const h=hit[nm]||(hit[nm]={n:0,m:0,it:x});h.n++;if(x.meal===meal)h.m++}}
+    const mine=(this.state.favs||[]).map(v=>{const h=hit[v.name];
+      return {...v,mine:true,score:(h?h.n+h.m*3:0)+(v.meal===meal?2:0)}});
+    const has=new Set(mine.map(v=>v.name));
+    const rest=Object.keys(hit).filter(nm=>!has.has(nm)).map(nm=>{const h=hit[nm],x=h.it;
+      return {id:'h'+nm,name:nm,amt:x.amt,unit:x.unit,kcal:x.kcal,c:x.c,p:x.p,f:x.f,meal:x.meal,mine:false,score:h.n+h.m*3}});
+    return [...mine,...rest].sort((a,b)=>b.score-a.score)}
+  favPut(meal,v){this.addFoods(this.state.selDate,[{id:'f'+(this.seq++),meal,time:this.nowHM(),
+      name:v.name,amt:+v.amt||0,unit:v.unit||'g',kcal:+v.kcal||0,c:+v.c||0,p:+v.p||0,f:+v.f||0}]);
+    this.toast(this.say(v.name+' 담았어요 ✓',v.name+' 담았사와요 👑'))}
+  favPin(v){const L=this.state.favs||[];if(L.some(x=>x.name===v.name)){this.toast('이미 내 목록에 있어요');return}
+    this.setState({favs:[...L,{id:'v'+(this.seq++),name:v.name,amt:v.amt,unit:v.unit,kcal:v.kcal,c:v.c,p:v.p,f:v.f,meal:v.meal}]});
+    this.toast(this.say('내 목록에 넣었어요 ⭐','내 목록에 넣었사와요 ⭐'))}
+  favDrop(id){this.setState({favs:(this.state.favs||[]).filter(x=>x.id!==id)});
+    this.toast(this.say('목록에서 뺐어요','목록에서 뺐사와요'))}
+  /* 🧭 최근 3일 조언 — 그저께·어제·오늘을 함께 보고 「오늘 무엇을 할지」를 정한다.
+     하루만 보면 어제 늦게 먹어 찬 물도, 어제 굶어서 온 반동도 원인을 못 읽는다.
+     홈의 「오늘 점수」 자리를 이 카드가 대신한다 (사장님 지시 2026-08-29). */
+  advice3(){const R=this.RULE(),W=this.state.weights||{},F=this.state.foods||{},g=this.goalFor(this.TODAY),fmt=n=>this.fmt(n);
+    const day=i=>{const ds=this.d(i),s=this.sums(ds),w=(W[ds]||{}).a,list=F[ds]||[];
+      return {ds,w:(w!=null&&w!=='')?+w:null,kcal:Math.round(s.kcal),c:Math.round(s.c),p:Math.round(s.p),f:Math.round(s.f),
+        n:list.length,late:list.some(x=>x.time&&this.outTime(x.time))}};
+    const t=day(0),y=day(1),b=day(2);
+    const rows=[b,y,t].map((x,i)=>({label:['그저께','어제','오늘'][i],date:this.lbl(x.ds),
+      w:x.w!=null?x.w.toFixed(1):'—',kcal:x.n?(fmt(x.kcal)+' kcal'):'기록 없음',p:x.n?('단백질 '+x.p+'g'):'—',today:i===2}));
+    const L=[],add=(icon,txt,color)=>L.push({icon,t:txt,color:color||'#1F1E1A'});
+    const hw=this.healthWatch(3);
+    if(hw.alarm)add('🚨','최근 3일 '+hw.text+' — 지금은 클린보다 「먹는 것」이 먼저예요. 단백질과 지방부터 채우세요.','#E5484D');
+    if(t.w!=null&&y.w!=null){const dv=+(t.w-y.w).toFixed(1);
+      const why=y.late?('어제 식사창(~'+R.winE+') 밖에 먹은 것'):(y.kcal>=Math.round(g.kcal*1.2)?('어제 '+fmt(y.kcal)+'kcal'):(y.c>=150?('어제 탄수 '+y.c+'g'):''));
+      if(dv>=0.3)add('⚖️','어제보다 +'+dv.toFixed(1)+'kg — '+(why?(why+' 탓에 물이 찬 거예요. 살이 아닙니다.'):'하루 사이 이 정도는 몸의 흔들림이에요.')+' 오늘 굶어서 되돌리려 하지 마세요.','#E5484D');
+      else if(dv<=-0.3)add('⚖️','어제보다 '+dv.toFixed(1)+'kg — 잘 내려갔어요. 오늘도 어제와 같은 방식 그대로 가세요.','#17A673');
+      else add('⚖️','어제와 거의 같아요('+(dv>0?'+':'')+dv.toFixed(1)+'kg). 하루가 아니라 사흘 흐름으로 보세요.');
+    }else if(t.w==null)add('⚖️','오늘 체중을 아직 안 재셨어요. 아침 공복에 한 번만 재 주세요 — 조언은 거기서 시작합니다.','#8B887C');
+    if(y.n){if(y.kcal<R.kcalMin)add('🍚','어제 '+fmt(y.kcal)+'kcal로 하한 '+fmt(R.kcalMin)+' 아래였어요. 오늘 더 줄이면 근육이 먼저 빠집니다.','#E5484D');
+      else if(y.kcal>=Math.round(g.kcal*1.2))add('🍚','어제 '+fmt(y.kcal)+'kcal로 많았어요. 오늘은 평소대로 '+fmt(g.kcal)+' 근처면 됩니다 — 굶는 건 금지.','#E9A23B')}
+    const pd=[t,y,b].filter(x=>x.n),pAvg=pd.length?Math.round(pd.reduce((a,x)=>a+x.p,0)/pd.length):0;
+    if(pd.length&&pAvg<R.pG)add('🍗','최근 '+pd.length+'일 단백질 평균 '+pAvg+'g — 하루 '+R.pG+'g에서 '+(R.pG-pAvg)+'g 모자라요. 계란·닭가슴살부터 채우세요.','#E4618C');
+    const left=Math.max(0,R.kcalMin-t.kcal),need=Math.max(0,R.pG-t.p);
+    const endM=this.mins(R.winE),nowM=this.mins(this.nowHM()),hrs=Math.max(0,Math.round((endM-nowM)/60));
+    add('🎯','오늘 '+fmt(t.kcal)+'kcal · 단백질 '+t.p+'g. '+(left>0
+      ?('하한까지 '+fmt(left)+'kcal'+(need>0?(', 단백질 '+need+'g'):'')+' 남았고 식사창은 '+(nowM<endM?(hrs+'시간 남았어요.'):'이미 끝났어요 — 창 밖이어도 하한은 채우세요.'))
+      :(need>0?('하한은 넘겼어요. 단백질만 '+need+'g 더 채우면 됩니다.'):'하한도 단백질도 채웠어요. 오늘은 이대로 마무리.')),
+      (left>0&&nowM>=endM)?'#E5484D':(left>0?'#1F1E1A':'#17A673'));
+    const water=+((this.state.water||{})[this.TODAY]||0);
+    if(water<R.waterMl)add('💧','물 '+(water/1000).toFixed(1)+'L / '+(R.waterMl/1000)+'L — '+fmt(R.waterMl-water)+'ml 남았어요. 오른 체중은 물을 채워야 빠집니다.','#5B8DEF');
+    return {rows,lines:L.slice(0,5)}}
   weekStart(ds){const dt=new Date(ds+'T00:00:00');dt.setDate(dt.getDate()-((dt.getDay()+6)%7));return this.ymd(dt)}
   weekEnd(ds){return this.addDays(this.weekStart(ds),6)}
-  /* 목표일은 1주 단위로 갱신된다 — 지나간 목표일은 이번 주 마감(일요일)으로 굴러간다. */
+  /* 목표일은 늘 「이번 주 마감(일요일)」이다 — 사장님 지시 2026-08-29 「이번주 목표 디데이로 잡아라」.
+     앞으로 멀리 잡아 둔 날짜도 이번 주로 당긴다. 먼 목표일 하나를 두면 매일이 남 얘기가 되기 때문이다. */
   /* 코드가 정한 목표 체중. 이 숫자를 바꾸면 이미 저장된 기록에도 한 번만 밀어 넣는다.
      그 뒤 사장님이 설정 화면에서 손으로 바꾸신 값은 다시 덮어쓰지 않는다. */
   GOALW=50;
   rollGoal(){const g=this.state.set||{};const we=this.weekEnd(this.TODAY);const n={};
     if(+g.goalWCode!==this.GOALW){n.goalW=this.GOALW;n.goalWCode=this.GOALW}
-    if(!g.goalDate||g.goalDate<this.TODAY)n.goalDate=we;
+    if(g.goalDate!==we)n.goalDate=we;
     if(Object.keys(n).length)this.setState({set:{...g,...n}})}
   /* 🏋️ 트레이너 입력함 — 사장님이 말로 주신 기록을 트레이너가 파일에 적어 두면 앱이 받아 넣는다.
      ⛔ 덮어쓰지 않고 「합친다」. 같은 날 같은 이름·같은 시각이 이미 있으면 건너뛴다.
@@ -1568,7 +1677,7 @@ class Component extends DCLogic {
     }catch(err){this.setState({aiBusy:false});this.toast('AI 처리 중 문제가 생겼어요 · '+(err.message||'네트워크'))}
   }
   stripRef=React.createRef();
-  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','carbUp','safe','stock','weekGoals','todo'];
+  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo'];
   idb(){return new Promise((res,rej)=>{const q=indexedDB.open('dietgram',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
   async dbGet(k){try{const db=await this.idb();return await new Promise((res,rej)=>{const t=db.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error)})}catch(_){try{const s=localStorage.getItem('dgm_'+k);return s?JSON.parse(s):null}catch(e){return null}}}
   // 기록은 가족 저장소(Supabase)에 둔다 — family_state 문서의 diet 칸 하나를 쓴다.
@@ -1652,10 +1761,9 @@ class Component extends DCLogic {
     const wkColor=wkp.need<=0?'#17A673':th.accent;
     const wkStats=[{label:'주 시작(월)',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:'남은 감량',val:wkp.need>0?fmt(wkp.need):'달성 ✓',color:wkp.need>0?'#E5484D':'#17A673'}];
     const noDow=ds=>this.lbl(ds).replace(/\s*\(.\)$/,'');
-    const tSc=this.score(this.TODAY),tSum=this.sums(this.TODAY),tGoal=this.goalFor(this.TODAY);
-    const tot=tSum.c*4+tSum.p*4+tSum.f*9,pct=v=>tot>0?Math.round(v/tot*100):0;
-    const segC=pct(tSum.c*4),segP=pct(tSum.p*4),segF=pct(tSum.f*9);
-    const macroLegend=[{name:'탄수화물',color:'#E9A23B',a:segC,g:tGoal.c},{name:'단백질',color:'#E4618C',a:segP,g:tGoal.p},{name:'지방',color:'#5B8DEF',a:segF,g:tGoal.f}];
+    const a3=this.advice3();
+    const a3Rows=a3.rows.map(r=>({...r,bg:r.today?modeB(S.mode):th.chipBg,labelColor:r.today?modeC(S.mode):'#8B887C',
+      wColor:r.today?modeC(S.mode):'#1F1E1A',pColor:r.today?'#E4618C':'#B5B2A6'}));
     const strip=[];
     const macroColor=ds=>{const s=this.sums(ds);const arr=[[s.c*4,'#E9A23B'],[s.p*4,'#E4618C'],[s.f*9,'#5B8DEF']];arr.sort((a,b)=>b[0]-a[0]);return arr[0][0]>0?arr[0][1]:'#B5B2A6'};
     for(let i=13;i>=0;i--){const ds=this.d(i);const dt=new Date(ds+'T00:00:00');const has=(S.foods[ds]||[]).length>0;const isT=i===0;const dm=S.dayMode[ds]||'diet';
@@ -1672,8 +1780,8 @@ class Component extends DCLogic {
     const mkThumb=p=>({emoji:p.photos[0]?(p.photos[0].src?'':p.photos[0].e):'📝',bg:phBg(p.photos[0]),textOnly:!p.photos.length,preview:p.text||'글 게시물',open:()=>this.openPost(p.id)});
     const starredPosts=S.posts.filter(p=>p.starred);
     const dSum=this.sums(S.selDate),dSc=this.score(S.selDate),dGoal=this.goalFor(S.selDate);
-    const meals=['아침','점심','저녁','간식'].map(nm=>{const items=(S.foods[S.selDate]||[]).filter(x=>x.meal===nm);const k=items.reduce((a,x)=>a+(+x.kcal||0),0);
-      return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
+    const meals=['아침','점심','저녁','간식'].map(nm=>{const items=(S.foods[S.selDate]||[]).filter(x=>x.meal===nm);const k=items.reduce((a,x)=>a+(+x.kcal||0),0);const qp=this.favPool(nm);
+      return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,quick:qp.slice(0,3).map(v=>({label:v.name,tap:()=>this.favPut(nm,v)})),favOpen:()=>this.setState({fv:{meal:nm}}),combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
         items:items.map(it=>({name:it.name,timeLabel:it.time?(it.time+'  '):'',timeColor:this.outTime(it.time)?'#E5484D':'#B5B2A6',amt:fmt(it.amt)+it.unit,c:fmt(it.c),p:fmt(it.p),f:fmt(it.f),kcal:fmt(it.kcal),open:()=>this.setState({fm:{...it,confirm:false,nameErr:false}}),del:e=>{e.stopPropagation();const F={...S.foods};F[S.selDate]=(F[S.selDate]||[]).filter(x=>x.id!==it.id);this.setState({foods:F});this.toast(this.say('삭제했어요','삭제했사와요'))}}))}});
     const dayPosts=S.posts.filter(p=>p.date===S.selDate).map(mkThumb);
     const fm=S.fm;
@@ -1840,6 +1948,9 @@ class Component extends DCLogic {
     const stAdd=w=>()=>{const t=String((this.state.stockAdd||{})[w]||'').trim();if(!t)return;
       const St={...(this.state.stock||{shop:[],home:[]})};St[w]=[...(St[w]||[]),t];
       this.setState({stock:St,stockAdd:{...(this.state.stockAdd||{}),[w]:''}})};
+    const fv=S.fv,fvMeal=fv?fv.meal:'',fvPool=fv?this.favPool(fvMeal):[];
+    const favSum=v=>fmt(v.amt)+(v.unit||'')+' · '+fmt(v.kcal)+'kcal · 단백질 '+fmt(v.p)+'g';
+    const favTap=v=>()=>{this.favPut(fvMeal,v);this.setState({fv:null})};
     const combos=S.combos||[],cm=S.cm;
     const cmMeal=cm?cm.meal:'';
     const comboSum=k=>{const it=k.items||[];if(!it.length)return '비어 있음 — 「이 끼니를 저장」으로 채우세요';
@@ -1934,6 +2045,15 @@ class Component extends DCLogic {
         draft:(S.stockAdd||{})[b.w]||'',
         onDraft:e=>this.setState({stockAdd:{...(this.state.stockAdd||{}),[b.w]:e.target.value}}),
         onKey:e=>{if(e.key==='Enter')stAdd(b.w)()},add:stAdd(b.w)})),
+      /* 자주 먹는 음식 */
+      fvOn:!!fv,fvClose:()=>this.setState({fv:null}),fvMealLabel:fvMeal,
+      fvHint:'누르면 '+fvMeal+'에 지금 시각으로 바로 담겨요. 「최근 기록에서」의 ⭐를 누르면 내 목록으로 들어와요.',
+      fvMine:fvPool.filter(v=>v.mine).map(v=>({name:v.name,summary:favSum(v),tap:favTap(v),
+        del:e=>{e.stopPropagation();this.favDrop(v.id)}})),
+      fvMineEmpty:!fvPool.some(v=>v.mine),
+      fvRecent:fvPool.filter(v=>!v.mine).slice(0,10).map(v=>({name:v.name,summary:favSum(v),tap:favTap(v),
+        pin:e=>{e.stopPropagation();this.favPin(v)}})),
+      fvNoRecent:!fvPool.some(v=>!v.mine),
       /* 조합식 서랍 */
       cmOn:!!cm,cmClose:()=>this.setState({cm:null}),cmMealLabel:cmMeal,
       cmModePick:()=>this.setState({cm:{...cm,mode:'pick'}}),cmModeSave:()=>this.setState({cm:{...cm,mode:'save'}}),
@@ -1997,7 +2117,7 @@ class Component extends DCLogic {
       onWeekGoal:e=>{const v=String(e.target.value||'').trim();const WG={...(S.weekGoals||{})};
         if(v==='')delete WG[wkp.ws];else WG[wkp.ws]=+v||0;
         this.setState({weekGoals:WG});this.toast(v===''?'이번 주 목표를 자동으로 되돌렸어요 ✓':('이번 주 목표를 '+v+'kg으로 두었어요 ✓'))},
-      wStats,hasTodayLog:tSc!=null,noTodayLog:tSc==null,todayScore:tSc,todayKcal:fmt(tSum.kcal),goalKcal:fmt(tGoal.kcal),segC,segP,segF,macroLegend,strip,wRows,
+      wStats,a3Rows,a3Lines:a3.lines,strip,wRows,
       hasStarred:starredPosts.length>0,noStarred:!starredPosts.length,starred:starredPosts.map(mkThumb),
       selLabel:this.lbl(S.selDate),selDate:S.selDate,todayStr:this.TODAY,
       prevDay:()=>this.shiftDay(-1),nextDay:()=>this.shiftDay(1),
