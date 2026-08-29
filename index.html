@@ -925,9 +925,12 @@ input,button,textarea,select{font-family:inherit;}
 
       <sc-if value="{{ kvSticker }}" hint-placeholder-val="{{ false }}">
         <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:18px 16px;text-align:center;">
-          <div style="font-size:13px;font-weight:700;color:var(--sub,#8A8177);">내가 모은 칭찬 스티커</div>
-          <div style="font-family:Gaegu;font-size:40px;font-weight:700;color:var(--ac,#F59E0B);margin:2px 0;">{{ stAvail }}개</div>
-          <div style="font-size:12px;color:var(--sub,#8A8177);">지금까지 {{ stEarned }}개 받고, {{ stSpent }}개 사용했어</div>
+          <div style="font-size:13px;font-weight:700;color:var(--sub,#8A8177);">지금 남은 내 스티커</div>
+          <div style="font-family:Gaegu;font-size:44px;font-weight:700;color:var(--ac,#F59E0B);margin:2px 0;line-height:1.1;">{{ stAvail }}개</div>
+          <div style="font-size:12px;color:var(--sub,#8A8177);">받은 {{ stEarned }}개 − 쓴 {{ stSpent }}개 = 남은 {{ stAvail }}개</div>
+          <sc-if value="{{ hasStReq }}" hint-placeholder-val="{{ false }}">
+            <div style="display:inline-block;margin-top:8px;background:var(--soft,#F7EAD2);border:1px solid var(--ac,#F59E0B);border-radius:99px;padding:4px 12px;font-size:11px;font-weight:800;">⏳ 교환 신청한 {{ stReqSum }}개는 빼고 골라요 · 지금 고를 수 있는 건 {{ stUsable }}개</div>
+          </sc-if>
           <sc-if value="{{ hasStTypes }}" hint-placeholder-val="{{ true }}">
             <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px;">
               <sc-for list="{{ stTypesV }}" as="st" hint-placeholder-count="4">
@@ -1016,7 +1019,23 @@ input,button,textarea,select{font-family:inherit;}
           </sc-if>
         </div>
         <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-          <div style="font-size:15px;font-weight:800;margin-bottom:10px;">🎁 보상으로 바꾸기</div>
+          <div style="font-size:15px;font-weight:800;margin-bottom:2px;">🎁 보상으로 바꾸기</div>
+          <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-bottom:10px;word-break:keep-all;">「교환」을 누르면 부모님께 신청이 가요. 부모님이 수락하면 그때 스티커가 빠져요.</div>
+          <sc-if value="{{ hasStReq }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--soft,#F7EAD2);border:1px solid var(--ac,#F59E0B);border-radius:14px;padding:11px 12px;margin-bottom:10px;">
+              <div style="font-size:12px;font-weight:800;margin-bottom:7px;">⏳ 부모님 확인 기다리는 중</div>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <sc-for list="{{ stReqV }}" as="rq" hint-placeholder-count="1">
+                  <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;">
+                    <span style="min-width:38px;color:var(--sub,#8A8177);">{{ rq.date }}</span>
+                    <span style="flex:1;min-width:0;">{{ rq.name }}</span>
+                    <span style="font-weight:900;color:var(--ac,#F59E0B);white-space:nowrap;">{{ rq.cost }}</span>
+                    <button onClick="{{ rq.cancel }}" style="flex-shrink:0;background:var(--card,#fff);color:var(--sub,#8A8177);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:5px 11px;font-size:11px;font-weight:800;cursor:pointer;min-height:32px;">취소</button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
           <div style="background:var(--bg,#FAF6EF);border:1px dashed var(--ac,#F59E0B);border-radius:14px;padding:12px;margin-bottom:10px;">
             <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:800;">🌟 용돈 스티커<span style="font-size:10px;font-weight:800;background:var(--card,#fff);color:var(--sub,#8A8177);border-radius:99px;padding:2px 7px;">고정</span></div>
             <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 9px;">내 스티커 1개 = {{ mxRate }}원</div>
@@ -1043,7 +1062,7 @@ input,button,textarea,select{font-family:inherit;}
             </sc-for>
           </div>
           <sc-if value="{{ hasExch }}" hint-placeholder-val="{{ false }}">
-            <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin:14px 0 8px;">🗓 월별 교환 기록</div>
+            <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);margin:14px 0 8px;">🗓 내가 바꾼 내역 · 몇 개 바꿔서 얼마 받았나</div>
             <div style="display:flex;flex-direction:column;gap:10px;">
               <sc-for list="{{ exMonV }}" as="mo" hint-placeholder-count="1">
                 <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:10px 12px;">
@@ -1051,11 +1070,14 @@ input,button,textarea,select{font-family:inherit;}
                     <span style="flex:1;">{{ mo.m }}</span>
                     <span style="color:var(--sub,#8A8177);font-weight:700;">{{ mo.n }}</span>
                     <span style="color:var(--ac,#F59E0B);">🌟 {{ mo.sum }}개 사용</span>
+                    <sc-if value="{{ mo.hasMoney }}" hint-placeholder-val="{{ true }}"><span style="color:#2E9E63;font-variant-numeric:tabular-nums;">+{{ mo.money }}</span></sc-if>
                   </div>
-                  <div style="display:flex;flex-direction:column;gap:2px;margin-top:6px;">
+                  <div style="display:flex;flex-direction:column;gap:3px;margin-top:6px;">
                     <sc-for list="{{ mo.items }}" as="ex" hint-placeholder-count="1">
-                      <div style="display:flex;gap:8px;font-size:11px;font-weight:700;color:var(--sub,#8A8177);">
-                        <span style="min-width:38px;">{{ ex.date }}</span><span style="flex:1;">{{ ex.name }}</span><span>−🌟{{ ex.cost }}</span>
+                      <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--sub,#8A8177);">
+                        <span style="min-width:38px;">{{ ex.date }}</span><span style="flex:1;min-width:0;">{{ ex.name }}</span>
+                        <span style="white-space:nowrap;">−🌟{{ ex.cost }}</span>
+                        <sc-if value="{{ ex.hasMoney }}" hint-placeholder-val="{{ true }}"><span style="color:#2E9E63;font-weight:900;white-space:nowrap;font-variant-numeric:tabular-nums;">+{{ ex.money }}</span></sc-if>
                       </div>
                     </sc-for>
                   </div>
@@ -1163,8 +1185,9 @@ input,button,textarea,select{font-family:inherit;}
                 <button onClick="{{ ko.openSched }}" style="background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:5px 10px;font-size:11px;font-weight:800;color:var(--sub,#8A8177);cursor:pointer;min-height:28px;">📅 일정관리</button>
                 <span style="flex:1;"></span>
                 <div style="text-align:right;">
-                  <div style="font-size:13px;font-weight:800;color:var(--ac,#F59E0B);">🌟 {{ ko.stickers }}개</div>
-                  <button onClick="{{ ko.openStHist }}" style="display:block;margin-left:auto;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px 8px;cursor:pointer;font-size:10px;font-weight:700;color:var(--sub,#8A8177);">받음 {{ ko.stEarned }} · 사용 {{ ko.stSpent }} ▸</button>
+                  <div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);line-height:1.3;">남은 스티커</div>
+                  <div style="font-size:17px;font-weight:900;color:var(--ac,#F59E0B);line-height:1.2;">🌟 {{ ko.stickers }}개</div>
+                  <button onClick="{{ ko.openStHist }}" style="display:block;margin-left:auto;margin-top:3px;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px 8px;cursor:pointer;font-size:10px;font-weight:700;color:var(--sub,#8A8177);">받음 {{ ko.stEarned }} · 사용 {{ ko.stSpent }} ▸</button>
                 </div>
               </div>
               <sc-if value="{{ ko.hasStTypesK }}" hint-placeholder-val="{{ false }}">
@@ -1239,6 +1262,30 @@ input,button,textarea,select{font-family:inherit;}
                   </div>
                 </div>
               </sc-if>
+              <sc-if value="{{ ko.hasExReq }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--soft,#F7EAD2);border:1px solid var(--ac,#F59E0B);border-radius:12px;padding:10px 12px;margin-top:10px;">
+                  <div style="font-size:12px;font-weight:800;margin-bottom:7px;">🎁 스티커 교환 신청 · 수락하면 그때 차감돼요</div>
+                  <div style="display:flex;flex-direction:column;gap:9px;">
+                    <sc-for list="{{ ko.exReqV }}" as="rq" hint-placeholder-count="1">
+                      <div>
+                        <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;flex-wrap:wrap;">
+                          <span style="flex:1;min-width:80px;">{{ rq.name }}</span>
+                          <span style="font-size:11px;font-weight:900;color:var(--ac,#F59E0B);white-space:nowrap;">{{ rq.cost }}</span>
+                          <sc-if value="{{ rq.hasMoney }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;font-weight:900;color:#2E9E63;white-space:nowrap;font-variant-numeric:tabular-nums;">+{{ rq.money }}</span></sc-if>
+                          <span style="font-size:11px;color:var(--sub,#8A8177);">{{ rq.date }}</span>
+                          <sc-if value="{{ rq.canOk }}" hint-placeholder-val="{{ true }}">
+                            <button onClick="{{ rq.ok }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;min-height:32px;">수락</button>
+                          </sc-if>
+                          <button onClick="{{ rq.no }}" style="background:var(--card,#fff);color:var(--sub,#8A8177);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;min-height:32px;">거절</button>
+                        </div>
+                        <sc-if value="{{ rq.hasShort }}" hint-placeholder-val="{{ false }}">
+                          <div style="font-size:11px;font-weight:800;color:#E0654F;margin-top:4px;word-break:keep-all;">{{ rq.shortTxt }}</div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
               <sc-if value="{{ ko.hasStHist }}" hint-placeholder-val="{{ false }}">
                 <div style="background:var(--bg,#FAF6EF);border-radius:12px;padding:10px 12px;margin-top:10px;">
                   <div style="display:flex;align-items:center;margin-bottom:6px;">
@@ -1258,8 +1305,7 @@ input,button,textarea,select{font-family:inherit;}
               </sc-if>
               <div style="display:flex;gap:6px;margin-top:10px;">
                 <button onClick="{{ ko.openTodo }}" style="flex:1;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:11px 4px;font-size:12px;font-weight:800;cursor:pointer;">+ 필수 할일</button>
-                <button onClick="{{ ko.openStick }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:11px 4px;font-size:12px;font-weight:800;cursor:pointer;">💌 스티커 보내기</button>
-                <button onClick="{{ ko.openMoney }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:11px 4px;font-size:12px;font-weight:800;cursor:pointer;">💸 용돈·차감</button>
+                <button onClick="{{ ko.openDed }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:11px 4px;font-size:12px;font-weight:800;cursor:pointer;">🌟 스티커 차감</button>
               </div>
               <sc-if value="{{ ko.hasSaMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--ac,#F59E0B);font-weight:700;margin-top:6px;">{{ ko.saMsg }}</div></sc-if>
               <sc-if value="{{ ko.hasTrK }}" hint-placeholder-val="{{ false }}">
@@ -1338,7 +1384,13 @@ input,button,textarea,select{font-family:inherit;}
             </div>
           </sc-for>
           <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-            <div style="font-size:15px;font-weight:800;margin-bottom:10px;">🎁 보상 목록 관리</div>
+            <button onClick="{{ rwToggle }}" style="width:100%;box-sizing:border-box;display:flex;align-items:center;gap:8px;background:{{ rwBg }};color:{{ rwFg }};border:1px solid {{ rwBd }};border-radius:14px;padding:13px 14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;text-align:left;min-height:48px;">
+              <span style="flex:1;">🎁 보상 목록 관리</span>
+              <span style="font-size:11px;font-weight:800;opacity:.8;">{{ rwOpenTxt }}</span>
+              <span style="font-size:12px;">{{ rwArrow }}</span>
+            </button>
+            <sc-if value="{{ rwOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="height:12px;"></div>
             <div style="display:flex;gap:8px;margin-bottom:10px;">
               <sc-for list="{{ rwKidPickV }}" as="rk" hint-placeholder-count="2">
                 <button onClick="{{ rk.pick }}" style="flex:1;background:{{ rk.bg }};color:{{ rk.fg }};border:1px solid {{ rk.bd }};border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">{{ rk.emoji }} {{ rk.name }}</button>
@@ -1383,136 +1435,9 @@ input,button,textarea,select{font-family:inherit;}
               <input value="{{ rwDescIn }}" onChange="{{ rwDescOn }}" placeholder="보상 내용 (예: 놀이공원 데려가기)" style="flex:1 1 100%;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
               <button onClick="{{ addReward }}" style="background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;">추가</button>
             </div>
-          </div>
-        </sc-if>
-
-        <sc-if value="{{ pvStk }}" hint-placeholder-val="{{ false }}">
-          <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:18px 16px;text-align:center;">
-            <div style="font-size:13px;font-weight:700;color:var(--sub,#8A8177);">아이들에게 받은 심부름 스티커 🧹</div>
-            <div style="font-family:Gaegu;font-size:38px;font-weight:700;color:var(--ac,#F59E0B);margin:2px 0;">{{ pErrBal }}개</div>
-            <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">아이가 부모님께 부탁할 때 쓰는 스티커예요</div>
-            <sc-if value="{{ hasPErr }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;flex-direction:column;gap:3px;margin-top:12px;text-align:left;">
-                <sc-for list="{{ pErrV }}" as="e" hint-placeholder-count="2">
-                  <div style="display:flex;gap:8px;font-size:11px;font-weight:700;color:var(--sub,#8A8177);">
-                    <span style="min-width:38px;">{{ e.date }}</span><span style="flex:1;">{{ e.memo }}</span><span>{{ e.a }}</span>
-                  </div>
-                </sc-for>
-              </div>
             </sc-if>
           </div>
-
-          <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <div style="font-size:15px;font-weight:800;">🤝 아이에게 할일 부탁하기</div>
-              <span style="background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border-radius:99px;padding:2px 8px;font-size:10px;font-weight:900;">선택 할일</span>
-            </div>
-            <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 10px;">아이가 수락할지 골라요. 다 하면 약속한 보상을 줘요. 꼭 해야 하는 할일은 ‘자녀 일정’에서 넣어주세요.</div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-              <sc-for list="{{ ptrKidV }}" as="p" hint-placeholder-count="2">
-                <button onClick="{{ p.pick }}" style="background:{{ p.bg }};color:{{ p.fg }};border:1px solid {{ p.bd }};border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;">{{ p.label }}</button>
-              </sc-for>
-            </div>
-            <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-bottom:5px;">보상으로 줄 것</div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-              <sc-for list="{{ ptrRwV }}" as="r" hint-placeholder-count="3">
-                <button onClick="{{ r.pick }}" style="background:{{ r.bg }};color:{{ r.fg }};border:1px solid {{ r.bd }};border-radius:99px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;">{{ r.label }}</button>
-              </sc-for>
-            </div>
-            <div style="font-size:10px;font-weight:700;color:var(--sub,#8A8177);margin:-3px 0 9px;">{{ ptrRwNote }}</div>
-            <sc-if value="{{ ptrIsCond }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
-                <sc-for list="{{ ptrCondPreV }}" as="c" hint-placeholder-count="3">
-                  <button onClick="{{ c.pick }}" style="background:var(--bg,#FAF6EF);color:var(--tx,#3F3A33);border:1px dashed var(--line,#EFE4CF);border-radius:99px;padding:5px 11px;font-size:11px;font-weight:800;cursor:pointer;">{{ c.label }}</button>
-                </sc-for>
-              </div>
-              <input value="{{ ptrCondV }}" onChange="{{ ptrCondOn }}" placeholder="어떤 약속? (예: 게임 30분, 아이스크림)" style="width:100%;box-sizing:border-box;margin-bottom:8px;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-            </sc-if>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input value="{{ ptrTaskV }}" onChange="{{ ptrTaskOn }}" placeholder="어떤 할일? (예: 재활용 버리기)" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;outline:none;">
-              <sc-if value="{{ ptrIsStk }}" hint-placeholder-val="{{ true }}">
-                <div style="display:flex;align-items:center;gap:2px;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px;flex-shrink:0;">
-                  <button onClick="{{ ptrDec }}" style="width:26px;height:26px;border-radius:50%;border:none;background:none;color:var(--sub,#8A8177);font-size:15px;font-weight:900;cursor:pointer;padding:0;">−</button>
-                  <span style="min-width:32px;text-align:center;font-size:12px;font-weight:900;">{{ ptrCurE }}{{ ptrCostV }}</span>
-                  <button onClick="{{ ptrInc }}" style="width:26px;height:26px;border-radius:50%;border:none;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);font-size:15px;font-weight:900;cursor:pointer;padding:0;">+</button>
-                </div>
-              </sc-if>
-              <button onClick="{{ ptrAdd }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;">부탁</button>
-            </div>
-          </div>
-
-          <sc-if value="{{ hasPTr }}" hint-placeholder-val="{{ false }}">
-            <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="font-size:15px;font-weight:800;margin-bottom:10px;">내 거래</div>
-              <div style="display:flex;flex-direction:column;gap:8px;">
-                <sc-for list="{{ pTrV }}" as="tr" hint-placeholder-count="2">
-                  <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:11px 12px;">
-                    <div style="display:flex;align-items:center;gap:7px;">
-                      <span style="background:{{ tr.dirBg }};border:1px solid var(--line,#EFE4CF);border-radius:8px;padding:3px 7px;font-size:11px;font-weight:900;white-space:nowrap;">{{ tr.dir }} {{ tr.cost }}</span>
-                      <span style="flex:1;font-size:13px;font-weight:800;">{{ tr.task }}</span>
-                      <span style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">{{ tr.date }}</span>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:6px;margin-top:5px;">
-                      <span style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">{{ tr.who }} · {{ tr.curNm }}</span>
-                      <span style="font-size:11px;font-weight:900;color:{{ tr.stC }};">· {{ tr.st }}</span>
-                    </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
-                      <sc-if value="{{ tr.canAccept }}" hint-placeholder-val="{{ false }}">
-                        <button onClick="{{ tr.accept }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:6px 13px;font-size:11px;font-weight:800;cursor:pointer;">수락</button>
-                      </sc-if>
-                      <sc-if value="{{ tr.canOk }}" hint-placeholder-val="{{ false }}">
-                        <button onClick="{{ tr.ok }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:6px 13px;font-size:11px;font-weight:800;cursor:pointer;">허락</button>
-                      </sc-if>
-                      <sc-if value="{{ tr.canMark }}" hint-placeholder-val="{{ false }}">
-                        <button onClick="{{ tr.mark }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:6px 13px;font-size:11px;font-weight:800;cursor:pointer;">다 했어요</button>
-                      </sc-if>
-                      <sc-if value="{{ tr.canPay }}" hint-placeholder-val="{{ false }}">
-                        <button onClick="{{ tr.pay }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:6px 13px;font-size:11px;font-weight:800;cursor:pointer;">확인하고 지급</button>
-                      </sc-if>
-                      <sc-if value="{{ tr.canBack }}" hint-placeholder-val="{{ false }}">
-                        <button onClick="{{ tr.back }}" style="background:var(--card,#fff);color:var(--sub,#8A8177);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:6px 13px;font-size:11px;font-weight:800;cursor:pointer;">아직이야</button>
-                      </sc-if>
-                      <sc-if value="{{ tr.canCancel }}" hint-placeholder-val="{{ false }}">
-                        <button onClick="{{ tr.cancel }}" style="background:var(--card,#fff);color:var(--sub,#8A8177);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:6px 13px;font-size:11px;font-weight:800;cursor:pointer;">취소</button>
-                      </sc-if>
-                    </div>
-                    <sc-if value="{{ tr.hasWarn }}" hint-placeholder-val="{{ false }}">
-                      <div style="font-size:11px;font-weight:800;color:#E0654F;margin-top:6px;">{{ tr.warnTxt }}</div>
-                    </sc-if>
-                  </div>
-                </sc-for>
-              </div>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ hasPend }}" hint-placeholder-val="{{ false }}">
-            <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-              <div style="font-size:15px;font-weight:800;margin-bottom:10px;">🙋 아이들끼리 거래 허락</div>
-              <div style="display:flex;flex-direction:column;gap:8px;">
-                <sc-for list="{{ pendV }}" as="pd" hint-placeholder-count="1">
-                  <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:11px 12px;">
-                    <div style="display:flex;align-items:center;gap:7px;">
-                      <span style="font-size:11px;font-weight:900;white-space:nowrap;color:var(--ac,#F59E0B);">{{ pd.cost }}</span>
-                      <span style="flex:1;font-size:13px;font-weight:800;">{{ pd.task }}</span>
-                      <span style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">{{ pd.date }}</span>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
-                      <span style="flex:1;font-size:11px;font-weight:700;color:var(--sub,#8A8177);">{{ pd.pair }} · {{ pd.curNm }}</span>
-                      <sc-if value="{{ pd.canOk }}" hint-placeholder-val="{{ true }}">
-                        <button onClick="{{ pd.ok }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:6px 13px;font-size:11px;font-weight:800;cursor:pointer;">허락</button>
-                      </sc-if>
-                      <button onClick="{{ pd.no }}" style="background:var(--card,#fff);color:var(--sub,#8A8177);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:6px 13px;font-size:11px;font-weight:800;cursor:pointer;">거절</button>
-                    </div>
-                    <sc-if value="{{ pd.hasWarn }}" hint-placeholder-val="{{ false }}">
-                      <div style="font-size:11px;font-weight:800;color:#E0654F;margin-top:6px;">{{ pd.warnTxt }}</div>
-                    </sc-if>
-                  </div>
-                </sc-for>
-              </div>
-            </div>
-          </sc-if>
         </sc-if>
-
 
         <sc-if value="{{ pvSetOrKids }}" hint-placeholder-val="{{ false }}">
           <sc-if value="{{ pvSet }}" hint-placeholder-val="{{ false }}">
@@ -1582,24 +1507,6 @@ input,button,textarea,select{font-family:inherit;}
       <div style="display:flex;gap:8px;">
         <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">취소</button>
         <button onClick="{{ pmTodoAdd }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">+ 필수 할일 추가</button>
-      </div>
-    </div>
-  </div>
-</sc-if>
-
-<sc-if value="{{ modalPStick }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
-    <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
-      <div style="font-size:16px;font-weight:800;margin-bottom:12px;">💌 {{ pmEmoji }} {{ pmName }}에게 스티커 보내기</div>
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px;">
-        <sc-for list="{{ pmStkPickV }}" as="sp" hint-placeholder-count="12">
-          <button onClick="{{ sp.pick }}" style="background:{{ sp.bg }};border:2px solid {{ sp.bd }};border-radius:12px;font-size:20px;padding:7px 0;cursor:pointer;">{{ sp.e }}</button>
-        </sc-for>
-      </div>
-      <input value="{{ f.stMsg }}" onChange="{{ on.stMsg }}" placeholder="칭찬 한마디 (예: 숙제 완벽!)" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;margin-bottom:14px;">
-      <div style="display:flex;gap:8px;">
-        <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">취소</button>
-        <button onClick="{{ pmStkSend }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">💌 보내기</button>
       </div>
     </div>
   </div>
@@ -1819,25 +1726,42 @@ input,button,textarea,select{font-family:inherit;}
   </div>
 </sc-if>
 
-<sc-if value="{{ modalPMoney }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ modalPDed }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
     <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
-      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">💸 {{ pmEmoji }} {{ pmName }} 용돈 보내기 · 스티커 차감</div>
-      <div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:12px;">지금 보유 스티커 🌟 {{ pmStickers }}개</div>
-      <div style="display:flex;gap:6px;margin-bottom:10px;">
-        <button onClick="{{ pmSaBonus }}" style="flex:1;background:{{ pmBnBg }};color:{{ pmBnFg }};border:1px solid {{ pmBnBd }};border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">🎁 보너스 용돈</button>
-        <button onClick="{{ pmSaDeduct }}" style="flex:1;background:{{ pmDdBg }};color:{{ pmDdFg }};border:1px solid {{ pmDdBd }};border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">🌟 스티커 차감</button>
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">🌟 {{ pmEmoji }} {{ pmName }} 스티커 차감</div>
+      <div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:12px;word-break:keep-all;">모은 스티커를 용돈으로 바꿔 줘요. 고른 개수만큼 실제로 차감돼요.</div>
+      <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;margin-bottom:12px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);">지금 남은 스티커</div>
+        <div style="font-family:Gaegu;font-size:38px;font-weight:700;color:var(--ac,#F59E0B);line-height:1.2;">{{ pmStickers }}개</div>
+        <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">받음 {{ pmStEarned }}개 − 사용 {{ pmStSpent }}개</div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <input value="{{ pmSaVal }}" onChange="{{ pmSaOn }}" type="number" placeholder="용돈 금액(원)" style="flex:1;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--bg,#FAF6EF);color:inherit;font-size:14px;outline:none;">
-        <sc-if value="{{ pmSaIsDeduct }}" hint-placeholder-val="{{ false }}"><div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 10px;border:1px solid var(--ac,#F59E0B);border-radius:12px;background:var(--soft,#F7EAD2);"><span style="font-size:13px;font-weight:900;white-space:nowrap;">🌟 {{ pmStkNeed }}개</span><span style="font-size:9px;font-weight:800;color:var(--sub,#8A8177);white-space:nowrap;">{{ pmStkRateTxt }}</span></div></sc-if>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="flex:1;font-size:13px;font-weight:800;">몇 개 차감할까요?</span>
+        <div style="display:flex;align-items:center;gap:4px;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:3px;flex-shrink:0;">
+          <button onClick="{{ pmDedDec }}" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--card,#fff);color:var(--sub,#8A8177);font-size:18px;font-weight:900;cursor:pointer;padding:0;font-family:inherit;">−</button>
+          <span style="min-width:52px;text-align:center;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums;">🌟 {{ pmDedN }}</span>
+          <button onClick="{{ pmDedInc }}" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);font-size:18px;font-weight:900;cursor:pointer;padding:0;font-family:inherit;">+</button>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;">취소</button>
-        <button onClick="{{ pmSaAdd }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;">💸 보내기</button>
+      <div style="background:var(--soft,#F7EAD2);border:1px solid var(--ac,#F59E0B);border-radius:14px;padding:12px 14px;">
+        <div style="font-size:12px;font-weight:800;color:var(--sub,#8A8177);">스티커 1개 {{ pmDedRate }}원 × {{ pmDedN }}개</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:3px;">
+          <span style="font-size:13px;font-weight:800;">합계</span>
+          <span style="flex:1;text-align:right;font-size:26px;font-weight:900;color:var(--ac,#F59E0B);font-variant-numeric:tabular-nums;line-height:1.2;">{{ pmDedAmt }}원</span>
+        </div>
+        <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-top:6px;">차감하면 남는 스티커 🌟 {{ pmDedLeft }}개</div>
+      </div>
+      <sc-if value="{{ pmDedWarn }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:12px;font-weight:800;color:#E0654F;margin-top:8px;word-break:keep-all;">{{ pmDedWarnTxt }}</div>
+      </sc-if>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;font-family:inherit;">취소</button>
+        <button onClick="{{ pmDedGo }}" style="flex:2;background:{{ pmDedBg }};color:{{ pmDedFg }};border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;font-family:inherit;">🌟 차감하고 용돈 주기</button>
       </div>
     </div>
   </div>
+</sc-if>
 </sc-if>
 
 <sc-if value="{{ modalPSched }}" hint-placeholder-val="{{ false }}">
@@ -2266,7 +2190,7 @@ input,button,textarea,select{font-family:inherit;}
 const FMOTTOS=['서로 선은 넘지 맙시다. 나는 갯바위에서, 너는 바다 속에서!','오늘의 신사 협정: 찌가 가라앉으면 정당하게 협상 개시.','잡아도 칭찬, 놓쳐도 미소, 꽝 쳐도 품격 유지!','바늘은 거들 뿐, 승부는 신사답게.','물고기는 매너 입질, 낚시꾼은 안전 퇴근!','오늘의 서약: 바늘 끝엔 예의, 발 밑엔 안전.','손맛은 묵직하게, 쓰레기는 싹 다 가볍게!','잡혀줘서 고맙고, 살아서 돌아가니 반갑다!','용왕님도 인정하는 페어플레이 낚시꾼.','바다와의 비즈니스: 꽝 쳐도 절대 투정 금지!','No Trash, No Risk, Just Fishing.','안전 조행 100%, 매너 입질 100%.','물고기에겐 미안함, 바다에겐 고마움.','손맛 낚고, 추억 담고, 무사 귀가.','격식 있는 챔질, 매너 있는 귀가.','바다 위 신사들의 정당한 한판승부.','안전이 우선, 매너가 기본.','바다를 아끼는 진짜 낚시꾼의 품격.','찌끝에 담은 예의, 발끝에 둔 안전.','클린 캐스팅, 리스펙트 조행.','바다가 내어준 선물, 감사함으로 되돌려줍니다.','물고기와 나눈 짧은 대화, 긴 여운으로 남기는 하루.','파도 소리에 감사를, 바람 소리에 안녕을.','자연이 준 소중한 손맛, 내가 지키는 안전한 조행.','바다를 닮은 넓은 마음으로 낚시합니다.','내가 떠난 자리는 바다의 눈물 없이 깨끗하게.','작은 물고기 한 마리에도 경건함을 담아.','바다와 사람이 같이 웃는 소중한 순간.','무사히 집으로 다녀오는 것이 가장 큰 조과입니다.','푸른 바다 위, 나만의 신사적 낭만.','어종 불문, 크기 불문! 안전과 매너는 절대 성역.','발 밑은 조심조심, 바다 속엔 신사답게.','잡는 기쁨보다 지키는 보람을 낚습니다.','바다의 규칙을 지키는 자가 진짜 꾼이다.','나를 지키는 구명조끼, 바다를 지키는 클린마인드.','어린 생명은 놓아주고, 내 쓰레기는 가져오고.','바다 생명과의 약속, 신사적인 라이벌의 대결.','너와 나의 매너가 만날 때 완벽한 조행이 완성된다.','나도 무사히 집으로, 너도 무사히 바다로!','오늘도 신사답게 던지고, 정직하게 낚았습니다.'];
 
 class Component extends DCLogic {
-  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',parentOk:false,modal:null,editMode:false,calM:'',tideM:'',tidePick:false,selDate:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:''};
+  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',rwOpen:false,parentOk:false,modal:null,editMode:false,calM:'',tideM:'',tidePick:false,selDate:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:''};
   KEY = 'famdiary_v1';
   KART={'가자미':{i:'🐟',a:'#E2D3B4',b:'#7D6746'},'우럭':{i:'🐠',a:'#B9C6AD',b:'#43533F'},'볼락':{i:'🐡',a:'#FFC0AC',b:'#A3392A'},'쥐노래미':{i:'🐟',a:'#DBE4AC',b:'#66743A'},'고등어':{i:'🐟',a:'#C8E7F5',b:'#25587A'},'전갱이':{i:'🐠',a:'#E2F2F8',b:'#54798F'},'학꽁치':{i:'🐟',a:'#EAF5FC',b:'#7691A6'},'보리멸':{i:'🐟',a:'#F6ECD4',b:'#A08554'},'황어':{i:'🐟',a:'#FFE7AD',b:'#94741F'},'삼치':{i:'🐟',a:'#D3E7F2',b:'#37627F'},'붕장어':{i:'🐍',a:'#E0D1B8',b:'#645440'},'장어':{i:'🐍',a:'#DCCFBA',b:'#5B4C3A'},'방어':{i:'🐠',a:'#FFE6B0',b:'#A5761D'},'광어':{i:'🐟',a:'#E6EEF6',b:'#5A6A79'},'감성돔':{i:'🐟',a:'#DFE9F2',b:'#41576B'},'참돔':{i:'🐠',a:'#FFD6D4',b:'#A4413C'}};
   KFISH={'장어':{len:68,diff:5},'삼치':{len:52,diff:3},'방어':{len:74,diff:4},'볼락':{len:24,diff:2},'광어':{len:45,diff:3},'감성돔':{len:31,diff:3},'참돔':{len:38,diff:4}};
@@ -2430,7 +2354,7 @@ class Component extends DCLogic {
       ],
       settings:{useTT:true,parentPw:String(this.props.parentPassword??'0000'),tideRegion:'south'},
       events:[], ddays:[], todos:[], checks:{kid1:{},kid2:{}},
-      journal:[], scores:[], stlog:[], exch:[], sttrash:[], fishlog:[], err:[], trades:[], appr:[],
+      journal:[], scores:[], stlog:[], exch:[], exreq:[], sttrash:[], fishlog:[], err:[], trades:[], appr:[],
       stkRate:{kid1:200,kid2:200},
       rewards:[], allow:[], tx:[], budgets:[], fixed:[], fixedPaid:{},
       accounts:[], feed:[], tt:[], calDeco:[], goals:[], mystk:[],
@@ -2460,6 +2384,7 @@ class Component extends DCLogic {
       if(!data.goals)data.goals=[];
       if(!data.appr)data.appr=[];
       if(!data.sttrash)data.sttrash=[];
+      if(!data.exreq)data.exreq=[];
       if(!data.mystk)data.mystk=[];
       // 예전 반응 🥹 는 2021년에 나온 글자라 폰·PC 폰트에 없으면 네모로 깨진다 — 🥺 로 옮긴다
       data.feed.forEach(po=>{if(po.likes&&po.likes['🥹']!==undefined){
@@ -2498,6 +2423,13 @@ class Component extends DCLogic {
   stRestore(tid){this.mut(d=>{const i=(d.sttrash||[]).findIndex(y=>y.tid===tid);if(i<0)return;
     const tr=d.sttrash[i];(tr.ty==='in'?d.stlog:d.exch).push(tr.it);d.sttrash.splice(i,1);});}
   stPurge(tid){this.mut(d=>{d.sttrash=(d.sttrash||[]).filter(y=>y.tid!==tid);});}
+  // 교환 신청 수락 — 여기서만 스티커가 실제로 빠진다(exch에 들어가야 잔액이 준다)
+  exOk(x){const t=this.today();this.mut(d=>{
+    if(!(d.exreq||[]).some(y=>y.id===x.id))return;          // 두 번 눌러도 한 번만 나간다
+    d.exreq=d.exreq.filter(y=>y.id!==x.id);
+    d.exch.push({id:this.uid(),k:x.k,d:t,name:x.name,cost:x.cost,money:Number(x.money||0)});
+    if(Number(x.money||0)>0)d.allow.push({id:this.uid(),k:x.k,d:t,ty:'in',pay:'card',src:'parent',a:Number(x.money),memo:'🌟 '+x.cost+'개 교환 용돈'});});}
+  exNo(id){this.mut(d=>{d.exreq=(d.exreq||[]).filter(y=>y.id!==id);});}
   apprOk(id){this.mut(d=>{const a=(d.appr||[]).find(x=>x.id===id);if(!a)return;
     const rn=Math.max(1,Number(a.rn||1));
     for(let i=0;i<rn;i++){const g=a.tag+'#'+i;if(!d.stlog.some(x=>x.auto===g))d.stlog.push({id:this.uid(),k:a.k,e:a.rs||'🌟',from:'할일 완료',msg:'"'+a.title+'" 해냈어!',d:a.d,auto:g});}
@@ -3617,6 +3549,14 @@ class Component extends DCLogic {
       // sticker
       const myStk=D.stlog.filter(x=>x.k===k);const spent=D.exch.filter(x=>x.k===k).reduce((s2,x)=>s2+x.cost,0);
       V.stEarned=myStk.length;V.stSpent=spent;const avail=myStk.length-spent;V.stAvail=avail;
+      // 교환은 누른다고 바로 빠지지 않는다 — 부모가 수락해야 차감된다. 그전까지는 「신청 중」으로 묶어 둔다
+      const myReq=(D.exreq||[]).filter(x=>x.k===k);
+      const reqByE={};myReq.forEach(x=>{const e2=x.e||'🌟';reqByE[e2]=(reqByE[e2]||0)+x.cost;});
+      const usable=Math.max(0,avail-(reqByE['🌟']||0));
+      V.stUsable=usable;V.hasStReq=myReq.length>0;V.stReqSum=myReq.reduce((s2,x)=>s2+x.cost,0);
+      V.stReqV=myReq.slice().sort((a,b)=>b.d.localeCompare(a.d)).map(x=>({date:this.dShort(x.d),name:x.name,
+        cost:(x.e||'🌟')+' '+x.cost+'개',
+        cancel:()=>this.mut(d=>{d.exreq=(d.exreq||[]).filter(y=>y.id!==x.id);})}));
       const stAsc=myStk.slice().sort((a,b)=>a.d.localeCompare(b.d)).map((x,i)=>({...x,used:i<spent}));
       const stCnt={};stAsc.forEach(x=>{if(!x.used)stCnt[x.e]=(stCnt[x.e]||0)+1;});
       V.stTypesV=Object.keys(stCnt).sort((a,b)=>stCnt[b]-stCnt[a]).map(e=>({e,n:stCnt[e]}));
@@ -3629,12 +3569,12 @@ class Component extends DCLogic {
       const mxN=Math.max(1,Number(f.mxN)||1);
       V.mxRate=myRate.toLocaleString();V.mxN=mxN;V.mxAmt=(mxN*myRate).toLocaleString();
       V.mxDec=()=>this.setF('mxN',Math.max(1,mxN-1));V.mxInc=()=>this.setF('mxN',mxN+1);
-      const mxCan=avail>=mxN;V.mxBg=mxCan?sk.ac:sk.bg;V.mxFg=mxCan?sk.on:sk.sub;
-      V.mxBuy=()=>{if(!mxCan)return;const amt=mxN*myRate;this.mut(d=>{d.exch.push({id:this.uid(),k,d:t,name:'용돈 '+amt.toLocaleString()+'원 교환',cost:mxN});
-        d.allow.push({id:this.uid(),k,d:t,ty:'in',pay:'card',src:'parent',a:amt,memo:'🌟 용돈 스티커 '+mxN+'개 교환'});});this.setF('mxN',1);};
-      V.rewardsV=D.rewards.filter(rw=>!rw.k||rw.k==='all'||rw.k===k).map(rw=>{const e=rw.e||'🌟';const have=e==='🌟'?avail:(stCnt[e]||0);const can=have>=rw.cost;
+      const mxCan=usable>=mxN;V.mxBg=mxCan?sk.ac:sk.bg;V.mxFg=mxCan?sk.on:sk.sub;
+      V.mxBuy=()=>{if(!mxCan)return;const amt=mxN*myRate;
+        this.mut(d=>{(d.exreq=d.exreq||[]).push({id:this.uid(),k,d:t,name:'용돈 '+amt.toLocaleString()+'원 교환',cost:mxN,money:amt,e:'🌟'});});this.setF('mxN',1);};
+      V.rewardsV=D.rewards.filter(rw=>!rw.k||rw.k==='all'||rw.k===k).map(rw=>{const e=rw.e||'🌟';const have=Math.max(0,(e==='🌟'?avail:(stCnt[e]||0))-(reqByE[e]||0));const can=have>=rw.cost;
         return{name:rw.name,e,cost:rw.cost,desc:rw.desc||'',hasDesc:!!rw.desc,have,bg:can?sk.ac:sk.bg,fg:can?sk.on:sk.sub,
-        buy:()=>{if(!can)return;this.mut(d=>{d.exch.push({id:this.uid(),k,d:t,name:rw.name,cost:rw.cost});});}};});
+        buy:()=>{if(!can)return;this.mut(d=>{(d.exreq=d.exreq||[]).push({id:this.uid(),k,d:t,name:rw.name,cost:rw.cost,money:0,e});});}};});
       const exs=D.exch.filter(x=>x.k===k).sort((a,b)=>b.d.localeCompare(a.d));
       V.hasExch=exs.length>0;V.exchV=exs.slice(0,5).map(x=>({date:this.dShort(x.d),name:x.name,cost:x.cost}));
       // 가족끼리 스티커 거래
@@ -3680,9 +3620,11 @@ class Component extends DCLogic {
           hasWarn:short,warnTxt:(iDo?gp.name+'의':'내')+' '+curNm+'가 '+Math.max(0,x.cost-bal)+'개 부족해서 거래를 못 해',
           hasWait:x.st==='chk'&&iDo};});
       const em={};exs.forEach(x=>{const m=x.d.slice(0,7);(em[m]=em[m]||[]).push(x);});
-      V.exMonV=Object.keys(em).sort().reverse().slice(0,6).map(m=>({
-        m:Number(m.slice(5,7))+'월',n:em[m].length+'번',sum:em[m].reduce((s2,x)=>s2+x.cost,0),
-        items:em[m].map(x=>({date:this.dShort(x.d),name:x.name,cost:x.cost}))}));
+      V.exMonV=Object.keys(em).sort().reverse().slice(0,6).map(m=>{const mo=em[m].reduce((s2,x)=>s2+Number(x.money||0),0);
+        return{m:Number(m.slice(5,7))+'월',n:em[m].length+'번',sum:em[m].reduce((s2,x)=>s2+x.cost,0),
+        hasMoney:mo>0,money:mo.toLocaleString()+'원',
+        items:em[m].map(x=>({date:this.dShort(x.d),name:x.name,cost:x.cost,
+          hasMoney:Number(x.money||0)>0,money:Number(x.money||0).toLocaleString()+'원'}))};});
       // allowance
       const myAl=D.allow.filter(x=>x.k===k);
       V.alBal=W(myAl.reduce((s2,x)=>s2+(x.ty==='in'?x.a:-x.a),0));
@@ -3712,54 +3654,12 @@ class Component extends DCLogic {
       V.parentOpen=S.tab==='parent';
       V.unlockParent=()=>{if((f.ppw||'')===D.settings.parentPw)this.setState({parentOk:true,pwErr:'',f:{...f,ppw:''}});else this.setState({pwErr:'비밀번호가 틀렸어요 (기본: 0000)'});};
       // 가계부는 별도 페이지(money/)로 옮겼다 — 칩은 남기되 누르면 그리로 간다
-      V.pviewsV=[{id:'kids',label:'👧 자녀 일정'},{id:'stk',label:'🌟 스티커'},{id:'money',label:'💳 가계부'},{id:'set',label:'⚙️ 설정'}]
+      V.pviewsV=[{id:'kids',label:'👧 자녀 일정'},{id:'money',label:'💳 가계부'},{id:'set',label:'⚙️ 설정'}]
         .map(pv=>({...pv,...chip(S.pview===pv.id),go:pv.id==='money'?(()=>this.goWallet()):(()=>this.setState({pview:pv.id}))}));
       V.pvKids=S.pview==='kids';V.pvMoney=false;V.pvSet=S.pview==='set';V.pvSetOrKids=V.pvKids||V.pvSet;
-      V.pvStk=S.pview==='stk';
-      V.pErrBal=this.errAvail(D,u.id);
-      const pErr=(D.err||[]).filter(x=>x.k===u.id).slice().sort((a,b)=>b.d.localeCompare(a.d));
-      V.hasPErr=pErr.length>0;
-      V.pErrV=pErr.slice(0,6).map(x=>({date:this.dShort(x.d),memo:x.memo,a:(x.a>0?'+':'')+x.a}));
-      const pKid=(kids.find(x=>x.id===S.ptrKid)||kids[0]||{}).id;
-      V.ptrKidV=kids.map(kp=>({label:kp.emoji+' '+kp.name,...softChip(kp.id===pKid),pick:()=>this.setState({ptrKid:kp.id})}));
-      V.ptrTaskV=f.ptrTask||'';V.ptrTaskOn=e=>this.setF('ptrTask',e.target.value);
-      const pCost=Math.max(1,Number(f.ptrCost||3));V.ptrCostV=pCost;
-      V.ptrDec=()=>this.setF('ptrCost',Math.max(1,pCost-1));V.ptrInc=()=>this.setF('ptrCost',Math.min(30,pCost+1));
-      const rwOpts=[{id:'star',label:'🌟 용돈 별스티커',note:'용돈으로 바꿀 수 있는 스티커예요.'},
-        {id:'praise',label:'🏅 칭찬 스티커',note:'용돈과 별개로 모으는 칭찬 스티커예요.'},
-        {id:'promise',label:'🎁 약속',note:'스티커 대신 다른 조건을 걸어요.'}];
-      const pRw=rwOpts.some(o=>o.id===f.ptrRw)?f.ptrRw:'star';
-      V.ptrRwV=rwOpts.map(o=>({label:o.label,...softChip(o.id===pRw),pick:()=>this.setF('ptrRw',o.id)}));
-      V.ptrRwNote=(rwOpts.find(o=>o.id===pRw)||{}).note;
-      V.ptrIsStk=pRw!=='promise';V.ptrIsCond=pRw==='promise';V.ptrCurE=this.CURI(pRw).e;
-      V.ptrCondV=f.ptrCond||'';V.ptrCondOn=e=>this.setF('ptrCond',e.target.value);
-      V.ptrCondPreV=['게임 30분','아이스크림','늦게 자기 30분','친구 초대'].map(c=>({label:c,pick:()=>this.setF('ptrCond',c)}));
-      V.ptrAdd=()=>{const task=(f.ptrTask||'').trim();const cond=(f.ptrCond||'').trim();
-        if(!task||!pKid||(pRw==='promise'&&!cond))return;
-        this.mut(d=>{d.trades=d.trades||[];d.trades.push({id:this.uid(),doer:pKid,giver:u.id,task,cost:pRw==='promise'?1:pCost,cond,st:'ask',by:u.id,cur:pRw,d:t});});
-        this.clearF(['ptrTask','ptrCond']);};
-      const trCard=(x,me)=>{const iDo=x.doer===me;const other=byName(iDo?x.giver:x.doer);const mt=this.trMeta(x.st,sk);
-        const cur=this.trCur(D,x);const curE=this.CURI(cur).e;const curNm=cur==='promise'?(x.cond||'약속'):this.CURI(cur).nm;
-        const bal=this.trBal(D,x);const short=bal<x.cost&&x.st!=='done';const gp=byName(x.giver);
-        return{who:other.emoji+' '+other.name,task:x.task,cost:cur==='promise'?(x.cond||'약속'):x.cost,date:this.dShort(x.d),curNm,
-          dir:curE+(iDo?' 받기':' 주기'),dirBg:iDo?sk.soft:sk.bg,st:mt.t,stC:mt.c,
-          canAccept:x.st==='ask'&&x.by!==me&&!short,accept:()=>{if(short)return;this.trSet(x.id,'go');},
-          canCancel:x.st==='ask'||x.st==='pw',cancel:()=>this.trDel(x.id),
-          canOk:x.st==='pw'&&!short,ok:()=>{if(short)return;this.trSet(x.id,'go');},
-          canMark:x.st==='go'&&iDo,mark:()=>this.trSet(x.id,'chk'),
-          canPay:x.st==='chk'&&!iDo&&!short,pay:()=>this.trPay(x),
-          canBack:x.st==='chk'&&!iDo,back:()=>this.trSet(x.id,'go'),
-          hasWarn:short,warnTxt:gp.name+'의 '+curNm+'가 '+Math.max(0,x.cost-bal)+'개 부족해서 거래 불가'};};
-      const pTr=TR.filter(x=>x.doer===u.id||x.giver===u.id).slice().sort(trSort);
-      V.hasPTr=pTr.length>0;V.pTrV=pTr.slice(0,8).map(x=>trCard(x,u.id));
-      const pend=TR.filter(x=>x.st==='pw'&&x.doer!==u.id&&x.giver!==u.id).slice().sort(trSort);
-      V.hasPend=pend.length>0;
-      V.pendV=pend.map(x=>{const gp=byName(x.giver);const dp=byName(x.doer);const cur=this.trCur(D,x);
-        const curE=this.CURI(cur).e;const curNm=cur==='promise'?(x.cond||'약속'):this.CURI(cur).nm;
-        const bal=this.trBal(D,x);const short=bal<x.cost;
-        return{pair:gp.emoji+' '+gp.name+' → '+dp.emoji+' '+dp.name,task:x.task,cost:curE+' '+x.cost,curNm,date:this.dShort(x.d),
-          canOk:!short,ok:()=>{if(short)return;this.trSet(x.id,'go');},no:()=>this.trDel(x.id),
-          hasWarn:short,warnTxt:gp.name+'의 '+curNm+' '+Math.max(0,x.cost-bal)+'개 부족 · 허락 불가'};});
+      const rwOpen=!!S.rwOpen;V.rwOpen=rwOpen;V.rwArrow=rwOpen?'▾':'▸';V.rwOpenTxt=rwOpen?'접기':'열기';
+      V.rwBg=rwOpen?sk.ac:sk.soft;V.rwFg=rwOpen?sk.on:sk.tx;V.rwBd=rwOpen?sk.ac:sk.line;
+      V.rwToggle=()=>this.setState({rwOpen:!rwOpen});
       V.kidsOV=kids.map(kp=>{
         const tds=D.todos.filter(x=>x.k===kp.id);const ck=(D.checks[kp.id]||{})[t]||{};
         const done=tds.filter(x=>ck[x.id]).length;
@@ -3789,9 +3689,8 @@ class Component extends DCLogic {
               save:()=>{const a2=Number(f['ea_'+x.id]);if(!a2)return;this.mut(d=>{const e2=d.allow.find(y=>y.id===x.id);if(e2){e2.a=a2;e2.memo=(f['em_'+x.id]||'').trim()||e2.memo;}});this.setState({monEdit:''});},
               del:()=>this.mut(d=>{d.allow=d.allow.filter(y=>y.id!==x.id);})};}):[]};});
         const fk='pt_'+kp.id;
-        const mrw=(D.rewards||[]).filter(x=>x.money&&x.cost).sort((a,b)=>(a.money/a.cost)-(b.money/b.cost))[0];
         const stkRate=Number((D.stkRate||{})[kp.id])||200;
-        const stkNeed=Math.max(1,Math.ceil((Number(f['sa_'+kp.id])||0)/stkRate));
+        const exReq=(D.exreq||[]).filter(x=>x.k===kp.id).slice().sort((a,b)=>b.d.localeCompare(a.d));
         const kAppr=(D.appr||[]).filter(x=>x.k===kp.id).slice().sort((a,b)=>b.d.localeCompare(a.d));
         const stHist=D.stlog.filter(x=>x.k===kp.id).map(x=>({d:x.d,txt:x.e+' '+(x.msg||x.from||'받음'),amt:'+1',c:'#3FA45B'}))
           .concat(kExch.map(x=>({d:x.d,txt:'🎁 '+x.name,amt:'-'+x.cost,c:'#E0654F'})))
@@ -3804,13 +3703,17 @@ class Component extends DCLogic {
           rnDec:()=>this.setF('rn_'+kp.id,Math.max(1,Math.max(1,Number(f['rn_'+kp.id]||1))-1)),
           rnInc:()=>this.setF('rn_'+kp.id,Math.min(9,Math.max(1,Number(f['rn_'+kp.id]||1))+1)),
           ptAdd:()=>{if(!(f[fk]||'').trim())return;const rs=f['rs_'+kp.id]||'🌟',rn=Math.max(1,Number(f['rn_'+kp.id]||1));this.mut(d=>{d.todos.push({id:this.uid(),k:kp.id,t:f[fk].trim(),e:'👑',rs,rn});});this.clearF([fk]);this.setState({saMsg:kp.id,saMsgTxt:'✅ 할일 추가! 성공하면 '+rs+' '+rn+'개를 받아요'});setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),2500);},
-          saVal:f['sa_'+kp.id]||'',saOn:e=>this.setF('sa_'+kp.id,e.target.value),
           hasSaMsg:S.saMsg===kp.id,saMsg:S.saMsgTxt||('💸 '+kp.name+'의 용돈 지갑에 바로 들어갔어요!'),
-          saIsDeduct:(f['saMode_'+kp.id]||'bonus')==='deduct',
-          stkNeed:stkNeed,stkRateTxt:stkRate.toLocaleString()+'원=1개',
-          bnBg:(f['saMode_'+kp.id]||'bonus')==='bonus'?sk.soft:sk.card,bnFg:(f['saMode_'+kp.id]||'bonus')==='bonus'?sk.tx:sk.sub,bnBd:(f['saMode_'+kp.id]||'bonus')==='bonus'?sk.ac:sk.line,
-          ddBg:f['saMode_'+kp.id]==='deduct'?sk.soft:sk.card,ddFg:f['saMode_'+kp.id]==='deduct'?sk.tx:sk.sub,ddBd:f['saMode_'+kp.id]==='deduct'?sk.ac:sk.line,
-          saBonus:()=>this.setF('saMode_'+kp.id,'bonus'),saDeduct:()=>this.setF('saMode_'+kp.id,'deduct'),
+          dedRate:stkRate,
+          hasExReq:exReq.length>0,
+          exReqV:exReq.map(x=>{const e=x.e||'🌟';const have=e==='🌟'?stkN:(kTypes[e]||0);const short=have<x.cost;
+            return{name:x.name,cost:e+' '+x.cost+'개',date:this.dShort(x.d),
+              hasMoney:Number(x.money||0)>0,money:Number(x.money||0).toLocaleString()+'원',
+              canOk:!short,ok:()=>{if(short)return;this.exOk(x);
+                this.setState({saMsg:kp.id,saMsgTxt:'✅ 수락 · 🌟 '+x.cost+'개 차감했어요 (남은 '+(stkN-x.cost)+'개)'});
+                setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),3500);},
+              no:()=>this.exNo(x.id),
+              hasShort:short,shortTxt:kp.name+'의 '+e+' 스티커가 '+(x.cost-have)+'개 모자라요 · 수락할 수 없어요'};}),
           hasAppr:kAppr.length>0,apprV:kAppr.map(x=>({title:x.title,rew:(x.rs||'🌟')+(Number(x.rn||1)>1?' ×'+x.rn:''),date:this.dShort(x.d),ok:()=>this.apprOk(x.id),no:()=>this.apprNo(x.id)})),
           hasStHist:stHist.length>0,stHistV:stHist.slice(0,2).map(x=>({date:this.dShort(x.d),txt:x.txt,amt:x.amt,c:x.c})),
           histMore:stHist.length>2,histArrow:'더보기 ▸',histToggle:()=>this.setState({modal:{t:'psthist',kid:kp.id},pmTrashOpen:false,pmPurgeAsk:''}),
@@ -3833,8 +3736,7 @@ class Component extends DCLogic {
                 this.setState({ptdEdit:''});},
               del:()=>{if(S.ptdEdit===td.id)this.setState({ptdEdit:''});this.mut(d=>{d.todos=d.todos.filter(x=>x.id!==td.id);d.appr=(d.appr||[]).filter(x=>x.td!==td.id);});}};}),
           openTodo:()=>this.setState({modal:{t:'ptodo',kid:kp.id}}),
-          openStick:()=>this.setState({modal:{t:'pstick',kid:kp.id}}),
-          openMoney:()=>this.setState({modal:{t:'pmoney',kid:kp.id}}),
+          openDed:()=>this.setState({modal:{t:'pded',kid:kp.id}}),
           openStHist:()=>this.setState({modal:{t:'psthist',kid:kp.id},pmTrashOpen:false,pmPurgeAsk:''}),
           openSched:()=>this.setState({modal:{t:'psched',kid:kp.id},ttKid:kp.id}),
           stEarned:kEarned,stSpent:kSpent,stTypesK,hasStTypesK:stTypesK.length>0,
@@ -3846,31 +3748,32 @@ class Component extends DCLogic {
               canOk:x.st==='pw'&&!short2,ok:()=>{if(short2)return;this.trSet(x.id,'go');},no:()=>this.trDel(x.id),
               canNo:x.st==='pw',canPay:x.st==='chk'&&!short2,pay:()=>this.trPay(x),
               hasShort:short2,shortTxt:gp2.name+'의 용돈스티커 '+Math.max(0,x.cost-bal2)+'개 부족 · 거래 불가'};}),
-          saAdd:()=>{const amt=Number(f['sa_'+kp.id]);if(!amt)return;const mode=f['saMode_'+kp.id]||'bonus';
-            if(mode==='deduct'){const n=Math.max(1,Math.ceil(amt/stkRate));
-              if(false){this.setState({saMsg:kp.id,saMsgTxt:'차감할 스티커 개수를 입력해 주세요'});setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),2500);return;}
-              if(n>stkN){this.setState({saMsg:kp.id,saMsgTxt:'스티커가 부족해요 (보유 '+stkN+'개)'});setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),2500);return;}
-              this.mut(d=>{d.exch.push({id:this.uid(),k:kp.id,d:t,name:'용돈 '+amt.toLocaleString()+'원 교환',cost:n});d.allow.push({id:this.uid(),k:kp.id,d:t,ty:'in',pay:'card',src:'parent',a:amt,memo:'🌟 '+n+'개 차감 용돈'});});
-              this.setState({saMsg:kp.id,saMsgTxt:'🌟 '+n+'개 차감하고 '+kp.name+'의 용돈 지갑에 넣었어요!'});
-            }else{
-              this.mut(d=>{d.allow.push({id:this.uid(),k:kp.id,d:t,ty:'in',pay:'card',src:'parent',a:amt,memo:'🎁 '+u.name+'가 보낸 보너스 용돈'});});
-              this.setState({saMsg:kp.id,saMsgTxt:'🎁 보너스 용돈이 '+kp.name+'의 지갑에 들어갔어요!'});
-            }
-            this.clearF(['sa_'+kp.id,'saStk_'+kp.id]);setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),2500);}};});
+          };});
       const pmKid=kids.find(x=>x.id===(S.modal&&S.modal.kid));
       const pmi=pmKid?V.kidsOV[kids.indexOf(pmKid)]:null;
-      V.modalPTodo=!!(pmi&&S.modal.t==='ptodo');V.modalPStick=!!(pmi&&S.modal.t==='pstick');V.modalPMoney=!!(pmi&&S.modal.t==='pmoney');V.modalPStHist=!!(pmi&&S.modal.t==='psthist');V.modalPSched=!!(pmi&&S.modal.t==='psched');
+      V.modalPTodo=!!(pmi&&S.modal.t==='ptodo');V.modalPDed=!!(pmi&&S.modal.t==='pded');V.modalPStHist=!!(pmi&&S.modal.t==='psthist');V.modalPSched=!!(pmi&&S.modal.t==='psched');
       if(pmi){V.pmName=pmKid.name;V.pmEmoji=pmKid.emoji;
         V.pmTTListV=(D.tt||[]).filter(x=>x.k===pmKid.id).slice().sort((a,b)=>a.day-b.day).map(x=>({day:this.DAYS[x.day],time:x.time,name:x.name,del:()=>this.mut(d=>{d.tt=d.tt.filter(y=>y.id!==x.id);})}));
         V.pmTTEmpty=V.pmTTListV.length===0;
         V.pmTodoVal=pmi.ptVal;V.pmTodoOn=pmi.ptOn;V.pmRsV=pmi.rsV;V.pmRnVal=pmi.rnVal;V.pmRnDec=pmi.rnDec;V.pmRnInc=pmi.rnInc;
         V.pmTodoAdd=()=>{if(!(f['pt_'+pmKid.id]||'').trim())return;pmi.ptAdd();this.setState({modal:null});};
-        V.pmStkPickV=this.STK.map(e=>({e,bg:(f.stEmoji||'🌟')===e?sk.soft:sk.bg,bd:(f.stEmoji||'🌟')===e?sk.ac:'transparent',pick:()=>this.setF('stEmoji',e)}));
-        V.pmStkSend=()=>{const e=f.stEmoji||'🌟';this.mut(d=>{d.stlog.push({id:this.uid(),k:pmKid.id,e,msg:(f.stMsg||'').trim(),from:u.name,d:t});});this.clearF(['stMsg']);this.setState({modal:null,saMsg:pmKid.id,saMsgTxt:e+' '+pmKid.name+'에게 스티커를 보냈어요!'});setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),2500);};
-        V.pmBnBg=pmi.bnBg;V.pmBnFg=pmi.bnFg;V.pmBnBd=pmi.bnBd;V.pmDdBg=pmi.ddBg;V.pmDdFg=pmi.ddFg;V.pmDdBd=pmi.ddBd;
-        V.pmSaBonus=pmi.saBonus;V.pmSaDeduct=pmi.saDeduct;V.pmSaVal=pmi.saVal;V.pmSaOn=pmi.saOn;
-        V.pmSaIsDeduct=pmi.saIsDeduct;V.pmStkNeed=pmi.stkNeed;V.pmStkRateTxt=pmi.stkRateTxt;V.pmStickers=pmi.stickers;
-        V.pmStEarned=pmi.stEarned;V.pmStSpent=pmi.stSpent;
+        V.pmStickers=pmi.stickers;V.pmStEarned=pmi.stEarned;V.pmStSpent=pmi.stSpent;
+        // 스티커 차감 — 개수를 고르면 1개 금액 x 개수 = 합계금액이 그 자리에서 보인다
+        const dedMax=Math.max(0,pmi.stickers);
+        const dedN=Math.min(Math.max(1,Number(f['ded_'+pmKid.id]||1)),Math.max(1,dedMax));
+        const dedAmt=dedN*pmi.dedRate;const dedOK=dedMax>=1&&dedN<=dedMax;
+        V.pmDedN=dedN;V.pmDedRate=pmi.dedRate.toLocaleString();V.pmDedAmt=dedAmt.toLocaleString();
+        V.pmDedLeft=Math.max(0,dedMax-dedN);
+        V.pmDedDec=()=>this.setF('ded_'+pmKid.id,Math.max(1,dedN-1));
+        V.pmDedInc=()=>this.setF('ded_'+pmKid.id,Math.min(Math.max(1,dedMax),dedN+1));
+        V.pmDedWarn=!dedOK;V.pmDedWarnTxt=dedMax<1?'남은 스티커가 없어요':'남은 스티커('+dedMax+'개)보다 많이 고르셨어요';
+        V.pmDedBg=dedOK?sk.ac:sk.bg;V.pmDedFg=dedOK?sk.on:sk.sub;
+        V.pmDedGo=()=>{if(!dedOK)return;
+          this.mut(d=>{d.exch.push({id:this.uid(),k:pmKid.id,d:t,name:'용돈 '+dedAmt.toLocaleString()+'원 교환',cost:dedN,money:dedAmt});
+            d.allow.push({id:this.uid(),k:pmKid.id,d:t,ty:'in',pay:'card',src:'parent',a:dedAmt,memo:'🌟 '+dedN+'개 차감 용돈'});});
+          this.clearF(['ded_'+pmKid.id]);
+          this.setState({modal:null,saMsg:pmKid.id,saMsgTxt:'🌟 '+dedN+'개 차감 · '+dedAmt.toLocaleString()+'원을 '+pmKid.name+'의 지갑에 넣었어요 (남은 스티커 '+(dedMax-dedN)+'개)'});
+          setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),4000);};
         const shm={};
         D.stlog.filter(x=>x.k===pmKid.id).forEach(x=>{const m=x.d.slice(0,7);(shm[m]=shm[m]||{inn:[],out:[]}).inn.push(x);});
         D.exch.filter(x=>x.k===pmKid.id).forEach(x=>{const m=x.d.slice(0,7);(shm[m]=shm[m]||{inn:[],out:[]}).out.push(x);});
@@ -3906,7 +3809,7 @@ class Component extends DCLogic {
             ask:()=>this.setState({pmPurgeAsk:tr.tid}),
             purge:()=>{this.stPurge(tr.tid);this.setState({pmPurgeAsk:''});}};});
         V.pmTrashEmpty=stTrash.length===0;
-        V.pmSaAdd=()=>{if(!Number(f['sa_'+pmKid.id]))return;pmi.saAdd();this.setState({modal:null});};}
+        }
       const rwKids=D.profiles.filter(p=>p.role==='kid').map(p=>({id:p.id,emoji:p.emoji,name:p.name})).concat([{id:'all',emoji:'👨‍👩‍👧‍👦',name:'공통'}]);
       const rwK=(rwKids.find(p=>p.id===S.rwKid)||rwKids[0]||{}).id;
       const rwAll=rwK==='all';V.rwNotAll=!rwAll;
