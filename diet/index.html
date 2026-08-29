@@ -1342,8 +1342,45 @@ class Component extends DCLogic {
   weekStart(ds){const dt=new Date(ds+'T00:00:00');dt.setDate(dt.getDate()-((dt.getDay()+6)%7));return this.ymd(dt)}
   weekEnd(ds){return this.addDays(this.weekStart(ds),6)}
   /* 목표일은 1주 단위로 갱신된다 — 지나간 목표일은 이번 주 마감(일요일)으로 굴러간다. */
-  rollGoal(){const g=this.state.set||{};const we=this.weekEnd(this.TODAY);
-    if(!g.goalDate||g.goalDate<this.TODAY)this.setState({set:{...g,goalDate:we}})}
+  /* 코드가 정한 목표 체중. 이 숫자를 바꾸면 이미 저장된 기록에도 한 번만 밀어 넣는다.
+     그 뒤 사장님이 설정 화면에서 손으로 바꾸신 값은 다시 덮어쓰지 않는다. */
+  GOALW=50;
+  rollGoal(){const g=this.state.set||{};const we=this.weekEnd(this.TODAY);const n={};
+    if(+g.goalWCode!==this.GOALW){n.goalW=this.GOALW;n.goalWCode=this.GOALW}
+    if(!g.goalDate||g.goalDate<this.TODAY)n.goalDate=we;
+    if(Object.keys(n).length)this.setState({set:{...g,...n}})}
+  /* 🏋️ 트레이너 입력함 — 사장님이 말로 주신 기록을 트레이너가 파일에 적어 두면 앱이 받아 넣는다.
+     ⛔ 덮어쓰지 않고 「합친다」. 같은 날 같은 이름·같은 시각이 이미 있으면 건너뛴다.
+     백업 불러오기(applyBackup)와 헷갈리지 마라 — 그쪽은 통째로 갈아끼우는 것이라 위험하다. */
+  pullInbox(){fetch('trainer-inbox.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(o=>{
+    if(!o||o.app!=='dietgram-inbox'||!o.stamp)return;
+    let seen=null;try{seen=localStorage.getItem('dgm_inboxSeen')}catch(_){}
+    if(seen===o.stamp)return;
+    const S=this.state,P={},add=[];
+    if(o.weights&&Object.keys(o.weights).length){const W={...S.weights};
+      for(const d of Object.keys(o.weights))W[d]={...(W[d]||{}),...o.weights[d]};  /* 목표(t) 칸을 지우지 않는다 */
+      P.weights=W;add.push('체중')}
+    if(o.foods){const F={...S.foods},DM={...S.dayMode};let n=0;
+      for(const d of Object.keys(o.foods)){const day=(F[d]||[]).slice();
+        for(const x of o.foods[d]){if(day.some(y=>y.name===x.name&&(y.time||'')===(x.time||'')))continue;
+          day.push({...x,id:'f'+(this.seq++)});n++}
+        F[d]=day;if(!DM[d])DM[d]=S.mode}
+      if(n){P.foods=F;P.dayMode=DM;add.push('음식 '+n+'개')}}
+    if(o.cond){const C={...S.cond};for(const d of Object.keys(o.cond))C[d]={...(C[d]||{}),...o.cond[d]};P.cond=C;add.push('컨디션')}
+    if(o.safe)P.safe={...(S.safe||{}),...o.safe};
+    if(o.lifts){const L={...S.lifts};let n=0;
+      for(const d of Object.keys(o.lifts)){const day=(L[d]||[]).slice();
+        for(const x of o.lifts[d]){if(day.some(y=>y.name===x.name))continue;day.push({...x,id:'l'+(this.seq++)});n++}
+        L[d]=day}
+      if(n){P.lifts=L;add.push('근력 '+n+'개')}}
+    if(o.water){const W={...(S.water||{})};for(const d of Object.keys(o.water))if(W[d]==null)W[d]=o.water[d];P.water=W}
+    if(o.journal){const J={...(S.journal||{})};for(const d of Object.keys(o.journal))J[d]={...(J[d]||{}),...o.journal[d]};P.journal=J}
+    try{localStorage.setItem('dgm_inboxSeen',o.stamp)}catch(_){}
+    if(!add.length)return;
+    this.setState(P,()=>{this.persist();this.toast('🏋️ 트레이너가 '+(o.note||'기록')+'을 넣었어요 — '+add.join(' · '))})
+  }).catch(()=>{})}
+  /* 기록을 다 읽은 뒤 한 번 — 목표일 굴리기 + 트레이너 입력함 받기. 두 mount(폰·웹)가 함께 부른다. */
+  afterLoad(){this.rollGoal();this.pullInbox()}
   wAt(ds){for(let i=0;i<28;i++){const w=(this.state.weights||{})[this.addDays(ds,-i)];if(w&&w.a!=null)return +w.a}return null}
   /* 이번 주에 실제로 잰 첫 기록. 옛 기록으로 거슬러 올라가지 않는다 — 낡은 숫자로 목표를 잡으면 허수 「달성」이 나온다. */
   wIn(a,b){for(let d=a;d<=b;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null)return +w.a}return null}
@@ -1387,7 +1424,7 @@ class Component extends DCLogic {
     const cd=this.condOf(T),ck=this.CONDS.filter(c=>cd[c.k]).map(c=>c.t),hw=this.healthWatch(7);
     L.push('','## 컨디션·운동','',
       '- 컨디션: '+(ck.length?ck.join(', '):'(없음)')+(cd.note?(' / 메모: '+cd.note):''),
-      '- 근력: '+((this.liftsOf(T)||[]).join(', ')||'(없음)'),
+      '- 근력: '+((this.liftsOf(T)||[]).map(x=>x.name+' '+(x.sets||0)+'x'+(x.reps||0)+(x.kg?(' '+x.kg+'kg'):'')).join(', ')||'(없음)'),
       '- 안전 예외: '+((this.state.safe||{})[T]?'켜짐 — 클린보다 「먹는 것」이 먼저다':'꺼짐'),
       '- 최근 7일 건강: '+hw.text+(hw.days?(' 〔신호 '+hw.days+'일'+(hw.safeN?(' · 안전 예외 '+hw.safeN+'일'):'')+'〕'):''),'',
       '## 할 일','',
@@ -1571,7 +1608,7 @@ class Component extends DCLogic {
       this._doc=doc||{};
       let o=this._doc.diet,moved=false;
       if(!o){o=await this.importLocal();moved=!!o}
-      this.adopt(o,()=>{this._loaded=true;this.rollGoal();if(moved){this._saved='';this.persist()}})})}
+      this.adopt(o,()=>{this._loaded=true;this.afterLoad();if(moved){this._saved='';this.persist()}})})}
   stripDown=e=>{const el=this.stripRef.current;if(!el)return;this._sd={x:e.clientX,sl:el.scrollLeft,moved:false};try{el.setPointerCapture(e.pointerId)}catch(_){}}
   stripMove=e=>{const sd=this._sd;if(!sd)return;const dx=e.clientX-sd.x;if(Math.abs(dx)>5)sd.moved=true;this.stripRef.current.scrollLeft=sd.sl-dx}
   stripUp=e=>{if(this._sd&&this._sd.moved){this._noClick=true;setTimeout(()=>{this._noClick=false},60)}this._sd=null}
