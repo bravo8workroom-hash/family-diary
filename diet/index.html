@@ -231,6 +231,12 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               <button onClick="{{woToday}}" style="flex:none;border:0;background:{{accent}};color:#fff;border-radius:99px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer">오늘</button>
             </sc-if>
           </div>
+          <div style="font-size:11px;font-weight:800;color:#B5B2A6;margin-bottom:6px">⚡ 자주 하는 운동 · 누르면 바로 기록</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:11px">
+            <sc-for list="{{woQuick}}" as="wq" hint-placeholder-count="4">
+              <button onClick="{{wq.tap}}" style="border:1px solid {{cardBorder}};background:{{wq.bg}};color:{{wq.color}};border-radius:99px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer">{{wq.label}}</button>
+            </sc-for>
+          </div>
           <div style="display:flex;flex-direction:column;gap:6px">
             <sc-for list="{{woGroups}}" as="g" hint-placeholder-count="2">
               <div style="font-size:11px;font-weight:800;color:{{g.color}};margin-top:4px;letter-spacing:.5px">{{g.name}}</div>
@@ -382,7 +388,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px">
               <sc-for list="{{m.quick}}" as="q" hint-placeholder-count="3">
-                <button onClick="{{q.tap}}" style="border:1px solid {{cardBorder}};background:{{chipBg}};color:{{accent}};border-radius:99px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer">＋ {{q.label}}</button>
+                <button onClick="{{q.tap}}" style="border:1px solid {{cardBorder}};background:{{chipBg}};color:{{accent}};border-radius:99px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px">＋ {{q.label}}<sc-if value="{{q.giOn}}" hint-placeholder-val="{{ true }}"><span style="flex:none;font-size:9.5px;font-weight:800;letter-spacing:.2px;padding:2px 6px;border-radius:99px;background:{{q.giBg}};color:{{q.giColor}}">{{q.giText}}</span></sc-if></button>
               </sc-for>
               <button onClick="{{m.favOpen}}" title="자주 먹는 음식 전부 보기" style="border:1.5px dashed #D8D5CB;background:none;color:#8B887C;border-radius:99px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer">⚡ 자주 먹는 것</button>
             </div>
@@ -1155,7 +1161,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         <sc-for list="{{fvMine}}" as="fr" hint-placeholder-count="6">
           <div onClick="{{fr.tap}}" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid {{cardBorder}};background:{{cardBg}};border-radius:{{radM}};padding:11px 13px">
             <div style="flex:1;min-width:0">
-              <div style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{fr.name}}</div>
+              <div style="display:flex;align-items:center;gap:6px;min-width:0"><span style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{fr.name}}</span><sc-if value="{{fr.giOn}}" hint-placeholder-val="{{ true }}"><span style="flex:none;font-size:9.5px;font-weight:800;letter-spacing:.2px;padding:2px 6px;border-radius:99px;background:{{fr.giBg}};color:{{fr.giColor}}">{{fr.giFull}}</span></sc-if></div>
               <div style="font-size:11px;color:#8B887C;margin-top:2px">{{fr.summary}}</div>
             </div>
             <span style="font-size:12px;font-weight:800;flex:none;color:{{accent}}">담기</span>
@@ -1169,7 +1175,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         <sc-for list="{{fvRecent}}" as="fh" hint-placeholder-count="5">
           <div onClick="{{fh.tap}}" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid {{cardBorder}};background:{{cardBg}};border-radius:{{radM}};padding:11px 13px">
             <div style="flex:1;min-width:0">
-              <div style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{fh.name}}</div>
+              <div style="display:flex;align-items:center;gap:6px;min-width:0"><span style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{fh.name}}</span><sc-if value="{{fh.giOn}}" hint-placeholder-val="{{ true }}"><span style="flex:none;font-size:9.5px;font-weight:800;letter-spacing:.2px;padding:2px 6px;border-radius:99px;background:{{fh.giBg}};color:{{fh.giColor}}">{{fh.giFull}}</span></sc-if></div>
               <div style="font-size:11px;color:#8B887C;margin-top:2px">{{fh.summary}}</div>
             </div>
             <span style="font-size:12px;font-weight:800;flex:none;color:{{accent}}">담기</span>
@@ -1307,6 +1313,52 @@ class Component extends DCLogic {
   COMBO_CODES=['A1','A2','A3','S1','S2','S3','S4','D1','D2','D3','D4'];
   CONDS=[{k:'dizzy',t:'어지러움',e:'😵',safe:true},{k:'shake',t:'손떨림',e:'🤲',safe:true},{k:'numb',t:'손저림',e:'🫱',safe:true},{k:'sweat',t:'식은땀',e:'💦',safe:true},{k:'nofood',t:'몇 시간째 못 먹음',e:'🕳',safe:true},{k:'afterlift',t:'근력 직후 고갈',e:'🪫',safe:true},{k:'heartburn',t:'속쓰림',e:'🔥'},{k:'belly',t:'배 꾸르륵·설사',e:'🌀'},{k:'period',t:'생리',e:'🩸'}];
   LIFTS=['하체','등','가슴+어깨','코어'];
+  /* GI(혈당지수) 표 — 자주 먹는 음식 옆에 작게 띄운다. 사장님 화면 글자라 한글이다.
+     55 이하 좋음(초록) · 56~69 중간(주황) · 70 이상 나쁨(빨강) — 국제 GI 분류 그대로다.
+     앞에서부터 이름에 들어 있는지 보므로 구체적인 것을 먼저 둔다('현미밥'이 '쌀밥'보다,
+     '양배추'가 '배'보다 앞). 표에 없는 음식은 아무것도 안 띄운다 — 모르는 값을 지어내지 않는다.
+     ⛔ GI는 혈당이 오르는 속도일 뿐 「먹어도 되는 음식」 표가 아니다. 절대선 판정(absLines)에 쓰지 마라. */
+  GI_TAB=[
+    ['마늘바게트',93],['바게트',93],['식빵',91],['흰빵',91],['토스트',91],['베이글',72],['크루아상',67],['호밀빵',58],['통밀빵',69],
+    ['도넛',76],['케이크',82],['머핀',75],['와플',76],['핫케이크',80],
+    ['떡볶이',82],['가래떡',85],['떡',85],['찹쌀',87],['백미',86],['흰쌀',86],['쌀밥',86],['공기밥',86],['김밥',80],['볶음밥',80],['죽',78],
+    ['라면',73],['비빔면',73],['우동',80],['소면',80],['국수',80],['파스타',65],['스파게티',65],
+    ['감자튀김',75],['감자칩',60],['감자',90],['군고구마',90],['고구마',55],['옥수수',65],
+    ['콘플레이크',85],['시리얼',82],['그래놀라',70],
+    ['설탕',109],['꿀',88],['사탕',108],['젤리',80],['초콜릿',70],['과자',75],['쿠키',77],['아이스크림',61],
+    ['콜라',70],['사이다',70],['탄산음료',70],['주스',65],['맥주',66],['테라',66],['카스',66],['하이트',66],
+    ['수박',72],['파인애플',65],['망고',55],['바나나',55],['포도',46],['오렌지',43],['귤',42],['딸기',40],['키위',35],['블루베리',34],['사과',38],['자두',39],['복숭아',41],
+    ['현미밥',55],['현미',55],['귀리',55],['오트밀',55],['보리',25],['퀴노아',53],['통밀',45],
+    ['달걀',30],['계란',30],['반숙란',30],['수란',30],['흰자',30],
+    ['닭가슴살',45],['닭',45],['소고기',45],['돼지',45],['목살',45],['삼겹',45],['껍데기',45],['오리',45],['햄버거',61],['소시지',46],
+    ['연어',40],['참치',40],['고등어',40],['새우',40],['오징어',40],['황태',40],['북어',40],['멸치',40],['어묵',51],
+    ['두부',42],['두유',34],['병아리콩',33],['렌틸',29],['콩',33],
+    ['그릭요거트',35],['요거트',35],['우유',25],['치즈',30],['버터',30],
+    ['아몬드',25],['호두',18],['땅콩',15],['견과',20],
+    ['아보카도',27],['방울토마토',30],['토마토',30],['브로콜리',25],['양배추',26],['배추',15],['시금치',15],['오이',23],['버섯',26],['상추',23],['김치',15],['나물',15],['미역',16],['당근',39],['양파',30],['파프리카',26],['가지',20],['단호박',65],['호박',65],
+    ['프로틴',30],['쉐이크',30],['배',38],['햄',46],['김',15]];
+  giOf(nm){const s=String(nm||'').replace(/\s/g,'');if(!s)return null;
+    for(const [k,g] of this.GI_TAB)if(s.includes(k))return {gi:g,
+      lv:g<=55?'좋음':g<=69?'중간':'나쁨',
+      color:g<=55?'#17A673':g<=69?'#C97A16':'#E5484D',
+      bg:g<=55?'#E6F5EE':g<=69?'#FBEFDD':'#FCEBEC'};
+    return null}
+  giVals(nm){const g=this.giOf(nm);
+    return g?{giOn:true,giText:'GI '+g.gi,giFull:'GI '+g.gi+' · '+g.lv,giColor:g.color,giBg:g.bg}
+      :{giOn:false,giText:'',giFull:'',giColor:'#8B887C',giBg:'transparent'}}
+  /* 자주 하는 운동 — 최근 60일 기록에서 종목별로 가장 자주 적은 시간을 뽑는다.
+     기록이 모자라면 씨앗(WO_SEED)으로 네 칸을 채운다. 칩을 누르면 보고 있는 날짜에 바로 기록된다. */
+  WO_SEED=[{k:'유산소',m:45},{k:'하체',m:40},{k:'등',m:40},{k:'가슴+어깨',m:40}];
+  WO_EMOJI={'하체':'🦵','등':'🏋️','가슴+어깨':'💪','유산소':'🏃','코어':'🧘'};
+  woPool(){const W=this.state.workouts||{},hit={};
+    for(let i=0;i<60;i++){const d=W[this.addDays(this.TODAY,-i)];if(!d)continue;
+      for(const k of Object.keys(d)){const m=+d[k]||0;if(m<=0)continue;
+        const h=hit[k]||(hit[k]={k,n:0,mm:{}});h.n++;h.mm[m]=(h.mm[m]||0)+1}}
+    const list=Object.values(hit).map(h=>{const ms=Object.keys(h.mm).map(Number).sort((a,b)=>h.mm[b]-h.mm[a]||b-a);
+      return {k:h.k,m:ms[0],n:h.n}}).sort((a,b)=>b.n-a.n);
+    for(const s of this.WO_SEED){if(list.length>=4)break;
+      if(!list.some(x=>x.k===s.k))list.push({k:s.k,m:s.m,n:0})}
+    return list.slice(0,4)}
   /* 자주 먹는 음식 씨앗 — 52kg 절대선 식단. 사장님 화면에 뜨는 글자라 한글이다.
      저장된 목록(state.favs)이 있으면 그쪽이 이긴다 — 사장님이 여기에 더 담으실 수 있다. */
   FAV_SEED=[
@@ -1807,7 +1859,7 @@ class Component extends DCLogic {
     const starredPosts=S.posts.filter(p=>p.starred);
     const dSum=this.sums(S.selDate),dSc=this.score(S.selDate),dGoal=this.goalFor(S.selDate);
     const meals=['아침','점심','저녁','간식'].map(nm=>{const items=(S.foods[S.selDate]||[]).filter(x=>x.meal===nm);const k=items.reduce((a,x)=>a+(+x.kcal||0),0);const qp=this.favPool(nm);
-      return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,quick:qp.slice(0,3).map(v=>({label:v.name,tap:()=>this.favPut(nm,v)})),favOpen:()=>this.setState({fv:{meal:nm}}),combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
+      return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,quick:qp.slice(0,3).map(v=>({label:v.name,tap:()=>this.favPut(nm,v),...this.giVals(v.name)})),favOpen:()=>this.setState({fv:{meal:nm}}),combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
         items:items.map(it=>({name:it.name,timeLabel:it.time?(it.time+'  '):'',timeColor:this.outTime(it.time)?'#E5484D':'#B5B2A6',amt:fmt(it.amt)+it.unit,c:fmt(it.c),p:fmt(it.p),f:fmt(it.f),kcal:fmt(it.kcal),open:()=>this.setState({fm:{...it,confirm:false,nameErr:false}}),del:e=>{e.stopPropagation();const F={...S.foods};F[S.selDate]=(F[S.selDate]||[]).filter(x=>x.id!==it.id);this.setState({foods:F});this.toast(this.say('삭제했어요','삭제했사와요'))}}))}});
     const dayPosts=S.posts.filter(p=>p.date===S.selDate).map(mkThumb);
     const fm=S.fm;
@@ -1865,6 +1917,11 @@ class Component extends DCLogic {
         opts:[0,15,30,45,60,75,90,105,120].map(m=>({label:woLbl(m),bg:m===v?th.accent:th.cardBg,color:m===v?'#fff':'#5C594E',
           pick:()=>setWo(k,m,this.say(dp+k+' '+woLbl(m)+' 기록 완료 💪 달력에서 확인!',dp+k+' '+woLbl(m)+' 기록했사와요 💪'))}))}};
     const woGroups=[{name:'근력',color:th.accent,rows:[mkWoRow('하체','🦵'),mkWoRow('등','🏋️'),mkWoRow('가슴+어깨','💪')]},{name:'유산소',color:'#5B8DEF',rows:[mkWoRow('유산소','🏃')]}];
+    const woDp=woIsT?'':this.lbl(woD8)+' ';
+    const woQuick=this.woPool().map(q=>{const on=(+woDay[q.k]||0)===q.m,lb=woLbl(q.m);
+      return {label:(this.WO_EMOJI[q.k]||'💪')+' '+q.k+' '+lb,
+        bg:on?th.accent:th.chipBg,color:on?'#fff':'#5C594E',
+        tap:()=>setWo(q.k,q.m,this.say(woDp+q.k+' '+lb+' 기록 완료 💪',woDp+q.k+' '+lb+' 기록했사와요 💪'))}});
     const woTotalToday=woMin(woD8);
     const [cy,cmn]=S.calM.split('-').map(Number);
     const mdays=new Date(cy,cmn,0).getDate(),fdow=new Date(cy,cmn-1,1).getDay();
@@ -2073,11 +2130,11 @@ class Component extends DCLogic {
         onKey:e=>{if(e.key==='Enter')stAdd(b.w)()},add:stAdd(b.w)})),
       /* 자주 먹는 음식 */
       fvOn:!!fv,fvClose:()=>this.setState({fv:null}),fvMealLabel:fvMeal,
-      fvHint:'누르면 '+fvMeal+'에 지금 시각으로 바로 담겨요. 「최근 기록에서」의 ⭐를 누르면 내 목록으로 들어와요.',
-      fvMine:fvPool.filter(v=>v.mine).map(v=>({name:v.name,summary:favSum(v),tap:favTap(v),
+      fvHint:'누르면 '+fvMeal+'에 지금 시각으로 바로 담겨요. 「최근 기록에서」의 ⭐를 누르면 내 목록으로 들어와요. GI는 혈당이 오르는 속도예요 — 초록 좋음 · 주황 중간 · 빨강 나쁨 (칼로리와는 다른 이야기예요).',
+      fvMine:fvPool.filter(v=>v.mine).map(v=>({name:v.name,summary:favSum(v),tap:favTap(v),...this.giVals(v.name),
         del:e=>{e.stopPropagation();this.favDrop(v.id)}})),
       fvMineEmpty:!fvPool.some(v=>v.mine),
-      fvRecent:fvPool.filter(v=>!v.mine).slice(0,10).map(v=>({name:v.name,summary:favSum(v),tap:favTap(v),
+      fvRecent:fvPool.filter(v=>!v.mine).slice(0,10).map(v=>({name:v.name,summary:favSum(v),tap:favTap(v),...this.giVals(v.name),
         pin:e=>{e.stopPropagation();this.favPin(v)}})),
       fvNoRecent:!fvPool.some(v=>!v.mine),
       /* 조합식 서랍 */
@@ -2126,7 +2183,7 @@ class Component extends DCLogic {
       maintBtnBg:S.mode==='maint'?th.cardBg:'transparent',maintBtnColor:S.mode==='maint'?th.maint:'#8B887C',maintBtnShadow:S.mode==='maint'?'0 1px 4px rgba(0,0,0,.12)':'none',
       stripRef:this.stripRef,stripDown:this.stripDown,stripMove:this.stripMove,stripUp:this.stripUp,stripClick:this.stripClick,
       woGroups,woTotal:woTotalToday>0?'총 '+fmtT(woTotalToday):'0:00',woTotalColor:woTotalToday>0?th.accent:'#B5B2A6',
-      woTitle:woIsT?'오늘 운동':'운동 기록',woDate:woD8,woDateLabel:this.lbl(woD8)+(woIsT?' · 오늘':''),
+      woQuick,woTitle:woIsT?'오늘 운동':'운동 기록',woDate:woD8,woDateLabel:this.lbl(woD8)+(woIsT?' · 오늘':''),
       woDateBg:woIsT?th.chipBg:th.dietSoft,woDateColor:woIsT?'#1F1E1A':th.accent,woNotToday:!woIsT,
       woPrev:()=>this.setState({woDate:this.addDays(woD8,-1),woOpen:null}),
       woNext:()=>{if(woD8<this.TODAY)this.setState({woDate:this.addDays(woD8,1),woOpen:null})},
