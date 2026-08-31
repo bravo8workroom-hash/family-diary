@@ -1470,7 +1470,9 @@ class Component extends DCLogic {
   /* 🏋️ 트레이너 입력함 — 사장님이 말로 주신 기록을 트레이너가 파일에 적어 두면 앱이 받아 넣는다.
      ⛔ 덮어쓰지 않고 「합친다」. 같은 날 같은 이름·같은 시각이 이미 있으면 건너뛴다.
      백업 불러오기(applyBackup)와 헷갈리지 마라 — 그쪽은 통째로 갈아끼우는 것이라 위험하다. */
-  pullInbox(){fetch('trainer-inbox.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(o=>{
+  pullInbox(){fetch('trainer-inbox.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(o=>this.mergeInbox(o)).catch(()=>{})}
+  /* 받은 것을 기록에 합치는 자리 — 검사기가 fetch 없이 이 함수를 직접 부른다. */
+  mergeInbox(o){
     if(!o||o.app!=='dietgram-inbox'||!o.stamp)return;
     let seen=null;try{seen=localStorage.getItem('dgm_inboxSeen')}catch(_){}
     if(seen===o.stamp)return;
@@ -1493,10 +1495,17 @@ class Component extends DCLogic {
       if(n){P.lifts=L;add.push('근력 '+n+'개')}}
     if(o.water){const W={...(S.water||{})};for(const d of Object.keys(o.water))if(W[d]==null)W[d]=o.water[d];P.water=W}
     if(o.journal){const J={...(S.journal||{})};for(const d of Object.keys(o.journal))J[d]={...(J[d]||{}),...o.journal[d]};P.journal=J}
+    if(o.workouts){const K={...(S.workouts||{})};let n=0;
+      for(const d of Object.keys(o.workouts)){const day={...(K[d]||{})};
+        for(const k of Object.keys(o.workouts[d]))if(day[k]!==o.workouts[d][k]){day[k]=o.workouts[d][k];n++}  /* 사장님이 방금 말씀하신 값이 이긴다 — 체중과 같다 */
+        K[d]=day}
+      if(n){P.workouts=K;add.push('운동 '+n+'개')}}
+    if(o.todoDone&&o.todoDone.length){const TD=S.todo||{items:[],done:[]},ids=new Set(o.todoDone.map(String));
+      const hit=(TD.items||[]).filter(x=>ids.has(x.id)||ids.has(String(x.t||'')));
+      if(hit.length){P.todo={items:(TD.items||[]).filter(x=>!(ids.has(x.id)||ids.has(String(x.t||'')))),done:[...hit.map(x=>({...x,at:this.TODAY})),...(TD.done||[])].slice(0,100)};add.push('작업대기 '+hit.length+'건 정리')}}
     try{localStorage.setItem('dgm_inboxSeen',o.stamp)}catch(_){}
     if(!add.length)return;
-    this.setState(P,()=>{this.persist();this.toast('🏋️ 트레이너가 '+(o.note||'기록')+'을 넣었어요 — '+add.join(' · '))})
-  }).catch(()=>{})}
+    this.setState(P,()=>{this.persist();this.toast('🏋️ 트레이너가 '+(o.note||'기록')+'을 넣었어요 — '+add.join(' · '))})}
   /* 기록을 다 읽은 뒤 한 번 — 목표일 굴리기 + 트레이너 입력함 받기. 두 mount(폰·웹)가 함께 부른다. */
   afterLoad(){this.rollGoal();this.pullInbox()}
   wAt(ds){for(let i=0;i<28;i++){const w=(this.state.weights||{})[this.addDays(ds,-i)];if(w&&w.a!=null)return +w.a}return null}
@@ -1526,8 +1535,8 @@ class Component extends DCLogic {
       '사장님이 다이어트 다이어리 화면에서 트레이너를 부르셨다. 아래는 앱이 지금 들고 있는 그날 기록이다.',
       '「/다이어트」 스킬을 읽고 트레이너 자리로 답해라. 앱을 고쳐야 하면 C:\\projects\\diet-diary 의 CLAUDE.md 절차를 따른다.','',
       '## ★ 작업대기 '+td.length+'건 — 이것부터 답해라','',
-      ...(td.length?td.map((x,i)=>(i+1)+'. '+(x.t||'(글 없이 사진만)')+(x.ts?(' 〔적은 때 '+x.ts+'〕'):'')+((x.ph&&x.ph.length)?(' 〔📷 사진 '+x.ph.length+'장 — 앱 홈 「작업대기」 카드에서 볼 수 있다〕'):'')):['(비어 있음 — 사장님이 적어 두신 것이 없다)']),
-      '','처리한 것은 번호로 알려 드려라 — 사장님이 화면에서 ✓를 눌러 빼신다.','',
+      ...(td.length?td.map((x,i)=>(i+1)+'. 〔'+x.id+'〕 '+(x.t||'(글 없이 사진만)')+(x.ts?(' 〔적은 때 '+x.ts+'〕'):'')+((x.ph&&x.ph.length)?(' 〔📷 사진 '+x.ph.length+'장 — 앱 홈 「작업대기」 카드에서 볼 수 있다〕'):'')):['(비어 있음 — 사장님이 적어 두신 것이 없다)']),
+      '','처리한 것은 입력함(trainer-inbox.json)의 todoDone 에 〔〕 안의 id 를 적어 보내라 — 앱을 열 때 스스로 「처리됨」으로 옮긴다.','',
       '## 절대선 '+kept+'/6',''];
     rows.forEach(a=>L.push('- '+(a.ok?'OK':'X ')+' '+a.name+' — '+a.val));
     L.push('','## 오늘 합계','',
