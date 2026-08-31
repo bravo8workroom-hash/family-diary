@@ -169,12 +169,18 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               <div style="background:{{r.bg}};border-radius:{{radS}};padding:10px 4px;text-align:center">
                 <div style="font-size:10.5px;font-weight:700;color:{{r.labelColor}}">{{r.label}}</div>
                 <div style="font-size:9.5px;color:#B5B2A6;margin-top:1px">{{r.date}}</div>
-                <div style="font-size:16px;font-weight:800;margin-top:6px;color:{{r.wColor}}">{{r.w}}<span style="font-size:10px;color:#B5B2A6;font-weight:600"> kg</span></div>
+                <sc-if value="{{r.wEdit}}" hint-placeholder-val="{{ false }}">
+                  <input defaultValue="{{r.wRaw}}" autoFocus="{{ true }}" inputMode="decimal" onBlur="{{r.wCommit}}" onKeyDown="{{r.wKey}}" style="width:100%;box-sizing:border-box;margin-top:6px;text-align:center;font-size:15px;font-weight:800;padding:3px 2px;border:1.5px solid {{accent}};border-radius:8px;outline:none">
+                </sc-if>
+                <sc-if value="{{r.wShow}}" hint-placeholder-val="{{ true }}">
+                  <div onClick="{{r.wTap}}" style="font-size:16px;font-weight:800;margin-top:6px;cursor:pointer;color:{{r.wColor}};text-decoration:underline dotted #D8D5CB;text-underline-offset:3px">{{r.w}}<span style="font-size:10px;color:#B5B2A6;font-weight:600"> kg</span></div>
+                </sc-if>
                 <div style="font-size:10.5px;color:#8B887C;font-weight:600;margin-top:6px">{{r.kcal}}</div>
                 <div style="font-size:10.5px;color:{{r.pColor}};font-weight:700;margin-top:2px">{{r.p}}</div>
               </div>
             </sc-for>
           </div>
+          <div style="font-size:10.5px;color:#B5B2A6;margin-top:7px;text-align:center">체중 숫자를 눌러 그 날 기록을 직접 적을 수 있어요</div>
           <div style="display:flex;flex-direction:column;gap:10px;margin-top:13px">
             <sc-for list="{{a3Lines}}" as="l" hint-placeholder-count="4">
               <div style="display:flex;gap:8px;align-items:flex-start">
@@ -300,6 +306,9 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
                         <div onClick="{{tp.zoom}}" style="width:66px;height:66px;border-radius:{{radS}};cursor:zoom-in;background:{{tp.bg}}"></div>
                       </sc-for>
                     </div>
+                  </sc-if>
+                  <sc-if value="{{td.hasWhen}}" hint-placeholder-val="{{ true }}">
+                    <div style="font-size:10px;color:#B5B2A6;font-weight:600;margin-top:5px">🕘 {{td.when}}</div>
                   </sc-if>
                 </div>
                 <button onClick="{{td.done}}" title="처리됨으로 옮기기" style="flex:none;border:0;background:none;color:#17A673;font-size:13px;font-weight:800;cursor:pointer;padding:0 2px">✓</button>
@@ -1423,7 +1432,7 @@ class Component extends DCLogic {
       return {ds,w:(w!=null&&w!=='')?+w:null,kcal:Math.round(s.kcal),c:Math.round(s.c),p:Math.round(s.p),f:Math.round(s.f),
         n:list.length,late:list.some(x=>x.time&&this.outTime(x.time))}};
     const t=day(0),y=day(1),b=day(2);
-    const rows=[b,y,t].map((x,i)=>({label:['그저께','어제','오늘'][i],date:this.lbl(x.ds),
+    const rows=[b,y,t].map((x,i)=>({label:['그저께','어제','오늘'][i],date:this.lbl(x.ds),ds:x.ds,wRaw:x.w!=null?x.w:'',
       w:x.w!=null?x.w.toFixed(1):'—',kcal:x.n?(fmt(x.kcal)+' kcal'):'기록 없음',p:x.n?('단백질 '+x.p+'g'):'—',today:i===2}));
     const L=[],add=(icon,txt,color)=>L.push({icon,t:txt,color:color||'#1F1E1A'});
     const hw=this.healthWatch(3);
@@ -1517,7 +1526,7 @@ class Component extends DCLogic {
       '사장님이 다이어트 다이어리 화면에서 트레이너를 부르셨다. 아래는 앱이 지금 들고 있는 그날 기록이다.',
       '「/다이어트」 스킬을 읽고 트레이너 자리로 답해라. 앱을 고쳐야 하면 C:\\projects\\diet-diary 의 CLAUDE.md 절차를 따른다.','',
       '## ★ 작업대기 '+td.length+'건 — 이것부터 답해라','',
-      ...(td.length?td.map((x,i)=>(i+1)+'. '+(x.t||'(글 없이 사진만)')+((x.ph&&x.ph.length)?(' 〔📷 사진 '+x.ph.length+'장 — 앱 홈 「작업대기」 카드에서 볼 수 있다〕'):'')):['(비어 있음 — 사장님이 적어 두신 것이 없다)']),
+      ...(td.length?td.map((x,i)=>(i+1)+'. '+(x.t||'(글 없이 사진만)')+(x.ts?(' 〔적은 때 '+x.ts+'〕'):'')+((x.ph&&x.ph.length)?(' 〔📷 사진 '+x.ph.length+'장 — 앱 홈 「작업대기」 카드에서 볼 수 있다〕'):'')):['(비어 있음 — 사장님이 적어 두신 것이 없다)']),
       '','처리한 것은 번호로 알려 드려라 — 사장님이 화면에서 ✓를 눌러 빼신다.','',
       '## 절대선 '+kept+'/6',''];
     rows.forEach(a=>L.push('- '+(a.ok?'OK':'X ')+' '+a.name+' — '+a.val));
@@ -1747,7 +1756,7 @@ class Component extends DCLogic {
     const tdPh=S.tdPh||[];
     const phUrl=src=>'url("'+src+'") center/cover no-repeat';
     const tdAdd=()=>{const t=String(S.tdDraft||'').trim();if(!t&&!tdPh.length)return;
-      this.setState({todo:{items:[...tdItems,{id:'t'+(this.seq++),t,ph:tdPh}],done:tdDone},tdDraft:'',tdPh:[]});
+      this.setState({todo:{items:[...tdItems,{id:'t'+(this.seq++),t,ph:tdPh,ts:this.TODAY+' '+this.nowHM()}],done:tdDone},tdDraft:'',tdPh:[]});
       this.toast(tdPh.length?('작업대기에 담았어요 📝 · 사진 '+tdPh.length+'장'):'작업대기에 담았어요 📝')};
     const tdPaste=e=>{const cd=e.clipboardData;if(!cd)return;
       const fl=Array.from(cd.items||[]).filter(it=>it.kind==='file'&&/^image\//.test(it.type)).map(it=>it.getAsFile()).filter(Boolean);
@@ -1756,6 +1765,7 @@ class Component extends DCLogic {
         this.toast('사진 '+srcs.length+'장 붙여넣었어요 📷')})};
     const tdPhDraft=tdPh.map((src,i)=>({bg:phUrl(src),del:()=>this.setState({tdPh:(this.state.tdPh||[]).filter((_,j)=>j!==i)})}));
     const tdRows=tdItems.map((x,i)=>({no:(i+1)+'.',t:x.t,hasT:!!String(x.t||'').trim(),
+      hasWhen:!!x.ts,when:x.ts?(this.lbl(String(x.ts).slice(0,10))+' '+String(x.ts).slice(11)):'',
       hasPh:!!(x.ph&&x.ph.length),phGap:String(x.t||'').trim()?'6px':'0px',
       ph:(x.ph||[]).map(src=>({bg:phUrl(src),zoom:()=>this.setState({lb:{bg:phUrl(src),e:''}})})),
       done:()=>{this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:[{...x,at:this.TODAY},...tdDone].slice(0,100)}});this.toast('처리됨으로 옮겼어요 ✓')},
@@ -1765,8 +1775,12 @@ class Component extends DCLogic {
     const wkStats=[{label:'주 시작(월)',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:'남은 감량',val:wkp.need>0?fmt(wkp.need):'달성 ✓',color:wkp.need>0?'#E5484D':'#17A673'}];
     const noDow=ds=>this.lbl(ds).replace(/\s*\(.\)$/,'');
     const a3=this.advice3();
-    const a3Rows=a3.rows.map(r=>({...r,bg:r.today?modeB(S.mode):th.chipBg,labelColor:r.today?modeC(S.mode):'#8B887C',
-      wColor:r.today?modeC(S.mode):'#1F1E1A',pColor:r.today?'#E4618C':'#B5B2A6'}));
+    const ewA=S.editW;
+    const a3Rows=a3.rows.map(r=>{const ed=!!(ewA&&ewA.d===r.ds&&ewA.f==='a');
+      return {...r,bg:r.today?modeB(S.mode):th.chipBg,labelColor:r.today?modeC(S.mode):'#8B887C',
+      wColor:r.today?modeC(S.mode):'#1F1E1A',pColor:r.today?'#E4618C':'#B5B2A6',
+      wEdit:ed,wShow:!ed,wTap:()=>this.setState({editW:{d:r.ds,f:'a'}}),
+      wCommit:e=>this.commitW(r.ds,'a',e.target.value),wKey:e=>{if(e.key==='Enter')e.target.blur()}}});
     const strip=[];
     const macroColor=ds=>{const s=this.sums(ds);const arr=[[s.c*4,'#E9A23B'],[s.p*4,'#E4618C'],[s.f*9,'#5B8DEF']];arr.sort((a,b)=>b[0]-a[0]);return arr[0][0]>0?arr[0][1]:'#B5B2A6'};
     for(let i=13;i>=0;i--){const ds=this.d(i);const dt=new Date(ds+'T00:00:00');const has=(S.foods[ds]||[]).length>0;const isT=i===0;const dm=S.dayMode[ds]||'diet';
