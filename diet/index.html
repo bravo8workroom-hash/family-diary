@@ -1429,15 +1429,20 @@ class Component extends DCLogic {
   outsideWindow(ds){const R=this.RULE(),a=this.mins(R.winS),b=this.mins(R.winE);return this.timedFoods(ds).filter(x=>{const m=this.mins(x.time);return m<a||m>b})}
   safeOn(ds){return !!((this.state.safe||{})[ds])}
   carbUpOf(ds){const R=this.RULE();const allow=+((R.carbUp||{})[new Date(ds+'T00:00:00').getDay()])||0;const used=+((this.state.carbUp||{})[ds])||0;return {allow,used,left:Math.max(0,allow-used)}}
+  /* 칼로리 하한은 하루로 판정하지 않는다 (사장님 지시 2026-08-31) — 어제·그저께 잘 먹었으면 하루 적게 먹은 것은
+     문제가 아니다. 연속 미달이 UNDER_RUN 일에 닿았을 때만 경고한다. 기록이 없는 날은 「모른다」이므로 줄을 끊는다.
+     ⛔ 안전 신호(어지러움·손떨림 등)는 이 규칙과 무관하게 하루도 즉시 경고다 — safe 배너를 건드리지 마라. */
+  underRun(ds){const R=this.RULE();let n=0;for(let i=0;i<8;i++){const k=this.addDays(ds,-i);if(!(this.state.foods[k]||[]).length)break;if(this.sums(k).kcal>=R.kcalMin)break;n++}return n}
   absLines(ds){
     const R=this.RULE(),s=this.sums(ds),items=this.state.foods[ds]||[],has=items.length>0;
+    const UNDER_RUN=4,uRun=this.underRun(ds);
     const timed=this.timedFoods(ds),out=this.outsideWindow(ds),first=timed[0]||null,water=this.waterOf(ds),milk=this.milkItems(ds);
     const f=n=>this.fmt(Math.round(n));
     return [
       {k:'win',icon:'🕙',name:'식사창 '+R.winS+'-'+R.winE,ok:has&&timed.length>0&&out.length===0,na:!has||!timed.length,
        val:!has?'기록 없음':!timed.length?'시각 미입력':out.length?(out.length+'끼 창 밖 ('+out.map(x=>x.time).join(', ')+')'):'모두 창 안'},
-      {k:'kcal',icon:'🔥',name:'칼로리 하한 '+f(R.kcalMin),ok:s.kcal>=R.kcalMin,na:!has,
-       val:f(s.kcal)+' kcal'+(has&&s.kcal<R.kcalMin?(' · '+f(R.kcalMin-s.kcal)+' 미달'):'')},
+      {k:'kcal',icon:'🔥',name:'칼로리 하한 '+f(R.kcalMin)+' ('+UNDER_RUN+'일 연속부터)',ok:s.kcal>=R.kcalMin||uRun<UNDER_RUN,na:!has,
+       val:f(s.kcal)+' kcal'+(has&&s.kcal<R.kcalMin?(' · '+f(R.kcalMin-s.kcal)+' 미달'+(uRun>1?(' · '+uRun+'일째'):'')):'')},
       {k:'p',icon:'🍗',name:'단백질 '+R.pG+'g (협상 불가)',ok:s.p>=R.pG,na:false,
        val:f(s.p)+' / '+R.pG+'g'+(s.p<R.pG?(' · '+f(R.pG-s.p)+'g 남음'):'')},
       {k:'fat1',icon:'🥑',name:'첫 끼 지방 (담석 예방)',ok:!!first&&(+first.f||0)>=R.firstFatG,na:!first,
@@ -1498,7 +1503,8 @@ class Component extends DCLogic {
       else if(dv<=-0.3)add('⚖️','어제보다 '+dv.toFixed(1)+'kg — 잘 내려갔어요. 오늘도 어제와 같은 방식 그대로 가세요.','#17A673');
       else add('⚖️','어제와 거의 같아요('+(dv>0?'+':'')+dv.toFixed(1)+'kg). 하루가 아니라 사흘 흐름으로 보세요.');
     }else if(t.w==null)add('⚖️','오늘 체중을 아직 안 재셨어요. 아침 공복에 한 번만 재 주세요 — 조언은 거기서 시작합니다.','#8B887C');
-    if(y.n){if(y.kcal<R.kcalMin)add('🍚','어제 '+fmt(y.kcal)+'kcal로 하한 '+fmt(R.kcalMin)+' 아래였어요. 오늘 더 줄이면 근육이 먼저 빠집니다.','#E5484D');
+    if(y.n){const yRun=this.underRun(this.addDays(this.TODAY,-1));
+      if(y.kcal<R.kcalMin&&yRun>=3)add('🍚','어제까지 '+yRun+'일 연속 하한 '+fmt(R.kcalMin)+' 아래였어요. 오늘 더 줄이면 근육이 먼저 빠집니다.','#E5484D');
       else if(y.kcal>=Math.round(g.kcal*1.2))add('🍚','어제 '+fmt(y.kcal)+'kcal로 많았어요. 오늘은 평소대로 '+fmt(g.kcal)+' 근처면 됩니다 — 굶는 건 금지.','#E9A23B')}
     const pd=[t,y,b].filter(x=>x.n),pAvg=pd.length?Math.round(pd.reduce((a,x)=>a+x.p,0)/pd.length):0;
     if(pd.length&&pAvg<R.pG)add('🍗','최근 '+pd.length+'일 단백질 평균 '+pAvg+'g — 하루 '+R.pG+'g에서 '+(R.pG-pAvg)+'g 모자라요. 계란·닭가슴살부터 채우세요.','#E4618C');
@@ -2222,10 +2228,14 @@ class Component extends DCLogic {
           w:(g>0?Math.max(0,Math.min(100,Math.round(c/g*100))):0)+'%',
           note:left>0?(fmt(left)+unit+' 남음'):(left<0?('+'+fmt(-left)+unit):'딱 맞음'),
           noteColor:(lo&&left<=0)?'#17A673':'#8B887C'}};
+        /* 탄수가 목표를 넘으면 그 칼로리(4kcal/g)만큼 지방 목표만 깎아 kcal 하한을 맞춘다 (사장님 지시 2026-08-31).
+           ⛔ 단백질 100g은 안 건드린다 — 깎으면 근손실이라 「굶기지 말자」는 지시와 정반대다.
+           지방은 담석 예방선 FAT_FLOOR 에서 멈춘다. */
+        const FAT_FLOOR=50,cOver=Math.max(0,dSum.c-RB.cG),fGoal=Math.max(FAT_FLOOR,Math.round(RB.fG-cOver*4/9));
         const B=[mk('kcal','#8B887C',th.accent,dSum.kcal,RB.kcalMin,'',true),
           mk('탄수화물','#E9A23B','#E9A23B',dSum.c,RB.cG,'g',false),
           mk('단백질','#E4618C','#E4618C',dSum.p,RB.pG,'g',true),
-          mk('지방','#5B8DEF','#5B8DEF',dSum.f,RB.fG,'g',true)];
+          mk('지방'+(fGoal<RB.fG?(' (탄수 +'+fmt(Math.round(cOver))+'g 반영)'):''),'#5B8DEF','#5B8DEF',dSum.f,fGoal,'g',true)];
         B[1].div='1px solid '+th.cardBorder;return B})(),
       dayModeBg:modeB(dGoal.m),dayModeColor:modeC(dGoal.m),dayModeLabel:modeL(dGoal.m),
       dayHasLog:dSc!=null,dayNoLog:dSc==null,dayScore:dSc,
