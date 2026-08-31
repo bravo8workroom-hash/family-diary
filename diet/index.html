@@ -351,12 +351,15 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:14px 18px">
         <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">트레이너 칼로리표</div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="text-align:center"><div style="font-size:11px;color:#8B887C;font-weight:600">kcal</div><div style="font-size:16px;font-weight:800">{{dayKcal}}</div></div>
-          <div style="width:1px;height:26px;background:{{chipBg}}"></div>
-          <div style="text-align:center"><div style="font-size:11px;color:#E9A23B;font-weight:700">탄수화물</div><div style="font-size:15px;font-weight:800">{{dayC}}g</div></div>
-          <div style="text-align:center"><div style="font-size:11px;color:#E4618C;font-weight:700">단백질</div><div style="font-size:15px;font-weight:800">{{dayP}}g</div></div>
-          <div style="text-align:center"><div style="font-size:11px;color:#5B8DEF;font-weight:700">지방</div><div style="font-size:15px;font-weight:800">{{dayF}}g</div></div>
+        <div style="display:flex;align-items:stretch;gap:2px">
+          <sc-for list="{{dayBars}}" as="b" hint-placeholder-count="4">
+            <div style="flex:1;min-width:0;text-align:center;padding:0 3px;border-left:{{b.div}}">
+              <div style="font-size:11px;font-weight:700;color:{{b.color}};white-space:nowrap">{{b.name}}</div>
+              <div style="font-size:15px;font-weight:800;white-space:nowrap">{{b.val}}<span style="font-size:10.5px;font-weight:700;color:#B5B2A6"> / {{b.goal}}</span></div>
+              <div style="height:6px;border-radius:99px;background:{{chipBg}};overflow:hidden;margin:7px 0 4px"><div style="height:100%;width:{{b.w}};border-radius:99px;background:{{b.bar}}"></div></div>
+              <div style="font-size:10px;font-weight:700;white-space:nowrap;color:{{b.noteColor}}">{{b.note}}</div>
+            </div>
+          </sc-for>
         </div>
         </div>
 
@@ -1296,7 +1299,7 @@ class Component extends DCLogic {
     const FV=this.FAV_SEED.map(x=>({id:'v'+(this.seq++),...x}));
     this.state={tab:'home',wide:this.isWide(),mode:'diet',selDate:this.TODAY,feedFilter:'all',sober:SB,calM:this.TODAY.slice(0,7),
       set:{goalDate:'2026-08-10',startW:70,goalW:50,budget:10000,provider:'gemini',geminiKey:'',claudeKey:'',apiPass:'0000',diet:{kcal:1500,c:40,p:30,f:30},maint:{kcal:2000,c:50,p:25,f:25},
-        rule:{winS:'10:00',winE:'18:00',kcalMin:1200,pG:100,fG:71,waterMl:2000,firstFatG:8,carbUp:{1:2,6:1}}},
+        rule:{winS:'10:00',winE:'18:00',kcalMin:1200,cG:40,pG:100,fG:71,waterMl:2000,firstFatG:8,carbUp:{1:2,6:1}}},
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,favs:FV,carbUp:{},safe:{},todo:{items:[],done:[]},
       stock:{shop:['아몬드','닭가슴살','귀리','단백질바 1박스','피자치즈(가져올 예정)'],home:[]},weekGoals:{},
@@ -1413,7 +1416,7 @@ class Component extends DCLogic {
      b:'「어제 많이 먹었으니 오늘 굶자」가 가장 위험한 습관이다. 굶은 날은 폭식으로 되돌아오고, 그 왕복이 대사를 깎는다.\n\n그래서 홈에 📊 주 평균 카드를 뒀다. 하루 숫자에 흔들리지 말고 7일 평균을 봐라. 한 끼 흔들렸다고 그날의 남은 끼니를 줄이지 않는다.'},
     {d:'2026-08-28',t:'어지러우면 지금 먹어라 — 안전이 클린보다 먼저다',
      b:'어지러움 · 손떨림 · 식은땀 · 몇 시간째 못 먹음 · 근력운동 직후 고갈.\n\n이 중 하나라도 있으면 깨끗한 음식을 찾지 말고 손에 잡히는 것을 지금 먹는다. 「다이어트 중인데」는 이때 참으라는 뜻이 아니다.\n\n컨디션 칩을 누르면 앱이 자동으로 안전 예외를 켜고 홈에 배너를 띄운다.'}];
-  RULE(){return Object.assign({winS:'10:00',winE:'18:00',kcalMin:1200,pG:100,fG:71,waterMl:2000,firstFatG:8,weekPace:0.5,carbUp:{1:2,6:1}},this.state.set.rule||{})}
+  RULE(){return Object.assign({winS:'10:00',winE:'18:00',kcalMin:1200,cG:40,pG:100,fG:71,waterMl:2000,firstFatG:8,weekPace:0.5,carbUp:{1:2,6:1}},this.state.set.rule||{})}
   ymd(dt){const z=n=>String(n).padStart(2,'0');return dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate())}
   addDays(ds,n){const dt=new Date(ds+'T00:00:00');dt.setDate(dt.getDate()+n);return this.ymd(dt)}
   mins(t){const m=/^(\d{1,2}):(\d{2})$/.exec(String(t||''));return m?(+m[1])*60+(+m[2]):null}
@@ -1552,6 +1555,9 @@ class Component extends DCLogic {
         for(const k of Object.keys(o.workouts[d]))if(day[k]!==o.workouts[d][k]){day[k]=o.workouts[d][k];n++}  /* 사장님이 방금 말씀하신 값이 이긴다 — 체중과 같다 */
         K[d]=day}
       if(n){P.workouts=K;add.push('운동 '+n+'개')}}
+    /* 트레이너와 상의해 정한 목표(탄수·단백질·지방 g 등)를 그대로 갈아끼운다 — 설정 화면에서 손으로 바꾸는 것과 같은 자리다. */
+    if(o.rule&&Object.keys(o.rule).length){const St=S.set||{};
+      P.set={...St,rule:{...(St.rule||{}),...o.rule}};add.push('트레이너 목표')}
     if(o.todoDone&&o.todoDone.length){const TD=S.todo||{items:[],done:[]},ids=new Set(o.todoDone.map(String));
       const hit=(TD.items||[]).filter(x=>ids.has(x.id)||ids.has(String(x.t||'')));
       if(hit.length){P.todo={items:(TD.items||[]).filter(x=>!(ids.has(x.id)||ids.has(String(x.t||'')))),done:[...hit.map(x=>({...x,at:this.TODAY})),...(TD.done||[])].slice(0,100)};add.push('작업대기 '+hit.length+'건 정리')}}
@@ -1593,7 +1599,7 @@ class Component extends DCLogic {
     rows.forEach(a=>L.push('- '+(a.ok?'OK':'X ')+' '+a.name+' — '+a.val));
     L.push('','## 오늘 합계','',
       '- '+Math.round(s.kcal)+' kcal (하한 '+R.kcalMin+' — 상한이 아니라 하한이다)',
-      '- 탄 '+Math.round(s.c)+'g · 단 '+Math.round(s.p)+'g (목표 '+R.pG+'g) · 지 '+Math.round(s.f)+'g',
+      '- 탄 '+Math.round(s.c)+'/'+R.cG+'g · 단 '+Math.round(s.p)+'/'+R.pG+'g · 지 '+Math.round(s.f)+'/'+R.fG+'g (뒤가 트레이너 목표)',
       '- 물 '+(this.waterOf(T)/1000).toFixed(2)+'/'+(R.waterMl/1000)+'L (커피 미포함)','',
       '## 이번 주 목표','',
       '- '+wk.ws+' ~ '+wk.we+' · 주 시작 '+wk.sw+'kg · 기준 '+wk.base+'kg → 목표 '+wk.goal+'kg'+(wk.manual?' (사장님과 정한 값)':' (지금 체중 기준 자동)'),
@@ -2114,6 +2120,7 @@ class Component extends DCLogic {
         {label:'식사창 시작',value:R52.winS,ph:'10:00',onChange:setRule('winS',true)},
         {label:'식사창 끝',value:R52.winE,ph:'18:00',onChange:setRule('winE',true)},
         {label:'칼로리 하한',value:R52.kcalMin,ph:'1200',onChange:setRule('kcalMin')},
+        {label:'탄수화물 g',value:R52.cG,ph:'40',onChange:setRule('cG')},
         {label:'단백질 g',value:R52.pG,ph:'100',onChange:setRule('pG')},
         {label:'지방 설계값 g',value:R52.fG,ph:'71',onChange:setRule('fG')},
         {label:'첫 끼 지방 g',value:R52.firstFatG,ph:'8',onChange:setRule('firstFatG')},
@@ -2207,7 +2214,19 @@ class Component extends DCLogic {
       nextDisabled:S.selDate>=this.TODAY,nextColor:S.selDate>=this.TODAY?'#D8D5CB':'#5C594E',nextOpacity:S.selDate>=this.TODAY?.5:1,
       onDatePick:e=>{const v=e.target.value;if(v&&v<=this.TODAY)this.setState({selDate:v})},
       onPhotoPick:e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;const h=new Date().getHours();const meal=h<10?'아침':h<15?'점심':h<20?'저녁':'간식';this.shrink(f,1568,0.85).then(res=>{const b64=res.slice(res.indexOf(',')+1);const mime=res.slice(5,res.indexOf(';'))||'image/jpeg';this.queueAI({type:'photo',date:S.selDate,meal,image:b64,mime,label:'사진 인식 · '+this.lbl(S.selDate)+' '+meal})})},
-      dayKcal:fmt(dSum.kcal),dayC:fmt(dSum.c),dayP:fmt(dSum.p),dayF:fmt(dSum.f),
+      /* 트레이너 칼로리표 게이지 — 오늘 먹은 양 / 트레이너와 정한 목표. 목표는 set.rule(cG·pG·fG·kcalMin)이 정본이다.
+         ⛔ 여기서 절대선을 다시 판정하지 마라(absLines가 그 자리다). 이 카드는 채운 정도만 보여준다. */
+      dayBars:(()=>{const RB=this.RULE(),mk=(name,color,bar,cur,goal,unit,lo)=>{
+        const g=+goal||0,c=Math.round((+cur||0)*10)/10,left=Math.round((g-c)*10)/10;
+        return {name,color,bar,val:fmt(c),goal:fmt(g)+unit,div:'none',
+          w:(g>0?Math.max(0,Math.min(100,Math.round(c/g*100))):0)+'%',
+          note:left>0?(fmt(left)+unit+' 남음'):(left<0?('+'+fmt(-left)+unit):'딱 맞음'),
+          noteColor:(lo&&left<=0)?'#17A673':'#8B887C'}};
+        const B=[mk('kcal','#8B887C',th.accent,dSum.kcal,RB.kcalMin,'',true),
+          mk('탄수화물','#E9A23B','#E9A23B',dSum.c,RB.cG,'g',false),
+          mk('단백질','#E4618C','#E4618C',dSum.p,RB.pG,'g',true),
+          mk('지방','#5B8DEF','#5B8DEF',dSum.f,RB.fG,'g',true)];
+        B[1].div='1px solid '+th.cardBorder;return B})(),
       dayModeBg:modeB(dGoal.m),dayModeColor:modeC(dGoal.m),dayModeLabel:modeL(dGoal.m),
       dayHasLog:dSc!=null,dayNoLog:dSc==null,dayScore:dSc,
       meals,dayPosts,newPostLog:()=>this.newPost(S.selDate),
