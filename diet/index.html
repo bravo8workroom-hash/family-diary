@@ -119,20 +119,15 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <div style="font-size:13px;font-weight:700;color:#8B887C">💊 오늘의 약</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:13px;font-weight:700;color:#8B887C">💊 오늘의 약 <span style="font-weight:600;color:#B5B2A6">· 절대선 아님</span></div>
             <div style="font-size:14px;font-weight:800;color:{{pillColor}}">{{pillKept}} / {{pillDue}}</div>
           </div>
-          <div style="font-size:10.5px;color:#B5B2A6;margin-bottom:10px;line-height:1.5">절대선이 아니라 체크리스트예요 — 하나 빠뜨렸다고 그날이 실패는 아니에요</div>
-          <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
             <sc-for list="{{pillRows}}" as="p" hint-placeholder-count="8">
-              <div onClick="{{p.tap}}" style="display:flex;align-items:center;gap:9px;cursor:pointer;background:{{p.bg}};border:1px solid {{p.border}};border-radius:{{radS}};padding:9px 11px">
-                <span style="font-size:14px;width:19px;text-align:center;flex:none">{{p.e}}</span>
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:12.5px;font-weight:700;color:{{p.nameColor}}">{{p.t}}</div>
-                  <div style="font-size:10.5px;color:{{p.tagColor}};margin-top:2px;line-height:1.45">{{p.tag}} · {{p.w}}</div>
-                </div>
-                <span style="font-size:14px;font-weight:800;flex:none;color:{{p.markColor}}">{{p.mark}}</span>
+              <div onClick="{{p.tap}}" style="cursor:pointer;text-align:center;padding:7px 2px 6px;border-radius:{{radS}};background:{{p.bg}};border:1px solid {{p.border}};opacity:{{p.op}}">
+                <div style="font-size:16px;line-height:1.2">{{p.e}}</div>
+                <div style="font-size:9px;font-weight:700;margin-top:3px;color:{{p.nameColor}};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{p.t}}</div>
               </div>
             </sc-for>
           </div>
@@ -1983,11 +1978,10 @@ class Component extends DCLogic {
     const absT=mkAbs(this.TODAY);
     const pillT=this.pillsOf(this.TODAY);
     const pillRows=this.PILLS.map(p=>{const on=!!pillT[p.k],due=this.pillDue(p,this.TODAY);
-      return {e:p.e,t:p.t,w:p.w,
-        tag:p.cyc==='day'?'매일':p.cyc==='opt'?'필요할 때':due?'격일 · 오늘 차례':'격일 · 어제 먹음',
-        tagColor:(p.cyc==='alt'&&!due)||p.cyc==='opt'?'#B5B2A6':'#8B887C',
+      return {e:p.e,t:p.t,
+        op:(on||due||p.cyc==='opt')?'1':'.45',
         bg:on?'#EAF7F1':th.chipBg,border:on?'#17A673':th.cardBorder,
-        nameColor:on?'#17A673':'#1F1E1A',mark:on?'✓':'○',markColor:on?'#17A673':'#D8D5CB',
+        nameColor:on?'#17A673':p.cyc==='opt'?'#8B887C':'#1F1E1A',
         tap:()=>{const P={...(S.pills||{})};const d={...(P[this.TODAY]||{})};
           if(d[p.k])delete d[p.k];else d[p.k]=true;
           if(Object.keys(d).length)P[this.TODAY]=d;else delete P[this.TODAY];
