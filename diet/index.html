@@ -599,40 +599,23 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         </div>
 
 
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <button onClick="{{prevDay}}" style="border:0;background:{{chipBg}};width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:14px;color:#5C594E">◀</button>
-          <label style="position:relative;display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 14px;border-radius:99px;background:{{chipBg}}">
-            <span style="font-size:15px;font-weight:800">{{selLabel}}</span>
-            <span style="font-size:13px;opacity:.55">📅</span>
-            <input type="date" value="{{selDate}}" max="{{todayStr}}" onChange="{{onDatePick}}" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
-          </label>
-          <button onClick="{{nextDay}}" disabled="{{nextDisabled}}" style="border:0;background:{{chipBg}};width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:14px;color:{{nextColor}};opacity:{{nextOpacity}}">▶</button>
-        </div>
-
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:8px">⚖️ 판단 / 결정</div>
-          <textarea value="{{jDecide}}" onChange="{{onJDecide}}" placeholder="예: 근력 주 2회 → 주 1회 유지 확정. 헬스장 위생 문제. 유산소는 주말." style="width:100%;box-sizing:border-box;min-height:110px;padding:12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;line-height:1.7;background:#FBFAF7;outline-color:{{accent}};resize:vertical"></textarea>
-        </div>
-
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:8px">🗓 남은 계획</div>
-          <textarea value="{{jPlan}}" onChange="{{onJPlan}}" placeholder="예: 즉시 닭가슴살 + 귀리 30g / 17:30 조합식 저녁 / 커피 중단, 물로 전환" style="width:100%;box-sizing:border-box;min-height:100px;padding:12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;line-height:1.7;background:#FBFAF7;outline-color:{{accent}};resize:vertical"></textarea>
-        </div>
-
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:8px">📝 메모</div>
-          <textarea value="{{jMemo}}" onChange="{{onJMemo}}" placeholder="그날의 몸 상태, 대화에서 나온 지침, 다음에 확인할 것" style="width:100%;box-sizing:border-box;min-height:90px;padding:12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;line-height:1.7;background:#FBFAF7;outline-color:{{accent}};resize:vertical"></textarea>
-        </div>
-
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">📚 지난 일지</div>
           <sc-if value="{{jNoRecent}}" hint-placeholder-val="{{ true }}">
             <div style="padding:8px 0;color:#B5B2A6;font-size:13px">아직 적은 일지가 없어요</div>
           </sc-if>
           <sc-for list="{{jRecent}}" as="jr" hint-placeholder-count="3">
-            <div onClick="{{jr.go}}" style="padding:11px 0;border-top:1px solid #F7F6F2;cursor:pointer">
-              <div style="font-size:13px;font-weight:800;color:{{accent}}">{{jr.date}}</div>
-              <div style="font-size:12.5px;color:#6B6858;margin-top:3px;line-height:1.6">{{jr.preview}}</div>
+            <div style="border-top:1px solid #F7F6F2">
+              <button onClick="{{jr.toggle}}" style="width:100%;border:0;background:none;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;padding:11px 0">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:800;color:{{accent}}">{{jr.date}}</div>
+                  <div style="font-size:12.5px;color:#6B6858;margin-top:3px;line-height:1.6">{{jr.preview}}</div>
+                </div>
+                <span style="font-size:11px;color:#B5B2A6;flex:none">{{jr.chev}}</span>
+              </button>
+              <sc-if value="{{jr.open}}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:13px;color:#4A4840;line-height:1.9;white-space:pre-wrap;padding:0 2px 14px">{{jr.body}}</div>
+              </sc-if>
             </div>
           </sc-for>
         </div>
@@ -666,6 +649,9 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               </sc-if>
             </div>
           </sc-for>
+          <sc-if value="{{ntHasMore}}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ntMoreTap}}" style="width:100%;margin-top:10px;border:1px solid {{cardBorder}};background:{{chipBg}};color:#5C594E;border-radius:{{radM}};padding:11px 0;font-size:12.5px;font-weight:800;cursor:pointer">{{ntMoreLabel}}</button>
+          </sc-if>
         </div>
       </div>
     </sc-if>
@@ -1272,7 +1258,7 @@ class Component extends DCLogic {
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,favs:FV,carbUp:{},safe:{},todo:{items:[],done:[]},
       stock:{shop:['아몬드','닭가슴살','귀리','단백질바 1박스','피자치즈(가져올 예정)'],home:[]},weekGoals:{},
-      cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,jTab:'decide',ntOpen:-1,ntKind:'전체',
+      cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,ntOpen:-1,ntKind:'전체',ntMore:false,jOpen:null,
       editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
   fmt(n){return (n==null||n===''||isNaN(+n))?'—':(+n).toLocaleString('ko-KR')}
@@ -1972,9 +1958,6 @@ class Component extends DCLogic {
       const at=day.findIndex(x=>x.id===row.id);if(at>=0)day[at]=row;else day.push(row);
       L[S.selDate]=day;this.setState({lifts:L,liftM:null});
       this.toast(this.say(nm+' 기록했어요 💪',nm+' 기록했사와요 💪'))};
-    const jrn=this.journalOf(S.selDate);
-    const jSet=k=>e=>{const J={...(S.journal||{})};const day={...this.journalOf(S.selDate),[k]:e.target.value};
-      if(day.decide||day.plan||day.memo)J[S.selDate]=day;else delete J[S.selDate];this.setState({journal:J})};
     const jKeys=Object.keys(S.journal||{}).filter(k=>{const v=S.journal[k]||{};return v.decide||v.plan||v.memo}).sort().reverse().slice(0,8);
     /* 🗺 트레이너 — 로드맵은 시작 체중과 목표 체중 사이를 5단계로 나눈다 */
     const md=ds=>(+ds.slice(5,7))+'월 '+(+ds.slice(8,10))+'일';
@@ -2022,7 +2005,9 @@ class Component extends DCLogic {
       {icon:'🚨',name:'안전 예외',val:'항상',valColor:'#E5484D',
        note:'어지러움·손떨림·식은땀·못 먹음·근력 직후에는 클린을 따지지 말고 지금 먹어라.'}];
     const NT_KINDS=['전체','메인','레시피'];
-    const ntList=this.TNOTES.map((n,i)=>({...n,i})).filter(n=>S.ntKind==='전체'||n.k===S.ntKind);
+    const NT_SHOW=5;
+    const ntAll=this.TNOTES.map((n,i)=>({...n,i})).filter(n=>S.ntKind==='전체'||n.k===S.ntKind);
+    const ntList=S.ntMore?ntAll:ntAll.slice(0,NT_SHOW);
     /* 잠시 숨겨 둔 탭 — 화면 코드는 그대로 살아 있다. 되살리려면 여기서 빼기만 하면 된다. */
     const HIDE_TABS=['feed'];
     const setRule=(k,txt)=>e=>{const v=e.target.value;const R=Object.assign({},this.RULE());R[k]=txt?String(v):(+v||0);
@@ -2103,17 +2088,20 @@ class Component extends DCLogic {
       rmSteps,tpRows,
       ntKinds:NT_KINDS.map(k=>({label:k==='전체'?'전체':(k==='메인'?'📒 메인':'🍳 레시피'),
         bg:S.ntKind===k?th.accent:th.chipBg,color:S.ntKind===k?'#fff':'#5C594E',
-        pick:()=>this.setState({ntKind:k,ntOpen:-1})})),
-      ntCount:ntList.length+'건',ntEmpty:!ntList.length,
+        pick:()=>this.setState({ntKind:k,ntOpen:-1,ntMore:false})})),
+      ntCount:ntAll.length+'건',ntEmpty:!ntAll.length,
+      ntHasMore:ntAll.length>NT_SHOW,
+      ntMoreLabel:S.ntMore?'▲ 접기':'▼ 더보기 ('+(ntAll.length-NT_SHOW)+'건 더)',
+      ntMoreTap:()=>this.setState({ntMore:!this.state.ntMore}),
       ntRows:ntList.map((n,j)=>({date:this.lbl(n.d),showDate:j===0||ntList[j-1].d!==n.d,
         title:n.t,body:n.b,kind:n.k,open:S.ntOpen===n.i,chev:S.ntOpen===n.i?'▲':'▼',
         toggle:()=>this.setState({ntOpen:this.state.ntOpen===n.i?-1:n.i})})),
-      jDecide:jrn.decide,onJDecide:jSet('decide'),
-      jPlan:jrn.plan,onJPlan:jSet('plan'),
-      jMemo:jrn.memo,onJMemo:jSet('memo'),
       jNoRecent:!jKeys.length,
-      jRecent:jKeys.map(k=>{const v=S.journal[k]||{};
-        return {date:this.lbl(k),preview:String(v.decide||v.plan||v.memo||'').slice(0,70),go:()=>this.setState({selDate:k})}}),
+      jRecent:jKeys.map(k=>{const v=S.journal[k]||{},op=S.jOpen===k;
+        const parts=[['판단 / 결정',v.decide],['남은 계획',v.plan],['메모',v.memo]].filter(x=>String(x[1]||'').trim());
+        return {date:this.lbl(k),preview:op?'':String(v.decide||v.plan||v.memo||'').slice(0,70),
+          open:op,chev:op?'▲':'▼',body:parts.map(x=>'【'+x[0]+'】\n'+x[1]).join('\n\n'),
+          toggle:()=>this.setState({jOpen:this.state.jOpen===k?null:k})}}),
       /* 설정 — 절대선 */
       ruleFields:[
         {label:'식사창 시작',value:R52.winS,ph:'10:00',onChange:setRule('winS',true)},
