@@ -261,26 +261,6 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">⭐ 모아보기</div>
-          <sc-if value="{{hasStarred}}" hint-placeholder-val="{{ true }}">
-            <div style="display:flex;gap:8px;overflow-x:auto;margin:0 -4px;padding:0 4px 2px;scrollbar-width:none">
-              <sc-for list="{{starred}}" as="p" hint-placeholder-count="4">
-                <div onClick="{{p.open}}" style="flex:none;width:96px;height:96px;border-radius:{{radM}};cursor:pointer;overflow:hidden;background:{{p.bg}};display:flex;align-items:center;justify-content:center;font-size:34px;position:relative">
-                  {{p.emoji}}
-                  <sc-if value="{{p.textOnly}}" hint-placeholder-val="{{ false }}">
-                    <span style="position:absolute;inset:0;background:#FBFAF6;padding:8px;font-size:10px;color:#6B6858;line-height:1.45;overflow:hidden;box-sizing:border-box">{{p.preview}}</span>
-                  </sc-if>
-                  <span style="position:absolute;top:5px;right:5px;font-size:12px">⭐</span>
-                </div>
-              </sc-for>
-            </div>
-          </sc-if>
-          <sc-if value="{{noStarred}}" hint-placeholder-val="{{ false }}">
-            <div style="padding:12px 0;text-align:center;color:#B5B2A6;font-size:13px">게시물에서 ☆를 눌러 모아보세요</div>
-          </sc-if>
-        </div>
-
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
             <div style="font-size:13px;font-weight:700;color:#8B887C;min-width:0">📝 작업대기 <span style="font-weight:600;color:#B5B2A6">· VS코드에 전할 말</span> <span style="font-weight:600;font-size:11px;color:#B5B2A6">— 「/d」로 부르기</span></div>
             <div style="font-size:14px;font-weight:800;color:{{tdColor}}">{{tdCount}}</div>
@@ -1868,7 +1848,6 @@ class Component extends DCLogic {
         diffText:diff==null?'—':(diff>0?'+':'')+diff.toFixed(1),diffColor:diff==null?'#B5B2A6':diff>0?'#E5484D':diff<0?'#5B8DEF':'#8B887C'})}
     const phBg=ph=>!ph?'linear-gradient(135deg,#F3F1EA,#E7E4DA)':ph.src?('url("'+ph.src+'") center/cover no-repeat'):('linear-gradient(135deg,'+ph.c1+','+ph.c2+')');
     const mkThumb=p=>({emoji:p.photos[0]?(p.photos[0].src?'':p.photos[0].e):'📝',bg:phBg(p.photos[0]),textOnly:!p.photos.length,preview:p.text||'글 게시물',open:()=>this.openPost(p.id)});
-    const starredPosts=S.posts.filter(p=>p.starred);
     const dSum=this.sums(S.selDate),dSc=this.score(S.selDate),dGoal=this.goalFor(S.selDate);
     const meals=['아침','점심','저녁','간식'].map(nm=>{const items=(S.foods[S.selDate]||[]).filter(x=>x.meal===nm);const k=items.reduce((a,x)=>a+(+x.kcal||0),0);const qp=this.favPool(nm);
       return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,quick:qp.slice(0,3).map(v=>({label:v.name,tap:()=>this.favPut(nm,v),...this.giVals(v.name)})),favOpen:()=>this.setState({fv:{meal:nm}}),combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
@@ -2214,7 +2193,6 @@ class Component extends DCLogic {
         if(v==='')delete WG[wkp.ws];else WG[wkp.ws]=+v||0;
         this.setState({weekGoals:WG});this.toast(v===''?'이번 주 목표를 자동으로 되돌렸어요 ✓':('이번 주 목표를 '+v+'kg으로 두었어요 ✓'))},
       wStats,a3Rows,a3Lines:a3.lines,strip,wRows,
-      hasStarred:starredPosts.length>0,noStarred:!starredPosts.length,starred:starredPosts.map(mkThumb),
       selLabel:this.lbl(S.selDate),selDate:S.selDate,todayStr:this.TODAY,
       prevDay:()=>this.shiftDay(-1),nextDay:()=>this.shiftDay(1),
       nextDisabled:S.selDate>=this.TODAY,nextColor:S.selDate>=this.TODAY?'#D8D5CB':'#5C594E',nextOpacity:S.selDate>=this.TODAY?.5:1,
