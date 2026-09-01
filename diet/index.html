@@ -598,26 +598,6 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           </sc-for>
         </div>
 
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:4px">💬 트레이너의 생각</div>
-          <sc-for list="{{tvRows}}" as="tv" hint-placeholder-count="8">
-            <div style="padding:12px 0;border-top:1px solid #F7F6F2">
-              <div style="font-size:13px;font-weight:800">{{tv.t}}</div>
-              <div style="font-size:12.5px;color:#6B6858;margin-top:4px;line-height:1.75">{{tv.d}}</div>
-            </div>
-          </sc-for>
-        </div>
-
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">🔥 다이어트 자극</div>
-          <div style="background:{{chipBg}};border-radius:{{radM}};padding:13px 15px;font-size:13px;font-weight:700;color:#4A4840;line-height:1.75">{{fuelToday}}</div>
-          <sc-for list="{{fuelRows}}" as="fu" hint-placeholder-count="7">
-            <div style="display:flex;gap:9px;padding:10px 0;border-top:1px solid #F7F6F2;margin-top:0">
-              <span style="font-size:12px;font-weight:800;color:{{accent}};flex:none;line-height:1.75">·</span>
-              <div style="font-size:12.5px;color:#6B6858;line-height:1.75">{{fu.t}}</div>
-            </div>
-          </sc-for>
-        </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px">
           <button onClick="{{prevDay}}" style="border:0;background:{{chipBg}};width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:14px;color:#5C594E">◀</button>
@@ -658,22 +638,31 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <div style="font-size:13px;font-weight:700;color:#8B887C">📌 다시 볼 대화</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:13px;font-weight:700;color:#8B887C">📒 노트</div>
             <div style="font-size:12px;font-weight:800;color:{{accent}}">{{ntCount}}</div>
           </div>
-          <div style="font-size:11.5px;color:#B5B2A6;line-height:1.6;margin-bottom:4px">트레이너와 나눈 이야기 중 두 번 세 번 봐야 할 것만 남겼어요. 제목을 누르면 펼쳐져요.</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <sc-for list="{{ntKinds}}" as="nk" hint-placeholder-count="3">
+              <button onClick="{{nk.pick}}" style="border:1px solid {{cardBorder}};background:{{nk.bg}};color:{{nk.color}};border-radius:99px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer">{{nk.label}}</button>
+            </sc-for>
+          </div>
+          <div style="font-size:11.5px;color:#B5B2A6;line-height:1.6">트레이너와 나눈 이야기를 날짜별로 모아 둔 곳이에요. 제목을 누르면 펼쳐져요.</div>
+          <sc-if value="{{ntEmpty}}" hint-placeholder-val="{{ true }}">
+            <div style="padding:10px 0;color:#B5B2A6;font-size:13px">이 구분에는 아직 적어 둔 노트가 없어요</div>
+          </sc-if>
           <sc-for list="{{ntRows}}" as="nt" hint-placeholder-count="5">
-            <div style="border-top:1px solid #F7F6F2">
-              <button onClick="{{nt.toggle}}" style="width:100%;border:0;background:none;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;padding:12px 0">
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:11px;font-weight:700;color:{{accent}}">{{nt.date}}</div>
-                  <div style="font-size:13.5px;font-weight:800;margin-top:3px;line-height:1.5">{{nt.title}}</div>
-                </div>
+            <div>
+              <sc-if value="{{nt.showDate}}" hint-placeholder-val="{{ true }}">
+                <div style="font-size:11.5px;font-weight:800;color:{{accent}};padding:13px 0 1px;border-top:1px solid #EDEBE4;margin-top:5px">{{nt.date}}</div>
+              </sc-if>
+              <button onClick="{{nt.toggle}}" style="width:100%;border:0;background:none;cursor:pointer;text-align:left;display:flex;align-items:center;gap:9px;padding:9px 0">
+                <span style="font-size:10.5px;font-weight:800;color:#8B887C;background:{{chipBg}};border-radius:99px;padding:3px 8px;flex:none">{{nt.kind}}</span>
+                <div style="flex:1;min-width:0;font-size:13.5px;font-weight:800;line-height:1.5">{{nt.title}}</div>
                 <span style="font-size:11px;color:#B5B2A6;flex:none">{{nt.chev}}</span>
               </button>
               <sc-if value="{{nt.open}}" hint-placeholder-val="{{ false }}">
-                <div style="font-size:13px;color:#4A4840;line-height:1.9;white-space:pre-wrap;padding:0 0 14px">{{nt.body}}</div>
+                <div style="font-size:13px;color:#4A4840;line-height:1.9;white-space:pre-wrap;padding:0 2px 14px">{{nt.body}}</div>
               </sc-if>
             </div>
           </sc-for>
@@ -1283,7 +1272,7 @@ class Component extends DCLogic {
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,favs:FV,carbUp:{},safe:{},todo:{items:[],done:[]},
       stock:{shop:['아몬드','닭가슴살','귀리','단백질바 1박스','피자치즈(가져올 예정)'],home:[]},weekGoals:{},
-      cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,jTab:'decide',ntOpen:-1,
+      cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,jTab:'decide',ntOpen:-1,ntKind:'전체',
       editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
   fmt(n){return (n==null||n===''||isNaN(+n))?'—':(+n).toLocaleString('ko-KR')}
@@ -1358,44 +1347,65 @@ class Component extends DCLogic {
     {name:'프로틴쉐이크(물)',amt:30,unit:'g',kcal:120,c:2,p:24,f:1.5,meal:'간식'},
     {name:'아몬드',amt:20,unit:'g',kcal:116,c:4,p:4,f:10,meal:'간식'},
     {name:'방울토마토',amt:100,unit:'g',kcal:18,c:4,p:0.9,f:0.2,meal:'간식'}];
-  /* 트레이너 자리 (일지 탭) — 생각 · 자극 · 다시 볼 대화. 화면 글자라 한글이다. */
-  TVIEW=[
-    {t:'저울은 하루에 1~2kg씩 출렁인다',d:'아침 공복, 화장실 다녀온 뒤, 같은 옷 — 조건을 고정하고 비교해라. 오늘 200g은 신호가 아니라 잡음이다.'},
-    {t:'부기 제품은 체지방과 무관하다',d:'수분이 빠진 것이지 살이 빠진 게 아니다. 저울이 잠깐 내려가는 것에 돈과 기대를 쓰지 마라.'},
-    {t:'약·주사는 기록만 한다',d:'용량과 증량 일정은 의사 영역이다. 앱과 트레이너는 적어 둘 뿐, 예측하거나 권하지 않는다.'},
-    {t:'정체기는 실패가 아니다',d:'2~3주 멈추는 것은 흔한 일이다. 여기서 더 굶는 것이 가장 흔한 실수다. 하던 것을 그대로 유지해라.'},
-    {t:'배고픔에도 종류가 있다',d:'위가 비어 꼬르륵거리는 것은 진짜, 화면을 보다 갑자기 생기는 것은 가짜다. 가짜는 물 한 컵과 15분이면 지나간다.'},
-    {t:'먹을 것을 미리 정해 두면 의지력을 안 쓴다',d:'조합식 서랍(A1~A3 · S1~S4 · D1~D4)이 그 장치다. 배고픈 상태에서 무엇을 먹을지 고르는 것이 가장 나쁜 순간이다.'},
-    {t:'집·가게 재고 안에서 먼저 찾아라',d:'배달과 가공식품은 기본값이 아니다. 설정의 🧺 재고에 있는 것으로 먼저 짜고, 모자랄 때만 밖을 본다.'},
-    {t:'잘한 날을 세라, 완벽한 날을 세지 마라',d:'절대선 6/6인 날만 세면 금방 지친다. 5/6인 날이 쌓이는 것이 곡선을 만든다.'}];
-  TFUEL=[
-    '단백질은 소화하는 데만 먹은 칼로리의 20~30%를 쓴다. 탄수는 5~10%, 지방은 0~3%. 같은 400kcal이어도 닭가슴살과 과자는 몸에 남는 양이 다르다.',
-    '근육 1kg은 가만히 있어도 하루 13kcal쯤 태운다. 작아 보이지만, 근육을 잃으면 「같은 걸 먹어도 찌는 몸」으로 바뀐다.',
-    '잠이 5시간 아래로 내려간 다음 날은 식욕 호르몬이 올라가고 포만 호르몬이 내려간다. 밤에 못 참는 건 의지가 아니라 호르몬 문제일 때가 많다.',
-    '감량 속도가 주 체중의 1%를 넘으면 빠지는 것의 상당량이 근육이다. 60kg이면 주 0.6kg가 상한선. 주 0.5kg는 느린 게 아니라 정확한 것이다.',
-    '체중이 멈춘 주에도 허리둘레·옷·사진은 계속 바뀐다. 지방이 빠진 자리를 물이 잠시 채우고 있을 뿐이다. 저울 하나만 보지 마라.',
-    '식사창을 좁히면 총량이 저절로 줄어든다. 「무엇을」 고르기 전에 「언제까지」를 정하는 편이 훨씬 쉽다.',
-    '다이어트를 끝낸 사람이 되돌아오는 가장 큰 이유는 목표 체중에 도착한 다음 날 계획이 없기 때문이다. 50kg은 결승선이 아니라 갈아타는 지점이다.',
-    '물 2L를 채운 날과 못 채운 날의 간식 횟수를 세어 보면 대개 차이가 난다. 물은 살을 빼지 않지만 먹는 횟수를 줄인다.'];
+  /* 트레이너 노트 — 메인 · 레시피 두 구분. 화면 글자라 한글이다.
+     k: '메인' | '레시피'. 새 이야기는 맨 위에 날짜 내림차순으로 넣는다. */
   TNOTES=[
-    {d:'2026-08-29',t:'웹 화면은 한 번에 한 칸만 본다',
+    {d:'2026-09-01',k:'메인',t:'알리오올리오 반 접시 — 오늘 탄수 몫을 다 썼다',
+     b:'배달 알리오올리오 한 접시는 대략 705kcal · 탄수 78g · 단백질 12g · 지방 38g이다(건면 100g + 올리브유 3큰술 + 마늘). 반만 먹으면 353kcal · 탄 39g · 단 6g · 지 19g.\n\n11시 50분이라 식사창 안이었고, 올리브유 19g이 들어 있어 첫 끼 지방(담석 예방)도 채웠다.\n\n문제는 나머지다. 탄수는 반 접시로 오늘 몫(40g)을 거의 다 썼고, 단백질은 6g뿐이라 94g이 남는다.\n\n그래서 결론은 하나다 — 면만 반 남기고 마늘과 기름 건더기는 다 먹는다. 지방은 설계값이라 빼지 않는다. 오늘 남은 끼니는 기름 적게, 단백질로만 채운다.'},
+    {d:'2026-09-01',k:'메인',t:'냉동실에 있는 것은 고르는 게 아니라 기본값이 된다',
+     b:'「알리오올리오가 맛있으면 만들어 얼려서 가게에 쟁여둘까」에 대한 답.\n\n탄수를 얹는 자리는 월요일 2개, 토요일 1개 — 주 3칸뿐이다. 그런데 가게 냉동실에 파스타가 있으면 그건 「고르는 것」이 아니라 「배고플 때 손에 잡히는 것」이 된다. 자리가 없는 화~금에도 그게 나간다.\n\n파스타는 얼렸다 데우면 면이 물러지는 것도 문제고, 통째로 얼리면 「반만」이 물리적으로 불가능해진다.\n\n그러니 쟁여두는 것을 막는 게 아니라 모양을 바꾼다. 면을 반의 반으로 줄이고 그 자리를 단백질로 채우면 월·토에 쓸 수 있는 한 끼가 된다(레시피 노트에 적어 뒀다).\n\n가게 냉동실의 나머지 칸은 단백질이 먼저다. 매일 단백질 100g을 채워야 하는데 파스타로는 못 채운다.'},
+    {d:'2026-09-01',k:'레시피',t:'단백질 알리오올리오 — 냉동 소분용',
+     b:'한 팩 기준 439kcal · 탄수 37g · 단백질 28g · 지방 19g. 절대선 안에 들어오는 한 끼다.\n\n【재료 · 1인분】\n· 스파게티 건면 40g (배달 한 접시의 반의 반)\n· 새우 또는 닭가슴살 100g\n· 브로콜리 한 줌 100g\n· 올리브유 1.5큰술 (18g)\n· 마늘 4~5쪽 · 페퍼론치노 · 소금\n\n【만드는 법】\n1. 면은 봉지에 적힌 시간보다 1분 덜 삶는다. 데울 때 더 익기 때문이다.\n2. 찬물에 헹구지 말고 올리브유를 살짝 발라 식힌다. 면끼리 붙는 것을 막는다.\n3. 마늘을 약불 올리브유에 천천히 볶아 향을 낸 뒤 새우와 브로콜리를 넣는다.\n4. 면을 합치고 면수 한 국자로 유화시킨다.\n5. 완전히 식힌 뒤 1인분씩 나눠 담아 얼린다.\n\n【얼릴 때】\n· 반드시 1인분씩 소분한다. 통째로 얼리면 반만 먹는 것이 불가능하다.\n· 납작하게 눌러 얼리면 빨리 얼고 빨리 녹는다.\n· 데울 때는 물 두 큰술을 뿌리고 뚜껑을 덮어 찐다. 그냥 돌리면 면이 마른다.\n· 2~3주 안에 먹는다.\n\n【먹는 자리】\n월요일 2칸, 토요일 1칸 — 탄수 얹는 날에만. 그 외의 날에는 꺼내지 않는다.'},
+    {d:'2026-08-29',k:'메인',t:'웹 화면은 한 번에 한 칸만 본다',
      b:'넓은 화면에서 홈·기록·일지·달력·피드를 한 판에 다 깔았더니, 홈 안에 또 화면이 들어 있는 꼴이 됐다.\n\n그래서 웹에서는 홈만 판에 남기고 나머지는 왼쪽 버튼으로 하나씩 열게 바꿨다. 피드는 지우지 않고 잠시 숨겨 뒀다 — 부르면 그대로 돌아온다.'},
-    {d:'2026-08-29',t:'목표일은 이번 주 일요일로 계속 굴러간다',
+    {d:'2026-08-29',k:'메인',t:'목표일은 이번 주 일요일로 계속 굴러간다',
      b:'먼 목표일 하나를 잡아 두면 매일이 남 얘기가 된다.\n\n그래서 앱을 열 때마다 목표일을 이번 주 일요일로 옮긴다. 홈의 D-day는 늘 「이번 주 마감」을 가리키고, 그 옆에 이번 주 목표 체중이 붙는다.\n\n한 번에 18kg을 보지 말고 이번 주 0.5kg만 봐라. 그게 목표일을 굴리는 이유다.'},
-    {d:'2026-08-28',t:'절대선 6개 — 의지가 아니라 화면이 지키게 만든다',
+    {d:'2026-08-28',k:'메인',t:'절대선 6개 — 의지가 아니라 화면이 지키게 만든다',
      b:'식사창 10:00–18:00 / 칼로리 하한 1,200 / 단백질 100g / 첫 끼에 지방 / 물 2L / 우유 금지.\n\n여섯 개 중 몇 개를 지켰는지가 홈 맨 위에 매일 뜬다. 「오늘 잘했나」를 기분으로 판단하지 않게 만드는 장치다.\n\n값은 설정에서 바꿀 수 있지만, 바꾸는 것과 어기는 것은 다르다.'},
-    {d:'2026-08-28',t:'칼로리 1,200은 상한이 아니라 하한이다',
-     b:'가장 많이 헷갈렸던 대목. 1,200은 「이 밑으로 내려가면 안 되는 선」이다.\n\n그 밑으로 먹은 날은 잘한 날이 아니라 손해 본 날이다. 몸은 부족분을 근육에서 꺼내 쓰고, 대사가 내려가서 같은 걸 먹어도 찌는 몸이 된다.\n\n그래서 앱은 초과가 아니라 미달을 경고한다.'},
-    {d:'2026-08-28',t:'지방을 무서워하지 마라 — 71g은 설계값이다',
+    {d:'2026-08-28',k:'메인',t:'칼로리 1,200은 상한이 아니라 하한이다',
+     b:'가장 많이 헷갈렸던 대목. 1,200은 「이 밑으로 내려가면 안 되는 선」이다.\n\n그 밑으로 먹은 날은 잘한 날이 아니라 손해 본 날이다. 몸은 부족분을 근육에서 꺼내 쓰고, 대사가 내려가서 같은 걸 먹어도 찌는 몸이 된다.\n\n그래서 앱은 초과가 아니라 미달을 경고한다. 다만 하루 미달로 꾸짖지는 않는다 — 4일 연속 미달일 때만 경고한다.'},
+    {d:'2026-08-28',k:'메인',t:'지방을 무서워하지 마라 — 71g은 설계값이다',
      b:'「기름진 것 피하라」는 증량 직후 며칠에만 해당하는 말이었다. 평소의 지방 71g은 일부러 잡아 둔 값이고, 목적은 담석 예방이다.\n\n오래 굶고 지방을 거의 안 먹으면 쓸개가 담즙을 비우지 않아 돌이 생긴다. 그래서 10시 첫 끼에 지방이 반드시 들어가야 한다.\n\n치즈·아몬드를 「지방이라서」 빼지 마라.'},
-    {d:'2026-08-28',t:'커피는 물 2L에 들어가지 않는다',
+    {d:'2026-08-28',k:'메인',t:'커피는 물 2L에 들어가지 않는다',
      b:'커피를 물로 계산하면 실제 수분은 계속 모자란 채로 간다. 공복에 많이 마시면 어지러움이 온다.\n\n물 2L는 살을 빼주는 장치가 아니라, 갈증을 식욕으로 잘못 읽는 것을 막는 장치다. 「배고픈 것 같다」의 상당수가 사실은 목마름이다.'},
-    {d:'2026-08-28',t:'유산소는 근력의 대체재가 아니다',
+    {d:'2026-08-28',k:'메인',t:'유산소는 근력의 대체재가 아니다',
      b:'근육을 지키는 것은 단백질과 저항운동 둘뿐이다. 유산소만 늘리면 저울 숫자는 내려가도, 내려간 것의 상당량이 근육이다.\n\n같은 50kg이어도 근육을 데리고 도착한 몸과 근육을 버리고 도착한 몸은 완전히 다르다. 뒤쪽은 반드시 되돌아온다.'},
-    {d:'2026-08-28',t:'보상성 절식 금지 — 주 평균으로 본다',
+    {d:'2026-08-28',k:'메인',t:'보상성 절식 금지 — 주 평균으로 본다',
      b:'「어제 많이 먹었으니 오늘 굶자」가 가장 위험한 습관이다. 굶은 날은 폭식으로 되돌아오고, 그 왕복이 대사를 깎는다.\n\n그래서 홈에 📊 주 평균 카드를 뒀다. 하루 숫자에 흔들리지 말고 7일 평균을 봐라. 한 끼 흔들렸다고 그날의 남은 끼니를 줄이지 않는다.'},
-    {d:'2026-08-28',t:'어지러우면 지금 먹어라 — 안전이 클린보다 먼저다',
-     b:'어지러움 · 손떨림 · 식은땀 · 몇 시간째 못 먹음 · 근력운동 직후 고갈.\n\n이 중 하나라도 있으면 깨끗한 음식을 찾지 말고 손에 잡히는 것을 지금 먹는다. 「다이어트 중인데」는 이때 참으라는 뜻이 아니다.\n\n컨디션 칩을 누르면 앱이 자동으로 안전 예외를 켜고 홈에 배너를 띄운다.'}];
+    {d:'2026-08-28',k:'메인',t:'어지러우면 지금 먹어라 — 안전이 클린보다 먼저다',
+     b:'어지러움 · 손떨림 · 식은땀 · 몇 시간째 못 먹음 · 근력운동 직후 고갈.\n\n이 중 하나라도 있으면 깨끗한 음식을 찾지 말고 손에 잡히는 것을 지금 먹는다. 「다이어트 중인데」는 이때 참으라는 뜻이 아니다.\n\n컨디션 칩을 누르면 앱이 자동으로 안전 예외를 켜고 홈에 배너를 띄운다.'},
+    {d:'2026-08-28',k:'메인',t:'저울은 하루에 1~2kg씩 출렁인다',
+     b:'아침 공복, 화장실 다녀온 뒤, 같은 옷 — 조건을 고정하고 비교해라.\n\n오늘 200g은 신호가 아니라 잡음이다.'},
+    {d:'2026-08-28',k:'메인',t:'부기 제품은 체지방과 무관하다',
+     b:'수분이 빠진 것이지 살이 빠진 게 아니다.\n\n저울이 잠깐 내려가는 것에 돈과 기대를 쓰지 마라.'},
+    {d:'2026-08-28',k:'메인',t:'약·주사는 기록만 한다',
+     b:'용량과 증량 일정은 의사 영역이다.\n\n앱과 트레이너는 적어 둘 뿐, 예측하거나 권하지 않는다.'},
+    {d:'2026-08-28',k:'메인',t:'정체기는 실패가 아니다',
+     b:'2~3주 멈추는 것은 흔한 일이다.\n\n여기서 더 굶는 것이 가장 흔한 실수다. 하던 것을 그대로 유지해라.'},
+    {d:'2026-08-28',k:'메인',t:'배고픔에도 종류가 있다',
+     b:'위가 비어 꼬르륵거리는 것은 진짜, 화면을 보다 갑자기 생기는 것은 가짜다.\n\n가짜는 물 한 컵과 15분이면 지나간다.'},
+    {d:'2026-08-28',k:'메인',t:'먹을 것을 미리 정해 두면 의지력을 안 쓴다',
+     b:'조합식 서랍(A1~A3 · S1~S4 · D1~D4)이 그 장치다.\n\n배고픈 상태에서 무엇을 먹을지 고르는 것이 가장 나쁜 순간이다.'},
+    {d:'2026-08-28',k:'메인',t:'집·가게 재고 안에서 먼저 찾아라',
+     b:'배달과 가공식품은 기본값이 아니다.\n\n설정의 🧺 재고에 있는 것으로 먼저 짜고, 모자랄 때만 밖을 본다.'},
+    {d:'2026-08-28',k:'메인',t:'잘한 날을 세라, 완벽한 날을 세지 마라',
+     b:'절대선 6/6인 날만 세면 금방 지친다.\n\n5/6인 날이 쌓이는 것이 곡선을 만든다.'},
+    {d:'2026-08-28',k:'메인',t:'단백질은 소화하는 데만 20~30%를 쓴다',
+     b:'단백질은 소화하는 데만 먹은 칼로리의 20~30%를 쓴다. 탄수는 5~10%, 지방은 0~3%.\n\n같은 400kcal이어도 닭가슴살과 과자는 몸에 남는 양이 다르다.'},
+    {d:'2026-08-28',k:'메인',t:'근육 1kg은 가만히 있어도 하루 13kcal를 태운다',
+     b:'작아 보이지만, 근육을 잃으면 「같은 걸 먹어도 찌는 몸」으로 바뀐다.'},
+    {d:'2026-08-28',k:'메인',t:'잠이 5시간 아래면 식욕 호르몬이 올라간다',
+     b:'잠이 5시간 아래로 내려간 다음 날은 식욕 호르몬이 올라가고 포만 호르몬이 내려간다.\n\n밤에 못 참는 건 의지가 아니라 호르몬 문제일 때가 많다.'},
+    {d:'2026-08-28',k:'메인',t:'주 감량 상한은 체중의 1% — 60kg이면 0.6kg',
+     b:'감량 속도가 주 체중의 1%를 넘으면 빠지는 것의 상당량이 근육이다.\n\n주 0.5kg는 느린 게 아니라 정확한 것이다.'},
+    {d:'2026-08-28',k:'메인',t:'체중이 멈춘 주에도 허리둘레는 바뀐다',
+     b:'체중이 멈춘 주에도 허리둘레·옷·사진은 계속 바뀐다.\n\n지방이 빠진 자리를 물이 잠시 채우고 있을 뿐이다. 저울 하나만 보지 마라.'},
+    {d:'2026-08-28',k:'메인',t:'「무엇을」보다 「언제까지」가 쉽다',
+     b:'식사창을 좁히면 총량이 저절로 줄어든다.\n\n「무엇을」 고르기 전에 「언제까지」를 정하는 편이 훨씬 쉽다.'},
+    {d:'2026-08-28',k:'메인',t:'50kg은 결승선이 아니라 갈아타는 지점이다',
+     b:'다이어트를 끝낸 사람이 되돌아오는 가장 큰 이유는 목표 체중에 도착한 다음 날 계획이 없기 때문이다.'},
+    {d:'2026-08-28',k:'메인',t:'물 2L를 채운 날은 간식 횟수가 준다',
+     b:'물 2L를 채운 날과 못 채운 날의 간식 횟수를 세어 보면 대개 차이가 난다.\n\n물은 살을 빼지 않지만 먹는 횟수를 줄인다.'}];
   RULE(){return Object.assign({winS:'10:00',winE:'18:00',kcalMin:1200,cG:40,pG:100,fG:71,waterMl:2000,firstFatG:8,weekPace:0.5,carbUp:{1:2,6:1}},this.state.set.rule||{})}
   ymd(dt){const z=n=>String(n).padStart(2,'0');return dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate())}
   addDays(ds,n){const dt=new Date(ds+'T00:00:00');dt.setDate(dt.getDate()+n);return this.ymd(dt)}
@@ -2011,7 +2021,8 @@ class Component extends DCLogic {
        note:'그 외 요일에는 자리가 없다. 미리 정해 두면 충동이 계획이 된다.'},
       {icon:'🚨',name:'안전 예외',val:'항상',valColor:'#E5484D',
        note:'어지러움·손떨림·식은땀·못 먹음·근력 직후에는 클린을 따지지 말고 지금 먹어라.'}];
-    const fuelIdx=(+this.TODAY.replace(/-/g,''))%this.TFUEL.length;
+    const NT_KINDS=['전체','메인','레시피'];
+    const ntList=this.TNOTES.map((n,i)=>({...n,i})).filter(n=>S.ntKind==='전체'||n.k===S.ntKind);
     /* 잠시 숨겨 둔 탭 — 화면 코드는 그대로 살아 있다. 되살리려면 여기서 빼기만 하면 된다. */
     const HIDE_TABS=['feed'];
     const setRule=(k,txt)=>e=>{const v=e.target.value;const R=Object.assign({},this.RULE());R[k]=txt?String(v):(+v||0);
@@ -2089,11 +2100,14 @@ class Component extends DCLogic {
       rmGoalW:fmt(rmGoalW),rmCurW:fmt(rmCur),rmLeftW:fmt(Math.max(0,+(rmCur-rmGoalW).toFixed(1))),
       rmPct:Math.max(0,Math.min(100,Math.round(rmDone/rmTotal*100))),rmPaceText:'주 '+wkp.pace+'kg 페이스',
       rmSummary:'시작 '+fmt(rmStart)+'kg에서 '+fmt(+rmDone.toFixed(1))+'kg 왔다 · 남은 약 '+wkp.weeksLeft+'주 · 이 페이스면 '+md(rmEta)+' 무렵 '+fmt(rmGoalW)+'kg',
-      rmSteps,tpRows,tvRows:this.TVIEW,
-      fuelToday:this.TFUEL[fuelIdx],fuelRows:this.TFUEL.filter((_,i)=>i!==fuelIdx).map(t=>({t})),
-      ntCount:this.TNOTES.length+'건',
-      ntRows:this.TNOTES.map((n,i)=>({date:this.lbl(n.d),title:n.t,body:n.b,open:S.ntOpen===i,chev:S.ntOpen===i?'▲':'▼',
-        toggle:()=>this.setState({ntOpen:this.state.ntOpen===i?-1:i})})),
+      rmSteps,tpRows,
+      ntKinds:NT_KINDS.map(k=>({label:k==='전체'?'전체':(k==='메인'?'📒 메인':'🍳 레시피'),
+        bg:S.ntKind===k?th.accent:th.chipBg,color:S.ntKind===k?'#fff':'#5C594E',
+        pick:()=>this.setState({ntKind:k,ntOpen:-1})})),
+      ntCount:ntList.length+'건',ntEmpty:!ntList.length,
+      ntRows:ntList.map((n,j)=>({date:this.lbl(n.d),showDate:j===0||ntList[j-1].d!==n.d,
+        title:n.t,body:n.b,kind:n.k,open:S.ntOpen===n.i,chev:S.ntOpen===n.i?'▲':'▼',
+        toggle:()=>this.setState({ntOpen:this.state.ntOpen===n.i?-1:n.i})})),
       jDecide:jrn.decide,onJDecide:jSet('decide'),
       jPlan:jrn.plan,onJPlan:jSet('plan'),
       jMemo:jrn.memo,onJMemo:jSet('memo'),
