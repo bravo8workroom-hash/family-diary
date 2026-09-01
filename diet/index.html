@@ -371,7 +371,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px">
               <sc-for list="{{m.quick}}" as="q" hint-placeholder-count="3">
-                <button onClick="{{q.tap}}" style="border:1px solid {{cardBorder}};background:{{chipBg}};color:{{accent}};border-radius:99px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px">＋ {{q.label}}<sc-if value="{{q.giOn}}" hint-placeholder-val="{{ true }}"><span style="flex:none;font-size:9.5px;font-weight:800;letter-spacing:.2px;padding:2px 6px;border-radius:99px;background:{{q.giBg}};color:{{q.giColor}}">{{q.giText}}</span></sc-if></button>
+                <button onClick="{{q.tap}}" style="border:1px solid {{cardBorder}};background:{{chipBg}};color:{{accent}};border-radius:99px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px">＋ {{q.label}}<span style="font-size:10.5px;font-weight:700;color:#8B887C">{{q.amt}}</span><sc-if value="{{q.giOn}}" hint-placeholder-val="{{ true }}"><span style="flex:none;font-size:9.5px;font-weight:800;letter-spacing:.2px;padding:2px 6px;border-radius:99px;background:{{q.giBg}};color:{{q.giColor}}">{{q.giText}}</span></sc-if></button>
               </sc-for>
               <button onClick="{{m.favOpen}}" title="자주 먹는 음식 전부 보기" style="border:1.5px dashed #D8D5CB;background:none;color:#8B887C;border-radius:99px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer">⚡ 자주 먹는 것</button>
             </div>
@@ -944,7 +944,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         </div>
         <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px">
           <div><div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">양</div><input inputMode="decimal" value="{{fmAmt}}" onChange="{{onFmAmt}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}"></div>
-          <div><div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">단위</div><select value="{{fmUnit}}" onChange="{{onFmUnit}}" style="width:100%;box-sizing:border-box;padding:10px 8px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}"><option value="g">g</option><option value="ml">ml</option><option value="개">개</option><option value="인분">인분</option></select></div>
+          <div><div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">단위</div><select value="{{fmUnit}}" onChange="{{onFmUnit}}" style="width:100%;box-sizing:border-box;padding:10px 8px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}"><option value="g">g</option><option value="ml">ml</option><option value="개">개</option><option value="종이컵">종이컵</option><option value="큰술">큰술</option><option value="작은술">작은술</option><option value="인분">인분</option><option value="조각">조각</option></select></div>
           <div><div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">kcal</div><input inputMode="numeric" value="{{fmKcal}}" onChange="{{onFmKcal}}" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:14px;background:#FBFAF7;outline-color:{{accent}}"></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
@@ -1117,13 +1117,34 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           <div style="color:#B5B2A6;font-size:12.5px">아직 비어 있어요 — 아래에서 ⭐를 누르면 여기로 올라와요</div>
         </sc-if>
         <sc-for list="{{fvMine}}" as="fr" hint-placeholder-count="6">
-          <div onClick="{{fr.tap}}" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid {{cardBorder}};background:{{cardBg}};border-radius:{{radM}};padding:11px 13px">
-            <div style="flex:1;min-width:0">
-              <div style="display:flex;align-items:center;gap:6px;min-width:0"><span style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{fr.name}}</span><sc-if value="{{fr.giOn}}" hint-placeholder-val="{{ true }}"><span style="flex:none;font-size:9.5px;font-weight:800;letter-spacing:.2px;padding:2px 6px;border-radius:99px;background:{{fr.giBg}};color:{{fr.giColor}}">{{fr.giFull}}</span></sc-if></div>
-              <div style="font-size:11px;color:#8B887C;margin-top:2px">{{fr.summary}}</div>
+          <div style="border:1px solid {{cardBorder}};background:{{cardBg}};border-radius:{{radM}}">
+            <div onClick="{{fr.tap}}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:11px 13px">
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:6px;min-width:0"><span style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{fr.name}}</span><sc-if value="{{fr.giOn}}" hint-placeholder-val="{{ true }}"><span style="flex:none;font-size:9.5px;font-weight:800;letter-spacing:.2px;padding:2px 6px;border-radius:99px;background:{{fr.giBg}};color:{{fr.giColor}}">{{fr.giFull}}</span></sc-if></div>
+                <div style="font-size:11px;color:#8B887C;margin-top:2px">{{fr.summary}}</div>
+              </div>
+              <span style="font-size:12px;font-weight:800;flex:none;color:{{accent}}">담기</span>
+              <button onClick="{{fr.edit}}" title="양·단위 고치기" style="border:0;background:none;color:#8B887C;font-size:14px;cursor:pointer;flex:none;padding:4px">✏️</button>
+              <button onClick="{{fr.del}}" title="목록에서 빼기" style="border:0;background:none;color:#B5B2A6;font-size:14px;cursor:pointer;flex:none;padding:4px">✕</button>
             </div>
-            <span style="font-size:12px;font-weight:800;flex:none;color:{{accent}}">담기</span>
-            <button onClick="{{fr.del}}" title="목록에서 빼기" style="border:0;background:none;color:#B5B2A6;font-size:14px;cursor:pointer;flex:none;padding:4px">✕</button>
+            <sc-if value="{{fr.editing}}" hint-placeholder-val="{{ false }}">
+              <div style="border-top:1px solid {{cardBorder}};padding:11px 13px 13px;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <input inputMode="decimal" value="{{fr.edAmt}}" onChange="{{fr.onEdAmt}}" style="width:104px;box-sizing:border-box;padding:10px 12px;border:1px solid #E3E0D8;border-radius:{{radS}};font-size:15px;font-weight:800;background:#FBFAF7;outline-color:{{accent}}">
+                  <span style="font-size:15px;font-weight:800;color:{{accent}}">{{fr.edUnit}}</span>
+                </div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap">
+                  <sc-for list="{{fr.edUnits}}" as="fu" hint-placeholder-count="8">
+                    <button onClick="{{fu.pick}}" style="border:0;cursor:pointer;border-radius:99px;padding:7px 12px;font-size:12.5px;font-weight:700;background:{{fu.bg}};color:{{fu.color}}">{{fu.name}}</button>
+                  </sc-for>
+                </div>
+                <div style="font-size:11.5px;color:#8B887C;line-height:1.6">{{fr.edPreview}}</div>
+                <div style="display:flex;gap:7px">
+                  <button onClick="{{fr.edCancel}}" style="flex:1;border:1px solid #E3E0D8;background:none;color:#8B887C;border-radius:{{radS}};padding:11px;font-size:13px;font-weight:700;cursor:pointer">취소</button>
+                  <button onClick="{{fr.edSave}}" style="flex:1;border:0;background:{{accent}};color:#fff;border-radius:{{radS}};padding:11px;font-size:13px;font-weight:800;cursor:pointer">저장</button>
+                </div>
+              </div>
+            </sc-if>
           </div>
         </sc-for>
         <div style="font-size:12px;font-weight:800;color:#8B887C;margin-top:6px">🕘 최근 기록에서</div>
@@ -1317,6 +1338,10 @@ class Component extends DCLogic {
     for(const s of this.WO_SEED){if(list.length>=4)break;
       if(!list.some(x=>x.k===s.k))list.push({k:s.k,m:s.m,n:0})}
     return list.slice(0,4)}
+  /* 양의 단위 — 자주 먹는 음식 편집 칩이 쓴다. 사장님 화면 글자라 한글이다.
+     ⚠ 음식 추가/수정 모달의 <select>도 같은 목록을 담고 있다(HTML 파서가 <select> 안의
+     <sc-for>를 지워 버려서 이 배열을 그대로 못 쓴다) — 여기를 고치면 그 <option> 줄도 같이 고쳐라. */
+  UNITS=['g','ml','개','종이컵','큰술','작은술','인분','조각'];
   /* 자주 먹는 음식 씨앗 — 52kg 절대선 식단. 사장님 화면에 뜨는 글자라 한글이다.
      저장된 목록(state.favs)이 있으면 그쪽이 이긴다 — 사장님이 여기에 더 담으실 수 있다. */
   FAV_SEED=[
@@ -1460,6 +1485,25 @@ class Component extends DCLogic {
     this.toast(this.say('내 목록에 넣었어요 ⭐','내 목록에 넣었사와요 ⭐'))}
   favDrop(id){this.setState({favs:(this.state.favs||[]).filter(x=>x.id!==id)});
     this.toast(this.say('목록에서 뺐어요','목록에서 뺐사와요'))}
+  /* 자주 먹는 음식의 양·단위 고치기 (2026-09-01, 사장님 지시 「수량 수정 가능하게, 단위도 설정 가능하게」).
+     같은 단위에서 양만 바꾸면 영양값이 같은 비율로 따라온다 — 닭가슴살 100g 110kcal -> 150g 165kcal.
+     단위를 바꾸면 g->개처럼 환산할 길이 없으므로 영양값은 그대로 두고 양·단위만 갈아끼운다.
+     고칠 수 있는 것은 ⭐ 내 목록(favs)뿐이다 — 🕘 최근 기록에서는 기록이 정본이라 ⭐로 먼저 담아야 한다. */
+  favScale(v,amt,unit){const a0=+v.amt||0,a1=+amt||0;
+    if(unit!==(v.unit||'g')||a0<=0||a1<=0)return {kcal:+v.kcal||0,c:+v.c||0,p:+v.p||0,f:+v.f||0};
+    const r=a1/a0,rd=(n,d)=>{const m=Math.pow(10,d);return Math.round((+n||0)*r*m)/m};
+    return {kcal:rd(v.kcal,0),c:rd(v.c,1),p:rd(v.p,1),f:rd(v.f,1)}}
+  favEdit(v){this.setState({fv:{...this.state.fv,ed:{id:v.id,amt:String(v.amt==null?'':v.amt),unit:v.unit||'g'}}})}
+  favEditSet(k,val){const fv=this.state.fv;if(!fv||!fv.ed)return;
+    this.setState({fv:{...fv,ed:{...fv.ed,[k]:val}}})}
+  favEditClose(){const fv=this.state.fv;if(!fv)return;this.setState({fv:{meal:fv.meal}})}
+  favEditSave(){const fv=this.state.fv,ed=fv&&fv.ed;if(!ed)return;
+    const L=this.state.favs||[],v=L.find(x=>x.id===ed.id);if(!v){this.favEditClose();return}
+    const amt=+ed.amt||0,unit=String(ed.unit||'').trim()||'g';
+    if(amt<=0){this.toast('양을 0보다 크게 적어 주세요');return}
+    const n=this.favScale(v,amt,unit);
+    this.setState({favs:L.map(x=>x.id===ed.id?{...x,amt,unit,...n}:x)});
+    this.favEditClose();this.toast(this.say('양을 고쳤어요 ✓','양을 고쳤사와요 👑'))}
   /* 🧭 최근 3일 조언 — 그저께·어제·오늘을 함께 보고 「오늘 무엇을 할지」를 정한다.
      하루만 보면 어제 늦게 먹어 찬 물도, 어제 굶어서 온 반동도 원인을 못 읽는다.
      홈의 「오늘 점수」 자리를 이 카드가 대신한다 (사장님 지시 2026-08-29). */
@@ -1846,7 +1890,7 @@ class Component extends DCLogic {
     const mkThumb=p=>({emoji:p.photos[0]?(p.photos[0].src?'':p.photos[0].e):'📝',bg:phBg(p.photos[0]),textOnly:!p.photos.length,preview:p.text||'글 게시물',open:()=>this.openPost(p.id)});
     const dSum=this.sums(S.selDate),dSc=this.score(S.selDate),dGoal=this.goalFor(S.selDate);
     const meals=['아침','점심','저녁','간식'].map(nm=>{const items=(S.foods[S.selDate]||[]).filter(x=>x.meal===nm);const k=items.reduce((a,x)=>a+(+x.kcal||0),0);const qp=this.favPool(nm);
-      return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,quick:qp.slice(0,3).map(v=>({label:v.name,tap:()=>this.favPut(nm,v),...this.giVals(v.name)})),favOpen:()=>this.setState({fv:{meal:nm}}),combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
+      return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,quick:qp.slice(0,3).map(v=>({label:v.name,amt:fmt(v.amt)+(v.unit||''),tap:()=>this.favPut(nm,v),...this.giVals(v.name)})),favOpen:()=>this.setState({fv:{meal:nm}}),combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
         items:items.map(it=>({name:it.name,timeLabel:it.time?(it.time+'  '):'',timeColor:this.outTime(it.time)?'#E5484D':'#B5B2A6',amt:fmt(it.amt)+it.unit,c:fmt(it.c),p:fmt(it.p),f:fmt(it.f),kcal:fmt(it.kcal),open:()=>this.setState({fm:{...it,confirm:false,nameErr:false}}),del:e=>{e.stopPropagation();const F={...S.foods};F[S.selDate]=(F[S.selDate]||[]).filter(x=>x.id!==it.id);this.setState({foods:F});this.toast(this.say('삭제했어요','삭제했사와요'))}}))}});
     const dayPosts=S.posts.filter(p=>p.date===S.selDate).map(mkThumb);
     const fm=S.fm;
@@ -2021,6 +2065,9 @@ class Component extends DCLogic {
     const fv=S.fv,fvMeal=fv?fv.meal:'',fvPool=fv?this.favPool(fvMeal):[];
     const favSum=v=>fmt(v.amt)+(v.unit||'')+' · '+fmt(v.kcal)+'kcal · 단백질 '+fmt(v.p)+'g';
     const favTap=v=>()=>{this.favPut(fvMeal,v);this.setState({fv:null})};
+    const fvEd=fv?fv.ed:null;
+    const fvUnits=cur=>this.UNITS.map(u=>({name:u,pick:()=>this.favEditSet('unit',u),
+      bg:cur===u?th.accent:th.chipBg,color:cur===u?'#fff':'#5C594E'}));
     const combos=S.combos||[],cm=S.cm;
     const cmMeal=cm?cm.meal:'';
     const comboSum=k=>{const it=k.items||[];if(!it.length)return '비어 있음 — 「이 끼니를 저장」으로 채우세요';
@@ -2124,9 +2171,17 @@ class Component extends DCLogic {
         onKey:e=>{if(e.key==='Enter')stAdd(b.w)()},add:stAdd(b.w)})),
       /* 자주 먹는 음식 */
       fvOn:!!fv,fvClose:()=>this.setState({fv:null}),fvMealLabel:fvMeal,
-      fvHint:'누르면 '+fvMeal+'에 지금 시각으로 바로 담겨요. 「최근 기록에서」의 ⭐를 누르면 내 목록으로 들어와요. GI는 혈당이 오르는 속도예요 — 초록 좋음 · 주황 중간 · 빨강 나쁨 (칼로리와는 다른 이야기예요).',
-      fvMine:fvPool.filter(v=>v.mine).map(v=>({name:v.name,summary:favSum(v),tap:favTap(v),...this.giVals(v.name),
-        del:e=>{e.stopPropagation();this.favDrop(v.id)}})),
+      fvHint:'누르면 '+fvMeal+'에 지금 시각으로 바로 담겨요. ✏️로 양과 단위를 고칠 수 있고, 양을 바꾸면 칼로리·탄단지가 같은 비율로 따라와요. 「최근 기록에서」의 ⭐를 누르면 내 목록으로 들어와요(그 뒤에 고칠 수 있어요). GI는 혈당이 오르는 속도예요 — 초록 좋음 · 주황 중간 · 빨강 나쁨 (칼로리와는 다른 이야기예요).',
+      fvMine:fvPool.filter(v=>v.mine).map(v=>{const ing=!!(fvEd&&fvEd.id===v.id);
+        const eu=ing?(String(fvEd.unit||'').trim()||'g'):'';
+        const pv=ing?this.favScale(v,fvEd.amt,eu):null;
+        return {name:v.name,summary:favSum(v),tap:favTap(v),...this.giVals(v.name),
+          del:e=>{e.stopPropagation();this.favDrop(v.id)},
+          edit:e=>{e.stopPropagation();if(ing)this.favEditClose();else this.favEdit(v)},
+          editing:ing,edAmt:ing?fvEd.amt:'',edUnit:eu,edUnits:ing?fvUnits(eu):[],
+          onEdAmt:e=>this.favEditSet('amt',e.target.value),
+          edPreview:!pv?'':(+fvEd.amt>0?('→ '+fmt(pv.kcal)+'kcal · 탄 '+fmt(pv.c)+'g · 단 '+fmt(pv.p)+'g · 지 '+fmt(pv.f)+'g'+(eu===(v.unit||'g')?'':' — 단위를 바꾸면 영양값은 그대로예요')):'양을 0보다 크게 적어 주세요'),
+          edCancel:()=>this.favEditClose(),edSave:()=>this.favEditSave()}}),
       fvMineEmpty:!fvPool.some(v=>v.mine),
       fvRecent:fvPool.filter(v=>!v.mine).slice(0,10).map(v=>({name:v.name,summary:favSum(v),tap:favTap(v),...this.giVals(v.name),
         pin:e=>{e.stopPropagation();this.favPin(v)}})),
