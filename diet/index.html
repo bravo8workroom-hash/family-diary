@@ -119,6 +119,26 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:13px;font-weight:700;color:#8B887C">💊 오늘의 약</div>
+            <div style="font-size:14px;font-weight:800;color:{{pillColor}}">{{pillKept}} / {{pillDue}}</div>
+          </div>
+          <div style="font-size:10.5px;color:#B5B2A6;margin-bottom:10px;line-height:1.5">절대선이 아니라 체크리스트예요 — 하나 빠뜨렸다고 그날이 실패는 아니에요</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <sc-for list="{{pillRows}}" as="p" hint-placeholder-count="8">
+              <div onClick="{{p.tap}}" style="display:flex;align-items:center;gap:9px;cursor:pointer;background:{{p.bg}};border:1px solid {{p.border}};border-radius:{{radS}};padding:9px 11px">
+                <span style="font-size:14px;width:19px;text-align:center;flex:none">{{p.e}}</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12.5px;font-weight:700;color:{{p.nameColor}}">{{p.t}}</div>
+                  <div style="font-size:10.5px;color:{{p.tagColor}};margin-top:2px;line-height:1.45">{{p.tag}} · {{p.w}}</div>
+                </div>
+                <span style="font-size:14px;font-weight:800;flex:none;color:{{p.markColor}}">{{p.mark}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
             <div style="font-size:13px;font-weight:700;color:#8B887C">💧 물 <span style="font-weight:600;color:#B5B2A6">· 커피는 미포함</span></div>
             <div style="font-size:16px;font-weight:800;color:{{waterColor}}">{{waterText}}</div>
@@ -133,15 +153,6 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-          <sc-for list="{{wStats}}" as="s" hint-placeholder-count="4">
-            <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radM}};padding:12px 6px;text-align:center">
-              <div style="font-size:11px;color:#8B887C;font-weight:600">{{s.label}}</div>
-              <div style="font-size:16px;font-weight:800;margin-top:4px;color:{{s.color}}">{{s.val}}</div>
-              <div style="font-size:10px;color:#B5B2A6">kg</div>
-            </div>
-          </sc-for>
-        </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -160,6 +171,14 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             </sc-for>
           </div>
           <div style="font-size:11px;color:#B5B2A6;margin-top:10px;line-height:1.55;text-align:center">{{wkNote}}</div>
+          <div style="display:flex;align-items:baseline;gap:4px;margin-top:9px;padding-top:9px;border-top:1px solid {{cardBorder}};white-space:nowrap;overflow:hidden">
+            <sc-for list="{{wStats}}" as="s" hint-placeholder-count="4">
+              <div style="flex:1;min-width:0;text-align:center;overflow:hidden">
+                <span style="font-size:9.5px;color:#B5B2A6;font-weight:600">{{s.label}}</span>
+                <span style="font-size:11.5px;font-weight:800;margin-left:3px;color:{{s.color}}">{{s.val}}</span>
+              </div>
+            </sc-for>
+          </div>
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
@@ -200,19 +219,6 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           <div style="font-size:11.5px;color:#8B887C;margin-top:11px;line-height:1.65">「오늘 많이 먹었으니 내일 굶자」는 하지 않아요. <b style="color:#1F1E1A">하루가 아니라 주 평균</b>으로 봅니다. 한 끼 흔들렸다고 그날 나머지를 줄이지 마세요.</div>
         </div>
 
-        <div ref="{{stripRef}}" onPointerDown="{{stripDown}}" onPointerMove="{{stripMove}}" onPointerUp="{{stripUp}}" onPointerCancel="{{stripUp}}" onClickCapture="{{stripClick}}" style="display:flex;gap:8px;overflow-x:auto;padding:2px 2px 4px;margin:0 -2px;scrollbar-width:none;cursor:grab;touch-action:pan-x">
-          <sc-for list="{{strip}}" as="d" hint-placeholder-count="14">
-            <div onClick="{{d.go}}" style="flex:none;width:46px;cursor:pointer;text-align:center;padding:8px 0 7px;border-radius:{{radS}};background:{{d.bg}};border:1px solid {{d.border}}">
-              <div style="font-size:10.5px;color:{{d.dowColor}};font-weight:600">{{d.dow}}</div>
-              <div style="font-size:15px;font-weight:800;margin-top:2px;color:{{d.numColor}}">{{d.num}}</div>
-              <div style="height:6px;display:flex;justify-content:center;margin-top:3px">
-                <sc-if value="{{d.dot}}" hint-placeholder-val="{{ false }}">
-                  <span style="width:5px;height:5px;border-radius:99px;background:{{d.dotColor}}"></span>
-                </sc-if>
-              </div>
-            </div>
-          </sc-for>
-        </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -1434,6 +1440,20 @@ class Component extends DCLogic {
      문제가 아니다. 연속 미달이 UNDER_RUN 일에 닿았을 때만 경고한다. 기록이 없는 날은 「모른다」이므로 줄을 끊는다.
      ⛔ 안전 신호(어지러움·손떨림 등)는 이 규칙과 무관하게 하루도 즉시 경고다 — safe 배너를 건드리지 마라. */
   underRun(ds){const R=this.RULE();let n=0;for(let i=0;i<8;i++){const k=this.addDays(ds,-i);if(!(this.state.foods[k]||[]).length)break;if(this.sums(k).kcal>=R.kcalMin)break;n++}return n}
+  /* 💊 오늘의 약 — 절대선이 아니다. 절대선 여섯은 늘리지 않는다(협상 불가 목록이라 항목이 늘면 무게가 흐려진다).
+     여기는 판정이 아니라 체크리스트다. ⛔ absLines·코치 댓글에 끌어들이지 마라 — 영양제를 빠뜨린 날이
+     식사창을 어긴 날과 같은 무게로 보이면 안 된다. 목록 정본은 PILLS 한 곳이고 코드라서
+     「첫 실행에만 심긴다」 함정이 없다(GI_TAB과 같은 부류). cyc: day=매일 · alt=격일 · opt=필요할 때. */
+  PILLS=[{k:'multi',e:'💊',t:'종합비타민',cyc:'day',w:'아침 첫 끼'},
+         {k:'vitd',e:'☀️',t:'비타민D',cyc:'day',w:'첫 끼 · 지방과 함께'},
+         {k:'omega',e:'🐟',t:'오메가3',cyc:'day',w:'첫 끼 · 지방과 함께'},
+         {k:'mag',e:'🌙',t:'마그네슘',cyc:'day',w:'저녁'},
+         {k:'zinc',e:'🔩',t:'아연',cyc:'alt',w:'낮 · 마그네슘과 시간 띄우기'},
+         {k:'iron',e:'🩸',t:'철분',cyc:'alt',w:'낮 · 마그네슘과 시간 띄우기'},
+         {k:'lacto',e:'🦠',t:'유산균',cyc:'opt',w:'배 불편한 날'},
+         {k:'mela',e:'😴',t:'멜라토닌',cyc:'opt',w:'잠 안 오는 날 · 저녁'}];
+  pillsOf(ds){return (this.state.pills||{})[ds]||{}}
+  pillDue(p,ds){if(p.cyc==='day')return true;if(p.cyc==='opt')return false;return !this.pillsOf(this.addDays(ds,-1))[p.k]}
   absLines(ds){
     const R=this.RULE(),s=this.sums(ds),items=this.state.foods[ds]||[],has=items.length>0;
     const UNDER_RUN=4,uRun=this.underRun(ds);
@@ -1781,8 +1801,7 @@ class Component extends DCLogic {
       this.toast(this.say('호출 '+used+'회로 '+n+'건 처리 · 코치 피드백까지 완료 ⚡','호출 '+used+'회로 '+n+'건 처리했답니다 ⚡'));
     }catch(err){this.setState({aiBusy:false});this.toast('AI 처리 중 문제가 생겼어요 · '+(err.message||'네트워크'))}
   }
-  stripRef=React.createRef();
-  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo'];
+  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo','pills'];
   idb(){return new Promise((res,rej)=>{const q=indexedDB.open('dietgram',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
   async dbGet(k){try{const db=await this.idb();return await new Promise((res,rej)=>{const t=db.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error)})}catch(_){try{const s=localStorage.getItem('dgm_'+k);return s?JSON.parse(s):null}catch(e){return null}}}
   // 기록은 가족 저장소(Supabase)에 둔다 — family_state 문서의 diet 칸 하나를 쓴다.
@@ -1816,17 +1835,13 @@ class Component extends DCLogic {
   watchWide(){try{if(typeof window==='undefined'||!window.matchMedia)return;const m=window.matchMedia('(min-width:1024px)');this._mq=m;this._onMq=e=>this.setState({wide:e.matches});m.addEventListener?m.addEventListener('change',this._onMq):m.addListener(this._onMq);if(m.matches!==this.state.wide)this.setState({wide:m.matches})}catch(_){}}
   componentWillUnmount(){try{const m=this._mq;if(m&&this._onMq)m.removeEventListener?m.removeEventListener('change',this._onMq):m.removeListener(this._onMq)}catch(_){}}
   scrollPane(k){const L={home:'\uD648',log:'\uAE30\uB85D',jr:'\uD2B8\uB808\uC774\uB108',cal:'\uB2EC\uB825',feed:'\uD53C\uB4DC'}[k];if(!L||typeof document==='undefined')return;setTimeout(()=>{try{const el=document.querySelector('.dash>[data-screen-label="'+L+'"]');if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}},0)}
-  componentDidMount(){this.watchWide();const el=this.stripRef.current;if(el)el.scrollLeft=el.scrollWidth;
+  componentDidMount(){this.watchWide();
     this._doc={};
     window.FamilyStore.start({seed:()=>({}),onRemote:doc=>{this._doc=doc;this.adopt(doc.diet)}}).then(async doc=>{
       this._doc=doc||{};
       let o=this._doc.diet,moved=false;
       if(!o){o=await this.importLocal();moved=!!o}
       this.adopt(o,()=>{this._loaded=true;this.afterLoad();if(moved){this._saved='';this.persist()}})})}
-  stripDown=e=>{const el=this.stripRef.current;if(!el)return;this._sd={x:e.clientX,sl:el.scrollLeft,moved:false};try{el.setPointerCapture(e.pointerId)}catch(_){}}
-  stripMove=e=>{const sd=this._sd;if(!sd)return;const dx=e.clientX-sd.x;if(Math.abs(dx)>5)sd.moved=true;this.stripRef.current.scrollLeft=sd.sl-dx}
-  stripUp=e=>{if(this._sd&&this._sd.moved){this._noClick=true;setTimeout(()=>{this._noClick=false},60)}this._sd=null}
-  stripClick=e=>{if(this._noClick){e.stopPropagation();e.preventDefault()}}
   renderVals(){
     const S=this.state,pr=this.props;
     const themes={
@@ -1874,10 +1889,6 @@ class Component extends DCLogic {
       wColor:r.today?modeC(S.mode):'#1F1E1A',pColor:r.today?'#E4618C':'#B5B2A6',
       wEdit:ed,wShow:!ed,wTap:()=>this.setState({editW:{d:r.ds,f:'a'}}),
       wCommit:e=>this.commitW(r.ds,'a',e.target.value),wKey:e=>{if(e.key==='Enter')e.target.blur()}}});
-    const strip=[];
-    const macroColor=ds=>{const s=this.sums(ds);const arr=[[s.c*4,'#E9A23B'],[s.p*4,'#E4618C'],[s.f*9,'#5B8DEF']];arr.sort((a,b)=>b[0]-a[0]);return arr[0][0]>0?arr[0][1]:'#B5B2A6'};
-    for(let i=13;i>=0;i--){const ds=this.d(i);const dt=new Date(ds+'T00:00:00');const has=(S.foods[ds]||[]).length>0;const isT=i===0;const dm=S.dayMode[ds]||'diet';
-      strip.push({dow:['일','월','화','수','목','금','토'][dt.getDay()],num:dt.getDate(),dot:has,dotColor:macroColor(ds),bg:isT?modeC(S.mode):th.cardBg,border:isT?modeC(S.mode):th.cardBorder,dowColor:isT?'rgba(255,255,255,.8)':'#B5B2A6',numColor:isT?'#fff':'#1F1E1A',go:()=>this.openDayFeed(ds)})}
     const wRows=[];
     for(let i=0;i<21;i++){const ds=this.d(-i);const w=S.weights[ds]||{};const ew=S.editW;const eT=!!(ew&&ew.d===ds&&ew.f==='t'),eA=!!(ew&&ew.d===ds&&ew.f==='a');
       const t=w.t,a=w.a;const diff=(t!=null&&a!=null)?+(a-t).toFixed(1):null;
@@ -1970,6 +1981,19 @@ class Component extends DCLogic {
           mark:a.ok?'✓':a.na?'·':'✕',
           markColor:a.ok?'#17A673':a.na?'#D8D5CB':'#E5484D'}))}};
     const absT=mkAbs(this.TODAY);
+    const pillT=this.pillsOf(this.TODAY);
+    const pillRows=this.PILLS.map(p=>{const on=!!pillT[p.k],due=this.pillDue(p,this.TODAY);
+      return {e:p.e,t:p.t,w:p.w,
+        tag:p.cyc==='day'?'매일':p.cyc==='opt'?'필요할 때':due?'격일 · 오늘 차례':'격일 · 어제 먹음',
+        tagColor:(p.cyc==='alt'&&!due)||p.cyc==='opt'?'#B5B2A6':'#8B887C',
+        bg:on?'#EAF7F1':th.chipBg,border:on?'#17A673':th.cardBorder,
+        nameColor:on?'#17A673':'#1F1E1A',mark:on?'✓':'○',markColor:on?'#17A673':'#D8D5CB',
+        tap:()=>{const P={...(S.pills||{})};const d={...(P[this.TODAY]||{})};
+          if(d[p.k])delete d[p.k];else d[p.k]=true;
+          if(Object.keys(d).length)P[this.TODAY]=d;else delete P[this.TODAY];
+          this.setState({pills:P})}}});
+    const pillDueN=this.PILLS.filter(p=>this.pillDue(p,this.TODAY)).length;
+    const pillKeptN=this.PILLS.filter(p=>this.pillDue(p,this.TODAY)&&pillT[p.k]).length;
     const safeT=this.safeOn(this.TODAY);
     const toggleSafe=()=>{const SF={...(S.safe||{})};if(SF[this.TODAY])delete SF[this.TODAY];else SF[this.TODAY]=true;
       this.setState({safe:SF});
@@ -2230,7 +2254,6 @@ class Component extends DCLogic {
       setMaint:()=>{if(S.mode!=='maint'){this.setState({mode:'maint'});this.toast(this.say('유지 모드로 전환했어요','유지 모드로 모시겠습니다 🪞'))}},
       dietBtnBg:S.mode==='diet'?th.cardBg:'transparent',dietBtnColor:S.mode==='diet'?th.diet:'#8B887C',dietBtnShadow:S.mode==='diet'?'0 1px 4px rgba(0,0,0,.12)':'none',
       maintBtnBg:S.mode==='maint'?th.cardBg:'transparent',maintBtnColor:S.mode==='maint'?th.maint:'#8B887C',maintBtnShadow:S.mode==='maint'?'0 1px 4px rgba(0,0,0,.12)':'none',
-      stripRef:this.stripRef,stripDown:this.stripDown,stripMove:this.stripMove,stripUp:this.stripUp,stripClick:this.stripClick,
       woGroups,woTotal:woTotalToday>0?'총 '+fmtT(woTotalToday):'0:00',woTotalColor:woTotalToday>0?th.accent:'#B5B2A6',
       woQuick,woTitle:woIsT?'오늘 운동':'운동 기록',woDate:woD8,woDateLabel:this.lbl(woD8)+(woIsT?' · 오늘':''),
       woDateBg:woIsT?th.chipBg:th.dietSoft,woDateColor:woIsT?'#1F1E1A':th.accent,woNotToday:!woIsT,
@@ -2249,7 +2272,8 @@ class Component extends DCLogic {
       onWeekGoal:e=>{const v=String(e.target.value||'').trim();const WG={...(S.weekGoals||{})};
         if(v==='')delete WG[wkp.ws];else WG[wkp.ws]=+v||0;
         this.setState({weekGoals:WG});this.toast(v===''?'이번 주 목표를 자동으로 되돌렸어요 ✓':('이번 주 목표를 '+v+'kg으로 두었어요 ✓'))},
-      wStats,a3Rows,a3Lines:a3.lines,strip,wRows,
+      wStats,a3Rows,a3Lines:a3.lines,wRows,
+      pillRows,pillKept:pillKeptN,pillDue:pillDueN,pillColor:pillKeptN>=pillDueN?'#17A673':th.accent,
       selLabel:this.lbl(S.selDate),selDate:S.selDate,todayStr:this.TODAY,
       prevDay:()=>this.shiftDay(-1),nextDay:()=>this.shiftDay(1),
       nextDisabled:S.selDate>=this.TODAY,nextColor:S.selDate>=this.TODAY?'#D8D5CB':'#5C594E',nextOpacity:S.selDate>=this.TODAY?.5:1,
