@@ -1373,7 +1373,7 @@ class Component extends DCLogic {
     {d:'2026-08-29',k:'메인',t:'목표일은 이번 주 일요일로 계속 굴러간다',
      b:'먼 목표일 하나를 잡아 두면 매일이 남 얘기가 된다.\n\n그래서 앱을 열 때마다 목표일을 이번 주 일요일로 옮긴다. 홈의 D-day는 늘 「이번 주 마감」을 가리키고, 그 옆에 이번 주 목표 체중이 붙는다.\n\n한 번에 18kg을 보지 말고 이번 주 0.5kg만 봐라. 그게 목표일을 굴리는 이유다.'},
     {d:'2026-08-28',k:'메인',t:'절대선 6개 — 의지가 아니라 화면이 지키게 만든다',
-     b:'식사창 10:00–18:00 / 칼로리 하한 1,200 / 단백질 100g / 첫 끼에 지방 / 물 2L / 우유 금지.\n\n여섯 개 중 몇 개를 지켰는지가 홈 맨 위에 매일 뜬다. 「오늘 잘했나」를 기분으로 판단하지 않게 만드는 장치다.\n\n값은 설정에서 바꿀 수 있지만, 바꾸는 것과 어기는 것은 다르다.'},
+     b:'식사창 10:00–18:00 / 칼로리 하한 1,200 / 단백질 100g / 첫 끼에 지방 / 물 2L.\n\n다섯 개 중 몇 개를 지켰는지가 홈 맨 위에 매일 뜬다. 「오늘 잘했나」를 기분으로 판단하지 않게 만드는 장치다.\n\n값은 설정에서 바꿀 수 있지만, 바꾸는 것과 어기는 것은 다르다.'},
     {d:'2026-08-28',k:'메인',t:'칼로리 1,200은 상한이 아니라 하한이다',
      b:'가장 많이 헷갈렸던 대목. 1,200은 「이 밑으로 내려가면 안 되는 선」이다.\n\n그 밑으로 먹은 날은 잘한 날이 아니라 손해 본 날이다. 몸은 부족분을 근육에서 꺼내 쓰고, 대사가 내려가서 같은 걸 먹어도 찌는 몸이 된다.\n\n그래서 앱은 초과가 아니라 미달을 경고한다. 다만 하루 미달로 꾸짖지는 않는다 — 4일 연속 미달일 때만 경고한다.'},
     {d:'2026-08-28',k:'메인',t:'지방을 무서워하지 마라 — 71g은 설계값이다',
@@ -1401,7 +1401,7 @@ class Component extends DCLogic {
     {d:'2026-08-28',k:'메인',t:'집·가게 재고 안에서 먼저 찾아라',
      b:'배달과 가공식품은 기본값이 아니다.\n\n설정의 🧺 재고에 있는 것으로 먼저 짜고, 모자랄 때만 밖을 본다.'},
     {d:'2026-08-28',k:'메인',t:'잘한 날을 세라, 완벽한 날을 세지 마라',
-     b:'절대선 6/6인 날만 세면 금방 지친다.\n\n5/6인 날이 쌓이는 것이 곡선을 만든다.'},
+     b:'절대선 5/5인 날만 세면 금방 지친다.\n\n4/5인 날이 쌓이는 것이 곡선을 만든다.'},
     {d:'2026-08-28',k:'메인',t:'단백질은 소화하는 데만 20~30%를 쓴다',
      b:'단백질은 소화하는 데만 먹은 칼로리의 20~30%를 쓴다. 탄수는 5~10%, 지방은 0~3%.\n\n같은 400kcal이어도 닭가슴살과 과자는 몸에 남는 양이 다르다.'},
     {d:'2026-08-28',k:'메인',t:'근육 1kg은 가만히 있어도 하루 13kcal를 태운다',
@@ -1426,7 +1426,6 @@ class Component extends DCLogic {
   condOf(ds){return (this.state.cond||{})[ds]||{}}
   liftsOf(ds){return (this.state.lifts||{})[ds]||[]}
   journalOf(ds){return Object.assign({decide:'',plan:'',memo:''},(this.state.journal||{})[ds]||{})}
-  milkItems(ds){return (this.state.foods[ds]||[]).filter(x=>{const t=String(x.name||'');return /우유|밀크|라떼|milk|latte/i.test(t)&&!/두유|아몬드유|귀리유|오트밀크|무유당/i.test(t)})}
   timedFoods(ds){return (this.state.foods[ds]||[]).filter(x=>this.mins(x.time)!=null).sort((a,b)=>this.mins(a.time)-this.mins(b.time))}
   outsideWindow(ds){const R=this.RULE(),a=this.mins(R.winS),b=this.mins(R.winE);return this.timedFoods(ds).filter(x=>{const m=this.mins(x.time);return m<a||m>b})}
   safeOn(ds){return !!((this.state.safe||{})[ds])}
@@ -1435,7 +1434,7 @@ class Component extends DCLogic {
      문제가 아니다. 연속 미달이 UNDER_RUN 일에 닿았을 때만 경고한다. 기록이 없는 날은 「모른다」이므로 줄을 끊는다.
      ⛔ 안전 신호(어지러움·손떨림 등)는 이 규칙과 무관하게 하루도 즉시 경고다 — safe 배너를 건드리지 마라. */
   underRun(ds){const R=this.RULE();let n=0;for(let i=0;i<8;i++){const k=this.addDays(ds,-i);if(!(this.state.foods[k]||[]).length)break;if(this.sums(k).kcal>=R.kcalMin)break;n++}return n}
-  /* 💊 오늘의 약 — 절대선이 아니다. 절대선 여섯은 늘리지 않는다(협상 불가 목록이라 항목이 늘면 무게가 흐려진다).
+  /* 💊 오늘의 약 — 절대선이 아니다. 절대선 다섯은 늘리지 않는다(협상 불가 목록이라 항목이 늘면 무게가 흐려진다).
      여기는 판정이 아니라 체크리스트다. ⛔ absLines·코치 댓글에 끌어들이지 마라 — 영양제를 빠뜨린 날이
      식사창을 어긴 날과 같은 무게로 보이면 안 된다. 목록 정본은 PILLS 한 곳이고 코드라서
      「첫 실행에만 심긴다」 함정이 없다(GI_TAB과 같은 부류). cyc: day=매일 · alt=격일 · opt=필요할 때. */
@@ -1452,7 +1451,7 @@ class Component extends DCLogic {
   absLines(ds){
     const R=this.RULE(),s=this.sums(ds),items=this.state.foods[ds]||[],has=items.length>0;
     const UNDER_RUN=4,uRun=this.underRun(ds);
-    const timed=this.timedFoods(ds),out=this.outsideWindow(ds),first=timed[0]||null,water=this.waterOf(ds),milk=this.milkItems(ds);
+    const timed=this.timedFoods(ds),out=this.outsideWindow(ds),first=timed[0]||null,water=this.waterOf(ds);
     const f=n=>this.fmt(Math.round(n));
     return [
       {k:'win',icon:'🕙',name:'식사창 '+R.winS+'-'+R.winE,ok:has&&timed.length>0&&out.length===0,na:!has||!timed.length,
@@ -1464,9 +1463,7 @@ class Component extends DCLogic {
       {k:'fat1',icon:'🥑',name:'첫 끼 지방 (담석 예방)',ok:!!first&&(+first.f||0)>=R.firstFatG,na:!first,
        val:first?(f(first.f)+'g · '+first.name):'첫 끼 시각을 적어 주세요'},
       {k:'water',icon:'💧',name:'물 '+(R.waterMl/1000)+'L (커피 제외)',ok:water>=R.waterMl,na:false,
-       val:(water/1000).toFixed(1)+' / '+(R.waterMl/1000)+'L'},
-      {k:'milk',icon:'🥛',name:'우유 금지 (쉐이크는 물)',ok:!milk.length,na:false,
-       val:milk.length?('우유 감지 · '+milk.map(x=>x.name).join(', ')):'없음'}];
+       val:(water/1000).toFixed(1)+' / '+(R.waterMl/1000)+'L'}];
   }
   nowHM(){const t=new Date();const z=v=>String(v).padStart(2,'0');return z(t.getHours())+':'+z(t.getMinutes())}
   outTime(t){const R=this.RULE(),m=this.mins(t);return m!=null&&(m<this.mins(R.winS)||m>this.mins(R.winE))}
@@ -1636,7 +1633,7 @@ class Component extends DCLogic {
       '## ★ 작업대기 '+td.length+'건 — 이것부터 답해라','',
       ...(td.length?td.map((x,i)=>(i+1)+'. 〔'+x.id+'〕 '+(x.t||'(글 없이 사진만)')+(x.ts?(' 〔적은 때 '+x.ts+'〕'):'')+((x.ph&&x.ph.length)?(' 〔📷 사진 '+x.ph.length+'장 — 앱 홈 「작업대기」 카드에서 볼 수 있다〕'):'')):['(비어 있음 — 사장님이 적어 두신 것이 없다)']),
       '','처리한 것은 입력함(trainer-inbox.json)의 todoDone 에 〔〕 안의 id 를 적어 보내라 — 앱을 열 때 스스로 「처리됨」으로 옮긴다.','',
-      '## 절대선 '+kept+'/6',''];
+      '## 절대선 '+kept+'/'+rows.length,''];
     rows.forEach(a=>L.push('- '+(a.ok?'OK':'X ')+' '+a.name+' — '+a.val));
     L.push('','## 오늘 합계','',
       '- '+Math.round(s.kcal)+' kcal (하한 '+R.kcalMin+' — 상한이 아니라 하한이다)',
@@ -1970,7 +1967,7 @@ class Component extends DCLogic {
     /* ── 52kg 절대선·물·주평균·컨디션·근력·일지·조합식·재고 ────────────── */
     const R52=this.RULE();
     const mkAbs=ds=>{const rows=this.absLines(ds);const kept=rows.filter(a=>a.ok).length;
-      return {kept,color:kept>=6?'#17A673':kept>=4?th.accent:'#E5484D',
+      return {kept,color:kept>=rows.length?'#17A673':kept>=rows.length-2?th.accent:'#E5484D',
         rows:rows.map(a=>({icon:a.icon,name:a.name,val:a.val,
           valColor:a.ok?'#17A673':a.na?'#B5B2A6':'#E5484D',
           mark:a.ok?'✓':a.na?'·':'✕',
