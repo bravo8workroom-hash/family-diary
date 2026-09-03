@@ -1451,7 +1451,7 @@ class Component extends DCLogic {
   absLines(ds){
     const R=this.RULE(),s=this.sums(ds),items=this.state.foods[ds]||[],has=items.length>0;
     const UNDER_RUN=4,uRun=this.underRun(ds);
-    const timed=this.timedFoods(ds),out=this.outsideWindow(ds),first=timed[0]||null,water=this.waterOf(ds);
+    const timed=this.timedFoods(ds),out=this.outsideWindow(ds),first=timed[0]||null,water=this.waterOf(ds),wRaw=(this.state.water||{})[ds];
     const f=n=>this.fmt(Math.round(n));
     return [
       {k:'win',icon:'🕙',name:'식사창 '+R.winS+'-'+R.winE,ok:has&&timed.length>0&&out.length===0,na:!has||!timed.length,
@@ -1462,8 +1462,8 @@ class Component extends DCLogic {
        val:f(s.p)+' / '+R.pG+'g'+(s.p<R.pG?(' · '+f(R.pG-s.p)+'g 남음'):'')},
       {k:'fat1',icon:'🥑',name:'첫 끼 지방 (담석 예방)',ok:!!first&&(+first.f||0)>=R.firstFatG,na:!first,
        val:first?(f(first.f)+'g · '+first.name):'첫 끼 시각을 적어 주세요'},
-      {k:'water',icon:'💧',name:'물 '+(R.waterMl/1000)+'L (커피 제외)',ok:water>=R.waterMl,na:false,
-       val:(water/1000).toFixed(1)+' / '+(R.waterMl/1000)+'L'}];
+      {k:'water',icon:'💧',name:'물 '+(R.waterMl/1000)+'L (커피 제외)',ok:water>=R.waterMl,na:wRaw==null,
+       val:wRaw==null?'기록 없음':((water/1000).toFixed(1)+' / '+(R.waterMl/1000)+'L')}];
   }
   nowHM(){const t=new Date();const z=v=>String(v).padStart(2,'0');return z(t.getHours())+':'+z(t.getMinutes())}
   outTime(t){const R=this.RULE(),m=this.mins(t);return m!=null&&(m<this.mins(R.winS)||m>this.mins(R.winE))}
@@ -1547,7 +1547,10 @@ class Component extends DCLogic {
       :(need>0?('하한은 넘겼어요. 단백질만 '+need+'g 더 채우면 됩니다.'):'하한도 단백질도 채웠어요. 오늘은 이대로 마무리.')),
       (left>0&&nowM>=endM)?'#E5484D':(left>0?'#1F1E1A':'#17A673'));
     const water=+((this.state.water||{})[this.TODAY]||0);
-    if(water<R.waterMl)add('💧','물 '+(water/1000).toFixed(1)+'L / '+(R.waterMl/1000)+'L — '+fmt(R.waterMl-water)+'ml 남았어요. 오른 체중은 물을 채워야 빠집니다.','#5B8DEF');
+    /* 주말에 물이 잘 빠진다 (사장님 2026-09-03 「주말에만 물을 잘 안먹긴 해」) — 그날만 더 세게 민다.
+       ⛔ 「물을 채워야 빠진다」로 되돌리지 마라. 물은 지방을 태우지 않는다 — 체중계 눈금을 덜 튀게 할 뿐이다. */
+    const wkend=[0,6].indexOf(new Date(this.TODAY+'T00:00:00').getDay())>=0;
+    if(water<R.waterMl)add('💧',(wkend?'주말이에요 — ':'')+'물 '+(water/1000).toFixed(1)+'L / '+(R.waterMl/1000)+'L, '+fmt(R.waterMl-water)+'ml 남았어요. '+(wkend?'주말엔 물이 잘 빠지니 「+1L」부터 한 번 눌러 주세요.':'물은 살을 빼주진 않지만 체중계 눈금이 덜 튑니다.'),wkend?'#E9A23B':'#5B8DEF');
     return {rows,lines:L.slice(0,5)}}
   weekStart(ds){const dt=new Date(ds+'T00:00:00');dt.setDate(dt.getDate()-((dt.getDay()+6)%7));return this.ymd(dt)}
   weekEnd(ds){return this.addDays(this.weekStart(ds),6)}
