@@ -1501,6 +1501,11 @@ class Component extends DCLogic {
      같은 단위에서 양만 바꾸면 영양값이 같은 비율로 따라온다 — 닭가슴살 100g 110kcal -> 150g 165kcal.
      단위를 바꾸면 g->개처럼 환산할 길이 없으므로 영양값은 그대로 두고 양·단위만 갈아끼운다.
      고칠 수 있는 것은 ⭐ 내 목록(favs)뿐이다 — 🕘 최근 기록에서는 기록이 정본이라 ⭐로 먼저 담아야 한다. */
+  fmPut(k,val){const fm=this.state.fm;if(!fm)return;const n={...fm,[k]:val,nameErr:false},b=fm.base;
+    if(k==='amt'&&b&&+b.amt>0&&+val>0&&(fm.unit||'g')===(b.unit||'g')){const r=(+val)/(+b.amt),rd=(x,d)=>{const m=Math.pow(10,d);return String(Math.round((+x||0)*r*m)/m)};
+      n.kcal=rd(b.kcal,0);n.c=rd(b.c,1);n.p=rd(b.p,1);n.f=rd(b.f,1)}
+    if(k==='kcal'||k==='c'||k==='p'||k==='f'||k==='unit')n.base={amt:n.amt,unit:n.unit,kcal:n.kcal,c:n.c,p:n.p,f:n.f};
+    this.setState({fm:n})}
   favScale(v,amt,unit){const a0=+v.amt||0,a1=+amt||0;
     if(unit!==(v.unit||'g')||a0<=0||a1<=0)return {kcal:+v.kcal||0,c:+v.c||0,p:+v.p||0,f:+v.f||0};
     const r=a1/a0,rd=(n,d)=>{const m=Math.pow(10,d);return Math.round((+n||0)*r*m)/m};
@@ -1897,10 +1902,10 @@ class Component extends DCLogic {
     const dSum=this.sums(S.selDate),dSc=this.score(S.selDate),dGoal=this.goalFor(S.selDate);
     const meals=['아침','점심','저녁','간식'].map(nm=>{const items=(S.foods[S.selDate]||[]).filter(x=>x.meal===nm);const k=items.reduce((a,x)=>a+(+x.kcal||0),0);const qp=this.favPool(nm);
       return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,quick:qp.slice(0,3).map(v=>({label:v.name,amt:fmt(v.amt)+(v.unit||''),tap:()=>this.favPut(nm,v),...this.giVals(v.name)})),favOpen:()=>this.setState({fv:{meal:nm}}),combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
-        items:items.map(it=>({name:it.name,timeLabel:it.time?(it.time+'  '):'',timeColor:this.outTime(it.time)?'#E5484D':'#B5B2A6',amt:fmt(it.amt)+it.unit,c:fmt(it.c),p:fmt(it.p),f:fmt(it.f),kcal:fmt(it.kcal),open:()=>this.setState({fm:{...it,confirm:false,nameErr:false}}),del:e=>{e.stopPropagation();const F={...S.foods};F[S.selDate]=(F[S.selDate]||[]).filter(x=>x.id!==it.id);this.setState({foods:F});this.toast(this.say('삭제했어요','삭제했사와요'))}}))}});
+        items:items.map(it=>({name:it.name,timeLabel:it.time?(it.time+'  '):'',timeColor:this.outTime(it.time)?'#E5484D':'#B5B2A6',amt:fmt(it.amt)+it.unit,c:fmt(it.c),p:fmt(it.p),f:fmt(it.f),kcal:fmt(it.kcal),open:()=>this.setState({fm:{...it,base:{amt:it.amt,unit:it.unit,kcal:it.kcal,c:it.c,p:it.p,f:it.f},confirm:false,nameErr:false}}),del:e=>{e.stopPropagation();const F={...S.foods};F[S.selDate]=(F[S.selDate]||[]).filter(x=>x.id!==it.id);this.setState({foods:F});this.toast(this.say('삭제했어요','삭제했사와요'))}}))}});
     const dayPosts=S.posts.filter(p=>p.date===S.selDate).map(mkThumb);
     const fm=S.fm;
-    const fmSet=(k)=>e=>this.setState({fm:{...this.state.fm,[k]:e.target.value,nameErr:false}});
+    const fmSet=(k)=>e=>this.fmPut(k,e.target.value);
     const photoPool=[{e:'🍚',c1:'#FFF6E3',c2:'#FFE9BC'},{e:'🥦',c1:'#E7F6E4',c2:'#CBEAC4'},{e:'🍅',c1:'#FFE9E4',c2:'#FFCFC2'},{e:'🍤',c1:'#FFEFE0',c2:'#FFD9B5'}];
     const filtered=(S.feedFilter==='star'?S.posts.filter(p=>p.starred):S.posts).slice().sort((a,b)=>b.date<a.date?-1:1);
     const ddayOf=ds=>{if(!hasGoal)return '';const diff=Math.round((new Date(gset.goalDate+'T00:00:00')-new Date(ds+'T00:00:00'))/864e5);return diff>0?'D-'+diff:diff===0?'D-Day':'D+'+(-diff)};
