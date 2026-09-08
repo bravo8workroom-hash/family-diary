@@ -1478,16 +1478,21 @@ class Component extends DCLogic {
     const alarm=this.CONDS.some(c=>c.safe&&hit[c.t]);
     return {days:days.length,safeN,alarm,text:list.length?list.join(' · '):'특이 없음',last:days[0]||''}}
   /* 자주 먹는 음식 — 내 목록(favs)과 최근 30일 기록을 한 줄로 세운다.
-     점수 = 그 끼니에서 먹은 횟수 ×3 + 아무 끼니에서 먹은 횟수. 씨앗은 끼니가 맞으면 +2. */
-  favPool(meal){const F=this.state.foods||{},hit={};
+     점수 = 그 끼니에서 먹은 횟수 ×3 + 아무 끼니에서 먹은 횟수 + 최근 가산. 씨앗은 끼니가 맞으면 +2.
+     ★ 최근 가산 (2026-09-08, 사장님 지시 「최근 먹은 음식 위주로 상단에 위치해서 업데이트 해」) —
+     마지막으로 먹은 날이 FAV_FRESH(=14)일 안이면 (14-며칠전)×2 점. 그래서 어제 처음 적은 음식도
+     씨앗 13줄을 제치고 맨 앞 칩에 뜬다. 새 음식은 원래도 후보에 들어와 있었지만 횟수가 1이라
+     바닥에 깔려 안 보였다. ⛔ 이 가산을 빼면 새 음식이 다시 가라앉는다. */
+  favPool(meal){const F=this.state.foods||{},hit={},FAV_FRESH=14;
     for(let i=0;i<30;i++){for(const x of (F[this.addDays(this.TODAY,-i)]||[])){
       const nm=String(x.name||'').trim();if(!nm)continue;
-      const h=hit[nm]||(hit[nm]={n:0,m:0,it:x});h.n++;if(x.meal===meal)h.m++}}
+      const h=hit[nm]||(hit[nm]={n:0,m:0,d:i,it:x});h.n++;if(x.meal===meal)h.m++}}
+    const sc=h=>h?h.n+h.m*3+Math.max(0,FAV_FRESH-h.d)*2:0;
     const mine=(this.state.favs||[]).map(v=>{const h=hit[v.name];
-      return {...v,mine:true,score:(h?h.n+h.m*3:0)+(v.meal===meal?2:0)}});
+      return {...v,mine:true,score:sc(h)+(v.meal===meal?2:0)}});
     const has=new Set(mine.map(v=>v.name));
     const rest=Object.keys(hit).filter(nm=>!has.has(nm)).map(nm=>{const h=hit[nm],x=h.it;
-      return {id:'h'+nm,name:nm,amt:x.amt,unit:x.unit,kcal:x.kcal,c:x.c,p:x.p,f:x.f,meal:x.meal,mine:false,score:h.n+h.m*3}});
+      return {id:'h'+nm,name:nm,amt:x.amt,unit:x.unit,kcal:x.kcal,c:x.c,p:x.p,f:x.f,meal:x.meal,mine:false,score:sc(h)}});
     return [...mine,...rest].sort((a,b)=>b.score-a.score)}
   favPut(meal,v){this.addFoods(this.state.selDate,[{id:'f'+(this.seq++),meal,time:this.nowHM(),
       name:v.name,amt:+v.amt||0,unit:v.unit||'g',kcal:+v.kcal||0,c:+v.c||0,p:+v.p||0,f:+v.f||0}]);
