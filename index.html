@@ -821,12 +821,32 @@ input,button,textarea,select{font-family:inherit;}
           <div style="font-size:12px;font-weight:700;color:var(--ac,#F59E0B);margin-bottom:12px;">다 한 할일은 부모님이 확인(OK)하면 스티커가 도착해! 전부 끝내면 🏆 보너스 1개 더!</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <sc-for list="{{ todosV }}" as="td" hint-placeholder-count="4">
-              <div style="display:flex;align-items:center;gap:10px;background:var(--bg,#FAF6EF);border-radius:14px;padding:11px 12px;">
-                <button onClick="{{ td.toggle }}" style="width:26px;height:26px;border-radius:50%;border:2px solid {{ td.ckBd }};background:{{ td.ckBg }};color:var(--on,#fff);font-size:13px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">{{ td.ck }}</button>
-                <span style="font-size:16px;">{{ td.emoji }}</span>
-                <span style="flex:1;font-size:14px;font-weight:700;text-decoration:{{ td.deco }};opacity:{{ td.op }};">{{ td.title }}</span>
-                <span style="font-size:11px;font-weight:900;color:var(--ac,#F59E0B);background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:3px 8px;white-space:nowrap;">{{ td.rew }}</span>
-                <button onClick="{{ td.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;">✕</button>
+              <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:11px 12px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <button onClick="{{ td.toggle }}" style="width:26px;height:26px;border-radius:50%;border:2px solid {{ td.ckBd }};background:{{ td.ckBg }};color:var(--on,#fff);font-size:13px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">{{ td.ck }}</button>
+                  <span style="font-size:16px;">{{ td.emoji }}</span>
+                  <span style="flex:1;font-size:14px;font-weight:700;text-decoration:{{ td.deco }};opacity:{{ td.op }};">{{ td.title }}</span>
+                  <span style="font-size:11px;font-weight:900;color:var(--ac,#F59E0B);background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:3px 8px;white-space:nowrap;">{{ td.rew }}</span>
+                  <button onClick="{{ td.picTap }}" style="background:{{ td.picBg }};color:{{ td.picFg }};border:1px solid {{ td.picBd }};border-radius:99px;padding:6px 9px;font-size:11px;font-weight:900;cursor:pointer;white-space:nowrap;min-height:32px;">📷{{ td.picCnt }}</button>
+                    <button onClick="{{ td.del }}" style="background:none;border:none;color:var(--sub,#8A8177);font-size:13px;cursor:pointer;">✕</button>
+                </div>
+                <sc-if value="{{ td.picOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;">
+                    <label style="flex:1;min-width:128px;text-align:center;background:var(--ac,#F59E0B);color:var(--on,#fff);border-radius:12px;padding:12px 10px;font-size:12px;font-weight:800;cursor:pointer;min-height:44px;box-sizing:border-box;">📸 지금 찍기<input type="file" accept="image/*" capture="environment" onChange="{{ td.picShot }}" style="display:none;"></label>
+                    <label style="flex:1;min-width:128px;text-align:center;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:12px 10px;font-size:12px;font-weight:800;cursor:pointer;min-height:44px;box-sizing:border-box;">🖼 사진첩에서 고르기<input type="file" accept="image/*" multiple="multiple" onChange="{{ td.picPick }}" style="display:none;"></label>
+                  </div>
+                  <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-top:6px;line-height:1.6;">{{ td.picHint }}</div>
+                </sc-if>
+                <sc-if value="{{ td.hasPics }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;">
+                    <sc-for list="{{ td.picsV }}" as="pc" hint-placeholder-count="2">
+                      <span style="position:relative;display:inline-block;">
+                        <span onClick="{{ pc.zoom }}" style="display:block;width:68px;height:68px;border-radius:12px;border:1px solid var(--line,#EFE4CF);background-image:url('{{ pc.u }}');background-size:cover;background-position:center;cursor:zoom-in;"></span>
+                        <button onClick="{{ pc.del }}" style="position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:2px solid var(--bg,#FAF6EF);background:rgba(0,0,0,.62);color:#fff;font-size:11px;font-weight:900;line-height:1;cursor:pointer;padding:0;">✕</button>
+                      </span>
+                    </sc-for>
+                  </div>
+                </sc-if>
               </div>
             </sc-for>
           </div>
@@ -1251,12 +1271,21 @@ input,button,textarea,select{font-family:inherit;}
                   <div style="font-size:12px;font-weight:800;margin-bottom:7px;">📮 완료 확인 요청 · OK하면 스티커가 지급돼요</div>
                   <div style="display:flex;flex-direction:column;gap:7px;">
                     <sc-for list="{{ ko.apprV }}" as="ap" hint-placeholder-count="1">
-                      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;flex-wrap:wrap;">
-                        <span style="flex:1;min-width:80px;">{{ ap.title }}</span>
-                        <span style="font-size:11px;font-weight:900;color:var(--ac,#F59E0B);white-space:nowrap;">{{ ap.rew }}</span>
-                        <span style="font-size:11px;color:var(--sub,#8A8177);">{{ ap.date }}</span>
-                        <button onClick="{{ ap.ok }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;">OK 지급</button>
-                        <button onClick="{{ ap.no }}" style="background:var(--card,#fff);color:var(--sub,#8A8177);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;">아직</button>
+                      <div>
+                        <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;flex-wrap:wrap;">
+                          <span style="flex:1;min-width:80px;">{{ ap.title }}</span>
+                          <span style="font-size:11px;font-weight:900;color:var(--ac,#F59E0B);white-space:nowrap;">{{ ap.rew }}</span>
+                          <span style="font-size:11px;color:var(--sub,#8A8177);">{{ ap.date }}</span>
+                          <button onClick="{{ ap.ok }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:99px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;">OK 지급</button>
+                          <button onClick="{{ ap.no }}" style="background:var(--card,#fff);color:var(--sub,#8A8177);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;">아직</button>
+                        </div>
+                        <sc-if value="{{ ap.hasPics }}" hint-placeholder-val="{{ false }}">
+                          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:7px;">
+                            <sc-for list="{{ ap.picsV }}" as="pc" hint-placeholder-count="1">
+                              <span onClick="{{ pc.zoom }}" style="display:block;width:60px;height:60px;border-radius:10px;border:1px solid var(--line,#EFE4CF);background-image:url('{{ pc.u }}');background-size:cover;background-position:center;cursor:zoom-in;"></span>
+                            </sc-for>
+                          </div>
+                        </sc-if>
                       </div>
                     </sc-for>
                   </div>
@@ -2185,12 +2214,18 @@ input,button,textarea,select{font-family:inherit;}
     </div>
   </div>
 </sc-if>
+<sc-if value="{{ picZoomOn }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ picZoomClose }}" style="position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;box-sizing:border-box;cursor:zoom-out;">
+    <img src="{{ picZoomUrl }}" style="max-width:100%;max-height:82vh;border-radius:16px;border:3px solid rgba(255,255,255,.85);box-shadow:0 18px 40px rgba(0,0,0,.6);">
+    <div style="font-size:13px;font-weight:700;color:#fff;text-align:center;word-break:keep-all;line-height:1.6;">화면을 누르면 닫혀요 · 인증 사진은 30일이 지나면 자동으로 지워져요</div>
+  </div>
+</sc-if>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;parentPassword&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;0000&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;보안&quot;},&quot;showFeedOnHome&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;홈 화면&quot;},&quot;showScores&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;아이 화면&quot;}}">
 const FMOTTOS=['서로 선은 넘지 맙시다. 나는 갯바위에서, 너는 바다 속에서!','오늘의 신사 협정: 찌가 가라앉으면 정당하게 협상 개시.','잡아도 칭찬, 놓쳐도 미소, 꽝 쳐도 품격 유지!','바늘은 거들 뿐, 승부는 신사답게.','물고기는 매너 입질, 낚시꾼은 안전 퇴근!','오늘의 서약: 바늘 끝엔 예의, 발 밑엔 안전.','손맛은 묵직하게, 쓰레기는 싹 다 가볍게!','잡혀줘서 고맙고, 살아서 돌아가니 반갑다!','용왕님도 인정하는 페어플레이 낚시꾼.','바다와의 비즈니스: 꽝 쳐도 절대 투정 금지!','No Trash, No Risk, Just Fishing.','안전 조행 100%, 매너 입질 100%.','물고기에겐 미안함, 바다에겐 고마움.','손맛 낚고, 추억 담고, 무사 귀가.','격식 있는 챔질, 매너 있는 귀가.','바다 위 신사들의 정당한 한판승부.','안전이 우선, 매너가 기본.','바다를 아끼는 진짜 낚시꾼의 품격.','찌끝에 담은 예의, 발끝에 둔 안전.','클린 캐스팅, 리스펙트 조행.','바다가 내어준 선물, 감사함으로 되돌려줍니다.','물고기와 나눈 짧은 대화, 긴 여운으로 남기는 하루.','파도 소리에 감사를, 바람 소리에 안녕을.','자연이 준 소중한 손맛, 내가 지키는 안전한 조행.','바다를 닮은 넓은 마음으로 낚시합니다.','내가 떠난 자리는 바다의 눈물 없이 깨끗하게.','작은 물고기 한 마리에도 경건함을 담아.','바다와 사람이 같이 웃는 소중한 순간.','무사히 집으로 다녀오는 것이 가장 큰 조과입니다.','푸른 바다 위, 나만의 신사적 낭만.','어종 불문, 크기 불문! 안전과 매너는 절대 성역.','발 밑은 조심조심, 바다 속엔 신사답게.','잡는 기쁨보다 지키는 보람을 낚습니다.','바다의 규칙을 지키는 자가 진짜 꾼이다.','나를 지키는 구명조끼, 바다를 지키는 클린마인드.','어린 생명은 놓아주고, 내 쓰레기는 가져오고.','바다 생명과의 약속, 신사적인 라이벌의 대결.','너와 나의 매너가 만날 때 완벽한 조행이 완성된다.','나도 무사히 집으로, 너도 무사히 바다로!','오늘도 신사답게 던지고, 정직하게 낚았습니다.'];
 
 class Component extends DCLogic {
-  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',rwOpen:false,parentOk:false,modal:null,editMode:false,calM:'',tideM:'',tidePick:false,selDate:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:''};
+  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',rwOpen:false,parentOk:false,modal:null,editMode:false,calM:'',tideM:'',tidePick:false,selDate:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',tdPicOpen:'',picZoom:'',picBusy:false};
   KEY = 'famdiary_v1';
   KART={'가자미':{i:'🐟',a:'#E2D3B4',b:'#7D6746'},'우럭':{i:'🐠',a:'#B9C6AD',b:'#43533F'},'볼락':{i:'🐡',a:'#FFC0AC',b:'#A3392A'},'쥐노래미':{i:'🐟',a:'#DBE4AC',b:'#66743A'},'고등어':{i:'🐟',a:'#C8E7F5',b:'#25587A'},'전갱이':{i:'🐠',a:'#E2F2F8',b:'#54798F'},'학꽁치':{i:'🐟',a:'#EAF5FC',b:'#7691A6'},'보리멸':{i:'🐟',a:'#F6ECD4',b:'#A08554'},'황어':{i:'🐟',a:'#FFE7AD',b:'#94741F'},'삼치':{i:'🐟',a:'#D3E7F2',b:'#37627F'},'붕장어':{i:'🐍',a:'#E0D1B8',b:'#645440'},'장어':{i:'🐍',a:'#DCCFBA',b:'#5B4C3A'},'방어':{i:'🐠',a:'#FFE6B0',b:'#A5761D'},'광어':{i:'🐟',a:'#E6EEF6',b:'#5A6A79'},'감성돔':{i:'🐟',a:'#DFE9F2',b:'#41576B'},'참돔':{i:'🐠',a:'#FFD6D4',b:'#A4413C'}};
   KFISH={'장어':{len:68,diff:5},'삼치':{len:52,diff:3},'방어':{len:74,diff:4},'볼락':{len:24,diff:2},'광어':{len:45,diff:3},'감성돔':{len:31,diff:3},'참돔':{len:38,diff:4}};
@@ -2354,7 +2389,7 @@ class Component extends DCLogic {
       ],
       settings:{useTT:true,parentPw:String(this.props.parentPassword??'0000'),tideRegion:'south'},
       events:[], ddays:[], todos:[], checks:{kid1:{},kid2:{}},
-      journal:[], scores:[], stlog:[], exch:[], exreq:[], sttrash:[], fishlog:[], err:[], trades:[], appr:[],
+      journal:[], scores:[], stlog:[], exch:[], exreq:[], sttrash:[], fishlog:[], err:[], trades:[], appr:[], tdPics:[],
       stkRate:{kid1:200,kid2:200},
       rewards:[], allow:[], tx:[], budgets:[], fixed:[], fixedPaid:{},
       accounts:[], feed:[], tt:[], calDeco:[], goals:[], mystk:[],
@@ -2386,6 +2421,13 @@ class Component extends DCLogic {
       if(!data.sttrash)data.sttrash=[];
       if(!data.exreq)data.exreq=[];
       if(!data.mystk)data.mystk=[];
+      // 할일 인증 사진은 30일이 지나면 문서에서 빼고 창고 파일까지 완전히 지운다 (오래 보관 안 함)
+      if(!data.tdPics)data.tdPics=[];
+      const picCut=Date.now()-30*86400000;
+      const picOld=data.tdPics.filter(p=>!(p.ts>picCut));
+      const picGone=picOld.length>0;
+      if(picGone){data.tdPics=data.tdPics.filter(p=>p.ts>picCut);
+        picOld.forEach(p=>{try{window.FamilyStore.dropPhoto(p.u);}catch(e){}});}
       // 예전 반응 🥹 는 2021년에 나온 글자라 폰·PC 폰트에 없으면 네모로 깨진다 — 🥺 로 옮긴다
       data.feed.forEach(po=>{if(po.likes&&po.likes['🥹']!==undefined){
         po.likes['🥺']=(po.likes['🥺']||0)+po.likes['🥹'];delete po.likes['🥹'];}});
@@ -2398,7 +2440,7 @@ class Component extends DCLogic {
       data.events.forEach(ev=>{if(ev.cl)ev.cl=ev.cl.filter(c=>!(c.dn&&c.da&&Date.now()-c.da>30*86400000));});
       const t=this.today();
       this.setState({data,calM:t.slice(0,7),tideM:t.slice(0,7),selDate:t},()=>{
-        if(qLeft)window.FamilyStore.save(this.state.data);
+        if(qLeft||picGone)window.FamilyStore.save(this.state.data);
         this.fcBackfill();});
     });
   }
@@ -2976,6 +3018,8 @@ class Component extends DCLogic {
       V.pickProfilePhoto=async e=>{const file=e.target.files[0];if(!file)return;const url=await this.compress(file,240);this.mut(d=>{d.profiles.find(x=>x.id===pid).photo=url;});};
       V.saveProfile=()=>{this.mut(d=>{const p=d.profiles.find(x=>x.id===pid);p.name=f.pfName||p.name;p.emoji=f.pfEmoji||p.emoji;p.pw=f.pfPw||'';});this.setState({modal:null});};}
     else{V.pickProfilePhoto=()=>{};V.saveProfile=()=>{};}
+    // 인증 사진 크게 보기
+    V.picZoomOn=!!S.picZoom;V.picZoomUrl=S.picZoom||'';V.picZoomClose=()=>this.setState({picZoom:''});
     if(!u)return V;
 
     V.uName=u.name;V.uEmoji=u.emoji;V.uPhoto=u.photo;V.uHasPhoto=!!u.photo;V.uNoPhoto=!u.photo;
@@ -3507,7 +3551,22 @@ class Component extends DCLogic {
       const done=tds.filter(x=>ck[x.id]).length;
       V.doneCnt=done;V.totalCnt=tds.length;V.todoPct=tds.length?Math.round(done/tds.length*100):0;
       V.motMsg=done===0?'첫 체크를 눌러볼까? 시작이 반이야 🌱':(done===tds.length?'올클리어!! 오늘의 주인공은 너야 🎉':(done/tds.length>=0.5?'절반 넘었어! 조금만 더 💪':'좋아, 그 기세로 쭉! 🚀'));
+      // 인증 사진 — 오늘 그 할일에 붙인 것만 본다 (30일이 지난 것은 시작할 때 지워진다)
+      const picsOf=id=>(D.tdPics||[]).filter(p=>p.k===k&&p.d===t&&p.td===id);
+      const picAdd=async(e,id)=>{const files=Array.from(e.target.files||[]);if(!files.length)return;e.target.value='';
+        this.setState({picBusy:true});
+        try{const urls=[];for(const file of files)urls.push(await window.FamilyStore.putPhoto(await this.compress(file,900)));
+          this.mut(d=>{d.tdPics=d.tdPics||[];urls.forEach(u=>d.tdPics.push({id:this.uid(),k,d:t,td:id,u,ts:Date.now()}));});}
+        finally{this.setState({picBusy:false});}};
       V.todosV=tds.map(td=>{const dn=!!ck[td.id];const rs=td.rs||'🌟',rn=Math.max(1,Number(td.rn||1));const pend=(D.appr||[]).some(x=>x.tag==='td_'+td.id+'_'+t);return{title:td.t,emoji:td.e,rew:pend?'⏳ 확인 중':(rn>1?rs+' ×'+rn:rs),ck:dn?'✓':'',ckBg:dn?sk.ac:'transparent',ckBd:dn?sk.ac:sk.line,deco:dn?'line-through':'none',op:dn?0.55:1,
+        picCnt:picsOf(td.id).length?' '+picsOf(td.id).length:'',picOpen:S.tdPicOpen===td.id,
+        picBg:S.tdPicOpen===td.id?sk.ac:sk.card,picFg:S.tdPicOpen===td.id?sk.on:sk.sub,picBd:S.tdPicOpen===td.id?sk.ac:sk.line,
+        picHint:S.picBusy?'사진 올리는 중이에요… 잠깐만요':'여러 장 한꺼번에 올릴 수 있어요 · 30일이 지나면 자동으로 지워져요',
+        picTap:()=>this.setState({tdPicOpen:S.tdPicOpen===td.id?'':td.id}),
+        picShot:e=>picAdd(e,td.id),picPick:e=>picAdd(e,td.id),
+        hasPics:picsOf(td.id).length>0,
+        picsV:picsOf(td.id).map(p=>({u:p.u,zoom:()=>this.setState({picZoom:p.u}),
+          del:()=>{window.FamilyStore.dropPhoto(p.u);this.mut(d=>{d.tdPics=(d.tdPics||[]).filter(x=>x.id!==p.id);});}})),
         toggle:()=>this.mut(d=>{d.checks[k]=d.checks[k]||{};d.checks[k][t]=d.checks[k][t]||{};const on=!d.checks[k][t][td.id];d.checks[k][t][td.id]=on;
           const tag='td_'+td.id+'_'+t,btag='all_'+k+'_'+t;d.appr=d.appr||[];
           if(on){if(!d.appr.some(x=>x.tag===tag)&&!d.stlog.some(x=>x.auto===tag+'#0'))d.appr.push({id:this.uid(),k,td:td.id,tag,title:td.t,rs,rn,d:t});}
@@ -3714,7 +3773,10 @@ class Component extends DCLogic {
                 setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),3500);},
               no:()=>this.exNo(x.id),
               hasShort:short,shortTxt:kp.name+'의 '+e+' 스티커가 '+(x.cost-have)+'개 모자라요 · 수락할 수 없어요'};}),
-          hasAppr:kAppr.length>0,apprV:kAppr.map(x=>({title:x.title,rew:(x.rs||'🌟')+(Number(x.rn||1)>1?' ×'+x.rn:''),date:this.dShort(x.d),ok:()=>this.apprOk(x.id),no:()=>this.apprNo(x.id)})),
+          hasAppr:kAppr.length>0,apprV:kAppr.map(x=>{const aps=(D.tdPics||[]).filter(p=>p.k===x.k&&p.d===x.d&&p.td===x.td);
+            return{title:x.title,rew:(x.rs||'🌟')+(Number(x.rn||1)>1?' ×'+x.rn:''),date:this.dShort(x.d),
+              hasPics:aps.length>0,picsV:aps.map(p=>({u:p.u,zoom:()=>this.setState({picZoom:p.u})})),
+              ok:()=>this.apprOk(x.id),no:()=>this.apprNo(x.id)};}),
           hasStHist:stHist.length>0,stHistV:stHist.slice(0,2).map(x=>({date:this.dShort(x.d),txt:x.txt,amt:x.amt,c:x.c})),
           histMore:stHist.length>2,histArrow:'더보기 ▸',histToggle:()=>this.setState({modal:{t:'psthist',kid:kp.id},pmTrashOpen:false,pmPurgeAsk:''}),
           hasTds:tds.length>0,
