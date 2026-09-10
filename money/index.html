@@ -11,6 +11,33 @@
 <script src="../config.js?v=20260829c"></script>
 <script src="../store.js?v=20260829c"></script>
 <script src="../support.js?v=20260829c"></script>
+<!-- 새 판이 나가면 폰이 옛 화면을 물고 있지 않게, 열 때마다 서버 판을 확인해 한 번만 스스로 새로고침한다 -->
+<script>
+(function(){
+  var KEY="fd/ver";
+  function check(){
+    var f=location.pathname.split("/").pop()||"index.html";
+    fetch(f+"?cb="+Date.now(),{method:"HEAD",cache:"no-store"}).then(function(r){
+      var tag=(r.headers.get("etag")||r.headers.get("last-modified")||"").replace(/[^A-Za-z0-9]/g,"");
+      if(!tag)return;
+      var cur=new URLSearchParams(location.search).get("v");
+      var seen="";try{seen=localStorage.getItem(KEY)||"";}catch(e){}
+      if(cur===tag||seen===tag){try{localStorage.setItem(KEY,tag);}catch(e){}return;}
+      var el=document.activeElement;
+      if(el&&(el.tagName==="INPUT"||el.tagName==="TEXTAREA"||el.isContentEditable))return;  // 글 쓰는 중엔 안 건드린다
+      try{localStorage.setItem(KEY,tag);}catch(e){}
+      location.replace(location.pathname+"?v="+tag);
+    }).catch(function(){});
+  }
+  check();
+  var last=Date.now();
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden)return;
+    if(Date.now()-last<300000)return;   // 5분에 한 번만 본다
+    last=Date.now();check();
+  });
+})();
+</script>
 </head>
 <body>
 <x-dc>
