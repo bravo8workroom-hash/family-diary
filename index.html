@@ -1028,6 +1028,7 @@ input,button,textarea,select{font-family:inherit;}
             </sc-if>
           </div>
         </sc-if>
+        <sc-if value="{{ trShow }}" hint-placeholder-val="{{ false }}">
         <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
           <div style="font-size:15px;font-weight:800;">🤝 가족끼리 스티커 거래</div>
           <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 10px;">할일을 부탁한 사람만 스티커를 줄 수 있어요. 부모님이 허락하고, 할일을 다 하면 받아요.</div>
@@ -1098,6 +1099,7 @@ input,button,textarea,select{font-family:inherit;}
             </div>
           </sc-if>
         </div>
+        </sc-if>
         <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
           <div style="font-size:15px;font-weight:800;margin-bottom:2px;">🎁 보상으로 바꾸기</div>
           <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-bottom:10px;word-break:keep-all;">「교환」을 누르면 부모님께 신청이 가요. 부모님이 수락하면 그때 스티커가 빠져요.</div>
@@ -3701,6 +3703,8 @@ class Component extends DCLogic {
       const myReq=(D.exreq||[]).filter(x=>x.k===k);
       const reqByE={};myReq.forEach(x=>{const e2=x.e||'🌟';reqByE[e2]=(reqByE[e2]||0)+x.cost;});
       const usable=Math.max(0,avail-(reqByE['🌟']||0));
+      // 🤝 가족끼리 스티커 거래 — 사장님 지시로 잠시 숨김(2026-09-10). 되살리려면 이 줄을 true 로만 바꾸면 된다
+      V.trShow=false;
       V.stUsable=usable;V.hasStReq=myReq.length>0;V.stReqSum=myReq.reduce((s2,x)=>s2+x.cost,0);
       // 아이 화면은 보기 전용이다 - 땡겨주는 것은 부모님뿐이고, 아이는 갚을 것과 내역만 본다
       const advLog=D.exch.filter(x=>x.k===k&&Number(x.adv||0)>0);
@@ -3905,7 +3909,8 @@ class Component extends DCLogic {
           openSched:()=>this.setState({modal:{t:'psched',kid:kp.id},ttKid:kp.id}),
           stEarned:kEarned,stSpent:kSpent,stTypesK,hasStTypesK:stTypesK.length>0,
           hasStMon:stMonV.length>0,stMonV,
-          hasTrK:kTr.length>0,trKV:kTr.slice(0,6).map(x=>{const gives=x.giver===kp.id;const other=byName(gives?x.doer:x.giver);const mt=this.trMeta(x.st,sk);
+          hasTrK:false,   // 🤝 거래 숨김(2026-09-10) — 되살리려면 kTr.length>0 으로
+          trKV:kTr.slice(0,6).map(x=>{const gives=x.giver===kp.id;const other=byName(gives?x.doer:x.giver);const mt=this.trMeta(x.st,sk);
             const gp2=byName(x.giver);const bal2=gp2.role==='kid'?this.trAvail(D,x.giver):9999;const short2=bal2<x.cost&&x.st!=='done';
             return{who:other.emoji+' '+other.name,task:x.task,cost:x.cost,date:this.dShort(x.d),
               dir:gives?'줌':'받음',dirC:gives?'#E0654F':'#3FA45B',st:mt.t,stC:mt.c,
