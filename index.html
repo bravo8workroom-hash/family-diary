@@ -832,8 +832,7 @@ input,button,textarea,select{font-family:inherit;}
                 </div>
                 <sc-if value="{{ td.picOpen }}" hint-placeholder-val="{{ false }}">
                   <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;">
-                    <label style="flex:1;min-width:128px;text-align:center;background:var(--ac,#F59E0B);color:var(--on,#fff);border-radius:12px;padding:12px 10px;font-size:12px;font-weight:800;cursor:pointer;min-height:44px;box-sizing:border-box;">📸 지금 찍기<input type="file" accept="image/*" capture="environment" onChange="{{ td.picShot }}" style="display:none;"></label>
-                    <label style="flex:1;min-width:128px;text-align:center;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:12px 10px;font-size:12px;font-weight:800;cursor:pointer;min-height:44px;box-sizing:border-box;">🖼 사진첩에서 고르기<input type="file" accept="image/*" multiple="multiple" onChange="{{ td.picPick }}" style="display:none;"></label>
+                    <label style="flex:1;text-align:center;background:var(--ac,#F59E0B);color:var(--on,#fff);border-radius:12px;padding:13px 10px;font-size:13px;font-weight:800;cursor:pointer;min-height:46px;box-sizing:border-box;">{{ td.picShotLabel }}<input type="file" accept="image/*" capture="environment" onChange="{{ td.picShot }}" style="display:none;"></label>
                   </div>
                   <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-top:6px;line-height:1.6;">{{ td.picHint }}</div>
                 </sc-if>
@@ -3561,9 +3560,9 @@ class Component extends DCLogic {
       V.todosV=tds.map(td=>{const dn=!!ck[td.id];const rs=td.rs||'🌟',rn=Math.max(1,Number(td.rn||1));const pend=(D.appr||[]).some(x=>x.tag==='td_'+td.id+'_'+t);return{title:td.t,emoji:td.e,rew:pend?'⏳ 확인 중':(rn>1?rs+' ×'+rn:rs),ck:dn?'✓':'',ckBg:dn?sk.ac:'transparent',ckBd:dn?sk.ac:sk.line,deco:dn?'line-through':'none',op:dn?0.55:1,
         picCnt:picsOf(td.id).length?' '+picsOf(td.id).length:'',picOpen:S.tdPicOpen===td.id,
         picBg:S.tdPicOpen===td.id?sk.ac:sk.card,picFg:S.tdPicOpen===td.id?sk.on:sk.sub,picBd:S.tdPicOpen===td.id?sk.ac:sk.line,
-        picHint:S.picBusy?'사진 올리는 중이에요… 잠깐만요':'여러 장 한꺼번에 올릴 수 있어요 · 30일이 지나면 자동으로 지워져요',
+        picHint:S.picBusy?'사진 올리는 중이에요… 잠깐만요':'지금 찍은 사진만 올라가요 · 여러 장은 다시 눌러서 찍으면 돼요 · 30일이 지나면 자동으로 지워져요',
         picTap:()=>this.setState({tdPicOpen:S.tdPicOpen===td.id?'':td.id}),
-        picShot:e=>picAdd(e,td.id),picPick:e=>picAdd(e,td.id),
+        picShot:e=>picAdd(e,td.id),picShotLabel:picsOf(td.id).length?'📸 한 장 더 찍기':'📸 지금 찍기',
         hasPics:picsOf(td.id).length>0,
         picsV:picsOf(td.id).map(p=>({u:p.u,zoom:()=>this.setState({picZoom:p.u}),
           del:()=>{window.FamilyStore.dropPhoto(p.u);this.mut(d=>{d.tdPics=(d.tdPics||[]).filter(x=>x.id!==p.id);});}})),
