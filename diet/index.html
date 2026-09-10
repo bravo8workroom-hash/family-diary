@@ -64,7 +64,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     <div style="display:flex;align-items:center;gap:7px;flex:none">
       <a class="hbtn" href="{{famUrl}}" title="우리집 다이어리로 이동">🏡<span class="hbtn-t">가족 다이어리</span></a>
       <button class="hbtn" onClick="{{callTrainer}}" title="트레이너 호출 (VS코드)">🏋️<span class="hbtn-t">트레이너 호출</span></button>
-      <span style="font-size:12px;font-weight:700;padding:5px 11px;border-radius:99px;background:{{modeBg}};color:{{modeColor}}">{{modeLabel}} 모드</span>
+      <span style="font-size:12px;font-weight:700;padding:5px 11px;border-radius:99px;background:{{modeBg}};color:{{modeColor}};white-space:nowrap">{{modeLabel}}</span>
     </div>
   </div>
 
@@ -85,10 +85,10 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               <div style="font-size:12.5px;color:#8B887C;margin-top:2px">설정에서 목표일을 정해 보세요 <a href="#" onClick="{{gotoSettings}}" style="font-weight:700">설정하기</a></div>
             </div>
           </sc-if>
-          <div style="display:flex;background:{{chipBg}};border-radius:{{radS}};padding:3px;flex:none">
-            <button onClick="{{setDiet}}" style="border:0;cursor:pointer;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;background:{{dietBtnBg}};color:{{dietBtnColor}};box-shadow:{{dietBtnShadow}}">다이어트</button>
-            <button onClick="{{setMaint}}" style="border:0;cursor:pointer;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;background:{{maintBtnBg}};color:{{maintBtnColor}};box-shadow:{{maintBtnShadow}}">유지</button>
-          </div>
+          <a href="#" onClick="{{gotoSettings}}" style="flex:none;text-decoration:none;text-align:right">
+            <div style="display:inline-block;font-size:13px;font-weight:800;padding:8px 13px;border-radius:{{radS}};background:{{modeBg}};color:{{modeColor}};white-space:nowrap">{{modeLabel}}</div>
+            <div style="font-size:10.5px;color:#B5B2A6;margin-top:4px">모드 바꾸기 ›</div>
+          </a>
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
@@ -166,6 +166,13 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             </sc-for>
           </div>
           <div style="font-size:11px;color:#B5B2A6;margin-top:10px;line-height:1.55;text-align:center">{{wkNote}}</div>
+          <sc-if value="{{phaseOn}}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid {{cardBorder}};line-height:1.6">
+              <div style="font-size:12.5px;font-weight:800;color:{{modeColor}}">{{phaseTitle}}</div>
+              <div style="font-size:11.5px;color:#8B887C;margin-top:3px">{{phaseRead}}</div>
+              <div style="font-size:11px;color:#B5B2A6;margin-top:3px">{{phaseTips}}</div>
+            </div>
+          </sc-if>
           <div style="display:flex;align-items:baseline;gap:4px;margin-top:9px;padding-top:9px;border-top:1px solid {{cardBorder}};white-space:nowrap;overflow:hidden">
             <sc-for list="{{wStats}}" as="s" hint-placeholder-count="4">
               <div style="flex:1;min-width:0;text-align:center;overflow:hidden">
@@ -776,10 +783,12 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           <div style="font-size:11px;color:#B5B2A6;margin-top:7px;line-height:1.55">이번 주 목표를 비워 두면 「주 시작 체중 − 주간 페이스」로 저절로 잡혀요. 트레이너와 이야기해 정한 숫자가 있으면 그걸 적어 주세요.</div>
           <div>
             <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">모드</div>
-            <div style="display:flex;background:{{chipBg}};border-radius:{{radS}};padding:3px">
-              <button onClick="{{setDiet}}" style="flex:1;border:0;cursor:pointer;padding:9px 0;border-radius:{{radS}};font-size:13px;font-weight:700;background:{{dietBtnBg}};color:{{dietBtnColor}};box-shadow:{{dietBtnShadow}}">다이어트</button>
-              <button onClick="{{setMaint}}" style="flex:1;border:0;cursor:pointer;padding:9px 0;border-radius:{{radS}};font-size:13px;font-weight:700;background:{{maintBtnBg}};color:{{maintBtnColor}};box-shadow:{{maintBtnShadow}}">유지</button>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;background:{{chipBg}};border-radius:{{radS}};padding:5px">
+              <sc-for list="{{phaseChips}}" as="pc" hint-placeholder-count="5">
+                <button onClick="{{pc.pick}}" style="border:0;cursor:pointer;padding:9px 12px;border-radius:{{radS}};font-size:12.5px;font-weight:700;background:{{pc.bg}};color:{{pc.color}};box-shadow:{{pc.shadow}}">{{pc.t}}</button>
+              </sc-for>
             </div>
+            <div style="font-size:11px;color:#B5B2A6;margin-top:7px;line-height:1.55">{{phaseHint}}</div>
           </div>
         </div>
 
@@ -849,7 +858,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               </div>
             </sc-for>
           </div>
-          <div style="font-size:11px;color:#8B887C;margin-top:12px;line-height:1.7">· 칼로리 1,200은 <b style="color:#1F1E1A">상한이 아니라 하한</b>이에요. 아래로 내려가면 경고가 뜹니다.<br>· 지방 71g은 설계된 값이고 <b style="color:#1F1E1A">담석 예방</b> 목적이에요. 치즈·아몬드를 지방 때문에 빼지 마세요.<br>· 탄수 얹기는 월·토 자리에서만 씁니다.</div>
+          <div style="font-size:11px;color:#8B887C;margin-top:12px;line-height:1.7">· 칼로리 1,200은 <b style="color:#1F1E1A">상한이 아니라 하한</b>이에요. 아래로 내려가면 경고가 뜹니다.<br>· 지방 45g은 설계된 값이고 <b style="color:#1F1E1A">담석 예방</b> 목적이에요(2026-09-10에 71g에서 내렸어요). 치즈·아몬드를 지방 때문에 빼지 마세요.<br>· 탄수 얹기는 월·토 자리에서만 씁니다.</div>
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
@@ -1244,7 +1253,10 @@ class Component extends DCLogic {
     const FV=this.FAV_SEED.map(x=>({id:'v'+(this.seq++),...x}));
     this.state={tab:'home',wide:this.isWide(),mode:'diet',selDate:this.TODAY,feedFilter:'all',sober:SB,calM:this.TODAY.slice(0,7),
       set:{goalDate:'2026-08-10',startW:70,goalW:50,budget:10000,provider:'gemini',geminiKey:'',claudeKey:'',apiPass:'0000',diet:{kcal:1500,c:40,p:30,f:30},maint:{kcal:2000,c:50,p:25,f:25},
-        rule:{winS:'10:00',winE:'18:00',kcalMin:1200,cG:40,pG:100,fG:71,waterMl:2000,firstFatG:8,carbUp:{1:2,6:1}}},
+        /* 새 기기의 출발값 = 🍽 식단 감량 모드 다이얼 (2026-09-10 사장님 채택 — 지방 45g 전 모드 공통).
+           ⚠ 여기가 진짜 기본값이다. RULE() 의 Object.assign 기본값은 이 칸이 통째로 없을 때만 쓰이는 backstop 이라
+           여기만 안 고치면 새 기기가 옛 값(탄수 40·지방 71)으로 시작한다. */
+        rule:{winS:'10:00',winE:'18:00',kcalMin:1200,cG:130,pG:100,fG:45,waterMl:2000,firstFatG:8,carbUp:{1:2,6:1}}},
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,favs:FV,carbUp:{},safe:{},todo:{items:[],done:[]},
       stock:{shop:[],home:[]},weekGoals:{},favMute:[],
@@ -1259,6 +1271,10 @@ class Component extends DCLogic {
   /* 그날의 목표 — 다이어트 모드는 절대선(set.rule)에서 g 로 뽑는다. 예전 set.diet(1,500kcal·탄단지 %)는 절대선과 어긋나
      점수가 늘 낮게 나왔다(지방 71g 설계값이 %로는 「높은 지방」이 된다). 유지 모드는 set.maint(kcal·%)를 g 로 바꿔 쓴다 — 나중에 쓰실 자리. */
   goalFor(dt){const m=this.state.dayMode[dt]||this.state.mode;const Rl=this.RULE();
+    /* 이번 주 모드가 걸려 있으면 유지 모드도 g 로 본다 — 그 주의 다이얼이 곧 그 주의 목표다.
+       kcal 은 탄*4 + 단*4 + 지*9 로 뽑되 하한 아래로는 안 내려간다. */
+    if(this.phaseOf()){const kc=Math.round(Rl.cG*4+Rl.pG*4+Rl.fG*9);
+      return {m,kcal:Math.max(Rl.kcalMin,kc),c:Rl.cG,p:Rl.pG,f:Rl.fG,floor:m!=='maint'}}
     if(m==='diet')return {m,kcal:Rl.kcalMin,c:Rl.cG,p:Rl.pG,f:Rl.fG,floor:true};
     const mt=this.state.set.maint||{},k=+mt.kcal||2000;
     return {m,kcal:k,c:Math.round(k*(+mt.c||50)/100/4),p:Math.round(k*(+mt.p||25)/100/4),f:Math.round(k*(+mt.f||25)/100/9),floor:false}}
@@ -1364,6 +1380,10 @@ class Component extends DCLogic {
   /* 트레이너 노트 — 메인 · 레시피 두 구분. 화면 글자라 한글이다.
      k: '메인' | '레시피'. 새 이야기는 맨 위에 날짜 내림차순으로 넣는다. */
   TNOTES=[
+    {d:'2026-09-10',k:'메인',t:'다이어트 방법은 하나가 아니다 — 이번 주 모드를 고른다',
+     b:'같은 방법을 사철 밀어붙이면 어느 주에는 반드시 어긋난다. 생리전에는 물이 차고, 근력을 시작하면 근육과 글리코겐으로 눈금이 오른다. 그때 「덜 먹기」로 답하면 굶기가 된다.\n\n그래서 모드를 다섯으로 나눴다. 🔥 극적 감량 · 🍽 식단 감량 · 🩸 생리·부종 · 💪 근력 · 🪞 유지.\n\n모드가 바꾸는 것은 협상 가능한 다이얼뿐이다 — 주 페이스, 탄수, 지방, 물, 그리고 말하는 법. 절대선 다섯(식사창 10~18시, 하한 1,200, 단백질 100g, 첫 끼 지방, 물 2L)은 어느 모드에서도 안 바뀐다.\n\n모드는 앱이 혼자 바꾸지 않는다. 지난 7일 몸 상태·식단·운동을 보고 트레이너와 이야기해서 정한다.'},
+    {d:'2026-09-10',k:'메인',t:'지방은 45g으로 내렸다 — 무서워하지 말라는 뜻은 그대로다',
+     b:'2026-09-10부터 지방 목표는 전 모드 45g이다. 옛 설계값 71g은 이 날로 끝났다.\n\n바뀐 것은 숫자뿐이고 이유는 그대로다. 10시 첫 끼에 지방이 반드시 들어가야 한다 — 오래 굶고 지방을 거의 안 먹으면 쓸개가 담즙을 비우지 않아 돌이 생긴다. 첫 끼 지방은 절대선이고 모드와 무관하다.\n\n치즈·아몬드를 「지방이라서」 빼지 마라. 45g은 줄인 값이지 없앤 값이 아니다.'},
     {d:'2026-09-01',k:'메인',t:'알리오올리오 반 접시 — 오늘 탄수 몫을 다 썼다',
      b:'배달 알리오올리오 한 접시는 대략 705kcal · 탄수 78g · 단백질 12g · 지방 38g이다(건면 100g + 올리브유 3큰술 + 마늘). 반만 먹으면 353kcal · 탄 39g · 단 6g · 지 19g.\n\n11시 50분이라 식사창 안이었고, 올리브유 19g이 들어 있어 첫 끼 지방(담석 예방)도 채웠다.\n\n문제는 나머지다. 탄수는 반 접시로 오늘 몫(40g)을 거의 다 썼고, 단백질은 6g뿐이라 94g이 남는다.\n\n그래서 결론은 하나다 — 면만 반 남기고 마늘과 기름 건더기는 다 먹는다. 지방은 설계값이라 빼지 않는다. 오늘 남은 끼니는 기름 적게, 단백질로만 채운다.'},
     {d:'2026-09-01',k:'메인',t:'냉동실에 있는 것은 고르는 게 아니라 기본값이 된다',
@@ -1420,7 +1440,43 @@ class Component extends DCLogic {
      b:'다이어트를 끝낸 사람이 되돌아오는 가장 큰 이유는 목표 체중에 도착한 다음 날 계획이 없기 때문이다.'},
     {d:'2026-08-28',k:'메인',t:'물 2L를 채운 날은 간식 횟수가 준다',
      b:'물 2L를 채운 날과 못 채운 날의 간식 횟수를 세어 보면 대개 차이가 난다.\n\n물은 살을 빼지 않지만 먹는 횟수를 줄인다.'}];
-  RULE(){return Object.assign({winS:'10:00',winE:'18:00',kcalMin:1200,cG:40,pG:100,fG:71,waterMl:2000,firstFatG:8,weekPace:0.5,carbUp:{1:2,6:1}},this.state.set.rule||{})}
+  /* 🔁 이번 주 모드 — 사장님 지시 2026-09-10 「바싹 줄일 때 · 유지 · 근력으로 늘 때 · 생리전, 그 시기에 맞는 방법으로 유동적으로」.
+     ⛔ 절대선 다섯(식사창·하한 1,200·단백질 100g·첫 끼 지방·물 2L)은 어느 모드에서도 안 바뀐다.
+     모드가 바꾸는 것은 협상 가능한 다이얼뿐이다 — 페이스·탄수·지방·물·말하는 법.
+     dials 는 「모드를 고르는 순간 한 번」만 set.rule 에 들어가는 출발값이다. 그 뒤 입력함 rule 칸이
+     보낸 값이 언제나 이긴다 — 화면·막대·호출장은 모드 기본값이 아니라 지금 set.rule 을 본다.
+     ⛔ 자동 전환은 없다. 판단은 트레이너와의 대화로 한다(신호가 보이면 조언 카드에 한 줄만 띄운다).
+     값의 정본은 몸-프로필.md §7 (제미나이 ② 검토 + 사장님 채택 2026-09-10). 지방 45g 은 전 모드 공통. */
+  PHASES=[
+    {k:'cut2',e:'🔥',t:'극적 감량',dials:{weekPace:1.0,cG:100,fG:45,pG:100,waterMl:2500},
+     read:'매일 내려가야 정상이에요. 덜 먹는 게 아니라 탄수·술·염분을 바닥까지 내리는 주간입니다.',
+     tips:['술 0','탄수 얹기 자리 없음','국물·젓갈 같은 짠 것 빼기']},
+    {k:'cut1',e:'🍽',t:'식단 감량',dials:{weekPace:0.5,cG:130,fG:45,pG:100,waterMl:2000},
+     read:'지금 방식 그대로예요. ⭐ 자주 먹는 음식 안에서 완만하게 내려갑니다.',
+     tips:['탄수 얹기 월 2 · 토 1 유지']},
+    {k:'bloat',e:'🩸',t:'생리·부종',dials:{weekPace:0.3,cG:120,fG:45,pG:100,waterMl:2500},
+     read:'눈금이 올라도 물이에요, 살이 아닙니다. 이번 주 체중계는 「수분이 얼마나 빠졌나」로 읽으세요.',
+     tips:['술 0','국물·젓갈·라면 같은 짠 것 빼기','올라도 굶어서 되돌리지 않기']},
+    {k:'build',e:'💪',t:'근력',dials:{weekPace:0,cG:150,fG:45,pG:100,waterMl:2500},
+     read:'올라도 근육과 글리코겐이에요. 이번 주는 눈금 대신 근력 기록으로 보세요.',
+     tips:['단백질을 더 올리려면 트레이너에게 말씀하세요']},
+    {k:'maint',e:'🪞',t:'유지',dials:{weekPace:0,cG:175,fG:45,pG:100,waterMl:2000},
+     read:'위아래 ±0.5kg 안이면 성공이에요. 대사량을 지키는 주간입니다.',
+     tips:['줄이지 않는 것이 이번 주의 일']}];
+  /* 지금 걸린 모드. 없으면 null 이고, 그때는 앱이 예전과 똑같이 움직인다. */
+  phaseOf(){const p=((this.state.set||{}).phase)||null;if(!p||!p.k)return null;
+    const d=this.PHASES.find(x=>x.k===p.k);if(!d)return null;
+    return {...d,from:p.from||'',to:p.to||'',why:p.why||'',over:!!(p.to&&p.to<this.TODAY)}}
+  /* 모드를 거는 유일한 자리 — 설정 칩과 입력함 phase 칸이 함께 쓴다.
+     다이얼이 set.rule 로 들어가므로 absLines·dayBars·weekPlan·advice3·호출장이 고칠 것 없이 따라온다. */
+  applyPhase(k,opt){const d=this.PHASES.find(x=>x.k===k);if(!d)return;const o=opt||{};
+    const St=this.state.set||{},prev=St.phase||{};
+    const set={...St,rule:{...(St.rule||{}),...d.dials},
+      phase:{k,from:o.from||((prev.k===k&&prev.from)?prev.from:this.TODAY),to:o.to||'',why:o.why||''}};
+    this.setState({set,mode:(k==='maint'?'maint':'diet')},()=>this.persist())}
+  /* 기본값은 🍽 식단 감량 모드의 출발값이다 (2026-09-10 사장님 채택 — 지방 45g 전 모드 공통).
+     130*4 + 100*4 + 45*9 = 1,325 로 하한 1,200 위에서 앞뒤가 맞는다. 저장된 set.rule 이 있으면 그게 이긴다. */
+  RULE(){return Object.assign({winS:'10:00',winE:'18:00',kcalMin:1200,cG:130,pG:100,fG:45,waterMl:2000,firstFatG:8,weekPace:0.5,carbUp:{1:2,6:1}},this.state.set.rule||{})}
   ymd(dt){const z=n=>String(n).padStart(2,'0');return dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate())}
   addDays(ds,n){const dt=new Date(ds+'T00:00:00');dt.setDate(dt.getDate()+n);return this.ymd(dt)}
   mins(t){const m=/^(\d{1,2}):(\d{2})$/.exec(String(t||''));return m?(+m[1])*60+(+m[2]):null}
@@ -1569,10 +1625,19 @@ class Component extends DCLogic {
     if(hw.alarm)add('🚨','최근 3일 '+hw.text+' — 지금은 클린보다 「먹는 것」이 먼저예요. 단백질과 지방부터 채우세요.','#E5484D');
     if(t.w!=null&&y.w!=null){const dv=+(t.w-y.w).toFixed(1);
       const why=y.late?('어제 식사창(~'+R.winE+') 밖에 먹은 것'):(y.kcal>=Math.round(R.kcalMin*1.5)?('어제 '+fmt(y.kcal)+'kcal'):(y.c>=R.cG*2?('어제 탄수 '+y.c+'g'):''));
-      if(dv>=0.3)add('⚖️','어제보다 +'+dv.toFixed(1)+'kg — '+(why?(why+' 탓에 물이 찬 거예요. 살이 아닙니다.'):'하루 사이 이 정도는 몸의 흔들림이에요.')+' 오늘 굶어서 되돌리려 하지 마세요.','#E5484D');
+      const phW=this.phaseOf();
+      /* 체중이 오른 날 「덜 먹어라」로 답하지 않는다. 부종·근력 주간은 오르는 것이 정상이라 이유부터 말한다. */
+      if(dv>=0.3){const up=(phW&&phW.k==='bloat')?('어제보다 +'+dv.toFixed(1)+'kg — 부종 물이에요, 살이 아닙니다. 이번 주 눈금은 「수분이 빠졌나」로만 보세요.')
+        :((phW&&phW.k==='build')?('어제보다 +'+dv.toFixed(1)+'kg — 근육과 글리코겐이에요. 근력 주간엔 눈금이 오르는 게 정상입니다.')
+        :('어제보다 +'+dv.toFixed(1)+'kg — '+(why?(why+' 탓에 물이 찬 거예요. 살이 아닙니다.'):'하루 사이 이 정도는 몸의 흔들림이에요.')+' 오늘 굶어서 되돌리려 하지 마세요.'));
+        add('⚖️',up,(phW&&(phW.k==='bloat'||phW.k==='build'))?'#8B5CF6':'#E5484D')}
       else if(dv<=-0.3)add('⚖️','어제보다 '+dv.toFixed(1)+'kg — 잘 내려갔어요. 오늘도 어제와 같은 방식 그대로 가세요.','#17A673');
       else add('⚖️','어제와 거의 같아요('+(dv>0?'+':'')+dv.toFixed(1)+'kg). 하루가 아니라 사흘 흐름으로 보세요.');
     }else if(t.w==null)add('⚖️','오늘 체중을 아직 안 재셨어요. 아침 공복에 한 번만 재 주세요 — 조언은 거기서 시작합니다.','#8B887C');
+    /* 🩸 부종 신호 — 자동으로 모드를 바꾸지 않는다(판단은 트레이너와의 대화로). 이미 부종 모드면 안 띄운다. */
+    {const phB=this.phaseOf(),c3=this.healthWatch(3),hb=c3.hit||{};
+     if((!phB||phB.k!=='bloat')&&t.w!=null&&y.w!=null&&(t.w-y.w)>=0.3&&(hb['생리']||hb['배 꾸르륵·설사']))
+       add('🩸','부종 신호예요 — 체중이 올랐고 생리·배 불편이 함께 있어요. 트레이너와 이번 주 모드를 확인하세요.','#8B5CF6')}
     if(y.n){const yRun=this.underRun(this.addDays(this.TODAY,-1));
       if(y.kcal<R.kcalMin&&yRun>=3)add('🍚','어제까지 '+yRun+'일 연속 하한 '+fmt(R.kcalMin)+' 아래였어요. 오늘 더 줄이면 근육이 먼저 빠집니다.','#E5484D');
       else if(y.kcal>=Math.round(R.kcalMin*1.5))add('🍚','어제 '+fmt(y.kcal)+'kcal로 많았어요. 오늘은 평소대로 하한 '+fmt(R.kcalMin)+' 근처면 됩니다 — 굶는 건 금지.','#E9A23B')}
@@ -1597,8 +1662,20 @@ class Component extends DCLogic {
   /* 코드가 정한 목표 체중. 이 숫자를 바꾸면 이미 저장된 기록에도 한 번만 밀어 넣는다.
      그 뒤 사장님이 설정 화면에서 손으로 바꾸신 값은 다시 덮어쓰지 않는다. */
   GOALW=50;
+  /* 최종 목표일 — 사장님 지시 2026-09-10 「내년 1월 15일까지 50kg」.
+     ⛔ 홈 D-day(set.goalDate)에 쓰지 마라 — 그건 늘 이번 주 마감이라 rollGoal 이 매번 되돌린다.
+     이건 🗺 로드맵과 트레이너 호출장이 읽는 먼 결승선이다. GOALW 와 같은 도장 방식이라
+     set.finalDateCode 가 이 값과 다르면 앱을 열 때 한 번만 갈아끼우고, 그 뒤 손으로 바꾸신 값은 안 덮는다. */
+  GOALDATE='2027-01-15';
+  /* 결승선까지 남은 주수와 거기에 필요한 페이스. 날짜가 없거나 지났으면 null 이다. */
+  finalPlan(cur){const g=this.state.set||{},fd=g.finalDate||'';if(!fd)return null;
+    const d=Math.round((new Date(fd+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5);
+    if(d<=0)return {fd,weeks:0,need:0,over:true};
+    const weeks=Math.max(1,Math.round(d/7*10)/10),gap=+(cur-(+g.goalW)).toFixed(1);
+    return {fd,days:d,weeks,gap,need:+(gap/weeks).toFixed(2),over:false}}
   rollGoal(){const g=this.state.set||{};const we=this.weekEnd(this.TODAY);const n={},P={};
     if(+g.goalWCode!==this.GOALW){n.goalW=this.GOALW;n.goalWCode=this.GOALW}
+    if(g.finalDateCode!==this.GOALDATE){n.finalDate=this.GOALDATE;n.finalDateCode=this.GOALDATE}
     if(g.goalDate!==we)n.goalDate=we;
     const fv=this.favMigrate();if(fv){P.favs=fv;n.favVer=this.FAV_VER}
     if(Object.keys(n).length)P.set={...g,...n};
@@ -1639,6 +1716,14 @@ class Component extends DCLogic {
     /* 트레이너와 상의해 정한 목표(탄수·단백질·지방 g 등)를 그대로 갈아끼운다 — 설정 화면에서 손으로 바꾸는 것과 같은 자리다. */
     if(o.rule&&Object.keys(o.rule).length){const St=S.set||{};
       P.set={...St,rule:{...(St.rule||{}),...o.rule}};add.push('트레이너 목표')}
+    /* 🔁 이번 주 모드 — {"k":"bloat","to":"2026-09-16","why":"…"}.
+       ⛔ 합치지 않고 통째로 갈아끼운다. 지난주 why/to 가 남으면 지난주 사연이 이번 주에 붙는다.
+       같이 온 rule 칸이 모드 출발값을 이긴다 — 트레이너가 그 주에 맞춰 조정한 값이라서다. */
+    if(o.phase&&o.phase.k){const d=this.PHASES.find(x=>x.k===o.phase.k);
+      if(d){const St=P.set||S.set||{};
+        P.set={...St,rule:{...(St.rule||{}),...d.dials,...(o.rule||{})},
+          phase:{k:d.k,from:o.phase.from||this.TODAY,to:o.phase.to||'',why:o.phase.why||''}};
+        P.mode=(d.k==='maint'?'maint':'diet');add.push('이번 주 모드 '+d.e+' '+d.t)}}
     /* ⭐ 자주 먹는 음식 — 트레이너가 이름·영양값을 바로잡아 보낸다. 같은 음식(foodKey)이 있으면 그 줄을 갈아끼우고 없으면 새로 넣는다. ✕로 뺐던 것도 되살린다. */
     if(o.favs&&o.favs.length){const L=(P.favs||S.favs||[]).slice(),mute=(P.favMute||S.favMute||[]).slice();let n=0;
       for(const x of o.favs){const k=this.foodKey(x.name);if(!k)continue;const i=L.findIndex(v=>this.foodKey(v.name)===k);
@@ -1663,7 +1748,8 @@ class Component extends DCLogic {
   /* 이번 주에 실제로 잰 첫 기록. 옛 기록으로 거슬러 올라가지 않는다 — 낡은 숫자로 목표를 잡으면 허수 「달성」이 나온다. */
   wIn(a,b){for(let d=a;d<=b;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null)return +w.a}return null}
   weekPlan(){const R=this.RULE(),g=this.state.set,ws=this.weekStart(this.TODAY),we=this.addDays(ws,6);
-    const pace=+R.weekPace>0?+R.weekPace:0.5;
+    /* 페이스 0 은 「이번 주는 안 줄인다」는 뜻이라 그대로 쓴다 (근력·유지 모드). 빈 값일 때만 0.5 로 되돌린다. */
+    const pace=(R.weekPace!=null&&R.weekPace!==''&&!isNaN(+R.weekPace))?Math.max(0,+R.weekPace):0.5;
     const cur=this.wAt(this.TODAY)!=null?this.wAt(this.TODAY):+g.startW;
     const swRaw=this.wIn(ws,this.TODAY),sw=swRaw!=null?swRaw:cur;
     const daysLeft=Math.max(0,Math.round((new Date(we+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5)+1);
@@ -1676,12 +1762,14 @@ class Component extends DCLogic {
     const goal=+Math.max(+g.goalW,(man!=null&&man!==''?+man:auto)).toFixed(1);
     const need=+(cur-goal).toFixed(1),span=+(base-goal).toFixed(1);
     const pct=span>0?Math.max(0,Math.min(100,Math.round((base-cur)/span*100))):(need<=0?100:0);
-    const weeksLeft=Math.max(0,Math.ceil((cur-(+g.goalW))/pace));
-    return {ws,we,pace,cur,sw,base,goal,need,pct,daysLeft,weeksLeft,manual:man!=null&&man!==''}}
+    /* 페이스가 0 이면 「몇 주 남았나」는 셀 수 없다 — 0 으로 나누면 Infinity 가 화면에 찍힌다. */
+    const weeksLeft=pace>0?Math.max(0,Math.ceil((cur-(+g.goalW))/pace)):null;
+    const weeksText=weeksLeft==null?'—':('약 '+weeksLeft+'주');
+    return {ws,we,pace,cur,sw,base,goal,need,pct,daysLeft,weeksLeft,weeksText,manual:man!=null&&man!==''}}
   famUrl(){try{const p=String(location.pathname||'');if(/(^|\/)diet\/(index\.html)?$/.test(p))return '../'}catch(e){}
     return 'https://bravo8workroom-hash.github.io/family-diary/'}
   trainerBrief(){const T=this.TODAY,R=this.RULE(),s=this.sums(T),rows=this.absLines(T),kept=rows.filter(a=>a.ok).length,wk=this.weekPlan();
-    const td=((this.state.todo||{}).items)||[];
+    const td=((this.state.todo||{}).items)||[];const fin=this.finalPlan(wk.cur);
     const L=['/다이어트','','# 트레이너 호출 — '+T+' '+this.nowHM(),'',
       '사장님이 다이어트 다이어리 화면에서 트레이너를 부르셨다. 아래는 앱이 지금 들고 있는 그날 기록이다.',
       '「/다이어트」 스킬을 읽고 트레이너 자리로 답해라. 앱을 고쳐야 하면 C:\\projects\\diet-diary 의 CLAUDE.md 절차를 따른다.','',
@@ -1697,11 +1785,44 @@ class Component extends DCLogic {
       '## 이번 주 목표','',
       '- '+wk.ws+' ~ '+wk.we+' · 주 시작 '+wk.sw+'kg · 기준 '+wk.base+'kg → 목표 '+wk.goal+'kg'+(wk.manual?' (사장님과 정한 값)':' (지금 체중 기준 자동)'),
       '- 지금 '+wk.cur+'kg · 남은 '+wk.need+'kg · 이번 주 '+wk.daysLeft+'일 남음',
-      '- 최종 '+(+this.state.set.goalW)+'kg까지 약 '+wk.weeksLeft+'주 (주 '+wk.pace+'kg 페이스)','',
+      '- 최종 '+(+this.state.set.goalW)+'kg까지 '+wk.weeksText+' (주 '+wk.pace+'kg 페이스)',
+      ...(fin?['- 결승선 '+fin.fd+'까지 '+(fin.over?'지났다':(fin.weeks+'주 · 남은 '+fin.gap+'kg → 필요 페이스 주 '+fin.need+'kg'+(fin.need>wk.pace?(' 〔지금 페이스 '+wk.pace+'보다 빠르다 — 사장님과 상의해라〕'):'')))]:[]),'',
       '## 먹은 것','');
     const fs=this.state.foods[T]||[];
     if(!fs.length)L.push('- (아직 없음)');
     else fs.forEach(f=>L.push('- ['+(f.meal||'')+' '+(f.time||'')+'] '+f.name+' '+(f.amt||'')+(f.unit||'')+' — '+Math.round(f.kcal||0)+'kcal / 탄'+Math.round(f.c||0)+' 단'+Math.round(f.p||0)+' 지'+Math.round(f.f||0)));
+    /* 🔁 이번 주 모드 — 모드 출발값과 지금 값이 다르면 둘 다 적는다. 트레이너가 무엇을 조정했는지 보이게. */
+    const ph=this.phaseOf();
+    L.push('','## 이번 주 모드','');
+    if(!ph)L.push('- (아직 안 정했다 — 지난 7일을 보고 진단해서 입력함 phase 칸으로 보내라)');
+    else{const dv=[];const nm={weekPace:'페이스',cG:'탄',fG:'지',pG:'단',waterMl:'물ml'};
+      for(const k of Object.keys(ph.dials))if(+ph.dials[k]!==+R[k])dv.push(nm[k]+' '+ph.dials[k]+' → 이번 주 '+R[k]);
+      L.push('- '+ph.e+' '+ph.t+(ph.from?(' · '+ph.from):'')+(ph.to?(' ~ '+ph.to):'')+(ph.over?' 〔기한 지남 — 다시 정해라〕':''),
+        '- 까닭: '+(ph.why||'(안 적힘)'),
+        '- 읽는 법: '+ph.read,
+        '- '+ph.tips.join(' · '),
+        '- 다이얼: '+(dv.length?('출발값에서 바뀐 것 — '+dv.join(' · ')):'출발값 그대로'))}
+    /* 📊 지난 7일 — 진단 재료. 오늘치만 보면 이번 주가 어떤 주인지 알 수 없다. */
+    const w7=[],k7=[],c7=[],p7=[],f7=[],wt7=[];let logN=0,underN=0,outN=0,alcoN=0,woN=0,woMin=0,liftN=0,wa7=[];
+    for(let i=6;i>=0;i--){const k=this.addDays(T,-i),ss=this.sums(k),items=this.state.foods[k]||[];
+      const ww=(this.state.weights||{})[k];if(ww&&ww.a!=null)w7.push({d:k,w:+ww.a});
+      if(items.length){logN++;k7.push(ss.kcal);c7.push(ss.c);p7.push(ss.p);f7.push(ss.f);
+        if(ss.kcal<R.kcalMin)underN++;
+        if(this.outsideWindow(k).length)outN++;
+        if(this.alcoOf(k).length)alcoN++}
+      const wo=(this.state.workouts||{})[k]||{};const mm=Object.keys(wo).reduce((a,x)=>a+(+wo[x]||0),0);
+      if(mm>0){woN++;woMin+=mm}
+      liftN+=((this.state.lifts||{})[k]||[]).length;
+      wa7.push(+((this.state.water||{})[k]||0));wt7.push(k)}
+    const avg=a=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):0;
+    const ws7=w7.length?w7[0]:null,we7=w7.length?w7[w7.length-1]:null;
+    L.push('','## 지난 7일 (진단 재료)','',
+      '- 체중: '+(w7.length?(ws7.d+' '+ws7.w+'kg → '+we7.d+' '+we7.w+'kg (차 '+(+(we7.w-ws7.w).toFixed(1))+'kg) · 최저 '+Math.min(...w7.map(x=>x.w))+' / 최고 '+Math.max(...w7.map(x=>x.w))):'(잰 날 없음)'),
+      '- 기록한 날: '+logN+'/7일',
+      '- 평균: '+avg(k7)+'kcal · 탄 '+avg(c7)+'g · 단 '+avg(p7)+'g · 지 '+avg(f7)+'g',
+      '- 하한 '+R.kcalMin+' 미달 '+underN+'일 · 식사창 밖에 먹은 날 '+outN+'일 · 술 마신 날 '+alcoN+'일',
+      '- 운동 '+woN+'일 · '+woMin+'분 · 근력 '+liftN+'건 · 물 평균 '+(avg(wa7)/1000).toFixed(2)+'L',
+      '- 컨디션 7일: '+this.healthWatch(7).text);
     const cd=this.condOf(T),ck=this.CONDS.filter(c=>cd[c.k]).map(c=>c.t),hw=this.healthWatch(7);
     L.push('','## 컨디션·운동','',
       '- 컨디션: '+(ck.length?ck.join(', '):'(없음)')+(cd.note?(' / 메모: '+cd.note):''),
@@ -1712,7 +1833,8 @@ class Component extends DCLogic {
       '1. 위 기록만 보고 「지금 무엇을 먹어야 하나」를 3~6줄로 답해라. 칼로리는 초과가 아니라 미달을 지적한다.',
       '2. 이번 주 목표 체중은 트레이너가 정한다 — 입력함의 rule.weekPace(주 페이스 kg) 또는 weekGoals({"주 시작 월요일":kg}) 칸으로 넣어라. 사장님께 설정 화면에 적으시라고 하지 마라.',
       '3. 사장님이 화면·기능을 고쳐 달라고 하시면 그때 앱을 고쳐라.',
-      '4. 사장님이 말씀하신 음식은 ⭐ 자주 먹는 음식과 같은 이름으로 적어라(별명표 FOOD_ALIAS). 처음 나온 음식은 저절로 ⭐에 오르니, 영양값이 미덥지 않으면 입력함 favs 칸으로 표준값을 함께 보내라.');
+      '4. 사장님이 말씀하신 음식은 ⭐ 자주 먹는 음식과 같은 이름으로 적어라(별명표 FOOD_ALIAS). 처음 나온 음식은 저절로 ⭐에 오르니, 영양값이 미덥지 않으면 입력함 favs 칸으로 표준값을 함께 보내라.',
+      '5. 이번 주 모드가 없거나 「기한 지남」이면 위 「지난 7일」과 사장님 말씀으로 진단하고, 대화로 확정한 뒤 입력함 phase 칸으로 보내라 — {"k":"cut2|cut1|bloat|build|maint","to":"YYYY-MM-DD","why":"한 줄"}. 모드 출발값을 그대로 쓰지 말고 이번 주 계획(운동 유무·일정·컨디션)에 맞춰 g 를 다시 정해 rule 칸으로 함께 보내라. 절대선 다섯은 어느 모드에서도 안 바꾼다.');
     return L.join('\n')}
   callTrainer(){const brief=this.trainerBrief();
     try{navigator.clipboard.writeText(brief)}catch(e){}
@@ -1902,6 +2024,7 @@ class Component extends DCLogic {
     const royal=this.royal();
     const fmt=n=>this.fmt(n);
     const modeC=m=>m==='diet'?th.diet:th.maint,modeB=m=>m==='diet'?th.dietSoft:th.maintSoft,modeL=m=>m==='diet'?'다이어트':'유지';
+    const phNow=this.phaseOf();
     const gset=S.set,hasGoal=!!gset.goalDate;
     let ddayText='',goalDateText='';
     if(hasGoal){const diff=Math.round((new Date(gset.goalDate+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5);ddayText=diff>0?'D-'+diff:diff===0?'D-Day':'D+'+(-diff);const gd=new Date(gset.goalDate+'T00:00:00');goalDateText=(gd.getMonth()+1)+'월 '+gd.getDate()+'일'}
@@ -2086,14 +2209,15 @@ class Component extends DCLogic {
       {p:0.85,t:'4단계 · 마지막 구간',d:'속도가 느려지는 것이 정상이다. 주 0.3~0.5kg이면 충분히 잘 가고 있는 것이다.'},
       {p:1.00,t:'완주 · 유지로 전환',d:'끝이 아니라 갈아타는 지점이다. 유지 모드로 바꾸고 칼로리를 천천히 올린다.'}];
     const rmRaw=RMDEF.map(x=>{const w=+(rmStart-rmTotal*x.p).toFixed(1);
-      return {w,done:rmCur<=w+0.05,wk:Math.max(1,Math.ceil((rmCur-w)/wkp.pace)),t:x.t,d:x.d}});
+      return {w,done:rmCur<=w+0.05,wk:wkp.pace>0?Math.max(1,Math.ceil((rmCur-w)/wkp.pace)):null,t:x.t,d:x.d}});
     const rmNow=rmRaw.findIndex(x=>!x.done);
     const rmSteps=rmRaw.map((x,i)=>({mark:x.done?'✅':(i===rmNow?'🔵':'⚪'),title:x.t,desc:x.d,
       titleColor:x.done?'#B5B2A6':(i===rmNow?th.accent:'#1F1E1A'),
       when:x.done?'지나옴':(i===rmNow?'진행 중':'약 '+x.wk+'주 뒤'),
       whenColor:i===rmNow?th.accent:'#B5B2A6',
       wText:fmt(x.w)+'kg 지점'+(x.done?'':' · '+md(this.addDays(this.TODAY,x.wk*7))+' 무렵')}));
-    const rmEta=this.addDays(this.TODAY,Math.max(0,wkp.weeksLeft)*7);
+    const rmEta=this.addDays(this.TODAY,Math.max(0,wkp.weeksLeft||0)*7);
+    const rmFin=this.finalPlan(rmCur);
     let rmLift=0;for(let i=0;i<7;i++){if((this.liftsOf(this.addDays(wkp.ws,i))||[]).length)rmLift++}
     const CUD=['일','월','화','수','목','금','토'],cuR=R52.carbUp||{};
     const cuTxt=Object.keys(cuR).filter(k=>+cuR[k]>0).map(k=>CUD[+k]+' '+cuR[k]).join(' · ')||'없음';
@@ -2201,7 +2325,8 @@ class Component extends DCLogic {
       /* 일지 = 트레이너 자리 */
       rmGoalW:fmt(rmGoalW),rmCurW:fmt(rmCur),rmLeftW:fmt(Math.max(0,+(rmCur-rmGoalW).toFixed(1))),
       rmPct:Math.max(0,Math.min(100,Math.round(rmDone/rmTotal*100))),rmPaceText:'주 '+wkp.pace+'kg 페이스',
-      rmSummary:'시작 '+fmt(rmStart)+'kg에서 '+fmt(+rmDone.toFixed(1))+'kg 왔다 · 남은 약 '+wkp.weeksLeft+'주 · 이 페이스면 '+md(rmEta)+' 무렵 '+fmt(rmGoalW)+'kg',
+      rmSummary:'시작 '+fmt(rmStart)+'kg에서 '+fmt(+rmDone.toFixed(1))+'kg 왔다 · 남은 '+wkp.weeksText+(wkp.weeksLeft!=null?(' · 이 페이스면 '+md(rmEta)+' 무렵 '+fmt(rmGoalW)+'kg'):' · 이번 주는 줄이지 않는 주간이다')
+        +(rmFin&&!rmFin.over?(' · 최종 '+md(rmFin.fd)+'까지 '+rmFin.weeks+'주 — 그때 '+fmt(rmGoalW)+'kg이 되려면 주 '+rmFin.need+'kg'):''),
       rmSteps,tpRows,
       ntKinds:NT_KINDS.map(k=>({label:k==='전체'?'전체':(k==='메인'?'📒 메인':'🍳 레시피'),
         bg:S.ntKind===k?th.accent:th.chipBg,color:S.ntKind===k?'#fff':'#5C594E',
@@ -2226,7 +2351,7 @@ class Component extends DCLogic {
         {label:'칼로리 하한',value:R52.kcalMin,ph:'1200',onChange:setRule('kcalMin')},
         {label:'탄수화물 g',value:R52.cG,ph:'40',onChange:setRule('cG')},
         {label:'단백질 g',value:R52.pG,ph:'100',onChange:setRule('pG')},
-        {label:'지방 설계값 g',value:R52.fG,ph:'71',onChange:setRule('fG')},
+        {label:'지방 설계값 g',value:R52.fG,ph:'45',onChange:setRule('fG')},
         {label:'첫 끼 지방 g',value:R52.firstFatG,ph:'8',onChange:setRule('firstFatG')},
         {label:'물 목표 ml',value:R52.waterMl,ph:'2000',onChange:setRule('waterMl')},
         {label:'월 탄수 얹기',value:(R52.carbUp||{})[1]||0,ph:'2',onChange:setCarb(1)},
@@ -2278,7 +2403,16 @@ class Component extends DCLogic {
       emptyMealMsg:royal?'아직 아무것도 안 드셨어요':'기록 없음',
       emptyStarMsg:royal?'게시물에서 ⭐를 누르면 여기 모인답니다':'게시물에서 ⭐를 눌러 모아보세요',
       emptyFeedMsg:royal?'아직 게시물이 없어요':'아직 게시물이 없어요',
-      modeLabel:modeL(S.mode),modeColor:modeC(S.mode),modeBg:modeB(S.mode),
+      modeLabel:phNow?(phNow.e+' '+phNow.t+(phNow.to?(' · ~'+noDow(phNow.to)):'')):(modeL(S.mode)+' 모드'),
+      modeColor:phNow?(phNow.k==='maint'?th.maint:th.diet):modeC(S.mode),
+      modeBg:phNow?(phNow.k==='maint'?th.maintSoft:th.dietSoft):modeB(S.mode),
+      phaseOn:!!phNow,phaseTitle:phNow?(phNow.e+' '+phNow.t+(phNow.over?' · 기한 지남 — 트레이너와 다시 정하세요':(phNow.to?(' · '+noDow(phNow.to)+'까지'):''))):'',
+      phaseRead:phNow?((phNow.why?(phNow.why+' — '):'')+phNow.read):'',
+      phaseTips:phNow?phNow.tips.join(' · '):'',
+      phaseHint:phNow?('지금 '+phNow.e+' '+phNow.t+' 모드예요. 모드를 바꾸면 탄수·지방·페이스·물이 그 모드의 출발값으로 채워지고, 그 뒤 트레이너가 보낸 값이 이깁니다.'):'모드를 고르면 탄수·지방·페이스·물이 그 모드의 출발값으로 채워져요. 절대선 다섯은 어느 모드에서도 안 바뀝니다.',
+      phaseChips:this.PHASES.map(p=>({t:p.e+' '+p.t,pick:()=>this.applyPhase(p.k),
+        bg:(phNow&&phNow.k===p.k)?th.cardBg:'transparent',color:(phNow&&phNow.k===p.k)?th.accent:'#8B887C',
+        shadow:(phNow&&phNow.k===p.k)?'0 1px 4px rgba(0,0,0,.12)':'none'})),
       isHome:S.tab==='home',isLog:S.tab==='log',isFeed:S.tab==='feed',isSet:S.tab==='set',isCal:S.tab==='cal',isJournal:S.tab==='jr',
       shellCls:S.wide?(S.tab==='set'?'wide wide-set':'wide'):'',
       calLabel:cy+'년 '+cmn+'월',calCells,
@@ -2290,10 +2424,7 @@ class Component extends DCLogic {
       alcoLabel:alcoSel.length?('🍺 '+alcoSel.map(x=>x.name).join(', ')+' · '+fmt(alcoK)+'kcal'):'🍀 오늘 술 없음',
       alcoBg:alcoSel.length?'#FDECEC':'#EAF7F1',alcoColor:alcoSel.length?'#E5484D':'#17A673',
       hasGoal,noGoal:!hasGoal,ddayText,goalDateText,gotoSettings:e=>{e.preventDefault();this.setState({tab:'set'})},
-      setDiet:()=>{if(S.mode!=='diet'){this.setState({mode:'diet'});this.toast(this.say('다이어트 모드로 전환했어요','다이어트 모드로 모시겠습니다 🎀'))}},
-      setMaint:()=>{if(S.mode!=='maint'){this.setState({mode:'maint'});this.toast(this.say('유지 모드로 전환했어요','유지 모드로 모시겠습니다 🪞'))}},
-      dietBtnBg:S.mode==='diet'?th.cardBg:'transparent',dietBtnColor:S.mode==='diet'?th.diet:'#8B887C',dietBtnShadow:S.mode==='diet'?'0 1px 4px rgba(0,0,0,.12)':'none',
-      maintBtnBg:S.mode==='maint'?th.cardBg:'transparent',maintBtnColor:S.mode==='maint'?th.maint:'#8B887C',maintBtnShadow:S.mode==='maint'?'0 1px 4px rgba(0,0,0,.12)':'none',
+      /* 모드를 고르는 자리는 설정 화면 칩 다섯 하나뿐이다 — 홈 배지는 읽기 전용이고 누르면 설정으로 간다. */
       woGroups,woTotal:woTotalToday>0?'총 '+fmtT(woTotalToday):'0:00',woTotalColor:woTotalToday>0?th.accent:'#B5B2A6',
       woQuick,woTitle:woIsT?'오늘 운동':'운동 기록',woDate:woD8,woDateLabel:this.lbl(woD8)+(woIsT?' · 오늘':''),
       woDateBg:woIsT?th.chipBg:th.dietSoft,woDateColor:woIsT?'#1F1E1A':th.accent,woNotToday:!woIsT,
@@ -2307,7 +2438,7 @@ class Component extends DCLogic {
       tdDraft:S.tdDraft||'',tdOnDraft:e=>this.setState({tdDraft:e.target.value}),
       tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,tdPaste,tdPhDraft,tdHasPh:!!tdPh.length,
       wkRange:noDow(wkp.ws)+'~'+noDow(wkp.we),wkGoalText:fmt(wkp.goal)+' kg',wkColor,wkPct:wkp.pct,wkStats,
-      wkNote:'남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg — 주 '+wkp.pace+'kg 페이스를 남은 날수로 나눈 몫이에요 · 최종 '+fmt(+gset.goalW)+'kg까지 약 '+wkp.weeksLeft+'주',
+      wkNote:(wkp.pace>0?('남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg — 주 '+wkp.pace+'kg 페이스를 남은 날수로 나눈 몫이에요 · 최종 '+fmt(+gset.goalW)+'kg까지 '+wkp.weeksText):('이번 주는 줄이지 않는 주간이에요(페이스 0). 눈금 대신 기록으로 보세요 · 이번 주 '+wkp.daysLeft+'일 남음')),
       sWeekGoal:wkp.manual?wkp.goal:'',sWeekPace:wkp.pace,onWeekPace:setRule('weekPace'),
       onWeekGoal:e=>{const v=String(e.target.value||'').trim();const WG={...(S.weekGoals||{})};
         if(v==='')delete WG[wkp.ws];else WG[wkp.ws]=+v||0;
@@ -2330,7 +2461,8 @@ class Component extends DCLogic {
         /* 탄수가 목표를 넘으면 그 칼로리(4kcal/g)만큼 지방 목표만 깎아 kcal 하한을 맞춘다 (사장님 지시 2026-08-31).
            ⛔ 단백질 100g은 안 건드린다 — 깎으면 근손실이라 「굶기지 말자」는 지시와 정반대다.
            지방은 담석 예방선 FAT_FLOOR 에서 멈춘다. */
-        const FAT_FLOOR=50,cOver=Math.max(0,dSum.c-RB.cG),fGoal=Math.max(FAT_FLOOR,Math.round(RB.fG-cOver*4/9));
+        /* 바닥선은 목표보다 클 수 없다 — 2026-09-10 지방 목표가 45g 이 되면서 옛 FAT_FLOOR 50 이 목표를 넘어섰다. */
+        const FAT_FLOOR=50,cOver=Math.max(0,dSum.c-RB.cG),fGoal=Math.max(Math.min(FAT_FLOOR,RB.fG),Math.round(RB.fG-cOver*4/9));
         const B=[mk('kcal','#8B887C',th.accent,dSum.kcal,RB.kcalMin,'',true),
           mk('탄수화물','#E9A23B','#E9A23B',dSum.c,RB.cG,'g',false),
           mk('단백질','#E4618C','#E4618C',dSum.p,RB.pG,'g',true),
