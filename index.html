@@ -3731,8 +3731,6 @@ class Component extends DCLogic {
       V.hasStTypes=V.stTypesV.length>0;
       V.boardV=stAsc.slice().reverse().slice(0,30).map(x=>({e:x.e,op:x.used?'0.22':'1',fl:x.used?'grayscale(1)':'none',
         tip:(x.used?'[교환에 사용함] ':'')+(x.msg?x.msg+' — ':'')+x.from+' ('+this.dShort(x.d)+')'}));
-      V.rewardsV=D.rewards.map(rw=>{const can=avail>=rw.cost;return{name:rw.name,cost:rw.cost,bg:can?sk.ac:sk.bg,fg:can?sk.on:sk.sub,
-        buy:()=>{if(!can)return;this.mut(d=>{d.exch.push({id:this.uid(),k,d:t,name:rw.name,cost:rw.cost});if(rw.money)d.allow.push({id:this.uid(),k,d:t,ty:'in',a:rw.money,memo:'스티커 보상: '+rw.name});});}};});
       const myRate=Number((D.stkRate||{})[k])||200;
       const mxN=Math.max(1,Number(f.mxN)||1);
       V.mxRate=myRate.toLocaleString();V.mxN=mxN;V.mxAmt=(mxN*myRate).toLocaleString();
