@@ -996,22 +996,17 @@ input,button,textarea,select{font-family:inherit;}
         </div>
         <sc-if value="{{ advOn }}" hint-placeholder-val="{{ false }}">
           <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
-            <div style="font-size:15px;font-weight:800;">🫰 미리 땡겨쓰기</div>
-            <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 12px;word-break:keep-all;line-height:1.7;">아직 못 모은 스티커도 부모님이 수락하면 미리 쓸 수 있어. 나중에 받는 스티커가 여기 먼저 들어가서 저절로 갚아져.</div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+            <div style="font-size:15px;font-weight:800;">🫰 미리 받은 스티커</div>
+            <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 12px;word-break:keep-all;line-height:1.7;">엄마·아빠가 아직 못 모은 스티커를 미리 주신 거야. 앞으로 받는 스티커가 여기 먼저 들어가서 저절로 갚아져. (미리 받는 건 엄마·아빠가 정해)</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
               <div style="flex:1;min-width:calc(50% - 3px);background:var(--bg,#FAF6EF);border-radius:12px;padding:9px 11px;">
                 <div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);">지금 갚아야 할 스티커</div>
                 <div style="font-size:19px;font-weight:900;color:{{ advOweC }};line-height:1.3;font-variant-numeric:tabular-nums;">🫰 {{ advOwe }}개</div>
               </div>
               <div style="flex:1;min-width:calc(50% - 3px);background:var(--bg,#FAF6EF);border-radius:12px;padding:9px 11px;">
-                <div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);">더 땡길 수 있는 스티커</div>
-                <div style="font-size:19px;font-weight:900;color:var(--ac,#F59E0B);line-height:1.3;font-variant-numeric:tabular-nums;">{{ advLeft }}개</div>
+                <div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);">지금까지 미리 받은 것</div>
+                <div style="font-size:19px;font-weight:900;color:var(--ac,#F59E0B);line-height:1.3;font-variant-numeric:tabular-nums;">{{ advTotal }}개</div>
               </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--sub,#8A8177);">
-              <span style="white-space:nowrap;">한도 {{ advMax }}개</span>
-              <div style="flex:1;height:9px;background:var(--bg,#FAF6EF);border-radius:99px;overflow:hidden;"><div style="height:100%;width:{{ advPct }}%;background:{{ advOweC }};border-radius:99px;"></div></div>
-              <span style="white-space:nowrap;font-variant-numeric:tabular-nums;">{{ advPct }}%</span>
             </div>
             <sc-if value="{{ advHasOwe }}" hint-placeholder-val="{{ true }}">
               <div style="margin-top:11px;background:var(--soft,#F7EAD2);border:1px solid var(--ac,#F59E0B);border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;line-height:1.7;word-break:keep-all;">{{ advPayTxt }}</div>
@@ -1020,7 +1015,7 @@ input,button,textarea,select{font-family:inherit;}
               <div style="margin-top:11px;font-size:12px;font-weight:800;color:#3FA45B;">✓ 갚을 스티커가 없어! 깨끗해</div>
             </sc-if>
             <sc-if value="{{ advHasLog }}" hint-placeholder-val="{{ true }}">
-              <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin:14px 0 6px;word-break:keep-all;">지금까지 {{ advTimes }}번 · 모두 {{ advTotal }}개 땡겨 썼어</div>
+              <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin:14px 0 6px;word-break:keep-all;">미리 받은 내역 · 모두 {{ advTimes }}번</div>
               <div style="display:flex;flex-direction:column;gap:4px;">
                 <sc-for list="{{ advLogV }}" as="av" hint-placeholder-count="2">
                   <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--sub,#8A8177);">
@@ -1130,9 +1125,6 @@ input,button,textarea,select{font-family:inherit;}
               <button onClick="{{ mxInc }}" style="width:34px;height:34px;flex-shrink:0;background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;">＋</button>
               <button onClick="{{ mxBuy }}" style="background:{{ mxBg }};color:{{ mxFg }};border:none;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;">교환</button>
             </div>
-            <sc-if value="{{ mxHasAdv }}" hint-placeholder-val="{{ false }}">
-              <div style="font-size:11px;font-weight:800;color:var(--ac,#F59E0B);margin-top:8px;word-break:keep-all;line-height:1.6;">{{ mxAdvTxt }}</div>
-            </sc-if>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px;">
             <sc-for list="{{ rewardsV }}" as="rw" hint-placeholder-count="4">
@@ -1144,7 +1136,6 @@ input,button,textarea,select{font-family:inherit;}
                 <div style="text-align:right;flex-shrink:0;">
                   <div style="font-size:13px;font-weight:800;color:var(--ac,#F59E0B);">{{ rw.e }} {{ rw.cost }}개</div>
                   <div style="font-size:10px;font-weight:700;color:var(--sub,#8A8177);">모은 {{ rw.have }}개</div>
-                  <sc-if value="{{ rw.hasAdv }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;font-weight:900;color:var(--ac,#F59E0B);white-space:nowrap;margin-top:1px;">{{ rw.advTxt }}</div></sc-if>
                 </div>
                 <button onClick="{{ rw.buy }}" style="background:{{ rw.bg }};color:{{ rw.fg }};border:none;border-radius:99px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;">교환</button>
               </div>
@@ -1277,7 +1268,7 @@ input,button,textarea,select{font-family:inherit;}
                   <div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);line-height:1.3;">남은 스티커</div>
                   <div style="font-size:17px;font-weight:900;color:var(--ac,#F59E0B);line-height:1.2;">🌟 {{ ko.stickers }}개</div>
                   <sc-if value="{{ ko.hasAdv }}" hint-placeholder-val="{{ false }}">
-                    <div style="font-size:11px;font-weight:900;color:#E0654F;line-height:1.3;white-space:nowrap;">🫰 땡겨쓴 {{ ko.advOwe }}개</div>
+                    <div style="font-size:11px;font-weight:900;color:#E0654F;line-height:1.3;white-space:nowrap;">🫰 미리 준 {{ ko.advOwe }}개</div>
                   </sc-if>
                   <button onClick="{{ ko.openStHist }}" style="display:block;margin-left:auto;margin-top:3px;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px 8px;cursor:pointer;font-size:10px;font-weight:700;color:var(--sub,#8A8177);">받음 {{ ko.stEarned }} · 사용 {{ ko.stSpent }} ▸</button>
                 </div>
@@ -1379,9 +1370,6 @@ input,button,textarea,select{font-family:inherit;}
                           </sc-if>
                           <button onClick="{{ rq.no }}" style="background:var(--card,#fff);color:var(--sub,#8A8177);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;min-height:32px;">거절</button>
                         </div>
-                        <sc-if value="{{ rq.hasAdvR }}" hint-placeholder-val="{{ false }}">
-                          <div style="font-size:11px;font-weight:800;color:var(--ac,#F59E0B);margin-top:4px;word-break:keep-all;line-height:1.7;">{{ rq.advRTxt }}</div>
-                        </sc-if>
                         <sc-if value="{{ rq.hasShort }}" hint-placeholder-val="{{ false }}">
                           <div style="font-size:11px;font-weight:800;color:#E0654F;margin-top:4px;word-break:keep-all;line-height:1.7;">{{ rq.shortTxt }}</div>
                         </sc-if>
@@ -1526,8 +1514,8 @@ input,button,textarea,select{font-family:inherit;}
               <div style="font-size:11px;font-weight:800;color:var(--ac,#F59E0B);margin-top:7px;">지금 설정 · 1개 {{ rwRateNow }}원 / 10개 {{ rwRate10 }}원</div>
             </div>
             <div style="background:var(--bg,#FAF6EF);border:1px dashed var(--ac,#F59E0B);border-radius:14px;padding:12px;margin-bottom:14px;">
-              <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:800;">🫰 미리 땡겨쓰기<span style="font-size:10px;font-weight:800;background:var(--card,#fff);color:var(--sub,#8A8177);border-radius:99px;padding:2px 7px;">한도</span></div>
-              <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 9px;word-break:keep-all;line-height:1.7;">아직 못 모은 스티커를 몇 개까지 미리 쓰게 할지 정해요. 교환 신청을 수락하는 순간 빠지고, 아이가 나중에 받는 스티커로 저절로 갚아집니다. <b>0개면 꺼짐</b>이에요.</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:800;">🫰 미리 땡겨주기<span style="font-size:10px;font-weight:800;background:var(--card,#fff);color:var(--sub,#8A8177);border-radius:99px;padding:2px 7px;">한도</span></div>
+              <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 9px;word-break:keep-all;line-height:1.7;">아직 못 모은 스티커를 몇 개까지 <b>미리 줄 수 있는지</b> 정해요. <b>아이는 신청할 수 없고</b>, 자녀 카드의 <b>🌟 스티커 차감</b>에서 부모님이 직접 주실 때만 쓰입니다. 아이 화면에는 갚을 개수와 내역만 보여요. <b>0개면 꺼짐</b>이에요.</div>
               <div style="display:flex;align-items:center;gap:7px;">
                 <span style="font-size:13px;font-weight:800;white-space:nowrap;">최대</span>
                 <input value="{{ rwAdvIn }}" onChange="{{ rwAdvOn }}" type="number" style="flex:1;min-width:0;box-sizing:border-box;padding:9px 10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--card,#fff);color:inherit;font-size:14px;font-weight:800;text-align:right;outline:none;">
@@ -1848,7 +1836,7 @@ input,button,textarea,select{font-family:inherit;}
   <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
     <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
       <div style="font-size:16px;font-weight:800;margin-bottom:4px;">🌟 {{ pmEmoji }} {{ pmName }} 스티커 차감</div>
-      <div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:12px;word-break:keep-all;">모은 스티커를 용돈으로 바꿔 줘요. 고른 개수만큼 실제로 차감돼요.</div>
+      <div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:12px;word-break:keep-all;line-height:1.7;">{{ pmDedHead }}</div>
       <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;margin-bottom:12px;text-align:center;">
         <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);">지금 남은 스티커</div>
         <div style="font-family:Gaegu;font-size:38px;font-weight:700;color:var(--ac,#F59E0B);line-height:1.2;">{{ pmStickers }}개</div>
@@ -1868,8 +1856,11 @@ input,button,textarea,select{font-family:inherit;}
           <span style="font-size:13px;font-weight:800;">합계</span>
           <span style="flex:1;text-align:right;font-size:26px;font-weight:900;color:var(--ac,#F59E0B);font-variant-numeric:tabular-nums;line-height:1.2;">{{ pmDedAmt }}원</span>
         </div>
-        <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-top:6px;">차감하면 남는 스티커 🌟 {{ pmDedLeft }}개</div>
+        <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-top:6px;word-break:keep-all;">{{ pmDedLeftTxt }}</div>
       </div>
+      <sc-if value="{{ pmDedHasAdv }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--soft,#F7EAD2);border:1px solid var(--ac,#F59E0B);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:12px;font-weight:800;word-break:keep-all;line-height:1.7;">{{ pmDedAdvTxt }}</div>
+      </sc-if>
       <sc-if value="{{ pmDedWarn }}" hint-placeholder-val="{{ false }}">
         <div style="font-size:12px;font-weight:800;color:#E0654F;margin-top:8px;word-break:keep-all;">{{ pmDedWarnTxt }}</div>
       </sc-if>
@@ -2560,10 +2551,9 @@ class Component extends DCLogic {
   // 교환 신청 수락 — 여기서만 스티커가 실제로 빠진다(exch에 들어가야 잔액이 준다)
   exOk(x){const t=this.today();this.mut(d=>{
     if(!(d.exreq||[]).some(y=>y.id===x.id))return;          // 두 번 눌러도 한 번만 나간다
-    if((x.e||'🌟')==='🌟'&&this.trAvail(d,x.k)-x.cost<-this.advMax(d,x.k))return;  // 땡겨쓰기 한도 밖이면 나가지 않는다
-    const adv=Math.max(0,x.cost-Math.max(0,this.trAvail(d,x.k)));                  // 이번에 미리 땡겨 쓴 몫 (수락 시점 기준)
+    if((x.e||'🌟')==='🌟'&&this.trAvail(d,x.k)<x.cost)return;   // 아이 신청은 모은 만큼만 - 땡겨주기는 부모님 차감으로만 한다
     d.exreq=d.exreq.filter(y=>y.id!==x.id);
-    d.exch.push({id:this.uid(),k:x.k,d:t,name:x.name,cost:x.cost,money:Number(x.money||0),adv});
+    d.exch.push({id:this.uid(),k:x.k,d:t,name:x.name,cost:x.cost,money:Number(x.money||0)});
     if(Number(x.money||0)>0)d.allow.push({id:this.uid(),k:x.k,d:t,ty:'in',pay:'card',src:'parent',a:Number(x.money),memo:'🌟 '+x.cost+'개 교환 용돈'});});}
   exNo(id){this.mut(d=>{d.exreq=(d.exreq||[]).filter(y=>y.id!==id);});}
   apprOk(id){this.mut(d=>{const a=(d.appr||[]).find(x=>x.id===id);if(!a)return;
@@ -3706,22 +3696,21 @@ class Component extends DCLogic {
       const advOwe=Math.max(0,-avail);const advMax=this.advMax(D,k);
       V.stEarned=myStk.length;V.stSpent=spent;V.stAvail=Math.max(0,avail);
       V.stSumTxt=avail>=0?('받은 '+myStk.length+'개 − 쓴 '+spent+'개 = 남은 '+avail+'개')
-        :('받은 '+myStk.length+'개 − 쓴 '+spent+'개 · 🫰 '+advOwe+'개는 미리 땡겨 썼어');
+        :('받은 '+myStk.length+'개 − 쓴 '+spent+'개 · 🫰 '+advOwe+'개는 미리 받아서 다음에 갚아');
       // 교환은 누른다고 바로 빠지지 않는다 — 부모가 수락해야 차감된다. 그전까지는 「신청 중」으로 묶어 둔다
       const myReq=(D.exreq||[]).filter(x=>x.k===k);
       const reqByE={};myReq.forEach(x=>{const e2=x.e||'🌟';reqByE[e2]=(reqByE[e2]||0)+x.cost;});
       const usable=Math.max(0,avail-(reqByE['🌟']||0));
-      // 신청이 다 수락돼도 한도 안이어야 한다 - 그 상한이 starCap, usable을 넘는 몫이 땡기는 개수다
-      const starCap=Math.max(0,avail-(reqByE['🌟']||0)+advMax);
       V.stUsable=usable;V.hasStReq=myReq.length>0;V.stReqSum=myReq.reduce((s2,x)=>s2+x.cost,0);
-      V.advOn=advMax>0||advOwe>0;V.advOwe=advOwe;V.advMax=advMax;V.advLeft=Math.max(0,starCap-usable);
-      V.advPct=advMax>0?Math.min(100,Math.round(advOwe/advMax*100)):(advOwe>0?100:0);
-      V.advOweC=advOwe>0?'#E0654F':sk.sub;
+      // 아이 화면은 보기 전용이다 - 땡겨주는 것은 부모님뿐이고, 아이는 갚을 것과 내역만 본다
+      const advLog=D.exch.filter(x=>x.k===k&&Number(x.adv||0)>0);
+      V.advTotal=advLog.reduce((s2,x)=>s2+Number(x.adv||0),0);V.advTimes=advLog.length;
+      V.advOn=advOwe>0||advLog.length>0;
+      V.advOwe=advOwe;V.advOweC=advOwe>0?'#E0654F':'#3FA45B';
       V.advHasOwe=advOwe>0;V.advNoOwe=advOwe===0;
       V.advPayTxt='앞으로 받는 스티커 '+advOwe+'개는 갚는 데 먼저 들어가. 그다음부터 다시 내 걸로 모을 수 있어!';
-      const advLog=D.exch.filter(x=>x.k===k&&Number(x.adv||0)>0);
-      V.advHasLog=advLog.length>0;V.advTimes=advLog.length;V.advTotal=advLog.reduce((s2,x)=>s2+Number(x.adv||0),0);
-      V.advLogV=advLog.slice().sort((a,b)=>b.d.localeCompare(a.d)).slice(0,5).map(x=>({date:this.dShort(x.d),name:x.name,n:Number(x.adv||0)}));
+      V.advHasLog=advLog.length>0;
+      V.advLogV=advLog.slice().sort((a,b)=>b.d.localeCompare(a.d)).slice(0,6).map(x=>({date:this.dShort(x.d),name:x.name,n:Number(x.adv||0)}));
       V.stReqV=myReq.slice().sort((a,b)=>b.d.localeCompare(a.d)).map(x=>({date:this.dShort(x.d),name:x.name,
         cost:(x.e||'🌟')+' '+x.cost+'개',
         cancel:()=>this.mut(d=>{d.exreq=(d.exreq||[]).filter(y=>y.id!==x.id);})}));
@@ -3735,16 +3724,14 @@ class Component extends DCLogic {
       const mxN=Math.max(1,Number(f.mxN)||1);
       V.mxRate=myRate.toLocaleString();V.mxN=mxN;V.mxAmt=(mxN*myRate).toLocaleString();
       V.mxDec=()=>this.setF('mxN',Math.max(1,mxN-1));V.mxInc=()=>this.setF('mxN',mxN+1);
-      const mxCan=starCap>=mxN;const mxAdv=Math.max(0,mxN-usable);
+      const mxCan=usable>=mxN;   // 땡겨쓰기는 부모님만 - 아이는 모은 만큼만 신청한다
       V.mxBg=mxCan?sk.ac:sk.bg;V.mxFg=mxCan?sk.on:sk.sub;
-      V.mxHasAdv=mxCan&&mxAdv>0;V.mxAdvTxt='🫰 그중 '+mxAdv+'개는 미리 땡겨쓰는 거야 · 나중에 받는 스티커로 갚아';
       V.mxBuy=()=>{if(!mxCan)return;const amt=mxN*myRate;
-        this.mut(d=>{(d.exreq=d.exreq||[]).push({id:this.uid(),k,d:t,name:'용돈 '+amt.toLocaleString()+'원 교환',cost:mxN,money:amt,e:'🌟',adv:mxAdv});});this.setF('mxN',1);};
+        this.mut(d=>{(d.exreq=d.exreq||[]).push({id:this.uid(),k,d:t,name:'용돈 '+amt.toLocaleString()+'원 교환',cost:mxN,money:amt,e:'🌟'});});this.setF('mxN',1);};
       V.rewardsV=D.rewards.filter(rw=>!rw.k||rw.k==='all'||rw.k===k).map(rw=>{const e=rw.e||'🌟';const have=Math.max(0,(e==='🌟'?avail:(stCnt[e]||0))-(reqByE[e]||0));
-        const cap=e==='🌟'?starCap:have;const can=cap>=rw.cost;const adv=e==='🌟'?Math.max(0,rw.cost-have):0;
+        const can=have>=rw.cost;   // 땡겨쓰기는 부모님만 - 아이는 모은 만큼만 신청한다
         return{name:rw.name,e,cost:rw.cost,desc:rw.desc||'',hasDesc:!!rw.desc,have,bg:can?sk.ac:sk.bg,fg:can?sk.on:sk.sub,
-        hasAdv:can&&adv>0,advTxt:'🫰 '+adv+'개 땡겨쓰기',
-        buy:()=>{if(!can)return;this.mut(d=>{(d.exreq=d.exreq||[]).push({id:this.uid(),k,d:t,name:rw.name,cost:rw.cost,money:0,e,adv});});}};});
+        buy:()=>{if(!can)return;this.mut(d=>{(d.exreq=d.exreq||[]).push({id:this.uid(),k,d:t,name:rw.name,cost:rw.cost,money:0,e});});}};});
       const exs=D.exch.filter(x=>x.k===k).sort((a,b)=>b.d.localeCompare(a.d));
       V.hasExch=exs.length>0;V.exchV=exs.slice(0,5).map(x=>({date:this.dShort(x.d),name:x.name,cost:x.cost}));
       // 가족끼리 스티커 거래
@@ -3864,10 +3851,10 @@ class Component extends DCLogic {
         const exReq=(D.exreq||[]).filter(x=>x.k===kp.id).slice().sort((a,b)=>b.d.localeCompare(a.d));
         const kAppr=(D.appr||[]).filter(x=>x.k===kp.id).slice().sort((a,b)=>b.d.localeCompare(a.d));
         const stHist=D.stlog.filter(x=>x.k===kp.id).map(x=>({d:x.d,txt:x.e+' '+(x.msg||x.from||'받음'),amt:'+1',c:'#3FA45B'}))
-          .concat(kExch.map(x=>({d:x.d,txt:'🎁 '+x.name+(Number(x.adv||0)>0?' (🫰 '+x.adv+'개 땡김)':''),amt:'-'+x.cost,c:'#E0654F'})))
+          .concat(kExch.map(x=>({d:x.d,txt:'🎁 '+x.name+(Number(x.adv||0)>0?' (🫰 '+x.adv+'개 미리)':''),amt:'-'+x.cost,c:'#E0654F'})))
           .sort((a,b)=>b.d.localeCompare(a.d));
         return{name:kp.name,emoji:kp.emoji,done,total:tds.length,pct:tds.length?Math.round(done/tds.length*100):0,weekMin:wk,
-          lastScore:lastSc?lastSc.s+' '+lastSc.v+'점':'—',stickers:Math.max(0,stkN),hasJ:!!lastJ,
+          lastScore:lastSc?lastSc.s+' '+lastSc.v+'점':'—',stickers:Math.max(0,stkN),stickersRaw:stkN,hasJ:!!lastJ,
           hasAdv:kAdvOwe>0,advOwe:kAdvOwe,advMax:kAdvMax,lastJ:lastJ?'['+lastJ.s+'] '+lastJ.txt:'',
           ptVal:f[fk]||'',ptOn:e=>this.setF(fk,e.target.value),
           rsV:this.STK.slice(0,6).map(e=>({e,bg:(f['rs_'+kp.id]||'🌟')===e?sk.soft:sk.card,bd:(f['rs_'+kp.id]||'🌟')===e?sk.ac:sk.line,pick:()=>this.setF('rs_'+kp.id,e)})),
@@ -3879,17 +3866,15 @@ class Component extends DCLogic {
           dedRate:stkRate,
           hasExReq:exReq.length>0,
           exReqV:exReq.map(x=>{const e=x.e||'🌟';const star=e==='🌟';const have=star?stkN:(kTypes[e]||0);
-            // 별스티커는 한도만큼 마이너스로 내려갈 수 있다 - 그 밖으로 나가는 신청만 막는다
-            const short=star?(have-x.cost< -kAdvMax):(have<x.cost);
-            const adv=star?Math.max(0,x.cost-Math.max(0,have)):0;const left=have-x.cost;
+            // 아이 신청은 모은 만큼만 - 모자라면 수락할 수 없다 (땡겨주기는 「스티커 차감」에서 부모님이 직접)
+            const short=have<x.cost;const left=have-x.cost;
             return{name:x.name,cost:e+' '+x.cost+'개',date:this.dShort(x.d),
               hasMoney:Number(x.money||0)>0,money:Number(x.money||0).toLocaleString()+'원',
-              hasAdvR:!short&&adv>0,advRTxt:'🫰 이 중 '+adv+'개는 아직 못 모은 스티커예요 · 수락하면 앞으로 받는 스티커로 갚아요 (한도 '+kAdvMax+'개)',
               canOk:!short,ok:()=>{if(short)return;this.exOk(x);
-                this.setState({saMsg:kp.id,saMsgTxt:left>=0?('✅ 수락 · '+e+' '+x.cost+'개 차감했어요 (남은 '+left+'개)'):('✅ 수락 · '+e+' '+x.cost+'개 중 🫰 '+(-left)+'개를 땡겨 썼어요 · 앞으로 받는 스티커로 갚아요')});
+                this.setState({saMsg:kp.id,saMsgTxt:'✅ 수락 · '+e+' '+x.cost+'개 차감했어요 (남은 '+Math.max(0,left)+'개)'});
                 setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),3500);},
               no:()=>this.exNo(x.id),
-              hasShort:short,shortTxt:star?(kp.name+'의 🌟 스티커가 '+(x.cost-Math.max(0,have))+'개 모자라요 · 땡겨쓰기 한도('+kAdvMax+'개)를 넘어서 수락할 수 없어요'):(kp.name+'의 '+e+' 스티커가 '+(x.cost-have)+'개 모자라요 · 수락할 수 없어요')};}),
+              hasShort:short,shortTxt:kp.name+'의 '+e+' 스티커가 '+(x.cost-have)+'개 모자라요 · 수락할 수 없어요'+(star&&kAdvMax>0?' (미리 주시려면 아래 🌟 스티커 차감에서 땡겨주기)':'')};}),
           hasAppr:kAppr.length>0,apprV:kAppr.map(x=>{const aps=(D.tdPics||[]).filter(p=>p.k===x.k&&p.d===x.d&&p.td===x.td);
             return{title:x.title,rew:(x.rs||'🌟')+(Number(x.rn||1)>1?' ×'+x.rn:''),date:this.dShort(x.d),
               hasPics:aps.length>0,picsV:aps.map(p=>({u:p.u,zoom:()=>this.setState({picZoom:p.u})})),
@@ -3938,20 +3923,32 @@ class Component extends DCLogic {
         V.pmTodoAdd=()=>{if(!(f['pt_'+pmKid.id]||'').trim())return;pmi.ptAdd();this.setState({modal:null});};
         V.pmStickers=pmi.stickers;V.pmStEarned=pmi.stEarned;V.pmStSpent=pmi.stSpent;
         // 스티커 차감 — 개수를 고르면 1개 금액 x 개수 = 합계금액이 그 자리에서 보인다
-        const dedMax=Math.max(0,pmi.stickers);
+        // 땡겨주기 - 모은 것을 넘어 한도까지 미리 줄 수 있다. 여기가 유일한 문이다(아이는 신청 못 한다)
+        const dedHave=Math.max(0,pmi.stickers);const dedAdvMax=this.advMax(D,pmKid.id);
+        const dedOwe=Math.max(0,-pmi.stickersRaw);              // 이미 땡겨 준 것
+        const dedMax=dedHave+Math.max(0,dedAdvMax-dedOwe);      // 한도가 남은 만큼만 더 준다
         const dedN=Math.min(Math.max(1,Number(f['ded_'+pmKid.id]||1)),Math.max(1,dedMax));
+        const dedAdv=Math.max(0,dedN-dedHave);                  // 이번에 미리 주는 몫
         const dedAmt=dedN*pmi.dedRate;const dedOK=dedMax>=1&&dedN<=dedMax;
         V.pmDedN=dedN;V.pmDedRate=pmi.dedRate.toLocaleString();V.pmDedAmt=dedAmt.toLocaleString();
-        V.pmDedLeft=Math.max(0,dedMax-dedN);
+        V.pmDedHasAdv=dedAdv>0;
+        V.pmDedAdvTxt='🫰 이 중 '+dedAdv+'개는 아직 못 모은 스티커를 미리 주는 거예요 · 앞으로 받는 스티커로 갚습니다';
+        V.pmDedLeftTxt=dedAdv>0?('차감하면 🫰 갚아야 할 스티커가 '+(dedOwe+dedAdv)+'개가 돼요')
+          :('차감하면 남는 스티커 🌟 '+(dedHave-dedN)+'개');
+        V.pmDedHead=dedAdvMax>0
+          ?('모은 스티커를 용돈으로 바꿔 줘요. 아직 못 모은 만큼도 🫰 미리 줄 수 있어요 (한도 '+dedAdvMax+'개).')
+          :'모은 스티커를 용돈으로 바꿔 줘요. 고른 개수만큼 실제로 차감돼요.';
         V.pmDedDec=()=>this.setF('ded_'+pmKid.id,Math.max(1,dedN-1));
         V.pmDedInc=()=>this.setF('ded_'+pmKid.id,Math.min(Math.max(1,dedMax),dedN+1));
-        V.pmDedWarn=!dedOK;V.pmDedWarnTxt=dedMax<1?'남은 스티커가 없어요':'남은 스티커('+dedMax+'개)보다 많이 고르셨어요';
+        V.pmDedWarn=!dedOK;V.pmDedWarnTxt=dedMax<1?('남은 스티커도 없고 🫰 땡겨주기 한도도 남지 않았어요 (한도 '+dedAdvMax+'개)'):('고를 수 있는 최대는 '+dedMax+'개예요');
         V.pmDedBg=dedOK?sk.ac:sk.bg;V.pmDedFg=dedOK?sk.on:sk.sub;
         V.pmDedGo=()=>{if(!dedOK)return;
-          this.mut(d=>{d.exch.push({id:this.uid(),k:pmKid.id,d:t,name:'용돈 '+dedAmt.toLocaleString()+'원 교환',cost:dedN,money:dedAmt});
-            d.allow.push({id:this.uid(),k:pmKid.id,d:t,ty:'in',pay:'card',src:'parent',a:dedAmt,memo:'🌟 '+dedN+'개 차감 용돈'});});
+          this.mut(d=>{d.exch.push({id:this.uid(),k:pmKid.id,d:t,name:(dedAdv>0?'🫰 미리 준 용돈 ':'용돈 ')+dedAmt.toLocaleString()+'원 교환',cost:dedN,money:dedAmt,adv:dedAdv});
+            d.allow.push({id:this.uid(),k:pmKid.id,d:t,ty:'in',pay:'card',src:'parent',a:dedAmt,memo:'🌟 '+dedN+'개 차감 용돈'+(dedAdv>0?' (🫰 '+dedAdv+'개 미리)':'')});});
           this.clearF(['ded_'+pmKid.id]);
-          this.setState({modal:null,saMsg:pmKid.id,saMsgTxt:'🌟 '+dedN+'개 차감 · '+dedAmt.toLocaleString()+'원을 '+pmKid.name+'의 지갑에 넣었어요 (남은 스티커 '+(dedMax-dedN)+'개)'});
+          this.setState({modal:null,saMsg:pmKid.id,saMsgTxt:dedAdv>0
+            ?('🫰 '+dedN+'개 차감 · 그중 '+dedAdv+'개는 미리 준 거예요 · '+dedAmt.toLocaleString()+'원을 '+pmKid.name+'의 지갑에 넣었어요 (갚을 것 '+(dedOwe+dedAdv)+'개)')
+            :('🌟 '+dedN+'개 차감 · '+dedAmt.toLocaleString()+'원을 '+pmKid.name+'의 지갑에 넣었어요 (남은 스티커 '+(dedHave-dedN)+'개)')});
           setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),4000);};
         const shm={};
         D.stlog.filter(x=>x.k===pmKid.id).forEach(x=>{const m=x.d.slice(0,7);(shm[m]=shm[m]||{inn:[],out:[]}).inn.push(x);});
@@ -4003,9 +4000,9 @@ class Component extends DCLogic {
       const rwAdv=this.advMax(D,rwK);
       const rwAdvIn=f['rwAdv_'+rwK]!==undefined?f['rwAdv_'+rwK]:String(rwAdv);
       V.rwAdvIn=rwAdvIn;V.rwAdvOn=e=>this.setF('rwAdv_'+rwK,e.target.value);
-      V.rwAdvNow=rwAdv>0?('지금 설정 · '+V.rwKidName+'는 최대 '+rwAdv+'개까지 미리 땡겨쓸 수 있어요'):'지금은 꺼져 있어요 (0개) · 못 모은 스티커는 쓸 수 없어요';
+      V.rwAdvNow=rwAdv>0?('지금 설정 · '+V.rwKidName+'에게 최대 '+rwAdv+'개까지 미리 주실 수 있어요'):'지금은 꺼져 있어요 (0개) · 모은 만큼만 차감돼요';
       const rwAdvOwe=Math.max(0,-this.trAvail(D,rwK));
-      V.rwAdvHasOwe=rwAdvOwe>0;V.rwAdvOweTxt='🫰 지금 '+rwAdvOwe+'개를 땡겨 쓴 상태예요 · 앞으로 받는 스티커 '+rwAdvOwe+'개는 갚는 데 먼저 들어갑니다';
+      V.rwAdvHasOwe=rwAdvOwe>0;V.rwAdvOweTxt='🫰 지금 '+rwAdvOwe+'개를 미리 준 상태예요 · 아이가 앞으로 받는 스티커 '+rwAdvOwe+'개는 갚는 데 먼저 들어갑니다';
       V.saveRwAdv=()=>{const v=Math.max(0,Math.floor(Number(rwAdvIn)||0));this.mut(d=>{d.stAdv=Object.assign({},d.stAdv||{},{[rwK]:v});});};
       const STK_PICK=['🌟','🏅','🧹','☀️','💖','🏆','🌿','🦄','🔥','👍','🍩','🎀','🌈','💎'];
       const rwE=STK_PICK.indexOf(f.rwEmoji)>=0?f.rwEmoji:'🏅';
