@@ -4036,5 +4036,36 @@ class Component extends DCLogic {
   }
 }
 </script>
+<!-- 맨 아래 새로고침 — 캐시를 통째로 비우고 서버의 최신 판으로 다시 연다 -->
+<div style="max-width:430px;margin:0 auto;padding:18px 16px 34px;box-sizing:border-box;text-align:center;">
+  <button id="fdReload" style="width:100%;max-width:280px;min-height:48px;border:none;border-radius:14px;background:#8A8177;color:#fff;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;padding:13px 16px;">새로고침</button>
+  <div style="margin-top:8px;font-size:11px;color:#A79E93;word-break:keep-all;line-height:1.6;">화면이 옛날 것 같으면 눌러 주세요</div>
+</div>
+<script>
+(function(){
+  var b=document.getElementById("fdReload");
+  if(!b)return;
+  // 바탕색을 앱(프로필 스킨)에 맞춘다 — 아래에 이질적인 띠가 생기지 않게
+  var wrap=b.parentElement;
+  function syncBg(){try{
+    var root=document.querySelector("#dc-root [style*='--bg']")||document.querySelector("#dc-root>*>*");
+    if(!root)return;
+    var bg=getComputedStyle(root).backgroundColor;
+    if(bg&&bg!=="rgba(0, 0, 0, 0)"){wrap.style.background=bg;document.body.style.background=bg;}
+  }catch(e){}}
+  syncBg();setTimeout(syncBg,800);document.addEventListener("click",function(){setTimeout(syncBg,300);},true);
+  b.onclick=async function(){
+    b.disabled=true;b.textContent="새로고침 중…";
+    try{localStorage.removeItem("fd/ver");}catch(e){}
+    try{if(window.caches){var ks=await caches.keys();await Promise.all(ks.map(function(k){return caches.delete(k);}));}}catch(e){}
+    try{if(navigator.serviceWorker){var rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(function(r){return r.unregister();}));}}catch(e){}
+    var f=location.pathname.split("/").pop()||"index.html", tag="";
+    try{var r=await fetch(f+"?cb="+Date.now(),{method:"HEAD",cache:"no-store"});
+      tag=(r.headers.get("etag")||r.headers.get("last-modified")||"").replace(/[^A-Za-z0-9]/g,"");}catch(e){}
+    try{localStorage.setItem("fd/ver",tag);}catch(e){}
+    location.replace(location.pathname+"?v="+(tag||Date.now()));
+  };
+})();
+</script>
 </body>
 </html>
