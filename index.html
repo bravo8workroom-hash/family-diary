@@ -1399,7 +1399,7 @@ input,button,textarea,select{font-family:inherit;}
               </sc-if>
               <div style="display:flex;gap:6px;margin-top:10px;">
                 <button onClick="{{ ko.openTodo }}" style="flex:1;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:11px 4px;font-size:12px;font-weight:800;cursor:pointer;">+ 필수 할일</button>
-                <button onClick="{{ ko.openDed }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:11px 4px;font-size:12px;font-weight:800;cursor:pointer;">🌟 스티커 차감</button>
+                <button onClick="{{ ko.openDed }}" style="flex:1;background:var(--soft,#F7EAD2);color:var(--tx,#3F3A33);border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:11px 4px;font-size:12px;font-weight:800;cursor:pointer;">🌟 스티커</button>
               </div>
               <sc-if value="{{ ko.hasSaMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--ac,#F59E0B);font-weight:700;margin-top:6px;">{{ ko.saMsg }}</div></sc-if>
               <sc-if value="{{ ko.hasTrK }}" hint-placeholder-val="{{ false }}">
@@ -1514,20 +1514,6 @@ input,button,textarea,select{font-family:inherit;}
                 <button onClick="{{ saveRwRate }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:9px 14px;font-size:13px;font-weight:800;cursor:pointer;">저장</button>
               </div>
               <div style="font-size:11px;font-weight:800;color:var(--ac,#F59E0B);margin-top:7px;">지금 설정 · 1개 {{ rwRateNow }}원 / 10개 {{ rwRate10 }}원</div>
-            </div>
-            <div style="background:var(--bg,#FAF6EF);border:1px dashed var(--ac,#F59E0B);border-radius:14px;padding:12px;margin-bottom:14px;">
-              <div style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:800;">🫰 미리 땡겨주기<span style="font-size:10px;font-weight:800;background:var(--card,#fff);color:var(--sub,#8A8177);border-radius:99px;padding:2px 7px;">한도</span></div>
-              <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin:3px 0 9px;word-break:keep-all;line-height:1.7;">아직 못 모은 스티커를 몇 개까지 <b>미리 줄 수 있는지</b> 정해요. <b>아이는 신청할 수 없고</b>, 자녀 카드의 <b>🌟 스티커 차감</b>에서 부모님이 직접 주실 때만 쓰입니다. 아이 화면에는 갚을 개수와 내역만 보여요. <b>0개면 꺼짐</b>이에요.</div>
-              <div style="display:flex;align-items:center;gap:7px;">
-                <span style="font-size:13px;font-weight:800;white-space:nowrap;">최대</span>
-                <input value="{{ rwAdvIn }}" onChange="{{ rwAdvOn }}" type="number" style="flex:1;min-width:0;box-sizing:border-box;padding:9px 10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--card,#fff);color:inherit;font-size:14px;font-weight:800;text-align:right;outline:none;">
-                <span style="font-size:13px;font-weight:800;">개</span>
-                <button onClick="{{ saveRwAdv }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:9px 14px;font-size:13px;font-weight:800;cursor:pointer;">저장</button>
-              </div>
-              <div style="font-size:11px;font-weight:800;color:var(--ac,#F59E0B);margin-top:7px;word-break:keep-all;line-height:1.6;">{{ rwAdvNow }}</div>
-              <sc-if value="{{ rwAdvHasOwe }}" hint-placeholder-val="{{ false }}">
-                <div style="font-size:11px;font-weight:800;color:#E0654F;margin-top:5px;word-break:keep-all;line-height:1.6;">{{ rwAdvOweTxt }}</div>
-              </sc-if>
             </div>
             </sc-if>
             <div style="font-size:13px;font-weight:800;margin-bottom:2px;">다른 스티커 보상 만들기</div>
@@ -1837,15 +1823,31 @@ input,button,textarea,select{font-family:inherit;}
 <sc-if value="{{ modalPDed }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;">
     <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
-      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">🌟 {{ pmEmoji }} {{ pmName }} 스티커 차감</div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:10px;">{{ pmDedTitle }}</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <button onClick="{{ pmTabDed }}" style="flex:1;background:{{ pmTabDedBg }};color:{{ pmTabDedFg }};border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:10px 4px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;min-height:44px;">🌟 차감</button>
+        <button onClick="{{ pmTabAdv }}" style="flex:1;background:{{ pmTabAdvBg }};color:{{ pmTabAdvFg }};border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:10px 4px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;min-height:44px;">🫰 땡겨쓰기</button>
+      </div>
       <div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:12px;word-break:keep-all;line-height:1.7;">{{ pmDedHead }}</div>
       <div style="background:var(--bg,#FAF6EF);border-radius:14px;padding:12px;margin-bottom:12px;text-align:center;">
         <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);">지금 남은 스티커</div>
         <div style="font-family:Gaegu;font-size:38px;font-weight:700;color:var(--ac,#F59E0B);line-height:1.2;">{{ pmStickers }}개</div>
         <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);">받음 {{ pmStEarned }}개 − 사용 {{ pmStSpent }}개</div>
       </div>
+      <sc-if value="{{ pmDedIsAdv }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--bg,#FAF6EF);border:1px dashed var(--ac,#F59E0B);border-radius:14px;padding:12px;margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:800;margin-bottom:7px;">🫰 미리 줄 수 있는 한도</div>
+          <div style="display:flex;align-items:center;gap:7px;">
+            <span style="font-size:13px;font-weight:800;white-space:nowrap;">최대</span>
+            <input value="{{ pmAdvIn }}" onChange="{{ pmAdvOn }}" type="number" style="flex:1;min-width:0;box-sizing:border-box;padding:9px 10px;border:1px solid var(--line,#eee);border-radius:12px;background:var(--card,#fff);color:inherit;font-size:14px;font-weight:800;text-align:right;outline:none;font-family:inherit;">
+            <span style="font-size:13px;font-weight:800;">개</span>
+            <button onClick="{{ pmAdvSave }}" style="background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:12px;padding:9px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">저장</button>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:var(--sub,#8A8177);margin-top:7px;word-break:keep-all;line-height:1.6;">{{ pmAdvOweTxt }}</div>
+        </div>
+      </sc-if>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <span style="flex:1;font-size:13px;font-weight:800;">몇 개 차감할까요?</span>
+        <span style="flex:1;font-size:13px;font-weight:800;">{{ pmDedPickTxt }}</span>
         <div style="display:flex;align-items:center;gap:4px;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:3px;flex-shrink:0;">
           <button onClick="{{ pmDedDec }}" style="width:40px;height:40px;border-radius:50%;border:none;background:var(--card,#fff);color:var(--sub,#8A8177);font-size:18px;font-weight:900;cursor:pointer;padding:0;font-family:inherit;">−</button>
           <span style="min-width:52px;text-align:center;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums;">🌟 {{ pmDedN }}</span>
@@ -1868,7 +1870,7 @@ input,button,textarea,select{font-family:inherit;}
       </sc-if>
       <div style="display:flex;gap:8px;margin-top:14px;">
         <button onClick="{{ closeModal }}" style="flex:1;background:var(--bg,#FAF6EF);border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;color:inherit;font-family:inherit;">취소</button>
-        <button onClick="{{ pmDedGo }}" style="flex:2;background:{{ pmDedBg }};color:{{ pmDedFg }};border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;font-family:inherit;">🌟 차감하고 용돈 주기</button>
+        <button onClick="{{ pmDedGo }}" style="flex:2;background:{{ pmDedBg }};color:{{ pmDedFg }};border:none;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;font-family:inherit;">{{ pmDedBtnTxt }}</button>
       </div>
     </div>
   </div>
@@ -2307,7 +2309,7 @@ input,button,textarea,select{font-family:inherit;}
 const FMOTTOS=['서로 선은 넘지 맙시다. 나는 갯바위에서, 너는 바다 속에서!','오늘의 신사 협정: 찌가 가라앉으면 정당하게 협상 개시.','잡아도 칭찬, 놓쳐도 미소, 꽝 쳐도 품격 유지!','바늘은 거들 뿐, 승부는 신사답게.','물고기는 매너 입질, 낚시꾼은 안전 퇴근!','오늘의 서약: 바늘 끝엔 예의, 발 밑엔 안전.','손맛은 묵직하게, 쓰레기는 싹 다 가볍게!','잡혀줘서 고맙고, 살아서 돌아가니 반갑다!','용왕님도 인정하는 페어플레이 낚시꾼.','바다와의 비즈니스: 꽝 쳐도 절대 투정 금지!','No Trash, No Risk, Just Fishing.','안전 조행 100%, 매너 입질 100%.','물고기에겐 미안함, 바다에겐 고마움.','손맛 낚고, 추억 담고, 무사 귀가.','격식 있는 챔질, 매너 있는 귀가.','바다 위 신사들의 정당한 한판승부.','안전이 우선, 매너가 기본.','바다를 아끼는 진짜 낚시꾼의 품격.','찌끝에 담은 예의, 발끝에 둔 안전.','클린 캐스팅, 리스펙트 조행.','바다가 내어준 선물, 감사함으로 되돌려줍니다.','물고기와 나눈 짧은 대화, 긴 여운으로 남기는 하루.','파도 소리에 감사를, 바람 소리에 안녕을.','자연이 준 소중한 손맛, 내가 지키는 안전한 조행.','바다를 닮은 넓은 마음으로 낚시합니다.','내가 떠난 자리는 바다의 눈물 없이 깨끗하게.','작은 물고기 한 마리에도 경건함을 담아.','바다와 사람이 같이 웃는 소중한 순간.','무사히 집으로 다녀오는 것이 가장 큰 조과입니다.','푸른 바다 위, 나만의 신사적 낭만.','어종 불문, 크기 불문! 안전과 매너는 절대 성역.','발 밑은 조심조심, 바다 속엔 신사답게.','잡는 기쁨보다 지키는 보람을 낚습니다.','바다의 규칙을 지키는 자가 진짜 꾼이다.','나를 지키는 구명조끼, 바다를 지키는 클린마인드.','어린 생명은 놓아주고, 내 쓰레기는 가져오고.','바다 생명과의 약속, 신사적인 라이벌의 대결.','너와 나의 매너가 만날 때 완벽한 조행이 완성된다.','나도 무사히 집으로, 너도 무사히 바다로!','오늘도 신사답게 던지고, 정직하게 낚았습니다.'];
 
 class Component extends DCLogic {
-  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',rwOpen:false,parentOk:false,modal:null,editMode:false,calM:'',tideM:'',tidePick:false,selDate:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',tdPicOpen:'',picZoom:'',picBusy:false};
+  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',rwOpen:false,parentOk:false,modal:null,editMode:false,calM:'',tideM:'',tidePick:false,selDate:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',tdPicOpen:'',picZoom:'',picBusy:false,pmDedTab:'ded'};
   KEY = 'famdiary_v1';
   KART={'가자미':{i:'🐟',a:'#E2D3B4',b:'#7D6746'},'우럭':{i:'🐠',a:'#B9C6AD',b:'#43533F'},'볼락':{i:'🐡',a:'#FFC0AC',b:'#A3392A'},'쥐노래미':{i:'🐟',a:'#DBE4AC',b:'#66743A'},'고등어':{i:'🐟',a:'#C8E7F5',b:'#25587A'},'전갱이':{i:'🐠',a:'#E2F2F8',b:'#54798F'},'학꽁치':{i:'🐟',a:'#EAF5FC',b:'#7691A6'},'보리멸':{i:'🐟',a:'#F6ECD4',b:'#A08554'},'황어':{i:'🐟',a:'#FFE7AD',b:'#94741F'},'삼치':{i:'🐟',a:'#D3E7F2',b:'#37627F'},'붕장어':{i:'🐍',a:'#E0D1B8',b:'#645440'},'장어':{i:'🐍',a:'#DCCFBA',b:'#5B4C3A'},'방어':{i:'🐠',a:'#FFE6B0',b:'#A5761D'},'광어':{i:'🐟',a:'#E6EEF6',b:'#5A6A79'},'감성돔':{i:'🐟',a:'#DFE9F2',b:'#41576B'},'참돔':{i:'🐠',a:'#FFD6D4',b:'#A4413C'}};
   KFISH={'장어':{len:68,diff:5},'삼치':{len:52,diff:3},'방어':{len:74,diff:4},'볼락':{len:24,diff:2},'광어':{len:45,diff:3},'감성돔':{len:31,diff:3},'참돔':{len:38,diff:4}};
@@ -3878,7 +3880,7 @@ class Component extends DCLogic {
                 this.setState({saMsg:kp.id,saMsgTxt:'✅ 수락 · '+e+' '+x.cost+'개 차감했어요 (남은 '+Math.max(0,left)+'개)'});
                 setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),3500);},
               no:()=>this.exNo(x.id),
-              hasShort:short,shortTxt:kp.name+'의 '+e+' 스티커가 '+(x.cost-have)+'개 모자라요 · 수락할 수 없어요'+(star&&kAdvMax>0?' (미리 주시려면 아래 🌟 스티커 차감에서 땡겨주기)':'')};}),
+              hasShort:short,shortTxt:kp.name+'의 '+e+' 스티커가 '+(x.cost-have)+'개 모자라요 · 수락할 수 없어요'+(star&&kAdvMax>0?' (미리 주시려면 아래 🌟 스티커 → 🫰 땡겨쓰기)':'')};}),
           hasAppr:kAppr.length>0,apprV:kAppr.map(x=>{const aps=(D.tdPics||[]).filter(p=>p.k===x.k&&p.d===x.d&&p.td===x.td);
             return{title:x.title,rew:(x.rs||'🌟')+(Number(x.rn||1)>1?' ×'+x.rn:''),date:this.dShort(x.d),
               hasPics:aps.length>0,picsV:aps.map(p=>({u:p.u,zoom:()=>this.setState({picZoom:p.u})})),
@@ -3904,7 +3906,7 @@ class Component extends DCLogic {
                 this.setState({ptdEdit:''});},
               del:()=>{if(S.ptdEdit===td.id)this.setState({ptdEdit:''});this.mut(d=>{d.todos=d.todos.filter(x=>x.id!==td.id);d.appr=(d.appr||[]).filter(x=>x.td!==td.id);});}};}),
           openTodo:()=>this.setState({modal:{t:'ptodo',kid:kp.id}}),
-          openDed:()=>this.setState({modal:{t:'pded',kid:kp.id}}),
+          openDed:()=>this.setState({modal:{t:'pded',kid:kp.id},pmDedTab:'ded'}),
           openStHist:()=>this.setState({modal:{t:'psthist',kid:kp.id},pmTrashOpen:false,pmPurgeAsk:''}),
           openSched:()=>this.setState({modal:{t:'psched',kid:kp.id},ttKid:kp.id}),
           stEarned:kEarned,stSpent:kSpent,stTypesK,hasStTypesK:stTypesK.length>0,
@@ -3928,24 +3930,43 @@ class Component extends DCLogic {
         V.pmTodoAdd=()=>{if(!(f['pt_'+pmKid.id]||'').trim())return;pmi.ptAdd();this.setState({modal:null});};
         V.pmStickers=pmi.stickers;V.pmStEarned=pmi.stEarned;V.pmStSpent=pmi.stSpent;
         // 스티커 차감 — 개수를 고르면 1개 금액 x 개수 = 합계금액이 그 자리에서 보인다
-        // 땡겨주기 - 모은 것을 넘어 한도까지 미리 줄 수 있다. 여기가 유일한 문이다(아이는 신청 못 한다)
+        // 창 하나에 탭 둘 - 「차감」은 모은 것만, 「🫰 땡겨쓰기」는 못 모은 것까지 미리 준다
         const dedHave=Math.max(0,pmi.stickers);const dedAdvMax=this.advMax(D,pmKid.id);
-        const dedOwe=Math.max(0,-pmi.stickersRaw);              // 이미 땡겨 준 것
-        const dedMax=dedHave+Math.max(0,dedAdvMax-dedOwe);      // 한도가 남은 만큼만 더 준다
+        const dedOwe=Math.max(0,-pmi.stickersRaw);              // 이미 미리 준 것(갚을 것)
+        const advTab=S.pmDedTab==='adv';
+        V.pmDedIsDed=!advTab;V.pmDedIsAdv=advTab;
+        V.pmTabDedBg=advTab?sk.card:sk.ac;V.pmTabDedFg=advTab?sk.sub:sk.on;
+        V.pmTabAdvBg=advTab?sk.ac:sk.card;V.pmTabAdvFg=advTab?sk.on:sk.sub;
+        V.pmTabDed=()=>this.setState({pmDedTab:'ded'});
+        V.pmTabAdv=()=>this.setState({pmDedTab:'adv'});
+        V.pmDedTitle=(advTab?'🫰 ':'🌟 ')+pmKid.emoji+' '+pmKid.name+(advTab?' 스티커 땡겨쓰기':' 스티커 차감');
+        // 땡겨쓰기 탭에서만 한도까지 더 고를 수 있다
+        const dedMax=advTab?(dedHave+Math.max(0,dedAdvMax-dedOwe)):dedHave;
         const dedN=Math.min(Math.max(1,Number(f['ded_'+pmKid.id]||1)),Math.max(1,dedMax));
         const dedAdv=Math.max(0,dedN-dedHave);                  // 이번에 미리 주는 몫
         const dedAmt=dedN*pmi.dedRate;const dedOK=dedMax>=1&&dedN<=dedMax;
         V.pmDedN=dedN;V.pmDedRate=pmi.dedRate.toLocaleString();V.pmDedAmt=dedAmt.toLocaleString();
         V.pmDedHasAdv=dedAdv>0;
         V.pmDedAdvTxt='🫰 이 중 '+dedAdv+'개는 아직 못 모은 스티커를 미리 주는 거예요 · 앞으로 받는 스티커로 갚습니다';
-        V.pmDedLeftTxt=dedAdv>0?('차감하면 🫰 갚아야 할 스티커가 '+(dedOwe+dedAdv)+'개가 돼요')
+        V.pmDedLeftTxt=dedAdv>0?('주고 나면 🫰 갚아야 할 스티커가 '+(dedOwe+dedAdv)+'개가 돼요')
           :('차감하면 남는 스티커 🌟 '+(dedHave-dedN)+'개');
-        V.pmDedHead=dedAdvMax>0
-          ?('모은 스티커를 용돈으로 바꿔 줘요. 아직 못 모은 만큼도 🫰 미리 줄 수 있어요 (한도 '+dedAdvMax+'개).')
+        V.pmDedHead=advTab
+          ?'아직 못 모은 스티커를 미리 줘요. 아이는 신청할 수 없고, 앞으로 받는 스티커로 저절로 갚아집니다.'
           :'모은 스티커를 용돈으로 바꿔 줘요. 고른 개수만큼 실제로 차감돼요.';
+        V.pmDedPickTxt=advTab?'몇 개 미리 줄까요?':'몇 개 차감할까요?';
+        V.pmDedBtnTxt=advTab?'🫰 미리 주고 용돈 주기':'🌟 차감하고 용돈 주기';
+        // 한도 설정 - 쓰는 자리 바로 옆에 둔다(사장님 선택 2026-09-10)
+        const pmAdvIn=f['pmadv_'+pmKid.id]!==undefined?f['pmadv_'+pmKid.id]:String(dedAdvMax);
+        V.pmAdvIn=pmAdvIn;V.pmAdvOn=e=>this.setF('pmadv_'+pmKid.id,e.target.value);
+        V.pmAdvSave=()=>{const v=Math.max(0,Math.floor(Number(pmAdvIn)||0));
+          this.mut(d=>{d.stAdv=Object.assign({},d.stAdv||{},{[pmKid.id]:v});});};
+        V.pmAdvOweTxt='지금 갚을 것 🫰 '+dedOwe+'개 · 한도가 '+dedAdvMax+'개라 앞으로 '+Math.max(0,dedAdvMax-dedOwe)+'개까지 더 줄 수 있어요';
         V.pmDedDec=()=>this.setF('ded_'+pmKid.id,Math.max(1,dedN-1));
         V.pmDedInc=()=>this.setF('ded_'+pmKid.id,Math.min(Math.max(1,dedMax),dedN+1));
-        V.pmDedWarn=!dedOK;V.pmDedWarnTxt=dedMax<1?('남은 스티커도 없고 🫰 땡겨주기 한도도 남지 않았어요 (한도 '+dedAdvMax+'개)'):('고를 수 있는 최대는 '+dedMax+'개예요');
+        V.pmDedWarn=!dedOK;
+        V.pmDedWarnTxt=advTab
+          ?(dedAdvMax<1?'🫰 한도가 0개예요 · 위에서 한도를 먼저 정해 주세요':'한도까지 다 주셨어요 · 아이가 갚은 뒤에 다시 주실 수 있어요')
+          :(dedMax<1?'남은 스티커가 없어요 · 미리 주시려면 🫰 땡겨쓰기 탭으로':'남은 스티커('+dedMax+'개)보다 많이 고르셨어요');
         V.pmDedBg=dedOK?sk.ac:sk.bg;V.pmDedFg=dedOK?sk.on:sk.sub;
         V.pmDedGo=()=>{if(!dedOK)return;
           this.mut(d=>{d.exch.push({id:this.uid(),k:pmKid.id,d:t,name:(dedAdv>0?'🫰 미리 준 용돈 ':'용돈 ')+dedAmt.toLocaleString()+'원 교환',cost:dedN,money:dedAmt,adv:dedAdv});
@@ -4001,14 +4022,6 @@ class Component extends DCLogic {
       V.rwRateIn=rwRateIn;V.rwRateOn=e=>this.setF('rwRate_'+rwK,e.target.value);
       V.rwRateNow=rwRate.toLocaleString();V.rwRate10=(rwRate*10).toLocaleString();
       V.saveRwRate=()=>{const v=Math.max(0,Number(rwRateIn)||0);if(!v)return;this.mut(d=>{d.stkRate=Object.assign({},d.stkRate||{},{[rwK]:v});});};
-      // 땡겨쓰기 한도 - 아이별. 0이면 꺼짐(지금까지와 똑같이 동작한다)
-      const rwAdv=this.advMax(D,rwK);
-      const rwAdvIn=f['rwAdv_'+rwK]!==undefined?f['rwAdv_'+rwK]:String(rwAdv);
-      V.rwAdvIn=rwAdvIn;V.rwAdvOn=e=>this.setF('rwAdv_'+rwK,e.target.value);
-      V.rwAdvNow=rwAdv>0?('지금 설정 · '+V.rwKidName+'에게 최대 '+rwAdv+'개까지 미리 주실 수 있어요'):'지금은 꺼져 있어요 (0개) · 모은 만큼만 차감돼요';
-      const rwAdvOwe=Math.max(0,-this.trAvail(D,rwK));
-      V.rwAdvHasOwe=rwAdvOwe>0;V.rwAdvOweTxt='🫰 지금 '+rwAdvOwe+'개를 미리 준 상태예요 · 아이가 앞으로 받는 스티커 '+rwAdvOwe+'개는 갚는 데 먼저 들어갑니다';
-      V.saveRwAdv=()=>{const v=Math.max(0,Math.floor(Number(rwAdvIn)||0));this.mut(d=>{d.stAdv=Object.assign({},d.stAdv||{},{[rwK]:v});});};
       const STK_PICK=['🌟','🏅','🧹','☀️','💖','🏆','🌿','🦄','🔥','👍','🍩','🎀','🌈','💎'];
       const rwE=STK_PICK.indexOf(f.rwEmoji)>=0?f.rwEmoji:'🏅';
       V.rwEmojiPickV=STK_PICK.map(e=>({e,bg:e===rwE?sk.soft:sk.bg,bd:e===rwE?sk.ac:'transparent',pick:()=>this.setF('rwEmoji',e)}));
