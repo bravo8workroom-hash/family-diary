@@ -1807,14 +1807,19 @@ class Component extends DCLogic {
     /* 빠졌으면 주 시작값에 붙어 목표가 도망가지 않고, 늘었으면 남은 날에 닿는 곳까지만 올라간다. */
     const auto=Math.max(sw-pace,reach);
     const base=Math.max(sw,cur);
-    const man=(this.state.weekGoals||{})[ws];
+    /* 사장님이 적어 두신 이번 주 목표는 어떤 요일 기준으로 저장됐든 이번 주 안에 있으면 읽는다 (2026-09-11 — 주 기준을 목요일로 바꾸자 월요일 칸(9/14)의 값이 빈칸으로 보였다. 값은 안 옮기고 읽기만 넓힌다). */
+    const WGm=this.state.weekGoals||{};let man=WGm[ws];if(man==null||man===''){const ks=Object.keys(WGm).filter(k=>k>=ws&&k<=we&&WGm[k]!=null&&WGm[k]!=='').sort();if(ks.length)man=WGm[ks[ks.length-1]]}
     const goal=+Math.max(+g.goalW,(man!=null&&man!==''?+man:auto)).toFixed(1);
     const need=+(cur-goal).toFixed(1),span=+(base-goal).toFixed(1);
     const pct=span>0?Math.max(0,Math.min(100,Math.round((base-cur)/span*100))):(need<=0?100:0);
     /* 페이스가 0 이면 「몇 주 남았나」는 셀 수 없다 — 0 으로 나누면 Infinity 가 화면에 찍힌다. */
     const weeksLeft=pace>0?Math.max(0,Math.ceil((cur-(+g.goalW))/pace)):null;
     const weeksText=weeksLeft==null?'—':('약 '+weeksLeft+'주');
-    return {ws,we,pace,cur,sw,base,goal,need,pct,daysLeft,weeksLeft,weeksText,manual:man!=null&&man!==''}}
+    /* 2차 목표 (2026-09-11 사장님 지시): 이번 주 목표를 이미 이뤘으면, 이룬 날부터 마감까지 남은 날수만큼 같은 페이스로 하나 더 건다. 1차 목표(goal)는 안 건드린다 — 2차를 못 이뤄도 1차는 해낸 것이다. */
+    let ach=null;for(let d=ws;d<=this.TODAY;d=this.addDays(d,1)){const w=this.wAt(d);if(w!=null&&+w<=goal){ach=d;break}}
+    const done=ach!=null;let bonus=null,bonusNeed=null;
+    if(done&&pace>0){const rem=Math.max(1,Math.round((new Date(we+'T00:00:00')-new Date(ach+'T00:00:00'))/864e5)+1);bonus=+Math.max(+g.goalW,goal-pace*Math.min(7,rem)/7).toFixed(1);if(bonus>=goal)bonus=null;else bonusNeed=+(cur-bonus).toFixed(1)}
+    return {ws,we,pace,cur,sw,base,goal,need,pct,daysLeft,weeksLeft,weeksText,manual:man!=null&&man!=='',done,ach,bonus,bonusNeed}}
   famUrl(){try{const p=String(location.pathname||'');if(/(^|\/)diet\/(index\.html)?$/.test(p))return '../'}catch(e){}
     return 'https://bravo8workroom-hash.github.io/family-diary/'}
   trainerBrief(){const T=this.TODAY,R=this.RULE(),s=this.sums(T),rows=this.absLines(T),kept=rows.filter(a=>a.ok).length,wk=this.weekPlan();
@@ -1833,10 +1838,10 @@ class Component extends DCLogic {
       '- 탄 '+Math.round(s.c)+'/'+R.cG+'g · 단 '+Math.round(s.p)+'/'+R.pG+'g · 지 '+Math.round(s.f)+'/'+R.fG+'g (뒤가 트레이너 목표)',
       '- 물 '+(this.waterOf(T)/1000).toFixed(2)+'/'+(R.waterMl/1000)+'L (커피 미포함)','',
       '## 이번 주 목표','',
-      '- '+wk.ws+' ~ '+wk.we+' (주 기준 '+this.DOW_KO[this.weekDow()]+'요일부터) · 주 시작 '+wk.sw+'kg · 기준 '+wk.base+'kg → 목표 '+wk.goal+'kg'+(wk.manual?' (사장님과 정한 값)':' (지금 체중 기준 자동)'),
-      '- 지금 '+wk.cur+'kg · 남은 '+wk.need+'kg · 이번 주 '+wk.daysLeft+'일 남음',
+      '- '+wk.ws+' ~ '+wk.we+'('+this.DOW_KO[new Date(wk.we+'T00:00:00').getDay()]+') (주 기준 '+this.DOW_KO[this.weekDow()]+'요일부터) · 주 시작 '+wk.sw+'kg · 기준 '+wk.base+'kg → 목표 '+wk.goal+'kg'+(wk.manual?' (사장님과 정한 값)':' (지금 체중 기준 자동)'),
+      '- 지금 '+wk.cur+'kg · 남은 '+wk.need+'kg · 이번 주 '+wk.daysLeft+'일 남음'+(wk.done?(' · 🎉 1차 목표 달성('+wk.ach+')'+(wk.bonus!=null?(' → 2차 목표 '+wk.bonus+'kg (남은 '+wk.bonusNeed+'kg) — 못 이뤄도 잘한 것이다, 굶기지 마라'):'')):''),
       '- 최종 '+(+this.state.set.goalW)+'kg까지 '+wk.weeksText+' (주 '+wk.pace+'kg 페이스)',
-      ...(fin?['- 결승선 '+fin.fd+'까지 '+(fin.over?'지났다':(fin.weeks+'주 · 남은 '+fin.gap+'kg → 필요 페이스 주 '+fin.need+'kg'+(fin.need>wk.pace?(' 〔지금 페이스 '+wk.pace+'보다 빠르다 — 사장님과 상의해라〕'):'')))]:[]),'',
+      ...(fin?['- 결승선 '+fin.fd+'('+this.DOW_KO[new Date(fin.fd+'T00:00:00').getDay()]+')까지 '+(fin.over?'지났다':(fin.weeks+'주 · 남은 '+fin.gap+'kg → 필요 페이스 주 '+fin.need+'kg'+(fin.need>wk.pace?(' 〔지금 페이스 '+wk.pace+'보다 빠르다 — 사장님과 상의해라〕'):'')))]:[]),'',
       '## 먹은 것','');
     const fs=this.state.foods[T]||[];
     if(!fs.length)L.push('- (아직 없음)');
@@ -2078,7 +2083,7 @@ class Component extends DCLogic {
     const phNow=this.phaseOf();
     const gset=S.set,hasGoal=!!gset.goalDate;
     let ddayText='',goalDateText='';
-    if(hasGoal){const diff=Math.round((new Date(gset.goalDate+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5);ddayText=diff>0?'D-'+diff:diff===0?'D-Day':'D+'+(-diff);const gd=new Date(gset.goalDate+'T00:00:00');goalDateText=(gd.getMonth()+1)+'월 '+gd.getDate()+'일'}
+    if(hasGoal){const diff=Math.round((new Date(gset.goalDate+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5);ddayText=diff>0?'D-'+diff:diff===0?'D-Day':'D+'+(-diff);const gd=new Date(gset.goalDate+'T00:00:00');goalDateText=(gd.getMonth()+1)+'월 '+gd.getDate()+'일 ('+this.DOW_KO[gd.getDay()]+')'}
     let cur=gset.startW;for(let i=0;i<14;i++){const w=S.weights[this.d(i)];if(w&&w.a!=null){cur=w.a;break}}
     const lost=+(gset.startW-cur).toFixed(1);
     const wStats=[{label:'시작',val:fmt(gset.startW),color:'#1F1E1A'},{label:'현재',val:fmt(cur),color:th.accent},{label:'감량',val:(lost>=0?'-':'+')+fmt(Math.abs(lost)),color:lost>=0?'#5B8DEF':'#E5484D'},{label:'목표',val:fmt(gset.goalW),color:'#1F1E1A'}];
@@ -2101,8 +2106,8 @@ class Component extends DCLogic {
       done:()=>{this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:[{...x,at:this.TODAY},...tdDone].slice(0,100)}});this.toast('처리됨으로 옮겼어요 ✓')},
       del:()=>this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:tdDone}})}));
     const wkp=this.weekPlan();
-    const wkColor=wkp.need<=0?'#17A673':th.accent;
-    const wkStats=[{label:'주 시작(월)',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:'남은 감량',val:wkp.need>0?fmt(wkp.need):'달성 ✓',color:wkp.need>0?'#E5484D':'#17A673'}];
+    const wkColor=(wkp.need<=0||wkp.done)?'#17A673':th.accent;
+    const wkStats=[{label:'주 시작('+this.DOW_KO[this.weekDow()]+')',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:wkp.bonus!=null?'2차까지':'남은 감량',val:wkp.bonus!=null?fmt(Math.max(0,wkp.bonusNeed)):(wkp.need>0?fmt(wkp.need):'달성 ✓'),color:wkp.bonus!=null?th.accent:(wkp.need>0?'#E5484D':'#17A673')}];
     const noDow=ds=>this.lbl(ds).replace(/\s*\(.\)$/,'');
     const a3=this.advice3();
     const ewA=S.editW;
@@ -2500,8 +2505,8 @@ class Component extends DCLogic {
       tdRows,tdCount:tdItems.length+'건'+(tdDone.length?(' · 처리됨 '+tdDone.length):''),tdColor:tdItems.length?th.accent:'#B5B2A6',tdEmpty:!tdItems.length,
       tdDraft:S.tdDraft||'',tdOnDraft:e=>this.setState({tdDraft:e.target.value}),
       tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,tdPaste,tdPhDraft,tdHasPh:!!tdPh.length,
-      wkRange:noDow(wkp.ws)+'~'+noDow(wkp.we),wkGoalText:fmt(wkp.goal)+' kg',wkColor,wkPct:wkp.pct,wkStats,
-      wkNote:(wkp.pace>0?('남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg — 주 '+wkp.pace+'kg 페이스를 남은 날수로 나눈 몫이에요 · 최종 '+fmt(+gset.goalW)+'kg까지 '+wkp.weeksText):('이번 주는 줄이지 않는 주간이에요(페이스 0). 눈금 대신 기록으로 보세요 · 이번 주 '+wkp.daysLeft+'일 남음')),
+      wkRange:noDow(wkp.ws)+'~'+this.lbl(wkp.we),wkGoalText:(wkp.bonus!=null?(fmt(wkp.goal)+' ✓ → 2차 '+fmt(wkp.bonus)+' kg'):(fmt(wkp.goal)+' kg')),wkColor,wkPct:wkp.pct,wkStats,
+      wkNote:(wkp.done?('🎉 이번 주 목표 '+fmt(wkp.goal)+'kg 달성! '+(wkp.bonus!=null?('2차 목표 '+fmt(wkp.bonus)+'kg — 남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.bonusNeed))+'kg 더. 못 해도 1차는 이미 해냈어요'):'마감까지 유지만 해도 충분해요')+' · 마감 '+this.lbl(wkp.we)):(wkp.pace>0?('남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg — 주 '+wkp.pace+'kg 페이스를 남은 날수로 나눈 몫이에요 · 최종 '+fmt(+gset.goalW)+'kg까지 '+wkp.weeksText):('이번 주는 줄이지 않는 주간이에요(페이스 0). 눈금 대신 기록으로 보세요 · 이번 주 '+wkp.daysLeft+'일 남음'))),
       sWeekGoal:wkp.manual?wkp.goal:'',sWeekPace:wkp.pace,onWeekPace:setRule('weekPace'),
       onWeekGoal:e=>{const v=String(e.target.value||'').trim();const WG={...(S.weekGoals||{})};
         if(v==='')delete WG[wkp.ws];else WG[wkp.ws]=+v||0;
