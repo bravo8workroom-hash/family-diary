@@ -1861,8 +1861,14 @@ class Component extends DCLogic {
   /* 받은 것을 기록에 합치는 자리 — 검사기가 fetch 없이 이 함수를 직접 부른다. */
   mergeInbox(o){
     if(!o||o.app!=='dietgram-inbox'||!o.stamp)return;
-    let seen=null;try{seen=localStorage.getItem('dgm_inboxSeen')}catch(_){}
-    if(seen===o.stamp)return;
+    /* 「이미 받았다」 도장은 공용 자료 안(set.inboxSeen)에 둔다 — 2026-09-12 사장님 지시 「설정한 목표체중과 페이스가 자꾸 옛기록으로 업데이트 된다」.
+       옛 코드는 도장을 그 기기 localStorage 에만 두었는데, 고쳐 쓰는 자료는 가족 저장소(모든 기기 공용)라
+       다른 기기·다른 브라우저·캐시를 지운 뒤 열면 같은 입력함이 다시 적용돼 사장님이 방금 바꾼 값을 덮었다.
+       ⛔ localStorage 로 되돌리지 마라. 옛 기기가 남긴 localStorage 도장은 읽기만 해서 공용 도장으로 옮긴다. */
+    const St0=this.state.set||{};
+    let seen=St0.inboxSeen||null;
+    if(!seen){try{seen=localStorage.getItem('dgm_inboxSeen')}catch(_){}}
+    if(seen===o.stamp){if(St0.inboxSeen!==o.stamp)this.setState({set:{...St0,inboxSeen:o.stamp}});return}
     const S=this.state,P={},add=[];
     if(o.weights&&Object.keys(o.weights).length){const W={...S.weights};
       for(const d of Object.keys(o.weights))W[d]={...(W[d]||{}),...o.weights[d]};  /* 목표(t) 칸을 지우지 않는다 */
@@ -1916,7 +1922,9 @@ class Component extends DCLogic {
       const hit=(TD.items||[]).filter(x=>ids.has(x.id)||ids.has(String(x.t||'')));
       if(hit.length){P.todo={items:(TD.items||[]).filter(x=>!(ids.has(x.id)||ids.has(String(x.t||'')))),done:[...hit.map(x=>({...x,at:this.TODAY})),...(TD.done||[])].slice(0,100)};add.push('작업대기 '+hit.length+'건 정리')}}
     try{localStorage.setItem('dgm_inboxSeen',o.stamp)}catch(_){}
-    if(!add.length)return;
+    /* 도장을 공용 자료에도 함께 적는다 — 넣은 것이 없어도 적어야 다른 기기가 다시 적용하지 않는다. */
+    P.set={...(P.set||S.set||{}),inboxSeen:o.stamp};
+    if(!add.length){this.setState(P);return}
     this.setState(P,()=>{this.persist();this.toast('🏋️ 트레이너가 '+(o.note||'기록')+'을 넣었어요 — '+add.join(' · '))})}
   /* 기록을 다 읽은 뒤 한 번 — 목표일 굴리기 + 트레이너 입력함 받기. 두 mount(폰·웹)가 함께 부른다. */
   afterLoad(){this.rollGoal();this.pullInbox()}
