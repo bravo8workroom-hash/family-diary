@@ -98,7 +98,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               <div style="font-size:11.5px;font-weight:700;color:#8B887C">{{winN}}번째</div>
             </div>
             <div style="font-size:15.5px;font-weight:800;color:#17A673;margin-top:9px;line-height:1.45">{{winTopLine}}</div>
-            <div style="font-size:11.5px;color:#8B887C;margin-top:3px;line-height:1.55">{{winTopSub}}</div>
+            <div style="font-size:11.5px;color:#8B887C;margin-top:3px;line-height:1.55;white-space:pre-line">{{winTopSub}}</div>
             <sc-if value="{{winHasRest}}" hint-placeholder-val="{{ false }}">
               <div style="margin-top:10px;padding-top:9px;border-top:1px solid #F4F2ED">
                 <sc-for list="{{winRest}}" as="wv" hint-placeholder-count="2">
@@ -137,7 +137,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             </sc-for>
           </div>
           <button onClick="{{safeToggle}}" style="width:100%;margin-top:13px;border:0;border-radius:{{radM}};padding:11px;font-size:12.5px;font-weight:800;cursor:pointer;background:{{safeBtnBg}};color:{{safeBtnColor}}">{{safeBtnLabel}}</button>
-          <div style="font-size:10.5px;color:#B5B2A6;margin-top:8px;line-height:1.55;text-align:center">어지러움·손떨림·식은땀·못 먹음·근력 직후엔 클린을 따지지 않아요</div>
+          <div style="font-size:10.5px;color:#B5B2A6;margin-top:8px;line-height:1.55;text-align:center">어지럽거나 못 먹은 날엔 클린을 안 따져요</div>
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
@@ -157,7 +157,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div style="font-size:13px;font-weight:700;color:#8B887C">💧 물 <span style="font-weight:600;color:#B5B2A6">· 커피는 미포함</span></div>
+            <div style="font-size:13px;font-weight:700;color:#8B887C">💧 물 <span style="font-weight:600;color:#B5B2A6">· 커피 빼고</span></div>
             <div style="font-size:16px;font-weight:800;color:{{waterColor}}">{{waterText}}</div>
           </div>
           <div style="height:10px;border-radius:99px;background:{{chipBg}};overflow:hidden">
@@ -187,11 +187,11 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               </div>
             </sc-for>
           </div>
-          <div style="font-size:11px;color:#B5B2A6;margin-top:10px;line-height:1.55;text-align:center">{{wkNote}}</div>
+          <div style="font-size:11px;color:#B5B2A6;margin-top:10px;line-height:1.55;text-align:center;white-space:pre-line">{{wkNote}}</div>
           <sc-if value="{{phaseOn}}" hint-placeholder-val="{{ true }}">
             <div style="margin-top:10px;padding-top:10px;border-top:1px solid {{cardBorder}};line-height:1.6">
               <div style="font-size:12.5px;font-weight:800;color:{{modeColor}}">{{phaseTitle}}</div>
-              <div style="font-size:11.5px;color:#8B887C;margin-top:3px">{{phaseRead}}</div>
+              <div style="font-size:11.5px;color:#8B887C;margin-top:3px;white-space:pre-line">{{phaseRead}}</div>
               <div style="font-size:11px;color:#B5B2A6;margin-top:3px">{{phaseTips}}</div>
             </div>
           </sc-if>
@@ -228,19 +228,19 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <sc-for list="{{a3Lines}}" as="l" hint-placeholder-count="4">
               <div style="display:flex;gap:8px;align-items:flex-start">
                 <span style="font-size:13px;flex:none;width:18px;text-align:center;line-height:1.6">{{l.icon}}</span>
-                <div style="flex:1;min-width:0;font-size:12px;line-height:1.65;font-weight:600;color:{{l.color}}">{{l.t}}</div>
+                <div style="flex:1;min-width:0;font-size:12px;line-height:1.65;font-weight:600;white-space:pre-line;color:{{l.color}}">{{l.t}}</div>
               </div>
             </sc-for>
           </div>
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">📊 주 평균 · 최근 7일 중 {{wkDays}}일 기록</div>
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">📊 주 평균 · 7일 중 {{wkDays}}일</div>
           <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
             <div style="background:{{chipBg}};border-radius:{{radM}};padding:12px;text-align:center"><div style="font-size:11px;color:#8B887C;font-weight:600">하루 평균</div><div style="font-size:17px;font-weight:800;margin-top:3px;color:{{wkKcalColor}}">{{wkKcal}} <span style="font-size:10.5px;color:#8B887C">kcal</span></div></div>
             <div style="background:{{chipBg}};border-radius:{{radM}};padding:12px;text-align:center"><div style="font-size:11px;color:#8B887C;font-weight:600">평균 단백질</div><div style="font-size:17px;font-weight:800;margin-top:3px;color:{{wkPColor}}">{{wkP}} <span style="font-size:10.5px;color:#8B887C">g</span></div></div>
           </div>
-          <div style="font-size:11.5px;color:#8B887C;margin-top:11px;line-height:1.65">「오늘 많이 먹었으니 내일 굶자」는 하지 않아요. <b style="color:#1F1E1A">하루가 아니라 주 평균</b>으로 봅니다. 한 끼 흔들렸다고 그날 나머지를 줄이지 마세요.</div>
+          <div style="font-size:11.5px;color:#8B887C;margin-top:11px;line-height:1.65">「오늘 많이 먹었으니 내일 굶자」는 하지 않아요.<br><b style="color:#1F1E1A">하루가 아니라 주 평균</b>으로 봅니다.</div>
         </div>
 
 
@@ -1310,7 +1310,7 @@ class Component extends DCLogic {
         rule:{winS:'10:00',winE:'18:00',kcalMin:1200,cG:130,pG:100,fG:45,waterMl:2000,firstFatG:8,carbUp:{1:2,6:1}}},
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,favs:FV,carbUp:{},safe:{},todo:{items:[],done:[]},
-      stock:{shop:[],home:[]},weekGoals:{},favMute:[],
+      stock:{shop:[],home:[]},weekGoals:{},favMute:[],wins:{},
       cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,ntOpen:-1,ntKind:'전체',ntMore:false,jOpen:null,
       editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
@@ -1568,11 +1568,11 @@ class Component extends DCLogic {
     return [
       {k:'win',icon:'🕙',name:'식사창 '+R.winS+'-'+R.winE,ok:has&&timed.length>0&&out.length===0,na:!has||!timed.length,
        val:!has?'기록 없음':!timed.length?'시각 미입력':out.length?(out.length+'끼 창 밖 ('+out.map(x=>x.time).join(', ')+')'):'모두 창 안'},
-      {k:'kcal',icon:'🔥',name:'칼로리 하한 '+f(R.kcalMin)+' ('+UNDER_RUN+'일 연속부터)',ok:s.kcal>=R.kcalMin||uRun<UNDER_RUN,na:!has,
+      {k:'kcal',icon:'🔥',name:'칼로리 하한 '+f(R.kcalMin)+' ('+UNDER_RUN+'일 연속)',ok:s.kcal>=R.kcalMin||uRun<UNDER_RUN,na:!has,
        val:f(s.kcal)+' kcal'+(has&&s.kcal<R.kcalMin?(' · '+f(R.kcalMin-s.kcal)+' 미달'+(uRun>1?(' · '+uRun+'일째'):'')):'')},
-      {k:'p',icon:'🍗',name:'단백질 '+R.pG+'g (협상 불가)',ok:s.p>=R.pG,na:false,
+      {k:'p',icon:'🍗',name:'단백질 '+R.pG+'g',ok:s.p>=R.pG,na:false,
        val:f(s.p)+' / '+R.pG+'g'+(s.p<R.pG?(' · '+f(R.pG-s.p)+'g 남음'):'')},
-      {k:'fat1',icon:'🥑',name:'첫 끼 지방 (담석 예방)',ok:!!first&&(+first.f||0)>=R.firstFatG,na:!first,
+      {k:'fat1',icon:'🥑',name:'첫 끼 지방 (담석)',ok:!!first&&(+first.f||0)>=R.firstFatG,na:!first,
        val:first?(f(first.f)+'g · '+first.name):'첫 끼 시각을 적어 주세요'},
       {k:'water',icon:'💧',name:'물 '+(R.waterMl/1000)+'L (커피 제외)',ok:water>=R.waterMl,na:wRaw==null,
        val:wRaw==null?'기록 없음':((water/1000).toFixed(1)+' / '+(R.waterMl/1000)+'L')}];
@@ -1767,10 +1767,18 @@ class Component extends DCLogic {
     for(const k of Object.keys(WG)){const v=WG[k];if(v!=null&&v!=='')add(k,this.addDays(k,6),1,+v)}
     const wk=this.weekPlan();
     add(wk.ws,wk.we,1,wk.goal);
-    if(wk.bonus!=null)add(wk.ws,wk.we,2,wk.bonus);
+    if(wk.bonus!=null){
+      /* 2차 목표를 얼린다. 옛 셈법(목표 체중 −0.2 · 페이스 비례)으로 적힌 2차 달성이 남아 있으면 한 번만 걷어낸다. */
+      if(out[wk.ws+'|2g']==null){out[wk.ws+'|2g']={g:wk.bonus,tier:0,d:this.TODAY};
+        const old=out[wk.ws+'|2'];if(old&&Math.abs(+old.goal-wk.bonus)>0.001)delete out[wk.ws+'|2']}
+      add(wk.ws,wk.we,2,wk.bonus)}
     return out}
-  winSave(){const o=this.winScan();if(Object.keys(o).length!==Object.keys(this.state.wins||{}).length)this.setState({wins:o})}
-  winList(){const W=this.state.wins||{};return Object.keys(W).map(k=>W[k]).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.tier-a.tier))}
+  winSave(){const o=this.winScan();if(JSON.stringify(o)!==JSON.stringify(this.state.wins||{}))this.setState({wins:o})}
+  /* 얼려 둔 2차 목표(tier 0)는 달성이 아니라 목표라서 뺀다. 주 기준 요일을 바꾸면 같은 달성이 두 주에 걸쳐 두 번 적힐 수 있어 「같은 날·같은 차수」는 한 줄로 접는다. */
+  winList(){const W=this.state.wins||{},at={},out=[];
+    for(const k of Object.keys(W)){const x=W[k];if(!x||(x.tier!==1&&x.tier!==2))continue;
+      const id=x.d+'|'+x.tier;if(at[id]==null){at[id]=out.length;out.push(x)}else if(+x.goal<+out[at[id]].goal)out[at[id]]=x}
+    return out.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.tier-a.tier))}
   rollGoal(){const g=this.state.set||{};const n={},P={};
     if(+g.goalWCode!==this.GOALW){n.goalW=this.GOALW;n.goalWCode=this.GOALW}
     if(g.finalDateCode!==this.GOALDATE){n.finalDate=this.GOALDATE;n.finalDateCode=this.GOALDATE}
@@ -1779,7 +1787,9 @@ class Component extends DCLogic {
     if(g.goalDate!==we)n.goalDate=we;
     const fv=this.favMigrate();if(fv){P.favs=fv;n.favVer=this.FAV_VER}
     if(Object.keys(n).length)P.set={...g,...n};
-    if(Object.keys(P).length)this.setState(P,()=>this.winSave());else this.winSave()}
+    if(Object.keys(P).length)this.setState(P);
+    /* ⛔ 이 줄을 위 setState 의 콜백으로 옮기지 마라 — 2026-09-11 실측으로 goalDate 갱신이 날아가 홈 D-day 가 D+32 로 찍혔다. 달성 스캔은 따로 뒤에 돌린다. */
+    setTimeout(()=>this.winSave(),0)}
   /* 🏋️ 트레이너 입력함 — 사장님이 말로 주신 기록을 트레이너가 파일에 적어 두면 앱이 받아 넣는다.
      ⛔ 덮어쓰지 않고 「합친다」. 같은 날 같은 이름·같은 시각이 이미 있으면 건너뛴다.
      백업 불러오기(applyBackup)와 헷갈리지 마라 — 그쪽은 통째로 갈아끼우는 것이라 위험하다. */
@@ -1875,7 +1885,12 @@ class Component extends DCLogic {
     /* 페이스 0(유지·근력 주간)에는 2차를 안 건다 — 「이번 주는 안 줄인다」는 모드와 어긋난다. */
     /* 기준은 목표 체중이 아니라 **달성한 그날 실제로 잰 체중**이다 (2026-09-11 사장님 정정 「목표체중에서 200g 빠지는 게 아니라 마지막 달성한 체중에서 200g」).
        목표를 크게 넘겨 이루셨으면 2차도 그만큼 아래에서 시작한다. 달성 체중은 wins 에 얼어붙어 있어 2차 목표가 날마다 도망가지 않는다. */
-    if(done&&pace>0){const b0=(achW!=null?achW:goal);bonus=+Math.max(+g.goalW,b0-this.BONUS_KG).toFixed(1);if(bonus>=goal)bonus=null;else bonusNeed=+(cur-bonus).toFixed(1)}
+    /* 기준은 목표 체중이 아니라 **마지막으로 잰 몸무게**다 (2026-09-11 사장님 정정 「68.3 목표를 67.8로 달성했으면 마지막 잰 몸무게에서 200g 더」).
+       ⛔ 목표 체중(goal)으로 잡으면 크게 넘겨 이루셨을 때 2차가 이미 지나온 자리에 걸려 「2차까지 0」이 뜬다 — 실제로 그렇게 떴다.
+       ⛔ 날마다 다시 셈하지도 마라 — 빠질 때마다 목표가 같이 내려가면 영영 못 닿는다(=굶기는 목표). 그래서 처음 걸릴 때 wins['<주>|2g'] 에 얼린다. */
+    const B2=(this.state.wins||{})[ws+'|2g'];
+    if(done&&pace>0){bonus=(B2&&B2.g!=null)?+B2.g:+Math.max(+g.goalW,Math.min(achW!=null?achW:goal,cur)-this.BONUS_KG).toFixed(1);
+      if(bonus>=goal)bonus=null;else bonusNeed=+(cur-bonus).toFixed(1)}
     return {ws,we,pace,cur,sw,base,goal,need,pct,daysLeft,weeksLeft,weeksText,manual:man!=null&&man!=='',done,ach,bonus,bonusNeed}}
   famUrl(){try{const p=String(location.pathname||'');if(/(^|\/)diet\/(index\.html)?$/.test(p))return '../'}catch(e){}
     return 'https://bravo8workroom-hash.github.io/family-diary/'}
@@ -1962,10 +1977,14 @@ class Component extends DCLogic {
     sc-=Math.min(35,Math.max(0,g.p-s.p)/Math.max(1,g.p)*70);
     sc-=Math.min(20,Math.max(0,s.c-g.c)/Math.max(1,g.c)*40);
     return Math.max(5,Math.round(sc))}
+  /* ★ 문장이 중간에 잘려 다음 줄로 넘어가지 않게, 문장마다 줄을 바꾼다 (2026-09-11 사장님 지시
+     「두 문장인데 한 패널 안에 길이가 길어서 마지막 문장이 중간에 짤려 밑으로 내려가잖아 — 애매하게 짤리는 부분은 그 한 문장을 아래로 내려서 써」).
+     쓰는 쪽은 이 함수를 통과시키고, 그리는 칸에는 white-space:pre-line 을 준다. 숫자의 소수점(1.5kg)은 뒤에 공백이 없어 안 걸린다. */
+  br(s){return String(s==null?'':s).replace(new RegExp('([.!?])[ ]+','g'),'$1'+String.fromCharCode(10))}
   lbl(ds){const dt=new Date(ds+'T00:00:00');return (dt.getMonth()+1)+'.'+dt.getDate()+' ('+['일','월','화','수','목','금','토'][dt.getDay()]+')'}
   addFoods(dt,items){const F={...this.state.foods};const DM={...this.state.dayMode};if(!(F[dt]||[]).length&&!DM[dt])DM[dt]=this.state.mode;F[dt]=[...(F[dt]||[]),...items];let P=this.state.posts;if(!P.some(p=>p.date===dt)){P=[{id:'p'+(this.seq++),date:dt,photos:[],text:'',auto:true,starred:false,comments:[]},...P]}const patch={foods:F,dayMode:DM,posts:P};const fv=this.favAuto(items);if(fv)patch.favs=fv;this.setState(patch)}
   openDayFeed(ds){let P=this.state.posts;let post=P.find(p=>p.date===ds);if(!post){post={id:'p'+(this.seq++),date:ds,photos:[],text:'',auto:true,starred:false,comments:[]};P=[post,...P]}this.setState({tab:'feed',posts:P,pm:{id:post.id,editing:false,isNew:false,menu:false,confirm:false,draft:null},replyTo:null,cInput:''})}
-  commitW(ds,f,v){const n=parseFloat(String(v).replace(/,/g,''));const W={...this.state.weights};W[ds]=Object.assign({t:null,a:null},W[ds],{[f]:isNaN(n)?null:n});this.setState({weights:W,editW:null},()=>this.winSave());if(!isNaN(n))this.toast(this.say('저장했어요 ✓','저장했사와요 👑'))}
+  commitW(ds,f,v){const n=parseFloat(String(v).replace(/,/g,''));const W={...this.state.weights};W[ds]=Object.assign({t:null,a:null},W[ds],{[f]:isNaN(n)?null:n});this.setState({weights:W,editW:null});setTimeout(()=>this.winSave(),0);if(!isNaN(n))this.toast(this.say('저장했어요 ✓','저장했사와요 👑'))}
   shiftDay(n){const dt=new Date(this.state.selDate+'T00:00:00');dt.setDate(dt.getDate()+n);const z=x=>String(x).padStart(2,'0');const ds=dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate());if(ds<=this.TODAY)this.setState({selDate:ds})}
   openPost(id,edit){const p=this.state.posts.find(x=>x.id===id);this.setState({pm:{id,editing:!!edit,isNew:false,menu:false,confirm:false,draft:edit?{photos:[...p.photos],text:p.text}:null},replyTo:null,cInput:''})}
   newPost(date){this.setState({pm:{id:null,editing:true,isNew:true,date,menu:false,confirm:false,draft:{photos:[],text:''}},replyTo:null,cInput:''})}
@@ -2421,7 +2440,7 @@ class Component extends DCLogic {
       absRows:absT.rows,absKept:absT.kept,absTotal:absT.rows.length,absColor:absT.color,
       safeToday:safeT,safeToggle:toggleSafe,
       safeBtnBg:safeT?'#E5484D':th.chipBg,safeBtnColor:safeT?'#fff':'#8B887C',
-      safeBtnLabel:safeT?'🚨 안전 예외 켜짐 — 누르면 끄기':'🚨 지금 어지럽다 / 손떨린다 / 못 먹었다',
+      safeBtnLabel:safeT?'🚨 안전 예외 켜짐 — 누르면 끄기':'🚨 어지럽다 / 손떨린다 / 못 먹었다',
       /* 물 */
       waterText:(waterT/1000).toFixed(2).replace(/\.?0+$/,'')+' / '+(waterGoal/1000)+'L',
       waterPct:Math.min(100,Math.round(waterT/waterGoal*100)),
@@ -2540,7 +2559,7 @@ class Component extends DCLogic {
       modeColor:phNow?(phNow.k==='maint'?th.maint:th.diet):modeC(S.mode),
       modeBg:phNow?(phNow.k==='maint'?th.maintSoft:th.dietSoft):modeB(S.mode),
       phaseOn:!!phNow,phaseTitle:phNow?(phNow.e+' '+phNow.t+(phNow.over?' · 기한 지남 — 트레이너와 다시 정하세요':(phNow.to?(' · '+noDow(phNow.to)+'까지'):''))):'',
-      phaseRead:phNow?((phNow.why?(phNow.why+' — '):'')+phNow.read):'',
+      phaseRead:phNow?this.br((phNow.why?(phNow.why+' — '):'')+phNow.read):'',
       phaseTips:phNow?phNow.tips.join(' · '):'',
       phaseHint:phNow?('지금 '+phNow.e+' '+phNow.t+' 모드예요. 모드를 바꾸면 탄수·지방·페이스·물이 그 모드의 출발값으로 채워지고, 그 뒤 트레이너가 보낸 값이 이깁니다.'):'모드를 고르면 탄수·지방·페이스·물이 그 모드의 출발값으로 채워져요. 절대선 다섯은 어느 모드에서도 안 바뀝니다.',
       phaseChips:this.PHASES.map(p=>({t:p.e+' '+p.t,pick:()=>this.applyPhase(p.k),
@@ -2572,14 +2591,14 @@ class Component extends DCLogic {
       tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,tdPaste,tdPhDraft,tdHasPh:!!tdPh.length,
       winOn:!!winTop,winN:winRows.length,winRows,winRest,winHasRest:winRest.length>0,
       winTopLine:winTop?('🎉 '+winTop.dTxt+' · '+winTop.goalTxt+' 목표 달성!'):'',
-      winTopSub:winTop?(winTop.tierTxt+' 목표를 '+winTop.whenTxt+'에 해냈어요 · '+winTop.wTxt):'',
+      winTopSub:winTop?(winTop.tierTxt+' · '+winTop.whenTxt+'에 해냈어요 · '+winTop.wTxt):'',
       wkRange:noDow(wkp.ws)+'~'+this.lbl(wkp.we),wkGoalText:(wkp.bonus!=null?(fmt(wkp.goal)+' ✓ → 2차 '+fmt(wkp.bonus)+' kg'):(fmt(wkp.goal)+' kg')),wkColor,wkPct:wkp.pct,wkStats,
-      wkNote:(wkp.done?('🎉 이번 주 목표 '+fmt(wkp.goal)+'kg 달성! '+(wkp.bonus!=null?('2차 목표 '+fmt(wkp.bonus)+'kg — 남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.bonusNeed))+'kg 더. 못 해도 1차는 이미 해냈어요'):'마감까지 유지만 해도 충분해요')+' · 마감 '+this.lbl(wkp.we)):(wkp.pace>0?('남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg — 주 '+wkp.pace+'kg 페이스를 남은 날수로 나눈 몫이에요 · 최종 '+fmt(+gset.goalW)+'kg까지 '+wkp.weeksText):('이번 주는 줄이지 않는 주간이에요(페이스 0). 눈금 대신 기록으로 보세요 · 이번 주 '+wkp.daysLeft+'일 남음'))),
+      wkNote:this.br((wkp.done?('🎉 '+fmt(wkp.goal)+'kg 달성! '+(wkp.bonus!=null?('2차 '+fmt(wkp.bonus)+'kg — '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.bonusNeed))+'kg 더. 못 해도 1차는 해냈어요'):'마감까지 유지만 해도 충분해요')+' · 마감 '+this.lbl(wkp.we)):(wkp.pace>0?('남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg · 최종 '+fmt(+gset.goalW)+'kg까지 '+wkp.weeksText):('줄이지 않는 주간이에요 · '+wkp.daysLeft+'일 남음')))),
       sWeekGoal:wkp.manual?wkp.goal:'',sWeekPace:wkp.pace,onWeekPace:setRule('weekPace'),
       onWeekGoal:e=>{const v=String(e.target.value||'').trim();const WG={...(S.weekGoals||{})};
         if(v==='')delete WG[wkp.ws];else WG[wkp.ws]=+v||0;
         this.setState({weekGoals:WG});this.toast(v===''?'이번 주 목표를 자동으로 되돌렸어요 ✓':('이번 주 목표를 '+v+'kg으로 두었어요 ✓'))},
-      wStats,a3Rows,a3Lines:a3.lines,wRows,
+      wStats,a3Rows,a3Lines:a3.lines.map(x=>({...x,t:this.br(x.t)})),wRows,
       pillRows,pillKept:pillKeptN,pillDue:pillDueN,pillColor:pillKeptN>=pillDueN?'#17A673':th.accent,
       selLabel:this.lbl(S.selDate),selDate:S.selDate,todayStr:this.TODAY,
       prevDay:()=>this.shiftDay(-1),nextDay:()=>this.shiftDay(1),
