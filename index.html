@@ -1611,6 +1611,7 @@ input,button,textarea,select{font-family:inherit;}
     <div style="background:var(--card,#fff);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:430px;box-sizing:border-box;">
       <div style="font-size:16px;font-weight:800;margin-bottom:4px;">🌟 {{ pmEmoji }} {{ pmName }} 스티커 월별 기록</div>
       <div style="font-size:12px;color:var(--sub,#8A8177);margin-bottom:12px;">지금까지 받음 <b style="color:#3FA45B;">{{ pmStEarned }}개</b> · 사용 <b style="color:#E0654F;">{{ pmStSpent }}개</b> · 남음 <b style="color:var(--tx,#3F3A33);">{{ pmStickers }}개</b></div>
+      <div style="font-size:11px;font-weight:700;color:var(--sub,#8A8177);margin-bottom:12px;word-break:keep-all;line-height:1.6;">내역을 누르면 메모를 보거나 남길 수 있어요 📝</div>
       <div style="display:flex;gap:6px;margin-bottom:12px;">
         <button onClick="{{ pmTabHist }}" style="flex:1;background:{{ pmTbHBg }};color:{{ pmTbHFg }};border:1px solid {{ pmTbHBd }};border-radius:12px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;min-height:40px;">📜 기록</button>
         <button onClick="{{ pmTabTrash }}" style="flex:1;background:{{ pmTbTBg }};color:{{ pmTbTFg }};border:1px solid {{ pmTbTBd }};border-radius:12px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;min-height:40px;">🗑️ 휴지통 {{ pmTrashN }}</button>
@@ -1631,12 +1632,34 @@ input,button,textarea,select{font-family:inherit;}
               </div>
               <div style="display:flex;flex-direction:column;gap:4px;">
                 <sc-for list="{{ hm.items }}" as="hi" hint-placeholder-count="3">
-                  <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;min-height:40px;">
-                    <span style="min-width:38px;color:var(--sub,#8A8177);flex-shrink:0;">{{ hi.date }}</span>
-                    <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ hi.txt }}</span>
-                    <span style="font-weight:900;color:{{ hi.c }};">{{ hi.amt }}</span>
-                    <button onClick="{{ hi.del }}" title="{{ hi.delTip }}" style="flex-shrink:0;width:40px;height:40px;background:transparent;border:none;border-radius:10px;font-size:14px;font-weight:900;color:var(--sub,#8A8177);cursor:pointer;font-family:inherit;opacity:{{ hi.delOp }};">{{ hi.delIcon }}</button>
-                  </div>
+                  <sc-if value="{{ hi.viewing }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;min-height:40px;">
+                      <button onClick="{{ hi.open }}" title="누르면 메모를 보거나 남길 수 있어요" style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;background:transparent;border:none;padding:0;margin:0;cursor:pointer;color:inherit;font-family:inherit;font-size:12px;font-weight:700;text-align:left;min-height:40px;">
+                        <span style="min-width:38px;color:var(--sub,#8A8177);flex-shrink:0;">{{ hi.date }}</span>
+                        <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ hi.txt }}</span>
+                        <span style="flex-shrink:0;font-size:11px;">{{ hi.memoTag }}</span>
+                        <span style="font-weight:900;color:{{ hi.c }};flex-shrink:0;">{{ hi.amt }}</span>
+                      </button>
+                      <button onClick="{{ hi.del }}" title="{{ hi.delTip }}" style="flex-shrink:0;width:40px;height:40px;background:transparent;border:none;border-radius:10px;font-size:14px;font-weight:900;color:var(--sub,#8A8177);cursor:pointer;font-family:inherit;opacity:{{ hi.delOp }};">{{ hi.delIcon }}</button>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ hi.editing }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:var(--card,#fff);border:1px solid var(--ac,#F59E0B);border-radius:12px;padding:10px 12px;">
+                      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;margin-bottom:8px;">
+                        <span style="color:var(--sub,#8A8177);flex-shrink:0;">{{ hi.date }}</span>
+                        <span style="flex:1;min-width:0;word-break:keep-all;line-height:1.6;">{{ hi.txt }}</span>
+                        <span style="font-weight:900;color:{{ hi.c }};flex-shrink:0;">{{ hi.amt }}</span>
+                      </div>
+                      <textarea value="{{ f.pmMemo }}" onChange="{{ on.pmMemo }}" rows="3" placeholder="이 스티커는 무슨 일로 받았나요? 메모를 남겨보세요 📝" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line,#EFE4CF);border-radius:10px;background:var(--bg,#FAF6EF);color:inherit;font-size:13px;line-height:1.6;outline:none;resize:none;font-family:inherit;word-break:keep-all;"></textarea>
+                      <div style="display:flex;gap:6px;margin-top:8px;">
+                        <button onClick="{{ hi.cancel }}" style="flex:1;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:10px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;color:inherit;font-family:inherit;min-height:44px;">취소</button>
+                        <sc-if value="{{ hi.hasMemo }}" hint-placeholder-val="{{ false }}">
+                          <button onClick="{{ hi.memoDel }}" style="flex:1;background:var(--bg,#FAF6EF);border:1px solid #E0654F;border-radius:10px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;color:#E0654F;font-family:inherit;min-height:44px;">메모 삭제</button>
+                        </sc-if>
+                        <button onClick="{{ hi.save }}" style="flex:2;background:var(--ac,#F59E0B);color:var(--on,#fff);border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;min-height:44px;">메모 저장</button>
+                      </div>
+                    </div>
+                  </sc-if>
                 </sc-for>
               </div>
             </div>
@@ -2552,6 +2575,10 @@ class Component extends DCLogic {
   stRestore(tid){this.mut(d=>{const i=(d.sttrash||[]).findIndex(y=>y.tid===tid);if(i<0)return;
     const tr=d.sttrash[i];(tr.ty==='in'?d.stlog:d.exch).push(tr.it);d.sttrash.splice(i,1);});}
   stPurge(tid){this.mut(d=>{d.sttrash=(d.sttrash||[]).filter(y=>y.tid!==tid);});}
+  // memo on one sticker record - empty text removes it. lives on the item itself so trash/restore carries it
+  stMemo(ty,it,txt){const key=JSON.stringify(it);this.mut(d=>{const arr=ty==='in'?d.stlog:d.exch;
+    const x=it.id!==undefined?arr.find(y=>y.id===it.id):arr.find(y=>JSON.stringify(y)===key);
+    if(!x)return;if(txt)x.memo=txt;else delete x.memo;});}
   // 교환 신청 수락 — 여기서만 스티커가 실제로 빠진다(exch에 들어가야 잔액이 준다)
   exOk(x){const t=this.today();this.mut(d=>{
     if(!(d.exreq||[]).some(y=>y.id===x.id))return;          // 두 번 눌러도 한 번만 나간다
@@ -3064,7 +3091,7 @@ class Component extends DCLogic {
   renderVals(){
     const S=this.state,D=S.data;
     if(!D)return{loading:true,noUser:false,hasUser:false,skinBg:'#FAF6EF',skinCard:'#fff',skinAc:'#F59E0B',skinOn:'#fff',skinSoft:'#F7EAD2',skinLine:'#EFE4CF',skinTx:'#3F3A33',skinSub:'#8A8177',f:{},on:{},modalPw:false,modalEvent:false,modalDday:false,modalProfile:false,modalPing:false,hasPings:false,pingsV:[]};
-    const FL=['evTitle','evTime','evMemo','evDate','evClItem','evClDue','evMember','jSubj','jMin','jText','scSubj','scName','scScore','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDate','kfTm','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','rwName','rwCost','goTitle','goDate','gdMemo'];
+    const FL=['evTitle','evTime','evMemo','evDate','evClItem','evClDue','evMember','jSubj','jMin','jText','scSubj','scName','scScore','tdTitle','fdText','alAmt','alMemo','stMsg','ttDay','ttTime','ttName','kfSpecies','kfLen','kfGear','kfPoint','kfDiary','kfEtc','kfDate','kfTm','pw','ppw','newPw','pfName','pfEmoji','pfPw','meName','meEmoji','mePw','pingMsg','ddTitle','ddDate','ddEmoji','rwName','rwCost','goTitle','goDate','gdMemo','pmMemo'];
     const on={};FL.forEach(k=>on[k]=e=>this.setF(k,e.target.value));
     const f=S.f,t=this.today(),W=this.won.bind(this);
     const u=D.profiles.find(p=>p.id===S.user)||null;
@@ -3886,7 +3913,7 @@ class Component extends DCLogic {
               hasPics:aps.length>0,picsV:aps.map(p=>({u:p.u,zoom:()=>this.setState({picZoom:p.u})})),
               ok:()=>this.apprOk(x.id),no:()=>this.apprNo(x.id)};}),
           hasStHist:stHist.length>0,stHistV:stHist.slice(0,2).map(x=>({date:this.dShort(x.d),txt:x.txt,amt:x.amt,c:x.c})),
-          histMore:stHist.length>2,histArrow:'더보기 ▸',histToggle:()=>this.setState({modal:{t:'psthist',kid:kp.id},pmTrashOpen:false,pmPurgeAsk:''}),
+          histMore:stHist.length>2,histArrow:'더보기 ▸',histToggle:()=>this.setState({modal:{t:'psthist',kid:kp.id},pmTrashOpen:false,pmPurgeAsk:'',pmMemoEdit:null}),
           hasTds:tds.length>0,
           tdListV:tds.map(td=>{const dn=!!ck[td.id];const pend=(D.appr||[]).some(x=>x.tag==='td_'+td.id+'_'+t);
             const rs=td.rs||'🌟',rn=Math.max(1,Number(td.rn||1));const ed=S.ptdEdit===td.id;
@@ -3907,7 +3934,7 @@ class Component extends DCLogic {
               del:()=>{if(S.ptdEdit===td.id)this.setState({ptdEdit:''});this.mut(d=>{d.todos=d.todos.filter(x=>x.id!==td.id);d.appr=(d.appr||[]).filter(x=>x.td!==td.id);});}};}),
           openTodo:()=>this.setState({modal:{t:'ptodo',kid:kp.id}}),
           openDed:()=>this.setState({modal:{t:'pded',kid:kp.id},pmDedTab:'ded'}),
-          openStHist:()=>this.setState({modal:{t:'psthist',kid:kp.id},pmTrashOpen:false,pmPurgeAsk:''}),
+          openStHist:()=>this.setState({modal:{t:'psthist',kid:kp.id},pmTrashOpen:false,pmPurgeAsk:'',pmMemoEdit:null}),
           openSched:()=>this.setState({modal:{t:'psched',kid:kp.id},ttKid:kp.id}),
           stEarned:kEarned,stSpent:kSpent,stTypesK,hasStTypesK:stTypesK.length>0,
           hasStMon:stMonV.length>0,stMonV,
@@ -3984,20 +4011,27 @@ class Component extends DCLogic {
         const lockTip='이미 써버린 스티커예요 (남은 '+stAvail+'개)';
         const lockMsg='이미 사용한 스티커라 지울 수 없어요 (남은 스티커 '+stAvail+'개). 먼저 아래 「사용」 기록을 지우면 받음 기록도 지울 수 있어요.';
         V.pmHasStMsg=!!S.pmStMsg;V.pmStMsg=S.pmStMsg||'';
+        // memo per record - click the row to open, save/delete/cancel. key is type+id so in/out never collide
+        const stMemoF=(ty,x)=>{const memo=x.memo||'',key=ty+':'+(x.id!==undefined?x.id:x.d+'|'+JSON.stringify(x).length),editing=S.pmMemoEdit===key;
+          return{hasMemo:!!memo,noMemo:!memo,memo,memoTag:memo?'📝':'',viewing:!editing,editing,
+            open:()=>this.setState({pmMemoEdit:key,f:{...this.state.f,pmMemo:memo}}),
+            cancel:()=>this.setState({pmMemoEdit:null}),
+            memoDel:()=>{this.stMemo(ty,x,'');this.setState({pmMemoEdit:null});},
+            save:()=>{this.stMemo(ty,x,(this.state.f.pmMemo||'').trim());this.setState({pmMemoEdit:null});}};};
         V.pmHistMonV=Object.keys(shm).sort().reverse().map(m=>{const g=shm[m];
           return{m:Number(m.slice(0,4))+'년 '+Number(m.slice(5,7))+'월',inN:g.inn.length,outN:g.out.reduce((s2,x)=>s2+x.cost,0),
             items:g.inn.map(x=>{const ok=stAvail>=1;
-              return{sd:x.d,date:this.dShort(x.d),txt:x.e+' '+(x.msg||x.from||'받음'),amt:'+1',c:'#3FA45B',
+              return{...stMemoF('in',x),sd:x.d,date:this.dShort(x.d),txt:x.e+' '+(x.msg||x.from||'받음'),amt:'+1',c:'#3FA45B',
                 delIcon:ok?'🗑️':'🔒',delOp:ok?'1':'0.45',delTip:ok?'휴지통으로 보내기':lockTip,
                 del:()=>{if(!ok)return stWarn(lockMsg);this.stDel('in',x);}};})
-              .concat(g.out.map(x=>({sd:x.d,date:this.dShort(x.d),txt:'🎁 '+x.name,amt:'-'+x.cost,c:'#E0654F',
+              .concat(g.out.map(x=>({...stMemoF('out',x),sd:x.d,date:this.dShort(x.d),txt:'🎁 '+x.name,amt:'-'+x.cost,c:'#E0654F',
                 delIcon:'🗑️',delOp:'1',delTip:'휴지통으로 보내기',del:()=>this.stDel('out',x)})))
               .sort((a,b)=>b.sd.localeCompare(a.sd))};});
         V.pmHistEmpty=V.pmHistMonV.length===0;
         const stTrash=(D.sttrash||[]).filter(x=>x.it&&x.it.k===pmKid.id);
         const trOpen=!!S.pmTrashOpen;V.pmTrashOpen=trOpen;V.pmHistOpen=!trOpen;V.pmTrashN=stTrash.length;
-        V.pmTabHist=()=>this.setState({pmTrashOpen:false,pmPurgeAsk:''});
-        V.pmTabTrash=()=>this.setState({pmTrashOpen:true,pmPurgeAsk:''});
+        V.pmTabHist=()=>this.setState({pmTrashOpen:false,pmPurgeAsk:'',pmMemoEdit:null});
+        V.pmTabTrash=()=>this.setState({pmTrashOpen:true,pmPurgeAsk:'',pmMemoEdit:null});
         V.pmTbHBg=trOpen?sk.card:sk.ac;V.pmTbHFg=trOpen?sk.sub:sk.on;V.pmTbHBd=trOpen?sk.line:sk.ac;
         V.pmTbTBg=trOpen?sk.ac:sk.card;V.pmTbTFg=trOpen?sk.on:sk.sub;V.pmTbTBd=trOpen?sk.ac:sk.line;
         V.pmTrashV=stTrash.slice().sort((a,b)=>String(b.dd).localeCompare(String(a.dd))).map(tr=>{const x=tr.it;const isIn=tr.ty==='in';
