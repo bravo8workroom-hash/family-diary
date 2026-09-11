@@ -91,6 +91,28 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           </a>
         </div>
 
+        <sc-if value="{{winOn}}" hint-placeholder-val="{{ true }}">
+          <div style="background:{{cardBg}};border:1px solid #BFE8D6;border-radius:{{radL}};padding:16px 18px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+              <div style="font-size:13px;font-weight:800;color:#17A673">🏆 달성 기록</div>
+              <div style="font-size:11.5px;font-weight:700;color:#8B887C">{{winN}}번째</div>
+            </div>
+            <div style="font-size:15.5px;font-weight:800;color:#17A673;margin-top:9px;line-height:1.45">{{winTopLine}}</div>
+            <div style="font-size:11.5px;color:#8B887C;margin-top:3px;line-height:1.55">{{winTopSub}}</div>
+            <sc-if value="{{winHasRest}}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:10px;padding-top:9px;border-top:1px solid #F4F2ED">
+                <sc-for list="{{winRest}}" as="wv" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:baseline;gap:7px;font-size:11.5px;color:#8B887C;padding:2.5px 0">
+                    <span style="flex:none;font-weight:800;color:#17A673">✓</span>
+                    <span style="flex:none;font-weight:700;color:#5C594E">{{wv.dTxt}}</span>
+                    <span style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">{{wv.goalTxt}} {{wv.tierTxt}} · {{wv.wTxt}}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
             <div style="font-size:13px;font-weight:700;color:#8B887C">🛡 오늘의 절대선</div>
@@ -575,6 +597,18 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <div style="height:100%;width:{{rmPct}}%;background:{{accent}};border-radius:99px"></div>
           </div>
           <div style="font-size:12px;color:#8B887C;margin-top:8px;line-height:1.65">{{rmSummary}}</div>
+          <sc-if value="{{winOn}}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:12px;padding-top:11px;border-top:1px solid #F4F2ED">
+              <div style="font-size:12.5px;font-weight:800;color:#17A673">🏆 지나온 달성 {{winN}}건</div>
+              <sc-for list="{{winRows}}" as="wr" hint-placeholder-count="3">
+                <div style="display:flex;align-items:baseline;gap:7px;font-size:11.5px;color:#8B887C;padding:4px 0">
+                  <span style="flex:none;font-weight:800;color:#17A673">{{wr.dTxt}}</span>
+                  <span style="flex:none;font-weight:700;font-size:10px;padding:1px 6px;border-radius:99px;background:{{wr.tierBg}};color:{{wr.tierColor}}">{{wr.tierTxt}}</span>
+                  <span style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">{{wr.goalTxt}} 목표 달성 · {{wr.wTxt}} · {{wr.whenTxt}}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
           <div style="margin-top:13px">
             <sc-for list="{{rmSteps}}" as="rs" hint-placeholder-count="5">
               <div style="display:flex;gap:10px;padding:12px 0;border-top:1px solid #F4F2ED">
@@ -1718,6 +1752,22 @@ class Component extends DCLogic {
     return ['## ⚙ 바뀐 설정 '+L.length+'건 — 사장님이 설정에서 바꾸신 것',''].concat(
       L.map(x=>'- '+x.t+': '+x.from+' → '+x.to+' 〔'+x.ts+'〕'),
       ['','이 값은 앱에 이미 들어가 있다. 이번 주 계획을 이 값 기준으로 다시 보고, 반영했으면 입력함에 chgAck:true 를 함께 보내라 — 그러면 이 칸이 비워진다.',''])}
+  /* 🏆 달성 기록 (2026-09-11 사장님 지시 「디데이 2일 전에 달성한 목표가 없어져서 기분이 안 좋아」).
+     주가 넘어가도, 주 기준 요일을 바꿔도 이룬 것은 사라지지 않는다.
+     키는 '<주시작>|<차수>' 하나뿐이고 **한 번 적히면 고치지 않는다** — 뒤에 체중이 올라도 달성은 달성이다.
+     ⛔ wAt() 로 훑지 마라 — 그건 28일까지 옛 기록을 끌어와서 허수 달성이 나온다. 그날 실제로 잰 값만 본다. */
+  winScan(){
+    const WG=this.state.weekGoals||{},W=this.state.weights||{},out={...(this.state.wins||{})};
+    const hit=(ws,we,goal)=>{for(let d=ws;d<=we&&d<=this.TODAY;d=this.addDays(d,1)){const w=W[d];if(w&&w.a!=null&&+w.a<=+goal+0.001)return {d,w:+w.a}}return null};
+    const add=(ws,we,tier,goal)=>{const k=ws+'|'+tier;if(out[k]||!(+goal>0))return;const h=hit(ws,we,goal);if(h)out[k]={d:h.d,w:h.w,goal:+(+goal).toFixed(1),tier,we}};
+    /* 사장님이 적어 두신 목표는 「적힌 날부터 7일」로 본다 — 주 기준 요일을 바꿔도 그때 이룬 것이 사라지지 않게. */
+    for(const k of Object.keys(WG)){const v=WG[k];if(v!=null&&v!=='')add(k,this.addDays(k,6),1,+v)}
+    const wk=this.weekPlan();
+    add(wk.ws,wk.we,1,wk.goal);
+    if(wk.bonus!=null)add(wk.ws,wk.we,2,wk.bonus);
+    return out}
+  winSave(){const o=this.winScan();if(Object.keys(o).length!==Object.keys(this.state.wins||{}).length)this.setState({wins:o})}
+  winList(){const W=this.state.wins||{};return Object.keys(W).map(k=>W[k]).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.tier-a.tier))}
   rollGoal(){const g=this.state.set||{};const n={},P={};
     if(+g.goalWCode!==this.GOALW){n.goalW=this.GOALW;n.goalWCode=this.GOALW}
     if(g.finalDateCode!==this.GOALDATE){n.finalDate=this.GOALDATE;n.finalDateCode=this.GOALDATE}
@@ -1726,7 +1776,7 @@ class Component extends DCLogic {
     if(g.goalDate!==we)n.goalDate=we;
     const fv=this.favMigrate();if(fv){P.favs=fv;n.favVer=this.FAV_VER}
     if(Object.keys(n).length)P.set={...g,...n};
-    if(Object.keys(P).length)this.setState(P)}
+    if(Object.keys(P).length)this.setState(P,()=>this.winSave());else this.winSave()}
   /* 🏋️ 트레이너 입력함 — 사장님이 말로 주신 기록을 트레이너가 파일에 적어 두면 앱이 받아 넣는다.
      ⛔ 덮어쓰지 않고 「합친다」. 같은 날 같은 이름·같은 시각이 이미 있으면 건너뛴다.
      백업 불러오기(applyBackup)와 헷갈리지 마라 — 그쪽은 통째로 갈아끼우는 것이라 위험하다. */
@@ -1816,7 +1866,8 @@ class Component extends DCLogic {
     const weeksLeft=pace>0?Math.max(0,Math.ceil((cur-(+g.goalW))/pace)):null;
     const weeksText=weeksLeft==null?'—':('약 '+weeksLeft+'주');
     /* 2차 목표 (2026-09-11 사장님 지시): 이번 주 목표를 이미 이뤘으면, 이룬 날부터 마감까지 남은 날수만큼 같은 페이스로 하나 더 건다. 1차 목표(goal)는 안 건드린다 — 2차를 못 이뤄도 1차는 해낸 것이다. */
-    let ach=null;for(let d=ws;d<=this.TODAY;d=this.addDays(d,1)){const w=this.wAt(d);if(w!=null&&+w<=goal){ach=d;break}}
+    let ach=((this.state.wins||{})[ws+'|1']||{}).d||null;
+    if(!ach)for(let d=ws;d<=we&&d<=this.TODAY;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null&&+w.a<=goal+0.001){ach=d;break}}
     const done=ach!=null;let bonus=null,bonusNeed=null;
     if(done&&pace>0){const rem=Math.max(1,Math.round((new Date(we+'T00:00:00')-new Date(ach+'T00:00:00'))/864e5)+1);bonus=+Math.max(+g.goalW,goal-pace*Math.min(7,rem)/7).toFixed(1);if(bonus>=goal)bonus=null;else bonusNeed=+(cur-bonus).toFixed(1)}
     return {ws,we,pace,cur,sw,base,goal,need,pct,daysLeft,weeksLeft,weeksText,manual:man!=null&&man!=='',done,ach,bonus,bonusNeed}}
@@ -1841,6 +1892,7 @@ class Component extends DCLogic {
       '- '+wk.ws+' ~ '+wk.we+'('+this.DOW_KO[new Date(wk.we+'T00:00:00').getDay()]+') (주 기준 '+this.DOW_KO[this.weekDow()]+'요일부터) · 주 시작 '+wk.sw+'kg · 기준 '+wk.base+'kg → 목표 '+wk.goal+'kg'+(wk.manual?' (사장님과 정한 값)':' (지금 체중 기준 자동)'),
       '- 지금 '+wk.cur+'kg · 남은 '+wk.need+'kg · 이번 주 '+wk.daysLeft+'일 남음'+(wk.done?(' · 🎉 1차 목표 달성('+wk.ach+')'+(wk.bonus!=null?(' → 2차 목표 '+wk.bonus+'kg (남은 '+wk.bonusNeed+'kg) — 못 이뤄도 잘한 것이다, 굶기지 마라'):'')):''),
       '- 최종 '+(+this.state.set.goalW)+'kg까지 '+wk.weeksText+' (주 '+wk.pace+'kg 페이스)',
+      ...(this.winList().length?['- 🏆 달성 기록 '+this.winList().length+'건: '+this.winList().slice(0,5).map(x=>x.d+' '+x.goal+'kg('+(x.tier===2?'2차':'1차')+')').join(' · ')+' 〔이룬 것을 먼저 알아주고 시작해라 — 사장님 지시 2026-09-11〕']:[]),
       ...(fin?['- 결승선 '+fin.fd+'('+this.DOW_KO[new Date(fin.fd+'T00:00:00').getDay()]+')까지 '+(fin.over?'지났다':(fin.weeks+'주 · 남은 '+fin.gap+'kg → 필요 페이스 주 '+fin.need+'kg'+(fin.need>wk.pace?(' 〔지금 페이스 '+wk.pace+'보다 빠르다 — 사장님과 상의해라〕'):'')))]:[]),'',
       '## 먹은 것','');
     const fs=this.state.foods[T]||[];
@@ -1907,7 +1959,7 @@ class Component extends DCLogic {
   lbl(ds){const dt=new Date(ds+'T00:00:00');return (dt.getMonth()+1)+'.'+dt.getDate()+' ('+['일','월','화','수','목','금','토'][dt.getDay()]+')'}
   addFoods(dt,items){const F={...this.state.foods};const DM={...this.state.dayMode};if(!(F[dt]||[]).length&&!DM[dt])DM[dt]=this.state.mode;F[dt]=[...(F[dt]||[]),...items];let P=this.state.posts;if(!P.some(p=>p.date===dt)){P=[{id:'p'+(this.seq++),date:dt,photos:[],text:'',auto:true,starred:false,comments:[]},...P]}const patch={foods:F,dayMode:DM,posts:P};const fv=this.favAuto(items);if(fv)patch.favs=fv;this.setState(patch)}
   openDayFeed(ds){let P=this.state.posts;let post=P.find(p=>p.date===ds);if(!post){post={id:'p'+(this.seq++),date:ds,photos:[],text:'',auto:true,starred:false,comments:[]};P=[post,...P]}this.setState({tab:'feed',posts:P,pm:{id:post.id,editing:false,isNew:false,menu:false,confirm:false,draft:null},replyTo:null,cInput:''})}
-  commitW(ds,f,v){const n=parseFloat(String(v).replace(/,/g,''));const W={...this.state.weights};W[ds]=Object.assign({t:null,a:null},W[ds],{[f]:isNaN(n)?null:n});this.setState({weights:W,editW:null});if(!isNaN(n))this.toast(this.say('저장했어요 ✓','저장했사와요 👑'))}
+  commitW(ds,f,v){const n=parseFloat(String(v).replace(/,/g,''));const W={...this.state.weights};W[ds]=Object.assign({t:null,a:null},W[ds],{[f]:isNaN(n)?null:n});this.setState({weights:W,editW:null},()=>this.winSave());if(!isNaN(n))this.toast(this.say('저장했어요 ✓','저장했사와요 👑'))}
   shiftDay(n){const dt=new Date(this.state.selDate+'T00:00:00');dt.setDate(dt.getDate()+n);const z=x=>String(x).padStart(2,'0');const ds=dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate());if(ds<=this.TODAY)this.setState({selDate:ds})}
   openPost(id,edit){const p=this.state.posts.find(x=>x.id===id);this.setState({pm:{id,editing:!!edit,isNew:false,menu:false,confirm:false,draft:edit?{photos:[...p.photos],text:p.text}:null},replyTo:null,cInput:''})}
   newPost(date){this.setState({pm:{id:null,editing:true,isNew:true,date,menu:false,confirm:false,draft:{photos:[],text:''}},replyTo:null,cInput:''})}
@@ -2027,7 +2079,7 @@ class Component extends DCLogic {
       this.toast(this.say('호출 '+used+'회로 '+n+'건 처리 · 코치 피드백까지 완료 ⚡','호출 '+used+'회로 '+n+'건 처리했답니다 ⚡'));
     }catch(err){this.setState({aiBusy:false});this.toast('AI 처리 중 문제가 생겼어요 · '+(err.message||'네트워크'))}
   }
-  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo','pills','favMute'];
+  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo','pills','favMute','wins'];
   idb(){return new Promise((res,rej)=>{const q=indexedDB.open('dietgram',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
   async dbGet(k){try{const db=await this.idb();return await new Promise((res,rej)=>{const t=db.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error)})}catch(_){try{const s=localStorage.getItem('dgm_'+k);return s?JSON.parse(s):null}catch(e){return null}}}
   // 기록은 가족 저장소(Supabase)에 둔다 — family_state 문서의 diet 칸 하나를 쓴다.
@@ -2107,6 +2159,13 @@ class Component extends DCLogic {
       del:()=>this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:tdDone}})}));
     const wkp=this.weekPlan();
     const wkColor=(wkp.need<=0||wkp.done)?'#17A673':th.accent;
+    /* 🏆 달성 기록 — 홈 카드와 🗺 로드맵이 같은 목록(winList)을 본다. 새로 판정하지 마라. */
+    const winL=this.winList();
+    const winRows=winL.map(x=>{const gap=Math.round((new Date(x.we+'T00:00:00')-new Date(x.d+'T00:00:00'))/864e5);
+      return {dTxt:this.lbl(x.d),goalTxt:fmt(x.goal)+'kg',tierTxt:x.tier===2?'2차':'1차',
+        tierBg:x.tier===2?'#EAF7F1':th.chipBg,tierColor:x.tier===2?'#17A673':'#8B887C',
+        wTxt:'그날 '+fmt(x.w)+'kg',whenTxt:gap>0?('마감 '+gap+'일 전'):(gap===0?'마감 당일':'마감 뒤')}});
+    const winTop=winRows[0],winRest=winRows.slice(1,5);
     const wkStats=[{label:'주 시작('+this.DOW_KO[this.weekDow()]+')',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:wkp.bonus!=null?'2차까지':'남은 감량',val:wkp.bonus!=null?fmt(Math.max(0,wkp.bonusNeed)):(wkp.need>0?fmt(wkp.need):'달성 ✓'),color:wkp.bonus!=null?th.accent:(wkp.need>0?'#E5484D':'#17A673')}];
     const noDow=ds=>this.lbl(ds).replace(/\s*\(.\)$/,'');
     const a3=this.advice3();
@@ -2505,6 +2564,9 @@ class Component extends DCLogic {
       tdRows,tdCount:tdItems.length+'건'+(tdDone.length?(' · 처리됨 '+tdDone.length):''),tdColor:tdItems.length?th.accent:'#B5B2A6',tdEmpty:!tdItems.length,
       tdDraft:S.tdDraft||'',tdOnDraft:e=>this.setState({tdDraft:e.target.value}),
       tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,tdPaste,tdPhDraft,tdHasPh:!!tdPh.length,
+      winOn:!!winTop,winN:winRows.length,winRows,winRest,winHasRest:winRest.length>0,
+      winTopLine:winTop?('🎉 '+winTop.dTxt+' · '+winTop.goalTxt+' 목표 달성!'):'',
+      winTopSub:winTop?(winTop.tierTxt+' 목표를 '+winTop.whenTxt+'에 해냈어요 · '+winTop.wTxt):'',
       wkRange:noDow(wkp.ws)+'~'+this.lbl(wkp.we),wkGoalText:(wkp.bonus!=null?(fmt(wkp.goal)+' ✓ → 2차 '+fmt(wkp.bonus)+' kg'):(fmt(wkp.goal)+' kg')),wkColor,wkPct:wkp.pct,wkStats,
       wkNote:(wkp.done?('🎉 이번 주 목표 '+fmt(wkp.goal)+'kg 달성! '+(wkp.bonus!=null?('2차 목표 '+fmt(wkp.bonus)+'kg — 남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.bonusNeed))+'kg 더. 못 해도 1차는 이미 해냈어요'):'마감까지 유지만 해도 충분해요')+' · 마감 '+this.lbl(wkp.we)):(wkp.pace>0?('남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg — 주 '+wkp.pace+'kg 페이스를 남은 날수로 나눈 몫이에요 · 최종 '+fmt(+gset.goalW)+'kg까지 '+wkp.weeksText):('이번 주는 줄이지 않는 주간이에요(페이스 0). 눈금 대신 기록으로 보세요 · 이번 주 '+wkp.daysLeft+'일 남음'))),
       sWeekGoal:wkp.manual?wkp.goal:'',sWeekPace:wkp.pace,onWeekPace:setRule('weekPace'),
