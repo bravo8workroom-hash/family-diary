@@ -1745,7 +1745,7 @@ class Component extends DCLogic {
        add('🩸','부종 신호예요 — 체중이 올랐고 생리·배 불편이 함께 있어요. 트레이너와 이번 주 모드를 확인하세요.','#8B5CF6')}
     if(y.n){const yd=this.addDays(this.TODAY,-1),yRun=this.underRun(yd),yR=this.roughOf(yd),yRt=yR?((this.ROUGH.find(x=>x.k===yR.rk)||{}).t||'대략'):'';
       if(y.kcal<R.kcalMin&&yRun>=3&&!yR)add('🍚','어제까지 '+yRun+'일 연속 하한 '+fmt(R.kcalMin)+' 아래였어요. 오늘 더 줄이면 근육이 먼저 빠집니다.','#E5484D');
-      else if(y.kcal>=Math.round(R.kcalMin*1.5))add('🍚',(yR?('어제는 「'+yRt+'」로 적어 두셨어요 (≈'+fmt(y.kcal)+'kcal).'):('어제 '+fmt(y.kcal)+'kcal로 많았어요.'))+' 오늘은 평소대로 하한 '+fmt(R.kcalMin)+' 근처면 됩니다 — 굶는 건 금지.','#E9A23B')}
+      else if(y.kcal>=Math.round(R.kcalMin*1.5))add('🍚',(yR?('어제는 「'+yRt+'」로 적어 두셨어요 (≈'+fmt(y.kcal)+'kcal).'):('어제 '+fmt(y.kcal)+'kcal로 많았어요.'))+' 오늘은 하한 '+fmt(R.kcalMin)+' 근처로 줄이면 됩니다. 첫 끼는 지방만 챙기고 가볍게 — 건너뛰진 마세요.','#E9A23B')}
     const pd=[t,y,b].filter(x=>x.n),pAvg=pd.length?Math.round(pd.reduce((a,x)=>a+x.p,0)/pd.length):0;
     if(pd.length&&pAvg<R.pG)add('🍗','최근 '+pd.length+'일 단백질 평균 '+pAvg+'g — 하루 '+R.pG+'g에서 '+(R.pG-pAvg)+'g 모자라요. 계란·닭가슴살부터 채우세요.','#E4618C');
     const left=Math.max(0,R.kcalMin-t.kcal),need=Math.max(0,R.pG-t.p);
