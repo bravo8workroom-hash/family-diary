@@ -1129,9 +1129,12 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         <sc-if value="{{fvEmpty}}" hint-placeholder-val="{{ false }}">
           <div style="color:#B5B2A6;font-size:12.5px">아직 비어 있어요 — 음식을 기록하면 여기에 저절로 올라와요</div>
         </sc-if>
-        <sc-for list="{{fvGroups}}" as="fg" hint-placeholder-count="3">
-        <div style="font-size:12px;font-weight:800;color:#8B887C;margin-top:4px">{{fg.cat}}</div>
-        <sc-for list="{{fg.rows}}" as="fr" hint-placeholder-count="4">
+        <div style="position:sticky;top:0;z-index:1;background:{{cardBg}};display:flex;gap:6px;flex-wrap:wrap;padding:4px 0 6px;margin-top:-2px">
+          <sc-for list="{{fvCats}}" as="fc" hint-placeholder-count="5">
+            <button onClick="{{fc.pick}}" style="border:1px solid {{cardBorder}};background:{{fc.bg}};color:{{fc.color}};border-radius:99px;padding:9px 14px;min-height:40px;font-size:12.5px;font-weight:800;cursor:pointer">{{fc.label}}</button>
+          </sc-for>
+        </div>
+        <sc-for list="{{fvRows}}" as="fr" hint-placeholder-count="4">
           <div style="border:1px solid {{cardBorder}};background:{{cardBg}};border-radius:{{radM}}">
             <div onClick="{{fr.tap}}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:11px 13px">
               <div style="flex:1;min-width:0">
@@ -1168,7 +1171,6 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               </div>
             </sc-if>
           </div>
-        </sc-for>
         </sc-for>
       </div>
     </div>
@@ -2316,6 +2318,19 @@ class Component extends DCLogic {
     const fvEd=fv?fv.ed:null;
     const fvUnits=cur=>this.UNITS.map(u=>({name:u,pick:()=>this.favEditSet('unit',u),
       bg:cur===u?th.accent:th.chipBg,color:cur===u?'#fff':'#5C594E'}));
+    /* 자주 먹는 음식 — 갈래별로 묶는다. 서랍 위 칩이 갈래 하나를 고르고(fv.cat — 화면 상태라 DBK 밖), 고른 갈래만 펼친다
+       (2026-09-11, 사장님 지시 「상단에 카테고리로 만들고 클릭하면 쫙 나오게, 스크롤 내리기 힘들어」). 고른 갈래가 비면 첫 갈래로. */
+    const fvGroups=this.FOOD_CATS.map(cat=>({cat,rows:fvPool.filter(v=>v.cat===cat).map(v=>{const ing=!!(fvEd&&fvEd.id===v.id);
+        return {name:v.name,summary:favSum(v),meta:v.n?('×'+v.n+(v.last?(' · 마지막 '+noDow(v.last)):'')):'아직 안 먹음',tap:favTap(v),...this.giVals(v.name),
+          del:e=>{e.stopPropagation();if(v.mine)this.favDrop(v.id);else this.setState({favMute:[...(this.state.favMute||[]),v.name]})},
+          edit:e=>{e.stopPropagation();if(!v.mine){this.favPin(v);return}if(ing)this.favEditClose();else this.favEdit(v)},
+          editing:ing,edAmt:ing?fvEd.amt:'',edUnit:ing?fvEd.unit:'',edUnits:ing?fvUnits(fvEd.unit):[],
+          edKcal:ing?fvEd.kcal:'',edC:ing?fvEd.c:'',edP:ing?fvEd.p:'',edF:ing?fvEd.f:'',
+          onEdAmt:e=>this.favEditSet('amt',e.target.value),onEdKcal:e=>this.favEditSet('kcal',e.target.value),onEdC:e=>this.favEditSet('c',e.target.value),onEdP:e=>this.favEditSet('p',e.target.value),onEdF:e=>this.favEditSet('f',e.target.value),
+          edNote:ing?((fvEd.unit||'g')===((fvEd.base||{}).unit||'g')?'양을 바꾸면 칼로리·탄단지가 같은 비율로 따라와요 — 숫자를 직접 고쳐도 돼요':'단위를 바꾸면 영양값은 그대로예요 — 필요하면 직접 고쳐 주세요'):'',
+          edCancel:()=>this.favEditClose(),edSave:()=>this.favEditSave()}})})).filter(gp=>gp.rows.length);
+    const fvCatList=fvGroups.map(g=>g.cat);
+    const fvCat=(fv&&fv.cat&&fvCatList.includes(fv.cat))?fv.cat:(fvCatList[0]||'');
     const combos=S.combos||[],cm=S.cm;
     const cmMeal=cm?cm.meal:'';
     const comboSum=k=>{const it=k.items||[];if(!it.length)return '비어 있음 — 「이 끼니를 저장」으로 채우세요';
@@ -2422,15 +2437,9 @@ class Component extends DCLogic {
       fvOn:!!fv,fvClose:()=>this.setState({fv:null}),fvMealLabel:fvMeal,
       fvHint:'누르면 '+fvMeal+'에 지금 시각으로 바로 담겨요. 기록에 적힌 음식은 여기에 저절로 올라와요(✕로 빼면 다시 안 올라와요). ✏️로 양·단위·칼로리·탄단지를 고칠 수 있고, 양을 바꾸면 영양값이 같은 비율로 따라와요. GI는 혈당이 오르는 속도예요 — 초록 좋음 · 주황 중간 · 빨강 나쁨.',
       fvEmpty:!fvPool.length,
-      fvGroups:this.FOOD_CATS.map(cat=>({cat,rows:fvPool.filter(v=>v.cat===cat).map(v=>{const ing=!!(fvEd&&fvEd.id===v.id);
-        return {name:v.name,summary:favSum(v),meta:v.n?('×'+v.n+(v.last?(' · 마지막 '+noDow(v.last)):'')):'아직 안 먹음',tap:favTap(v),...this.giVals(v.name),
-          del:e=>{e.stopPropagation();if(v.mine)this.favDrop(v.id);else this.setState({favMute:[...(this.state.favMute||[]),v.name]})},
-          edit:e=>{e.stopPropagation();if(!v.mine){this.favPin(v);return}if(ing)this.favEditClose();else this.favEdit(v)},
-          editing:ing,edAmt:ing?fvEd.amt:'',edUnit:ing?fvEd.unit:'',edUnits:ing?fvUnits(fvEd.unit):[],
-          edKcal:ing?fvEd.kcal:'',edC:ing?fvEd.c:'',edP:ing?fvEd.p:'',edF:ing?fvEd.f:'',
-          onEdAmt:e=>this.favEditSet('amt',e.target.value),onEdKcal:e=>this.favEditSet('kcal',e.target.value),onEdC:e=>this.favEditSet('c',e.target.value),onEdP:e=>this.favEditSet('p',e.target.value),onEdF:e=>this.favEditSet('f',e.target.value),
-          edNote:ing?((fvEd.unit||'g')===((fvEd.base||{}).unit||'g')?'양을 바꾸면 칼로리·탄단지가 같은 비율로 따라와요 — 숫자를 직접 고쳐도 돼요':'단위를 바꾸면 영양값은 그대로예요 — 필요하면 직접 고쳐 주세요'):'',
-          edCancel:()=>this.favEditClose(),edSave:()=>this.favEditSave()}})})).filter(gp=>gp.rows.length),
+      fvGroups,fvCat,
+      fvCats:fvCatList.map(c=>({label:c+' '+fvGroups.find(g=>g.cat===c).rows.length,bg:fvCat===c?th.accent:th.chipBg,color:fvCat===c?'#fff':'#5C594E',pick:()=>this.setState({fv:{meal:fvMeal,cat:c}})})),
+      fvRows:(fvGroups.find(g=>g.cat===fvCat)||{rows:[]}).rows,
       /* 조합식 서랍 */
       cmOn:!!cm,cmClose:()=>this.setState({cm:null}),cmMealLabel:cmMeal,
       cmModePick:()=>this.setState({cm:{...cm,mode:'pick'}}),cmModeSave:()=>this.setState({cm:{...cm,mode:'save'}}),
