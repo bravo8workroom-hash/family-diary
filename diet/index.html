@@ -53,21 +53,6 @@ input,button,select,textarea{font-family:inherit}
 @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
 input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;min-height:39px}
 input[type=date]::-webkit-date-and-time-value{text-align:left}
-/* 🎲 달성 말판 — 뱀사다리형 게임판. 판 .bd · 칸 .bd-c · 지금 칸 .bd-me (칸 색은 종류마다 클래스 하나) */
-.bd{display:flex;flex-wrap:wrap;gap:4px;max-width:404px;padding:11px;border-radius:16px;background:linear-gradient(155deg,#FBF7EC,#F1EADA);border:1px solid #E3DCC9;box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(31,30,26,.05)}
-.bd-c{box-sizing:border-box;position:relative;flex:0 0 calc(12.5% - 3.5px);height:46px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;border:1px solid #E6E0D0;background:#FFFDF6;box-shadow:0 1px 0 rgba(31,30,26,.04)}
-.bd-c>.bd-n{position:absolute;top:2px;left:4px;font-size:7px;font-weight:800;color:#CFC8B5;line-height:1}
-.bd-c>.bd-e{font-size:15px;line-height:1}
-.bd-c>.bd-s{font-size:8.5px;font-weight:800;line-height:1;color:#8B887C}
-.bd-start{background:#EAF0FF;border-color:#A8BDEE}.bd-start>.bd-s{color:#4A6BC4}
-.bd-done{background:#E4F6EC;border-color:#93D6BA}.bd-done>.bd-s{color:#17A673}
-.bd-cp{background:#FFF3D2;border-color:#E9C765}.bd-cp>.bd-s{color:#B4881B}
-.bd-goal{background:#FFE6EE;border-color:#EFA0BF}.bd-goal>.bd-s{color:#D94E82}
-.bd-me{z-index:2;background:var(--chip,#FDEFF4);border:2px solid var(--accent,#E4618C);box-shadow:0 7px 16px rgba(31,30,26,.22);animation:bdhop 1.5s ease-in-out infinite}
-.bd-me>.bd-e{font-size:19px}.bd-me>.bd-s{color:var(--accent,#E4618C)}
-.bd-sel{outline:2px solid #1F1E1A;outline-offset:2px}
-.bd-pad{visibility:hidden}
-@keyframes bdhop{0%,100%{transform:translateY(-2px)}50%{transform:translateY(-7px)}}
 </style>
 </helmet>
 <div class="app-shell {{shellCls}}" style="max-width:var(--appw,430px);margin:0 auto;height:100dvh;background:{{appBg}};--accent:{{accent}};--line:{{cardBorder}};--chip:{{chipBg}};position:relative;display:flex;flex-direction:column;overflow:hidden;color:#1F1E1A">
@@ -106,28 +91,6 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           </a>
         </div>
 
-        <sc-if value="{{winOn}}" hint-placeholder-val="{{ true }}">
-          <div style="background:{{cardBg}};border:1px solid #BFE8D6;border-radius:{{radL}};padding:16px 18px">
-            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
-              <div style="font-size:13px;font-weight:800;color:#17A673">🏆 달성 기록</div>
-              <div style="font-size:11.5px;font-weight:700;color:#8B887C">{{winN}}번째</div>
-            </div>
-            <div style="font-size:15.5px;font-weight:800;color:#17A673;margin-top:9px;line-height:1.45">{{winTopLine}}</div>
-            <div style="font-size:11.5px;color:#8B887C;margin-top:3px;line-height:1.55">{{winTopSub}}</div>
-            <sc-if value="{{winHasRest}}" hint-placeholder-val="{{ false }}">
-              <div style="margin-top:10px;padding-top:9px;border-top:1px solid #F4F2ED">
-                <sc-for list="{{winRest}}" as="wv" hint-placeholder-count="2">
-                  <div style="display:flex;align-items:baseline;gap:7px;font-size:11.5px;color:#8B887C;padding:2.5px 0">
-                    <span style="flex:none;font-weight:800;color:#17A673">✓</span>
-                    <span style="flex:none;font-weight:700;color:#5C594E">{{wv.dTxt}}</span>
-                    <span style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">{{wv.goalTxt}} {{wv.tierTxt}} · {{wv.wTxt}}</span>
-                  </div>
-                </sc-for>
-              </div>
-            </sc-if>
-          </div>
-        </sc-if>
-
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
             <div style="font-size:13px;font-weight:700;color:#8B887C">🛡 오늘의 절대선</div>
@@ -152,7 +115,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             </sc-for>
           </div>
           <button onClick="{{safeToggle}}" style="width:100%;margin-top:13px;border:0;border-radius:{{radM}};padding:11px;font-size:12.5px;font-weight:800;cursor:pointer;background:{{safeBtnBg}};color:{{safeBtnColor}}">{{safeBtnLabel}}</button>
-          <div style="font-size:10.5px;color:#B5B2A6;margin-top:8px;line-height:1.55;text-align:center">어지럽거나 못 먹은 날엔 클린을 안 따져요</div>
+          <div style="font-size:10.5px;color:#B5B2A6;margin-top:8px;line-height:1.55;text-align:center">어지러움·손떨림·식은땀·못 먹음·근력 직후엔 클린을 따지지 않아요</div>
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
@@ -172,7 +135,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div style="font-size:13px;font-weight:700;color:#8B887C">💧 물 <span style="font-weight:600;color:#B5B2A6">· 커피 빼고</span></div>
+            <div style="font-size:13px;font-weight:700;color:#8B887C">💧 물 <span style="font-weight:600;color:#B5B2A6">· 커피는 미포함</span></div>
             <div style="font-size:16px;font-weight:800;color:{{waterColor}}">{{waterText}}</div>
           </div>
           <div style="height:10px;border-radius:99px;background:{{chipBg}};overflow:hidden">
@@ -202,11 +165,11 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               </div>
             </sc-for>
           </div>
-          <div style="font-size:11px;color:#B5B2A6;margin-top:10px;line-height:1.55;text-align:center"><sc-for list="{{wkNoteS}}" as="wn" hint-placeholder-count="2"><span style="display:inline-block">{{wn.t}}</span>&#32;</sc-for></div>
+          <div style="font-size:11px;color:#B5B2A6;margin-top:10px;line-height:1.55;text-align:center">{{wkNote}}</div>
           <sc-if value="{{phaseOn}}" hint-placeholder-val="{{ true }}">
             <div style="margin-top:10px;padding-top:10px;border-top:1px solid {{cardBorder}};line-height:1.6">
               <div style="font-size:12.5px;font-weight:800;color:{{modeColor}}">{{phaseTitle}}</div>
-              <div style="font-size:11.5px;color:#8B887C;margin-top:3px"><sc-for list="{{phaseReadS}}" as="pr1" hint-placeholder-count="2"><span style="display:inline-block">{{pr1.t}}</span>&#32;</sc-for></div>
+              <div style="font-size:11.5px;color:#8B887C;margin-top:3px">{{phaseRead}}</div>
               <div style="font-size:11px;color:#B5B2A6;margin-top:3px">{{phaseTips}}</div>
             </div>
           </sc-if>
@@ -243,19 +206,19 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <sc-for list="{{a3Lines}}" as="l" hint-placeholder-count="4">
               <div style="display:flex;gap:8px;align-items:flex-start">
                 <span style="font-size:13px;flex:none;width:18px;text-align:center;line-height:1.6">{{l.icon}}</span>
-                <div style="flex:1;min-width:0;font-size:12px;line-height:1.65;font-weight:600;color:{{l.color}}"><sc-for list="{{l.ts}}" as="ls1" hint-placeholder-count="2"><span style="display:inline-block">{{ls1.t}}</span>&#32;</sc-for></div>
+                <div style="flex:1;min-width:0;font-size:12px;line-height:1.65;font-weight:600;color:{{l.color}}">{{l.t}}</div>
               </div>
             </sc-for>
           </div>
         </div>
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">📊 주 평균 · 7일 중 {{wkDays}}일</div>
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">📊 주 평균 · 최근 7일 중 {{wkDays}}일 기록</div>
           <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
             <div style="background:{{chipBg}};border-radius:{{radM}};padding:12px;text-align:center"><div style="font-size:11px;color:#8B887C;font-weight:600">하루 평균</div><div style="font-size:17px;font-weight:800;margin-top:3px;color:{{wkKcalColor}}">{{wkKcal}} <span style="font-size:10.5px;color:#8B887C">kcal</span></div></div>
             <div style="background:{{chipBg}};border-radius:{{radM}};padding:12px;text-align:center"><div style="font-size:11px;color:#8B887C;font-weight:600">평균 단백질</div><div style="font-size:17px;font-weight:800;margin-top:3px;color:{{wkPColor}}">{{wkP}} <span style="font-size:10.5px;color:#8B887C">g</span></div></div>
           </div>
-          <div style="font-size:11.5px;color:#8B887C;margin-top:11px;line-height:1.65"><span style="display:inline-block">「오늘 많이 먹었으니 내일 굶자」는 하지 않아요.</span>&#32;<span style="display:inline-block"><b style="color:#1F1E1A">하루가 아니라 주 평균</b>으로 봅니다.</span></div>
+          <div style="font-size:11.5px;color:#8B887C;margin-top:11px;line-height:1.65">「오늘 많이 먹었으니 내일 굶자」는 하지 않아요. <b style="color:#1F1E1A">하루가 아니라 주 평균</b>으로 봅니다. 한 끼 흔들렸다고 그날 나머지를 줄이지 마세요.</div>
         </div>
 
 
@@ -401,6 +364,21 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           </div>
         </div>
 
+        <sc-if value="{{roughShow}}" hint-placeholder-val="{{ false }}">
+          <div style="background:{{cardBg}};border:1.5px dashed #D8D5CB;border-radius:{{radL}};padding:14px 18px">
+            <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:4px">{{roughTitle}}</div>
+            <div style="font-size:11.5px;color:#B5B2A6;line-height:1.6;margin-bottom:11px"><span style="display:inline-block">정확하지 않아도 됩니다.</span>&#32;<span style="display:inline-block">빈 날로 두면 주 평균에서 통째로 빠져요.</span>&#32;<span style="display:inline-block">나중에 음식을 적으면 이 줄은 저절로 지워집니다.</span></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <sc-for list="{{roughChips}}" as="r" hint-placeholder-count="4">
+                <button onClick="{{r.tap}}" style="flex:1 1 132px;min-width:132px;border:1px solid {{cardBorder}};background:{{r.bg}};color:{{r.color}};border-radius:{{radM}};padding:10px 12px;font-size:13px;font-weight:800;cursor:pointer;text-align:left">{{r.label}}<span style="display:block;font-size:10.5px;font-weight:700;color:{{r.subColor}};margin-top:3px;white-space:nowrap">{{r.sub}}</span></button>
+              </sc-for>
+            </div>
+            <sc-if value="{{roughOn}}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{roughClear}}" style="width:100%;margin-top:10px;border:0;background:none;color:#B5B2A6;font-size:11.5px;font-weight:700;cursor:pointer;padding:7px">대략 기록 지우기</button>
+            </sc-if>
+          </div>
+        </sc-if>
+
         <sc-for list="{{meals}}" as="m" hint-placeholder-count="4">
           <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:14px 18px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
@@ -505,7 +483,6 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <sc-for list="{{calCells}}" as="c" hint-placeholder-count="35">
               <div onClick="{{c.go}}" style="min-height:54px;border-radius:10px;background:{{c.bg}};border:1px solid {{c.border}};padding:5px 2px 4px;text-align:center;cursor:{{c.cursor}};opacity:{{c.opacity}}">
                 <div style="font-size:11px;font-weight:700;color:{{c.numColor}}">{{c.num}}</div>
-                <div style="font-size:9px;font-weight:700;color:{{c.wColor}};min-height:11px">{{c.w}}</div>
                 <div style="font-size:9.5px;font-weight:700;color:{{c.kcalColor}};margin-top:2px;min-height:12px">{{c.kcal}}</div>
                 <div style="font-size:11px;min-height:14px">{{c.mark}}</div>
                 <div style="font-size:8.5px;font-weight:800;color:{{c.woColor}};min-height:11px">{{c.wo}}</div>
@@ -612,23 +589,6 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <div style="height:100%;width:{{rmPct}}%;background:{{accent}};border-radius:99px"></div>
           </div>
           <div style="font-size:12px;color:#8B887C;margin-top:8px;line-height:1.65">{{rmSummary}}</div>
-          <div style="margin-top:12px;padding-top:11px;border-top:1px solid #F4F2ED">
-            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
-              <div style="font-size:12.5px;font-weight:800;color:#17A673">🎲 달성 말판</div>
-              <div style="font-size:11px;font-weight:700;color:#8B887C">{{bdDone}}칸 왔다 · 남은 {{bdLeftN}}칸</div>
-            </div>
-            <div class="bd" style="margin-top:9px">
-              <sc-for list="{{bdCells}}" as="bc" hint-placeholder-count="16">
-                <div class="{{bc.cls}}" onClick="{{bc.tap}}">
-                  <span class="bd-n">{{bc.n}}</span>
-                  <span class="bd-e">{{bc.mark}}</span>
-                  <span class="bd-s">{{bc.sub}}</span>
-                </div>
-              </sc-for>
-            </div>
-            <div style="font-size:10.5px;color:#B5B2A6;margin-top:7px">🚩 출발 · 🏆 달성 · ⭐ 체크포인트 · 🏁 결승선</div>
-            <div style="font-size:11px;color:#8B887C;margin-top:4px;line-height:1.6">{{bdInfo}}</div>
-          </div>
           <div style="margin-top:13px">
             <sc-for list="{{rmSteps}}" as="rs" hint-placeholder-count="5">
               <div style="display:flex;gap:10px;padding:12px 0;border-top:1px solid #F4F2ED">
@@ -1183,12 +1143,9 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
         <sc-if value="{{fvEmpty}}" hint-placeholder-val="{{ false }}">
           <div style="color:#B5B2A6;font-size:12.5px">아직 비어 있어요 — 음식을 기록하면 여기에 저절로 올라와요</div>
         </sc-if>
-        <div style="position:sticky;top:0;z-index:1;background:{{cardBg}};display:flex;gap:6px;flex-wrap:wrap;padding:4px 0 6px;margin-top:-2px">
-          <sc-for list="{{fvCats}}" as="fc" hint-placeholder-count="5">
-            <button onClick="{{fc.pick}}" style="border:1px solid {{cardBorder}};background:{{fc.bg}};color:{{fc.color}};border-radius:99px;padding:9px 14px;min-height:40px;font-size:12.5px;font-weight:800;cursor:pointer">{{fc.label}}</button>
-          </sc-for>
-        </div>
-        <sc-for list="{{fvRows}}" as="fr" hint-placeholder-count="4">
+        <sc-for list="{{fvGroups}}" as="fg" hint-placeholder-count="3">
+        <div style="font-size:12px;font-weight:800;color:#8B887C;margin-top:4px">{{fg.cat}}</div>
+        <sc-for list="{{fg.rows}}" as="fr" hint-placeholder-count="4">
           <div style="border:1px solid {{cardBorder}};background:{{cardBg}};border-radius:{{radM}}">
             <div onClick="{{fr.tap}}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:11px 13px">
               <div style="flex:1;min-width:0">
@@ -1225,6 +1182,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               </div>
             </sc-if>
           </div>
+        </sc-for>
         </sc-for>
       </div>
     </div>
@@ -1330,8 +1288,8 @@ class Component extends DCLogic {
         rule:{winS:'10:00',winE:'18:00',kcalMin:1200,cG:130,pG:100,fG:45,waterMl:2000,firstFatG:8,carbUp:{1:2,6:1}}},
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,favs:FV,carbUp:{},safe:{},todo:{items:[],done:[]},
-      stock:{shop:[],home:[]},weekGoals:{},favMute:[],wins:{},
-      cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,ntOpen:-1,ntKind:'전체',ntMore:false,jOpen:null,bdSel:null,
+      stock:{shop:[],home:[]},weekGoals:{},favMute:[],
+      cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,ntOpen:-1,ntKind:'전체',ntMore:false,jOpen:null,
       editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
   fmt(n){return (n==null||n===''||isNaN(+n))?'—':(+n).toLocaleString('ko-KR')}
@@ -1562,10 +1520,32 @@ class Component extends DCLogic {
   ALCO=/맥주|생맥|소주|와인|막걸리|하이볼|위스키|칵테일|사케|청주|양주|술$/;
   alcoOf(ds){return (this.state.foods[ds]||[]).filter(x=>this.ALCO.test(String(x.name||'').replace(/\s/g,'')))}
   carbUpOf(ds){const R=this.RULE();const allow=+((R.carbUp||{})[new Date(ds+'T00:00:00').getDay()])||0;const used=+((this.state.carbUp||{})[ds])||0;return {allow,used,left:Math.max(0,allow-used)}}
+  /* 「기록 못 한 날」 대략 적기 (2026-09-12, 사장님 지시 「어제 먹은 걸 기록 못할 때가 있다 — 예상 칼로리를 대충 적게 하자」).
+     칩 하나로 그날에 est:true 한 줄이 들어간다. 그러면 주 평균·달력·막대가 전부 따라온다 — 예전엔 빈 날이
+     「모른다」라 주 평균에서 통째로 빠져 하루 빼먹은 주의 평균이 통째로 흔들렸다.
+     ⛔ 추정값으로 꾸짖지 마라 (사장님 선택 2026-09-12 「평균엔 넣고 굶김 판정에선 뺀다」):
+       · underRun 은 est 날을 끊지도 세지도 않고 지나간다
+       · absLines 의 식사창·kcal·단백질·첫 끼 지방은 「모름」(na) — 시각도 실제 양도 모른다
+       · favAuto 는 est 줄을 ⭐에 안 올린다 (음식 이름이 아니다)
+       · 술로 세지 않는다 — 「외식·술」은 확정이 아니라 짐작이다 (ALCO 에 안 걸리는 이름을 골랐다)
+     addFoods·mergeInbox 가 진짜 음식을 넣을 때 est 줄을 지운다 — 그래서 「est 가 있는 날 = est 만 있는 날」이다.
+     단어에서 자책어를 뺐다 — 이 앱의 뿌리가 「굶기지 말자」라 「과식」 같은 말이 다음 날 굶기를 부른다. */
+  ROUGH=[{k:'light', e:'🥗',t:'가볍게',  s:'평소보다 적게',kcal:1200,c:100,p:95,f:44},
+         {k:'normal',e:'🍽',t:'평소대로',s:'계획대로',     kcal:1400,c:130,p:100,f:51},
+         {k:'hearty',e:'🍚',t:'든든히',  s:'평소보다 많이',kcal:1800,c:200,p:90,f:70},
+         {k:'out',   e:'🍻',t:'외식·술', s:'밖에서',       kcal:2300,c:255,p:85,f:105}];
+  roughOf(ds){return (this.state.foods[ds]||[]).find(x=>x.est)||null}
+  roughAdd(ds,k){const R=this.ROUGH.find(x=>x.k===k);if(!R)return;
+    const F={...this.state.foods};
+    F[ds]=[...(F[ds]||[]).filter(x=>!x.est),{id:'f'+(this.seq++),meal:null,time:null,est:true,rk:R.k,
+      name:R.t+' (대략)',amt:0,unit:'',kcal:R.kcal,c:R.c,p:R.p,f:R.f}];
+    this.setState({foods:F});this.toast('≈ '+R.t+' — 대략으로 적었어요')}
+  roughClear(ds){const F={...this.state.foods};F[ds]=(F[ds]||[]).filter(x=>!x.est);if(!F[ds].length)delete F[ds];
+    this.setState({foods:F});this.toast('대략 기록을 지웠어요')}
   /* 칼로리 하한은 하루로 판정하지 않는다 (사장님 지시 2026-08-31) — 어제·그저께 잘 먹었으면 하루 적게 먹은 것은
      문제가 아니다. 연속 미달이 UNDER_RUN 일에 닿았을 때만 경고한다. 기록이 없는 날은 「모른다」이므로 줄을 끊는다.
      ⛔ 안전 신호(어지러움·손떨림 등)는 이 규칙과 무관하게 하루도 즉시 경고다 — safe 배너를 건드리지 마라. */
-  underRun(ds){const R=this.RULE();let n=0;for(let i=0;i<8;i++){const k=this.addDays(ds,-i);if(!(this.state.foods[k]||[]).length)break;if(this.sums(k).kcal>=R.kcalMin)break;n++}return n}
+  underRun(ds){const R=this.RULE();let n=0;for(let i=0;i<8;i++){const k=this.addDays(ds,-i);const it=this.state.foods[k]||[];if(!it.length)break;if(it.some(x=>x.est))continue;if(this.sums(k).kcal>=R.kcalMin)break;n++}return n}
   /* 💊 오늘의 약 — 절대선이 아니다. 절대선 다섯은 늘리지 않는다(협상 불가 목록이라 항목이 늘면 무게가 흐려진다).
      여기는 판정이 아니라 체크리스트다. ⛔ absLines·코치 댓글에 끌어들이지 마라 — 영양제를 빠뜨린 날이
      식사창을 어긴 날과 같은 무게로 보이면 안 된다. 목록 정본은 PILLS 한 곳이고 코드라서
@@ -1581,18 +1561,18 @@ class Component extends DCLogic {
   pillsOf(ds){return (this.state.pills||{})[ds]||{}}
   pillDue(p,ds){if(p.cyc==='day')return true;if(p.cyc==='opt')return false;return !this.pillsOf(this.addDays(ds,-1))[p.k]}
   absLines(ds){
-    const R=this.RULE(),s=this.sums(ds),items=this.state.foods[ds]||[],has=items.length>0;
+    const R=this.RULE(),s=this.sums(ds),items=this.state.foods[ds]||[],has=items.length>0,est=items.some(x=>x.est);
     const UNDER_RUN=4,uRun=this.underRun(ds);
     const timed=this.timedFoods(ds),out=this.outsideWindow(ds),first=timed[0]||null,water=this.waterOf(ds),wRaw=(this.state.water||{})[ds];
     const f=n=>this.fmt(Math.round(n));
     return [
       {k:'win',icon:'🕙',name:'식사창 '+R.winS+'-'+R.winE,ok:has&&timed.length>0&&out.length===0,na:!has||!timed.length,
-       val:!has?'기록 없음':!timed.length?'시각 미입력':out.length?(out.length+'끼 창 밖 ('+out.map(x=>x.time).join(', ')+')'):'모두 창 안'},
-      {k:'kcal',icon:'🔥',name:'칼로리 하한 '+f(R.kcalMin)+' ('+UNDER_RUN+'일 연속)',ok:s.kcal>=R.kcalMin||uRun<UNDER_RUN,na:!has,
-       val:f(s.kcal)+' kcal'+(has&&s.kcal<R.kcalMin?(' · '+f(R.kcalMin-s.kcal)+' 미달'+(uRun>1?(' · '+uRun+'일째'):'')):'')},
-      {k:'p',icon:'🍗',name:'단백질 '+R.pG+'g',ok:s.p>=R.pG,na:false,
-       val:f(s.p)+' / '+R.pG+'g'+(s.p<R.pG?(' · '+f(R.pG-s.p)+'g 남음'):'')},
-      {k:'fat1',icon:'🥑',name:'첫 끼 지방 (담석)',ok:!!first&&(+first.f||0)>=R.firstFatG,na:!first,
+       val:!has?'기록 없음':est?'대략만 적음 — 시각 모름':!timed.length?'시각 미입력':out.length?(out.length+'끼 창 밖 ('+out.map(x=>x.time).join(', ')+')'):'모두 창 안'},
+      {k:'kcal',icon:'🔥',name:'칼로리 하한 '+f(R.kcalMin)+' ('+UNDER_RUN+'일 연속부터)',ok:(s.kcal>=R.kcalMin||uRun<UNDER_RUN)&&!est,na:!has||est,
+       val:(est?'≈ ':'')+f(s.kcal)+' kcal'+(est?' (대략)':'')+(has&&!est&&s.kcal<R.kcalMin?(' · '+f(R.kcalMin-s.kcal)+' 미달'+(uRun>1?(' · '+uRun+'일째'):'')):'')},
+      {k:'p',icon:'🍗',name:'단백질 '+R.pG+'g (협상 불가)',ok:s.p>=R.pG&&!est,na:est,
+       val:est?('≈ '+f(s.p)+'g (대략)'):(f(s.p)+' / '+R.pG+'g'+(s.p<R.pG?(' · '+f(R.pG-s.p)+'g 남음'):''))},
+      {k:'fat1',icon:'🥑',name:'첫 끼 지방 (담석 예방)',ok:!!first&&(+first.f||0)>=R.firstFatG,na:!first,
        val:first?(f(first.f)+'g · '+first.name):'첫 끼 시각을 적어 주세요'},
       {k:'water',icon:'💧',name:'물 '+(R.waterMl/1000)+'L (커피 제외)',ok:water>=R.waterMl,na:wRaw==null,
        val:wRaw==null?'기록 없음':((water/1000).toFixed(1)+' / '+(R.waterMl/1000)+'L')}];
@@ -1616,7 +1596,7 @@ class Component extends DCLogic {
      영양값은 ⭐ 줄의 값이 정본이다 — 기록의 값은 그날 먹은 양이라 들쭉날쭉하다. */
   favPool(meal){const F=this.state.foods||{},hit={},FAV_FRESH=14,DAYS=90;
     for(let i=0;i<DAYS;i++){const ds=this.addDays(this.TODAY,-i);for(const x of (F[ds]||[])){
-      const k=this.foodKey(x.name);if(!k)continue;
+      if(x.est)continue;const k=this.foodKey(x.name);if(!k)continue;
       const h=hit[k]||(hit[k]={n:0,m:0,d:i,last:ds,it:x});h.n++;if(x.meal===meal)h.m++}}
     const sc=h=>h?h.n+h.m*3+Math.max(0,FAV_FRESH-h.d)*2:0;
     const mute=new Set((this.state.favMute||[]).map(n=>this.foodKey(n)));
@@ -1629,7 +1609,7 @@ class Component extends DCLogic {
   /* 기록에 새 음식이 들어오면 ⭐에 자동으로 넣는다. 별명표에 걸리면 별명(정리된 이름)으로 넣는다. 돌려주는 값은 새 favs 배열(바뀐 게 없으면 null). */
   favAuto(items,favs0){const L=(favs0||this.state.favs||[]).slice(),mute=new Set((this.state.favMute||[]).map(n=>this.foodKey(n)));
     const has=new Set(L.map(v=>this.foodKey(v.name)));let n=0;
-    for(const x of (items||[])){const raw=String(x.name||'').trim(),k=this.foodKey(raw);if(!k||has.has(k)||mute.has(k))continue;
+    for(const x of (items||[])){if(x.est)continue;const raw=String(x.name||'').trim(),k=this.foodKey(raw);if(!k||has.has(k)||mute.has(k))continue;
       has.add(k);n++;const nm=k===raw.replace(/\s/g,'')?raw:k;
       L.push({id:'v'+(this.seq++),name:nm,amt:+x.amt||0,unit:x.unit||'g',kcal:+x.kcal||0,c:+x.c||0,p:+x.p||0,f:+x.f||0,meal:x.meal||'간식'})}
     return n?L:null}
@@ -1709,9 +1689,9 @@ class Component extends DCLogic {
     {const phB=this.phaseOf(),c3=this.healthWatch(3),hb=c3.hit||{};
      if((!phB||phB.k!=='bloat')&&t.w!=null&&y.w!=null&&(t.w-y.w)>=0.3&&(hb['생리']||hb['배 꾸르륵·설사']))
        add('🩸','부종 신호예요 — 체중이 올랐고 생리·배 불편이 함께 있어요. 트레이너와 이번 주 모드를 확인하세요.','#8B5CF6')}
-    if(y.n){const yRun=this.underRun(this.addDays(this.TODAY,-1));
-      if(y.kcal<R.kcalMin&&yRun>=3)add('🍚','어제까지 '+yRun+'일 연속 하한 '+fmt(R.kcalMin)+' 아래였어요. 오늘 더 줄이면 근육이 먼저 빠집니다.','#E5484D');
-      else if(y.kcal>=Math.round(R.kcalMin*1.5))add('🍚','어제 '+fmt(y.kcal)+'kcal로 많았어요. 오늘은 평소대로 하한 '+fmt(R.kcalMin)+' 근처면 됩니다 — 굶는 건 금지.','#E9A23B')}
+    if(y.n){const yd=this.addDays(this.TODAY,-1),yRun=this.underRun(yd),yR=this.roughOf(yd),yRt=yR?((this.ROUGH.find(x=>x.k===yR.rk)||{}).t||'대략'):'';
+      if(y.kcal<R.kcalMin&&yRun>=3&&!yR)add('🍚','어제까지 '+yRun+'일 연속 하한 '+fmt(R.kcalMin)+' 아래였어요. 오늘 더 줄이면 근육이 먼저 빠집니다.','#E5484D');
+      else if(y.kcal>=Math.round(R.kcalMin*1.5))add('🍚',(yR?('어제는 「'+yRt+'」로 적어 두셨어요 (≈'+fmt(y.kcal)+'kcal).'):('어제 '+fmt(y.kcal)+'kcal로 많았어요.'))+' 오늘은 평소대로 하한 '+fmt(R.kcalMin)+' 근처면 됩니다 — 굶는 건 금지.','#E9A23B')}
     const pd=[t,y,b].filter(x=>x.n),pAvg=pd.length?Math.round(pd.reduce((a,x)=>a+x.p,0)/pd.length):0;
     if(pd.length&&pAvg<R.pG)add('🍗','최근 '+pd.length+'일 단백질 평균 '+pAvg+'g — 하루 '+R.pG+'g에서 '+(R.pG-pAvg)+'g 모자라요. 계란·닭가슴살부터 채우세요.','#E4618C');
     const left=Math.max(0,R.kcalMin-t.kcal),need=Math.max(0,R.pG-t.p);
@@ -1729,9 +1709,6 @@ class Component extends DCLogic {
   /* 한 주의 시작 요일. 0=일 … 6=토, 기본 4=목 — 사장님 지시 2026-09-10 「주 기준이 월~일이 아니라 목~수다(약 투입 주기)」.
      설정 화면 「주 기준 요일」에서 바꾼다. GOALW 와 같은 도장(set.weekDowCode)이라 이미 저장된 기기에도 한 번만 밀어 넣는다. */
   WEEKDOW=4;
-  /* 2차 목표는 1차에서 딱 이만큼만 더 (2026-09-11 사장님 지시 「1kg는 너무 타이트하니까 200g만 더 빼는 걸로」).
-     ⛔ 페이스에 비례해 늘리지 마라 — 주 1.1kg 페이스면 2차가 1kg이 되어 굶기는 목표가 된다. 2차는 「덤」이지 또 한 주가 아니다. */
-  BONUS_KG=0.2;
   DOW_KO=['일','월','화','수','목','금','토'];
   weekDow(){const v=+((this.state.set||{}).weekDow);return isNaN(v)?this.WEEKDOW:((v%7)+7)%7}
   /* dowOv 는 rollGoal 이 「방금 바꾼 요일」로 미리 셈할 때만 쓴다 — setState 가 아직 반영되기 전이라 state 를 읽으면 옛 요일이 나온다. */
@@ -1775,30 +1752,6 @@ class Component extends DCLogic {
     return ['## ⚙ 바뀐 설정 '+L.length+'건 — 사장님이 설정에서 바꾸신 것',''].concat(
       L.map(x=>'- '+x.t+': '+x.from+' → '+x.to+' 〔'+x.ts+'〕'),
       ['','이 값은 앱에 이미 들어가 있다. 이번 주 계획을 이 값 기준으로 다시 보고, 반영했으면 입력함에 chgAck:true 를 함께 보내라 — 그러면 이 칸이 비워진다.',''])}
-  /* 🏆 달성 기록 (2026-09-11 사장님 지시 「디데이 2일 전에 달성한 목표가 없어져서 기분이 안 좋아」).
-     주가 넘어가도, 주 기준 요일을 바꿔도 이룬 것은 사라지지 않는다.
-     키는 '<주시작>|<차수>' 하나뿐이고 **한 번 적히면 고치지 않는다** — 뒤에 체중이 올라도 달성은 달성이다.
-     ⛔ wAt() 로 훑지 마라 — 그건 28일까지 옛 기록을 끌어와서 허수 달성이 나온다. 그날 실제로 잰 값만 본다. */
-  winScan(){
-    const WG=this.state.weekGoals||{},W=this.state.weights||{},out={...(this.state.wins||{})};
-    const hit=(ws,we,goal)=>{for(let d=ws;d<=we&&d<=this.TODAY;d=this.addDays(d,1)){const w=W[d];if(w&&w.a!=null&&+w.a<=+goal+0.001)return {d,w:+w.a}}return null};
-    const add=(ws,we,tier,goal)=>{const k=ws+'|'+tier;if(out[k]||!(+goal>0))return;const h=hit(ws,we,goal);if(h)out[k]={d:h.d,w:h.w,goal:+(+goal).toFixed(1),tier,we}};
-    /* 사장님이 적어 두신 목표는 「적힌 날부터 7일」로 본다 — 주 기준 요일을 바꿔도 그때 이룬 것이 사라지지 않게. */
-    for(const k of Object.keys(WG)){const v=WG[k];if(v!=null&&v!=='')add(k,this.addDays(k,6),1,+v)}
-    const wk=this.weekPlan();
-    add(wk.ws,wk.we,1,wk.goal);
-    if(wk.bonus!=null){
-      /* 2차 목표를 얼린다. 옛 셈법(목표 체중 −0.2 · 페이스 비례)으로 적힌 2차 달성이 남아 있으면 한 번만 걷어낸다. */
-      if(out[wk.ws+'|2g']==null){out[wk.ws+'|2g']={g:wk.bonus,tier:0,d:this.TODAY};
-        const old=out[wk.ws+'|2'];if(old&&Math.abs(+old.goal-wk.bonus)>0.001)delete out[wk.ws+'|2']}
-      add(wk.ws,wk.we,2,wk.bonus)}
-    return out}
-  winSave(){const o=this.winScan();if(JSON.stringify(o)!==JSON.stringify(this.state.wins||{}))this.setState({wins:o})}
-  /* 얼려 둔 2차 목표(tier 0)는 달성이 아니라 목표라서 뺀다. 주 기준 요일을 바꾸면 같은 달성이 두 주에 걸쳐 두 번 적힐 수 있어 「같은 날·같은 차수」는 한 줄로 접는다. */
-  winList(){const W=this.state.wins||{},at={},out=[];
-    for(const k of Object.keys(W)){const x=W[k];if(!x||(x.tier!==1&&x.tier!==2))continue;
-      const id=x.d+'|'+x.tier;if(at[id]==null){at[id]=out.length;out.push(x)}else if(+x.goal<+out[at[id]].goal)out[at[id]]=x}
-    return out.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.tier-a.tier))}
   rollGoal(){const g=this.state.set||{};const n={},P={};
     if(+g.goalWCode!==this.GOALW){n.goalW=this.GOALW;n.goalWCode=this.GOALW}
     if(g.finalDateCode!==this.GOALDATE){n.finalDate=this.GOALDATE;n.finalDateCode=this.GOALDATE}
@@ -1807,9 +1760,7 @@ class Component extends DCLogic {
     if(g.goalDate!==we)n.goalDate=we;
     const fv=this.favMigrate();if(fv){P.favs=fv;n.favVer=this.FAV_VER}
     if(Object.keys(n).length)P.set={...g,...n};
-    if(Object.keys(P).length)this.setState(P);
-    /* ⛔ 이 줄을 위 setState 의 콜백으로 옮기지 마라 — 2026-09-11 실측으로 goalDate 갱신이 날아가 홈 D-day 가 D+32 로 찍혔다. 달성 스캔은 따로 뒤에 돌린다. */
-    setTimeout(()=>this.winSave(),0)}
+    if(Object.keys(P).length)this.setState(P)}
   /* 🏋️ 트레이너 입력함 — 사장님이 말로 주신 기록을 트레이너가 파일에 적어 두면 앱이 받아 넣는다.
      ⛔ 덮어쓰지 않고 「합친다」. 같은 날 같은 이름·같은 시각이 이미 있으면 건너뛴다.
      백업 불러오기(applyBackup)와 헷갈리지 마라 — 그쪽은 통째로 갈아끼우는 것이라 위험하다. */
@@ -1824,7 +1775,7 @@ class Component extends DCLogic {
       for(const d of Object.keys(o.weights))W[d]={...(W[d]||{}),...o.weights[d]};  /* 목표(t) 칸을 지우지 않는다 */
       P.weights=W;add.push('체중')}
     if(o.foods){const F={...S.foods},DM={...S.dayMode};let n=0;const newF=[];
-      for(const d of Object.keys(o.foods)){const day=(F[d]||[]).slice();
+      for(const d of Object.keys(o.foods)){const day=(F[d]||[]).filter(x=>!x.est);
         for(const x of o.foods[d]){if(day.some(y=>y.name===x.name&&(y.time||'')===(x.time||'')))continue;
           day.push({...x,id:'f'+(this.seq++)});newF.push(x);n++}
         F[d]=day;if(!DM[d])DM[d]=S.mode}
@@ -1890,28 +1841,14 @@ class Component extends DCLogic {
     /* 빠졌으면 주 시작값에 붙어 목표가 도망가지 않고, 늘었으면 남은 날에 닿는 곳까지만 올라간다. */
     const auto=Math.max(sw-pace,reach);
     const base=Math.max(sw,cur);
-    /* 사장님이 적어 두신 이번 주 목표는 어떤 요일 기준으로 저장됐든 이번 주 안에 있으면 읽는다 (2026-09-11 — 주 기준을 목요일로 바꾸자 월요일 칸(9/14)의 값이 빈칸으로 보였다. 값은 안 옮기고 읽기만 넓힌다). */
-    const WGm=this.state.weekGoals||{};let man=WGm[ws];if(man==null||man===''){const ks=Object.keys(WGm).filter(k=>k>=ws&&k<=we&&WGm[k]!=null&&WGm[k]!=='').sort();if(ks.length)man=WGm[ks[ks.length-1]]}
+    const man=(this.state.weekGoals||{})[ws];
     const goal=+Math.max(+g.goalW,(man!=null&&man!==''?+man:auto)).toFixed(1);
     const need=+(cur-goal).toFixed(1),span=+(base-goal).toFixed(1);
     const pct=span>0?Math.max(0,Math.min(100,Math.round((base-cur)/span*100))):(need<=0?100:0);
     /* 페이스가 0 이면 「몇 주 남았나」는 셀 수 없다 — 0 으로 나누면 Infinity 가 화면에 찍힌다. */
     const weeksLeft=pace>0?Math.max(0,Math.ceil((cur-(+g.goalW))/pace)):null;
     const weeksText=weeksLeft==null?'—':('약 '+weeksLeft+'주');
-    /* 2차 목표 (2026-09-11 사장님 지시): 이번 주 목표를 이미 이뤘으면, 이룬 날부터 마감까지 남은 날수만큼 같은 페이스로 하나 더 건다. 1차 목표(goal)는 안 건드린다 — 2차를 못 이뤄도 1차는 해낸 것이다. */
-    const W1=(this.state.wins||{})[ws+'|1']||{};let ach=W1.d||null,achW=W1.w!=null?+W1.w:null;
-    if(!ach)for(let d=ws;d<=we&&d<=this.TODAY;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null&&+w.a<=goal+0.001){ach=d;achW=+w.a;break}}
-    const done=ach!=null;let bonus=null,bonusNeed=null;
-    /* 페이스 0(유지·근력 주간)에는 2차를 안 건다 — 「이번 주는 안 줄인다」는 모드와 어긋난다. */
-    /* 기준은 목표 체중이 아니라 **달성한 그날 실제로 잰 체중**이다 (2026-09-11 사장님 정정 「목표체중에서 200g 빠지는 게 아니라 마지막 달성한 체중에서 200g」).
-       목표를 크게 넘겨 이루셨으면 2차도 그만큼 아래에서 시작한다. 달성 체중은 wins 에 얼어붙어 있어 2차 목표가 날마다 도망가지 않는다. */
-    /* 기준은 목표 체중이 아니라 **마지막으로 잰 몸무게**다 (2026-09-11 사장님 정정 「68.3 목표를 67.8로 달성했으면 마지막 잰 몸무게에서 200g 더」).
-       ⛔ 목표 체중(goal)으로 잡으면 크게 넘겨 이루셨을 때 2차가 이미 지나온 자리에 걸려 「2차까지 0」이 뜬다 — 실제로 그렇게 떴다.
-       ⛔ 날마다 다시 셈하지도 마라 — 빠질 때마다 목표가 같이 내려가면 영영 못 닿는다(=굶기는 목표). 그래서 처음 걸릴 때 wins['<주>|2g'] 에 얼린다. */
-    const B2=(this.state.wins||{})[ws+'|2g'];
-    if(done&&pace>0){bonus=(B2&&B2.g!=null)?+B2.g:+Math.max(+g.goalW,Math.min(achW!=null?achW:goal,cur)-this.BONUS_KG).toFixed(1);
-      if(bonus>=goal)bonus=null;else bonusNeed=+(cur-bonus).toFixed(1)}
-    return {ws,we,pace,cur,sw,base,goal,need,pct,daysLeft,weeksLeft,weeksText,manual:man!=null&&man!=='',done,ach,bonus,bonusNeed}}
+    return {ws,we,pace,cur,sw,base,goal,need,pct,daysLeft,weeksLeft,weeksText,manual:man!=null&&man!==''}}
   famUrl(){try{const p=String(location.pathname||'');if(/(^|\/)diet\/(index\.html)?$/.test(p))return '../'}catch(e){}
     return 'https://bravo8workroom-hash.github.io/family-diary/'}
   trainerBrief(){const T=this.TODAY,R=this.RULE(),s=this.sums(T),rows=this.absLines(T),kept=rows.filter(a=>a.ok).length,wk=this.weekPlan();
@@ -1930,11 +1867,10 @@ class Component extends DCLogic {
       '- 탄 '+Math.round(s.c)+'/'+R.cG+'g · 단 '+Math.round(s.p)+'/'+R.pG+'g · 지 '+Math.round(s.f)+'/'+R.fG+'g (뒤가 트레이너 목표)',
       '- 물 '+(this.waterOf(T)/1000).toFixed(2)+'/'+(R.waterMl/1000)+'L (커피 미포함)','',
       '## 이번 주 목표','',
-      '- '+wk.ws+' ~ '+wk.we+'('+this.DOW_KO[new Date(wk.we+'T00:00:00').getDay()]+') (주 기준 '+this.DOW_KO[this.weekDow()]+'요일부터) · 주 시작 '+wk.sw+'kg · 기준 '+wk.base+'kg → 목표 '+wk.goal+'kg'+(wk.manual?' (사장님과 정한 값)':' (지금 체중 기준 자동)'),
-      '- 지금 '+wk.cur+'kg · 남은 '+wk.need+'kg · 이번 주 '+wk.daysLeft+'일 남음'+(wk.done?(' · 🎉 1차 목표 달성('+wk.ach+')'+(wk.bonus!=null?(' → 2차 목표 '+wk.bonus+'kg (남은 '+wk.bonusNeed+'kg) — 못 이뤄도 잘한 것이다, 굶기지 마라'):'')):''),
+      '- '+wk.ws+' ~ '+wk.we+' (주 기준 '+this.DOW_KO[this.weekDow()]+'요일부터) · 주 시작 '+wk.sw+'kg · 기준 '+wk.base+'kg → 목표 '+wk.goal+'kg'+(wk.manual?' (사장님과 정한 값)':' (지금 체중 기준 자동)'),
+      '- 지금 '+wk.cur+'kg · 남은 '+wk.need+'kg · 이번 주 '+wk.daysLeft+'일 남음',
       '- 최종 '+(+this.state.set.goalW)+'kg까지 '+wk.weeksText+' (주 '+wk.pace+'kg 페이스)',
-      ...(this.winList().length?['- 🏆 달성 기록 '+this.winList().length+'건: '+this.winList().slice(0,5).map(x=>x.d+' '+x.goal+'kg('+(x.tier===2?'2차':'1차')+')').join(' · ')+' 〔이룬 것을 먼저 알아주고 시작해라 — 사장님 지시 2026-09-11〕']:[]),
-      ...(fin?['- 결승선 '+fin.fd+'('+this.DOW_KO[new Date(fin.fd+'T00:00:00').getDay()]+')까지 '+(fin.over?'지났다':(fin.weeks+'주 · 남은 '+fin.gap+'kg → 필요 페이스 주 '+fin.need+'kg'+(fin.need>wk.pace?(' 〔지금 페이스 '+wk.pace+'보다 빠르다 — 사장님과 상의해라〕'):'')))]:[]),'',
+      ...(fin?['- 결승선 '+fin.fd+'까지 '+(fin.over?'지났다':(fin.weeks+'주 · 남은 '+fin.gap+'kg → 필요 페이스 주 '+fin.need+'kg'+(fin.need>wk.pace?(' 〔지금 페이스 '+wk.pace+'보다 빠르다 — 사장님과 상의해라〕'):'')))]:[]),'',
       '## 먹은 것','');
     const fs=this.state.foods[T]||[];
     if(!fs.length)L.push('- (아직 없음)');
@@ -1997,22 +1933,10 @@ class Component extends DCLogic {
     sc-=Math.min(35,Math.max(0,g.p-s.p)/Math.max(1,g.p)*70);
     sc-=Math.min(20,Math.max(0,s.c-g.c)/Math.max(1,g.c)*40);
     return Math.max(5,Math.round(sc))}
-  /* ★ 문장이 중간에 잘려 다음 줄로 넘어가지 않게, 문장마다 줄을 바꾼다 (2026-09-11 사장님 지시
-     「두 문장인데 한 패널 안에 길이가 길어서 마지막 문장이 중간에 짤려 밑으로 내려가잖아 — 애매하게 짤리는 부분은 그 한 문장을 아래로 내려서 써」).
-     쓰는 쪽은 이 함수를 통과시키고, 그리는 칸에는 white-space:pre-line 을 준다. 숫자의 소수점(1.5kg)은 뒤에 공백이 없어 안 걸린다. */
-  /* ★ 문장을 토막 내 넘기지 않는다 (2026-09-11 사장님 지시 「모두 한 줄로 넣으면 맨 뒤 문장이 애매하게 짤려 아래로 내려가는데,
-     그 짤리는 문장을 통째로 내려서 쓰라는 말이였어」). 문장마다 잘라 주면 그리는 쪽이 inline-block 으로 얹어,
-     들어가면 한 줄에 같이 두고 안 들어가면 그 문장만 통째로 아래로 내린다.
-     ⛔ white-space:pre-line 으로 무조건 줄을 바꾸지 마라 — 짧은 두 문장까지 갈라놔서 사장님이 「이건 아니다」 하셨다. */
-  sents(s){const t=String(s==null?'':s),out=[];let cur='';
-    for(let i=0;i<t.length;i++){cur+=t[i];
-      if((t[i]==='.'||t[i]==='!'||t[i]==='?')&&t[i+1]===' '){out.push(cur);cur='';i++}}
-    if(cur)out.push(cur);
-    return out.map(x=>x.trim()).filter(Boolean).map(x=>({t:x}))}
   lbl(ds){const dt=new Date(ds+'T00:00:00');return (dt.getMonth()+1)+'.'+dt.getDate()+' ('+['일','월','화','수','목','금','토'][dt.getDay()]+')'}
-  addFoods(dt,items){const F={...this.state.foods};const DM={...this.state.dayMode};if(!(F[dt]||[]).length&&!DM[dt])DM[dt]=this.state.mode;F[dt]=[...(F[dt]||[]),...items];let P=this.state.posts;if(!P.some(p=>p.date===dt)){P=[{id:'p'+(this.seq++),date:dt,photos:[],text:'',auto:true,starred:false,comments:[]},...P]}const patch={foods:F,dayMode:DM,posts:P};const fv=this.favAuto(items);if(fv)patch.favs=fv;this.setState(patch)}
+  addFoods(dt,items){const F={...this.state.foods};const DM={...this.state.dayMode};if(!(F[dt]||[]).length&&!DM[dt])DM[dt]=this.state.mode;F[dt]=[...(F[dt]||[]).filter(x=>!x.est),...items];let P=this.state.posts;if(!P.some(p=>p.date===dt)){P=[{id:'p'+(this.seq++),date:dt,photos:[],text:'',auto:true,starred:false,comments:[]},...P]}const patch={foods:F,dayMode:DM,posts:P};const fv=this.favAuto(items);if(fv)patch.favs=fv;this.setState(patch)}
   openDayFeed(ds){let P=this.state.posts;let post=P.find(p=>p.date===ds);if(!post){post={id:'p'+(this.seq++),date:ds,photos:[],text:'',auto:true,starred:false,comments:[]};P=[post,...P]}this.setState({tab:'feed',posts:P,pm:{id:post.id,editing:false,isNew:false,menu:false,confirm:false,draft:null},replyTo:null,cInput:''})}
-  commitW(ds,f,v){const n=parseFloat(String(v).replace(/,/g,''));const W={...this.state.weights};W[ds]=Object.assign({t:null,a:null},W[ds],{[f]:isNaN(n)?null:n});this.setState({weights:W,editW:null});setTimeout(()=>this.winSave(),0);if(!isNaN(n))this.toast(this.say('저장했어요 ✓','저장했사와요 👑'))}
+  commitW(ds,f,v){const n=parseFloat(String(v).replace(/,/g,''));const W={...this.state.weights};W[ds]=Object.assign({t:null,a:null},W[ds],{[f]:isNaN(n)?null:n});this.setState({weights:W,editW:null});if(!isNaN(n))this.toast(this.say('저장했어요 ✓','저장했사와요 👑'))}
   shiftDay(n){const dt=new Date(this.state.selDate+'T00:00:00');dt.setDate(dt.getDate()+n);const z=x=>String(x).padStart(2,'0');const ds=dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate());if(ds<=this.TODAY)this.setState({selDate:ds})}
   openPost(id,edit){const p=this.state.posts.find(x=>x.id===id);this.setState({pm:{id,editing:!!edit,isNew:false,menu:false,confirm:false,draft:edit?{photos:[...p.photos],text:p.text}:null},replyTo:null,cInput:''})}
   newPost(date){this.setState({pm:{id:null,editing:true,isNew:true,date,menu:false,confirm:false,draft:{photos:[],text:''}},replyTo:null,cInput:''})}
@@ -2132,7 +2056,7 @@ class Component extends DCLogic {
       this.toast(this.say('호출 '+used+'회로 '+n+'건 처리 · 코치 피드백까지 완료 ⚡','호출 '+used+'회로 '+n+'건 처리했답니다 ⚡'));
     }catch(err){this.setState({aiBusy:false});this.toast('AI 처리 중 문제가 생겼어요 · '+(err.message||'네트워크'))}
   }
-  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo','pills','favMute','wins'];
+  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo','pills','favMute'];
   idb(){return new Promise((res,rej)=>{const q=indexedDB.open('dietgram',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
   async dbGet(k){try{const db=await this.idb();return await new Promise((res,rej)=>{const t=db.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error)})}catch(_){try{const s=localStorage.getItem('dgm_'+k);return s?JSON.parse(s):null}catch(e){return null}}}
   // 기록은 가족 저장소(Supabase)에 둔다 — family_state 문서의 diet 칸 하나를 쓴다.
@@ -2188,7 +2112,7 @@ class Component extends DCLogic {
     const phNow=this.phaseOf();
     const gset=S.set,hasGoal=!!gset.goalDate;
     let ddayText='',goalDateText='';
-    if(hasGoal){const diff=Math.round((new Date(gset.goalDate+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5);ddayText=diff>0?'D-'+diff:diff===0?'D-Day':'D+'+(-diff);const gd=new Date(gset.goalDate+'T00:00:00');goalDateText=(gd.getMonth()+1)+'월 '+gd.getDate()+'일 ('+this.DOW_KO[gd.getDay()]+')'}
+    if(hasGoal){const diff=Math.round((new Date(gset.goalDate+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5);ddayText=diff>0?'D-'+diff:diff===0?'D-Day':'D+'+(-diff);const gd=new Date(gset.goalDate+'T00:00:00');goalDateText=(gd.getMonth()+1)+'월 '+gd.getDate()+'일'}
     let cur=gset.startW;for(let i=0;i<14;i++){const w=S.weights[this.d(i)];if(w&&w.a!=null){cur=w.a;break}}
     const lost=+(gset.startW-cur).toFixed(1);
     const wStats=[{label:'시작',val:fmt(gset.startW),color:'#1F1E1A'},{label:'현재',val:fmt(cur),color:th.accent},{label:'감량',val:(lost>=0?'-':'+')+fmt(Math.abs(lost)),color:lost>=0?'#5B8DEF':'#E5484D'},{label:'목표',val:fmt(gset.goalW),color:'#1F1E1A'}];
@@ -2211,15 +2135,8 @@ class Component extends DCLogic {
       done:()=>{this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:[{...x,at:this.TODAY},...tdDone].slice(0,100)}});this.toast('처리됨으로 옮겼어요 ✓')},
       del:()=>this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:tdDone}})}));
     const wkp=this.weekPlan();
-    const wkColor=(wkp.need<=0||wkp.done)?'#17A673':th.accent;
-    /* 🏆 달성 기록 — 홈 카드와 🗺 로드맵이 같은 목록(winList)을 본다. 새로 판정하지 마라. */
-    const winL=this.winList();
-    const winRows=winL.map(x=>{const gap=Math.round((new Date(x.we+'T00:00:00')-new Date(x.d+'T00:00:00'))/864e5);
-      return {dTxt:this.lbl(x.d),goalTxt:fmt(x.goal)+'kg',tierTxt:x.tier===2?'2차':'1차',
-        tierBg:x.tier===2?'#EAF7F1':th.chipBg,tierColor:x.tier===2?'#17A673':'#8B887C',
-        wTxt:'그날 '+fmt(x.w)+'kg',whenTxt:gap>0?('마감 '+gap+'일 전'):(gap===0?'마감 당일':'마감 뒤')}});
-    const winTop=winRows[0],winRest=winRows.slice(1,5);
-    const wkStats=[{label:'주 시작('+this.DOW_KO[this.weekDow()]+')',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:wkp.bonus!=null?'2차까지':'남은 감량',val:wkp.bonus!=null?fmt(Math.max(0,wkp.bonusNeed)):(wkp.need>0?fmt(wkp.need):'달성 ✓'),color:wkp.bonus!=null?th.accent:(wkp.need>0?'#E5484D':'#17A673')}];
+    const wkColor=wkp.need<=0?'#17A673':th.accent;
+    const wkStats=[{label:'주 시작(월)',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:'남은 감량',val:wkp.need>0?fmt(wkp.need):'달성 ✓',color:wkp.need>0?'#E5484D':'#17A673'}];
     const noDow=ds=>this.lbl(ds).replace(/\s*\(.\)$/,'');
     const a3=this.advice3();
     const ewA=S.editW;
@@ -2239,6 +2156,12 @@ class Component extends DCLogic {
     const phBg=ph=>!ph?'linear-gradient(135deg,#F3F1EA,#E7E4DA)':ph.src?('url("'+ph.src+'") center/cover no-repeat'):('linear-gradient(135deg,'+ph.c1+','+ph.c2+')');
     const mkThumb=p=>({emoji:p.photos[0]?(p.photos[0].src?'':p.photos[0].e):'📝',bg:phBg(p.photos[0]),textOnly:!p.photos.length,preview:p.text||'글 게시물',open:()=>this.openPost(p.id)});
     const dSum=this.sums(S.selDate),dSc=this.score(S.selDate),dGoal=this.goalFor(S.selDate);
+    /* 「기록 못 한 날」 대략 칩 — 진짜 음식이 한 줄이라도 있으면 카드째 사라진다(대략은 빈 날을 메우는 것이다). */
+    const dRough=this.roughOf(S.selDate),dReal=(S.foods[S.selDate]||[]).some(x=>!x.est);
+    const roughChips=this.ROUGH.map(r=>{const on=!!dRough&&dRough.rk===r.k;
+      return {label:r.e+' '+r.t,sub:r.s+' · '+fmt(r.kcal)+' kcal',
+        bg:on?th.accent:th.chipBg,color:on?'#FFFFFF':'#5C594E',subColor:on?'rgba(255,255,255,.82)':'#8B887C',
+        tap:()=>this.roughAdd(S.selDate,r.k)}});
     const meals=['아침','점심','저녁','간식'].map(nm=>{const items=(S.foods[S.selDate]||[]).filter(x=>x.meal===nm);const k=items.reduce((a,x)=>a+(+x.kcal||0),0);const qp=this.favPool(nm);
       return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,quick:qp.slice(0,3).map(v=>({label:v.name,amt:fmt(v.amt)+(v.unit||''),tap:()=>this.favPut(nm,v),...this.giVals(v.name)})),favOpen:()=>this.setState({fv:{meal:nm}}),combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
         items:items.map(it=>({name:it.name,timeLabel:it.time?(it.time+'  '):'',timeColor:this.outTime(it.time)?'#E5484D':'#B5B2A6',amt:fmt(it.amt)+it.unit,c:fmt(it.c),p:fmt(it.p),f:fmt(it.f),kcal:fmt(it.kcal),open:()=>this.setState({fm:{...it,base:{amt:it.amt,unit:it.unit,kcal:it.kcal,c:it.c,p:it.p,f:it.f},confirm:false,nameErr:false}}),del:e=>{e.stopPropagation();const F={...S.foods};F[S.selDate]=(F[S.selDate]||[]).filter(x=>x.id!==it.id);this.setState({foods:F});this.toast(this.say('삭제했어요','삭제했사와요'))}}))}});
@@ -2309,15 +2232,15 @@ class Component extends DCLogic {
     const woTotalToday=woMin(woD8);
     const [cy,cmn]=S.calM.split('-').map(Number);
     const mdays=new Date(cy,cmn,0).getDate(),fdow=new Date(cy,cmn-1,1).getDay();
-    const calCells=[];for(let i=0;i<fdow;i++)calCells.push({num:'',bg:'transparent',border:'transparent',kcal:'',w:'',wColor:'#8B887C',mark:'',wo:'',woColor:'#B5B2A6',numColor:'#B5B2A6',kcalColor:'#8B887C',cursor:'default',opacity:1,go:null});
+    const calCells=[];for(let i=0;i<fdow;i++)calCells.push({num:'',bg:'transparent',border:'transparent',kcal:'',mark:'',wo:'',woColor:'#B5B2A6',numColor:'#B5B2A6',kcalColor:'#8B887C',cursor:'default',opacity:1,go:null});
     let mKcal=0,mLogged=0,sOk=0,sNo=0,mAlco=0;
     for(let dd=1;dd<=mdays;dd++){const ds=cy+'-'+pad2(cmn)+'-'+pad2(dd);const sm=this.sums(ds);const al=this.alcoOf(ds);const fut=ds>this.TODAY;const isT=ds===this.TODAY;
       if(sm.kcal>0){mKcal+=sm.kcal;mLogged++;if(al.length){sNo++;mAlco+=al.reduce((a,x)=>a+(+x.kcal||0),0)}else sOk++}
-      calCells.push({num:dd,bg:isT?th.accent:th.chipBg,border:isT?th.accent:'transparent',numColor:isT?'#fff':fut?'#D8D5CB':'#5C594E',kcal:sm.kcal>0?fmt(sm.kcal):'',kcalColor:isT?'#fff':th.accent,w:(v=>v!=null&&v!==''?(+v).toFixed(1)+'kg':'')((S.weights[ds]||{}).a),wColor:isT?'#fff':'#5C594E',mark:al.length?'🍺':'',wo:woMin(ds)>0?'💪'+fmtT(woMin(ds)):'',woColor:isT?'#fff':th.accent,cursor:fut?'default':'pointer',opacity:fut?.55:1,go:fut?null:()=>this.setState({selDate:ds,tab:'log'})})}
+      calCells.push({num:dd,bg:isT?th.accent:th.chipBg,border:isT?th.accent:'transparent',numColor:isT?'#fff':fut?'#D8D5CB':'#5C594E',kcal:sm.kcal>0?fmt(sm.kcal):'',kcalColor:isT?'#fff':th.accent,mark:al.length?'🍺':'',wo:woMin(ds)>0?'💪'+fmtT(woMin(ds)):'',woColor:isT?'#fff':th.accent,cursor:fut?'default':'pointer',opacity:fut?.55:1,go:fut?null:()=>this.setState({selDate:ds,tab:'log'})})}
     /* ── 52kg 절대선·물·주평균·컨디션·근력·일지·조합식·재고 ────────────── */
     const R52=this.RULE();
-    const mkAbs=ds=>{const rows=this.absLines(ds);const kept=rows.filter(a=>a.ok).length;
-      return {kept,color:kept>=rows.length?'#17A673':kept>=rows.length-2?th.accent:'#E5484D',
+    const mkAbs=ds=>{const rows=this.absLines(ds);const kept=rows.filter(a=>a.ok).length;const judged=rows.filter(a=>!a.na).length;
+      return {kept,color:!judged?'#B5B2A6':kept>=judged?'#17A673':kept>=judged-2?th.accent:'#E5484D',
         rows:rows.map(a=>({icon:a.icon,name:a.name,val:a.val,
           valColor:a.ok?'#17A673':a.na?'#B5B2A6':'#E5484D',
           mark:a.ok?'✓':a.na?'·':'✕',
@@ -2390,48 +2313,6 @@ class Component extends DCLogic {
       wText:fmt(x.w)+'kg 지점'+(x.done?'':' · '+md(this.addDays(this.TODAY,x.wk*7))+' 무렵')}));
     const rmEta=this.addDays(this.TODAY,Math.max(0,wkp.weeksLeft||0)*7);
     const rmFin=this.finalPlan(rmCur);
-    /* 🏆 부루마불 말판 — 칸 하나 = 이번 주 목표 한 번 달성 (2026-09-11 사장님 지시 「부루마불 게임처럼 달성했을 때 한 칸씩」).
-       옛 「🏆 지나온 달성」 목록을 이 말판이 대신한다 — 목록이 매일 떠 있는 것이 싫다고 하셔서 진행판으로 바꿨다.
-       ⛔ 여기서 달성을 다시 판정하지 마라. winList() 가 내놓은 것을 줄 세울 뿐이다(홈 🏆 카드와 같은 목록).
-       한 줄 8칸이고 홀수 줄은 거꾸로 놓아 지그재그(뱀사다리)가 된다. 짧은 줄은 안 보이는 빈 칸으로 메워야
-       홀수 줄이 오른쪽 끝에 붙는다 — 안 메우면 길이 끊겨 보인다. */
-    /* 🎲 🏆 달성 말판 — 뱀사다리형 게임판 (2026-09-11 사장님 지시 「부루마불 게임처럼 달성했을 때 한 칸씩」 → 「좀 더 게임프로그램처럼」).
-       옛 「🏆 지나온 달성」 목록을 이 판이 대신한다 — 목록이 매일 떠 있는 것이 싫다고 하셔서 진행판으로 바꿨다.
-       ⛔ 여기서 달성을 다시 판정하지 마라. winList() 가 내놓은 것을 줄 세울 뿐이다(홈 🏆 카드와 같은 목록).
-       칸 종류는 CSS 클래스 하나로만 구분한다(.bd-start/.bd-done/.bd-me/.bd-cp/.bd-goal) — 색을 인라인으로 다시 적지 마라. */
-    const BD_ROW=8,BD_MAX=56;
-    const bdPace=wkp.pace>0?wkp.pace:0.5;
-    const bdLeft=Math.min(BD_MAX,Math.max(1,Math.ceil((rmCur-rmGoalW)/bdPace)));
-    const bdPast=winL.slice().reverse();
-    /* 🗺 로드맵 5단계를 앞으로 갈 칸에 ⭐ 체크포인트로 박는다 — 말판과 로드맵이 같은 지점을 가리키게.
-       마지막 단계(완주)는 결승선 칸과 겹치므로 뺀다. */
-    const bdCP={};
-    rmRaw.forEach((x,i)=>{if(x.done||i>=rmRaw.length-1)return;
-      const off=Math.max(1,Math.ceil((rmCur-x.w)/bdPace));if(off<bdLeft&&!bdCP[off])bdCP[off]={n:i+1,t:x.t,w:x.w}});
-    const bdSeq=[{k:'s',mark:'🚩',sub:'출발',cls:'bd-c bd-start',info:'🚩 출발 · '+fmt(rmStart)+'kg 에서 시작했다'},
-      ...bdPast.map((x,i)=>({k:'w'+i,mark:'🏆',sub:fmt(x.w),cls:'bd-c bd-done',
-        info:'🏆 '+this.lbl(x.d)+' · '+fmt(x.goal)+'kg '+(x.tier===2?'2차':'1차')+' 목표 달성 · 그날 '+fmt(x.w)+'kg'})),
-      {k:'now',mark:'🏃',sub:'지금',cls:'bd-c bd-me',
-        info:'🏃 지금 '+fmt(rmCur)+'kg · 다음 칸은 이번 주 목표 '+fmt(wkp.goal)+'kg'},
-      ...Array.from({length:bdLeft},(_,i)=>{const off=i+1,last=off===bdLeft,cp=bdCP[off];
-        return {k:'e'+i,mark:last?'🏁':(cp?'⭐':''),sub:last?fmt(rmGoalW):(cp?(cp.n+'단계'):''),
-          cls:'bd-c'+(last?' bd-goal':(cp?' bd-cp':'')),
-          info:last?('🏁 결승선 '+fmt(rmGoalW)+'kg · 여기까지 '+bdLeft+'칸')
-            :(cp?('⭐ '+cp.t+' · '+fmt(cp.w)+'kg 지점 · '+off+'칸 뒤')
-               :('앞으로 '+off+'칸 · 이 페이스면 '+md(this.addDays(this.TODAY,off*7))+' 무렵'))}})];
-    bdSeq.forEach((c,i)=>{c.n=i?String(i):''});
-    /* 한 줄 8칸이고 홀수 줄은 거꾸로 놓아 지그재그가 된다. 짧은 줄은 안 보이는 빈 칸으로 메워야 길이 안 끊긴다. */
-    const bdCells=[];
-    for(let i=0;i<bdSeq.length;i+=BD_ROW){const odd=(i/BD_ROW)%2===1;let r=bdSeq.slice(i,i+BD_ROW);if(odd)r=r.reverse();
-      while(r.length<BD_ROW){const p={k:'p'+i+'_'+r.length,mark:'',sub:'',n:'',cls:'bd-c bd-pad',info:''};if(odd)r.unshift(p);else r.push(p)}
-      for(const c of r)bdCells.push(c)}
-    const bdPick=bdCells.find(c=>c.k===S.bdSel&&c.info);
-    const bdFlat=bdCells.map(c=>({...c,cls:c.cls+((S.bdSel===c.k&&c.info)?' bd-sel':''),
-      tap:()=>{if(c.info)this.setState({bdSel:this.state.bdSel===c.k?null:c.k})}}));
-    const bdNext=Object.keys(bdCP).map(Number).sort((a,b)=>a-b)[0];
-    const bdInfo=bdPick?bdPick.info
-      :(bdNext!=null?('칸을 누르면 그 자리를 보여준다 · 다음 ⭐ '+bdCP[bdNext].t+'까지 '+bdNext+'칸')
-        :'칸 하나 = 이번 주 목표 한 번 달성 · 칸을 누르면 그 자리를 보여준다');
     let rmLift=0;for(let i=0;i<7;i++){if((this.liftsOf(this.addDays(wkp.ws,i))||[]).length)rmLift++}
     const CUD=['일','월','화','수','목','금','토'],cuR=R52.carbUp||{};
     const cuTxt=Object.keys(cuR).filter(k=>+cuR[k]>0).map(k=>CUD[+k]+' '+cuR[k]).join(' · ')||'없음';
@@ -2477,19 +2358,6 @@ class Component extends DCLogic {
     const fvEd=fv?fv.ed:null;
     const fvUnits=cur=>this.UNITS.map(u=>({name:u,pick:()=>this.favEditSet('unit',u),
       bg:cur===u?th.accent:th.chipBg,color:cur===u?'#fff':'#5C594E'}));
-    /* 자주 먹는 음식 — 갈래별로 묶는다. 서랍 위 칩이 갈래 하나를 고르고(fv.cat — 화면 상태라 DBK 밖), 고른 갈래만 펼친다
-       (2026-09-11, 사장님 지시 「상단에 카테고리로 만들고 클릭하면 쫙 나오게, 스크롤 내리기 힘들어」). 고른 갈래가 비면 첫 갈래로. */
-    const fvGroups=this.FOOD_CATS.map(cat=>({cat,rows:fvPool.filter(v=>v.cat===cat).map(v=>{const ing=!!(fvEd&&fvEd.id===v.id);
-        return {name:v.name,summary:favSum(v),meta:v.n?('×'+v.n+(v.last?(' · 마지막 '+noDow(v.last)):'')):'아직 안 먹음',tap:favTap(v),...this.giVals(v.name),
-          del:e=>{e.stopPropagation();if(v.mine)this.favDrop(v.id);else this.setState({favMute:[...(this.state.favMute||[]),v.name]})},
-          edit:e=>{e.stopPropagation();if(!v.mine){this.favPin(v);return}if(ing)this.favEditClose();else this.favEdit(v)},
-          editing:ing,edAmt:ing?fvEd.amt:'',edUnit:ing?fvEd.unit:'',edUnits:ing?fvUnits(fvEd.unit):[],
-          edKcal:ing?fvEd.kcal:'',edC:ing?fvEd.c:'',edP:ing?fvEd.p:'',edF:ing?fvEd.f:'',
-          onEdAmt:e=>this.favEditSet('amt',e.target.value),onEdKcal:e=>this.favEditSet('kcal',e.target.value),onEdC:e=>this.favEditSet('c',e.target.value),onEdP:e=>this.favEditSet('p',e.target.value),onEdF:e=>this.favEditSet('f',e.target.value),
-          edNote:ing?((fvEd.unit||'g')===((fvEd.base||{}).unit||'g')?'양을 바꾸면 칼로리·탄단지가 같은 비율로 따라와요 — 숫자를 직접 고쳐도 돼요':'단위를 바꾸면 영양값은 그대로예요 — 필요하면 직접 고쳐 주세요'):'',
-          edCancel:()=>this.favEditClose(),edSave:()=>this.favEditSave()}})})).filter(gp=>gp.rows.length);
-    const fvCatList=fvGroups.map(g=>g.cat);
-    const fvCat=(fv&&fv.cat&&fvCatList.includes(fv.cat))?fv.cat:(fvCatList[0]||'');
     const combos=S.combos||[],cm=S.cm;
     const cmMeal=cm?cm.meal:'';
     const comboSum=k=>{const it=k.items||[];if(!it.length)return '비어 있음 — 「이 끼니를 저장」으로 채우세요';
@@ -2510,7 +2378,7 @@ class Component extends DCLogic {
       absRows:absT.rows,absKept:absT.kept,absTotal:absT.rows.length,absColor:absT.color,
       safeToday:safeT,safeToggle:toggleSafe,
       safeBtnBg:safeT?'#E5484D':th.chipBg,safeBtnColor:safeT?'#fff':'#8B887C',
-      safeBtnLabel:safeT?'🚨 안전 예외 켜짐 — 누르면 끄기':'🚨 어지럽다 / 손떨린다 / 못 먹었다',
+      safeBtnLabel:safeT?'🚨 안전 예외 켜짐 — 누르면 끄기':'🚨 지금 어지럽다 / 손떨린다 / 못 먹었다',
       /* 물 */
       waterText:(waterT/1000).toFixed(2).replace(/\.?0+$/,'')+' / '+(waterGoal/1000)+'L',
       waterPct:Math.min(100,Math.round(waterT/waterGoal*100)),
@@ -2555,7 +2423,7 @@ class Component extends DCLogic {
       rmPct:Math.max(0,Math.min(100,Math.round(rmDone/rmTotal*100))),rmPaceText:'주 '+wkp.pace+'kg 페이스',
       rmSummary:'시작 '+fmt(rmStart)+'kg에서 '+fmt(+rmDone.toFixed(1))+'kg 왔다 · 남은 '+wkp.weeksText+(wkp.weeksLeft!=null?(' · 이 페이스면 '+md(rmEta)+' 무렵 '+fmt(rmGoalW)+'kg'):' · 이번 주는 줄이지 않는 주간이다')
         +(rmFin&&!rmFin.over?(' · 최종 '+md(rmFin.fd)+'까지 '+rmFin.weeks+'주 — 그때 '+fmt(rmGoalW)+'kg이 되려면 주 '+rmFin.need+'kg'):''),
-      rmSteps,bdCells:bdFlat,bdDone:bdPast.length,bdLeftN:bdLeft,bdInfo,tpRows,
+      rmSteps,tpRows,
       ntKinds:NT_KINDS.map(k=>({label:k==='전체'?'전체':(k==='메인'?'📒 메인':'🍳 레시피'),
         bg:S.ntKind===k?th.accent:th.chipBg,color:S.ntKind===k?'#fff':'#5C594E',
         pick:()=>this.setState({ntKind:k,ntOpen:-1,ntMore:false})})),
@@ -2596,9 +2464,15 @@ class Component extends DCLogic {
       fvOn:!!fv,fvClose:()=>this.setState({fv:null}),fvMealLabel:fvMeal,
       fvHint:'누르면 '+fvMeal+'에 지금 시각으로 바로 담겨요. 기록에 적힌 음식은 여기에 저절로 올라와요(✕로 빼면 다시 안 올라와요). ✏️로 양·단위·칼로리·탄단지를 고칠 수 있고, 양을 바꾸면 영양값이 같은 비율로 따라와요. GI는 혈당이 오르는 속도예요 — 초록 좋음 · 주황 중간 · 빨강 나쁨.',
       fvEmpty:!fvPool.length,
-      fvGroups,fvCat,
-      fvCats:fvCatList.map(c=>({label:c+' '+fvGroups.find(g=>g.cat===c).rows.length,bg:fvCat===c?th.accent:th.chipBg,color:fvCat===c?'#fff':'#5C594E',pick:()=>this.setState({fv:{meal:fvMeal,cat:c}})})),
-      fvRows:(fvGroups.find(g=>g.cat===fvCat)||{rows:[]}).rows,
+      fvGroups:this.FOOD_CATS.map(cat=>({cat,rows:fvPool.filter(v=>v.cat===cat).map(v=>{const ing=!!(fvEd&&fvEd.id===v.id);
+        return {name:v.name,summary:favSum(v),meta:v.n?('×'+v.n+(v.last?(' · 마지막 '+noDow(v.last)):'')):'아직 안 먹음',tap:favTap(v),...this.giVals(v.name),
+          del:e=>{e.stopPropagation();if(v.mine)this.favDrop(v.id);else this.setState({favMute:[...(this.state.favMute||[]),v.name]})},
+          edit:e=>{e.stopPropagation();if(!v.mine){this.favPin(v);return}if(ing)this.favEditClose();else this.favEdit(v)},
+          editing:ing,edAmt:ing?fvEd.amt:'',edUnit:ing?fvEd.unit:'',edUnits:ing?fvUnits(fvEd.unit):[],
+          edKcal:ing?fvEd.kcal:'',edC:ing?fvEd.c:'',edP:ing?fvEd.p:'',edF:ing?fvEd.f:'',
+          onEdAmt:e=>this.favEditSet('amt',e.target.value),onEdKcal:e=>this.favEditSet('kcal',e.target.value),onEdC:e=>this.favEditSet('c',e.target.value),onEdP:e=>this.favEditSet('p',e.target.value),onEdF:e=>this.favEditSet('f',e.target.value),
+          edNote:ing?((fvEd.unit||'g')===((fvEd.base||{}).unit||'g')?'양을 바꾸면 칼로리·탄단지가 같은 비율로 따라와요 — 숫자를 직접 고쳐도 돼요':'단위를 바꾸면 영양값은 그대로예요 — 필요하면 직접 고쳐 주세요'):'',
+          edCancel:()=>this.favEditClose(),edSave:()=>this.favEditSave()}})})).filter(gp=>gp.rows.length),
       /* 조합식 서랍 */
       cmOn:!!cm,cmClose:()=>this.setState({cm:null}),cmMealLabel:cmMeal,
       cmModePick:()=>this.setState({cm:{...cm,mode:'pick'}}),cmModeSave:()=>this.setState({cm:{...cm,mode:'save'}}),
@@ -2629,7 +2503,7 @@ class Component extends DCLogic {
       modeColor:phNow?(phNow.k==='maint'?th.maint:th.diet):modeC(S.mode),
       modeBg:phNow?(phNow.k==='maint'?th.maintSoft:th.dietSoft):modeB(S.mode),
       phaseOn:!!phNow,phaseTitle:phNow?(phNow.e+' '+phNow.t+(phNow.over?' · 기한 지남 — 트레이너와 다시 정하세요':(phNow.to?(' · '+noDow(phNow.to)+'까지'):''))):'',
-      phaseReadS:phNow?this.sents((phNow.why?(phNow.why+' — '):'')+phNow.read):[],
+      phaseRead:phNow?((phNow.why?(phNow.why+' — '):'')+phNow.read):'',
       phaseTips:phNow?phNow.tips.join(' · '):'',
       phaseHint:phNow?('지금 '+phNow.e+' '+phNow.t+' 모드예요. 모드를 바꾸면 탄수·지방·페이스·물이 그 모드의 출발값으로 채워지고, 그 뒤 트레이너가 보낸 값이 이깁니다.'):'모드를 고르면 탄수·지방·페이스·물이 그 모드의 출발값으로 채워져요. 절대선 다섯은 어느 모드에서도 안 바뀝니다.',
       phaseChips:this.PHASES.map(p=>({t:p.e+' '+p.t,pick:()=>this.applyPhase(p.k),
@@ -2659,16 +2533,13 @@ class Component extends DCLogic {
       tdRows,tdCount:tdItems.length+'건'+(tdDone.length?(' · 처리됨 '+tdDone.length):''),tdColor:tdItems.length?th.accent:'#B5B2A6',tdEmpty:!tdItems.length,
       tdDraft:S.tdDraft||'',tdOnDraft:e=>this.setState({tdDraft:e.target.value}),
       tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,tdPaste,tdPhDraft,tdHasPh:!!tdPh.length,
-      winOn:!!winTop,winN:winRows.length,winRest,winHasRest:winRest.length>0,
-      winTopLine:winTop?('🎉 '+winTop.dTxt+' · '+winTop.goalTxt+' 목표 달성!'):'',
-      winTopSub:winTop?(winTop.tierTxt+' · '+winTop.whenTxt+'에 해냈어요 · '+winTop.wTxt):'',
-      wkRange:noDow(wkp.ws)+'~'+this.lbl(wkp.we),wkGoalText:(wkp.bonus!=null?(fmt(wkp.goal)+' ✓ → 2차 '+fmt(wkp.bonus)+' kg'):(fmt(wkp.goal)+' kg')),wkColor,wkPct:wkp.pct,wkStats,
-      wkNoteS:this.sents((wkp.done?('🎉 '+fmt(wkp.goal)+'kg 달성! '+(wkp.bonus!=null?('2차 '+fmt(wkp.bonus)+'kg — '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.bonusNeed))+'kg 더. 못 해도 1차는 해냈어요'):'마감까지 유지만 해도 충분해요')+' · 마감 '+this.lbl(wkp.we)):(wkp.pace>0?('남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg · 최종 '+fmt(+gset.goalW)+'kg까지 '+wkp.weeksText):('줄이지 않는 주간이에요 · '+wkp.daysLeft+'일 남음')))),
+      wkRange:noDow(wkp.ws)+'~'+noDow(wkp.we),wkGoalText:fmt(wkp.goal)+' kg',wkColor,wkPct:wkp.pct,wkStats,
+      wkNote:(wkp.pace>0?('남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg — 주 '+wkp.pace+'kg 페이스를 남은 날수로 나눈 몫이에요 · 최종 '+fmt(+gset.goalW)+'kg까지 '+wkp.weeksText):('이번 주는 줄이지 않는 주간이에요(페이스 0). 눈금 대신 기록으로 보세요 · 이번 주 '+wkp.daysLeft+'일 남음')),
       sWeekGoal:wkp.manual?wkp.goal:'',sWeekPace:wkp.pace,onWeekPace:setRule('weekPace'),
       onWeekGoal:e=>{const v=String(e.target.value||'').trim();const WG={...(S.weekGoals||{})};
         if(v==='')delete WG[wkp.ws];else WG[wkp.ws]=+v||0;
         this.setState({weekGoals:WG});this.toast(v===''?'이번 주 목표를 자동으로 되돌렸어요 ✓':('이번 주 목표를 '+v+'kg으로 두었어요 ✓'))},
-      wStats,a3Rows,a3Lines:a3.lines.map(x=>({...x,ts:this.sents(x.t)})),wRows,
+      wStats,a3Rows,a3Lines:a3.lines,wRows,
       pillRows,pillKept:pillKeptN,pillDue:pillDueN,pillColor:pillKeptN>=pillDueN?'#17A673':th.accent,
       selLabel:this.lbl(S.selDate),selDate:S.selDate,todayStr:this.TODAY,
       prevDay:()=>this.shiftDay(-1),nextDay:()=>this.shiftDay(1),
@@ -2694,7 +2565,9 @@ class Component extends DCLogic {
           mk('지방'+(fGoal<RB.fG?(' (탄수 +'+fmt(Math.round(cOver))+'g 반영)'):''),'#5B8DEF','#5B8DEF',dSum.f,fGoal,'g',true)];
         B[1].div='1px solid '+th.cardBorder;return B})(),
       dayModeBg:modeB(dGoal.m),dayModeColor:modeC(dGoal.m),dayModeLabel:modeL(dGoal.m),
-      dayHasLog:dSc!=null,dayNoLog:dSc==null,dayScore:dSc,
+      dayHasLog:dSc!=null,dayNoLog:dSc==null,dayScore:dSc==null?dSc:((dRough?'≈ ':'')+dSc),
+      roughShow:!dReal,roughOn:!!dRough,roughChips,roughClear:()=>this.roughClear(S.selDate),
+      roughTitle:dRough?('≈ '+dRough.name.replace(' (대략)','')+'으로 적혀 있어요 — 바꾸려면 누르세요'):'기록을 못 하셨나요? 대략만 눌러 주세요',
       meals,dayPosts,newPostLog:()=>this.newPost(S.selDate),
       fmOn:!!fm,fmTitle:fm&&fm.id?'음식 수정':'음식 추가',fmIsEdit:!!(fm&&fm.id),fmConfirm:!!(fm&&fm.confirm),
       fmMeals:['아침','점심','저녁','간식'].map(nm=>({name:nm,pick:()=>this.setState({fm:{...this.state.fm,meal:nm}}),bg:fm&&fm.meal===nm?th.cardBg:'transparent',color:fm&&fm.meal===nm?th.accent:'#8B887C',shadow:fm&&fm.meal===nm?'0 1px 4px rgba(0,0,0,.12)':'none'})),
