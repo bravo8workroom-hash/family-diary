@@ -1286,7 +1286,8 @@ input,button,textarea,select{font-family:inherit;}
                 <span style="flex:1;"></span>
                 <div style="text-align:right;">
                   <div style="font-size:10px;font-weight:800;color:var(--sub,#8A8177);line-height:1.3;">남은 스티커</div>
-                  <div style="font-size:17px;font-weight:900;color:var(--ac,#F59E0B);line-height:1.2;">🌟 {{ ko.stickers }}개</div>
+                  <div style="font-size:17px;font-weight:900;color:var(--ac,#F59E0B);line-height:1.2;font-variant-numeric:tabular-nums;">🌟 {{ ko.stickers }}개 <span style="font-size:13px;font-weight:900;color:var(--tx,#3F3A33);">= {{ ko.stWon }}</span></div>
+                  <div style="font-size:10px;font-weight:700;color:var(--sub,#8A8177);line-height:1.3;font-variant-numeric:tabular-nums;">1개 {{ ko.stRateTxt }}</div>
                   <sc-if value="{{ ko.hasAdv }}" hint-placeholder-val="{{ false }}">
                     <div style="font-size:11px;font-weight:900;color:#E0654F;line-height:1.3;white-space:nowrap;">🫰 미리 준 {{ ko.advOwe }}개</div>
                   </sc-if>
@@ -3953,6 +3954,8 @@ class Component extends DCLogic {
           ptAdd:()=>{if(!(f[fk]||'').trim())return;const rs=f['rs_'+kp.id]||'🌟',rn=Math.max(1,Number(f['rn_'+kp.id]||1));this.mut(d=>{d.todos.push({id:this.uid(),k:kp.id,t:f[fk].trim(),e:'👑',rs,rn});});this.clearF([fk]);this.setState({saMsg:kp.id,saMsgTxt:'✅ 할일 추가! 성공하면 '+rs+' '+rn+'개를 받아요'});setTimeout(()=>this.setState({saMsg:'',saMsgTxt:''}),2500);},
           hasSaMsg:S.saMsg===kp.id,saMsg:S.saMsgTxt||('💸 '+kp.name+'의 용돈 지갑에 바로 들어갔어요!'),
           dedRate:stkRate,
+          stWon:(Math.max(0,stkN)*stkRate).toLocaleString()+'원',   // 남은 스티커를 다 바꾸면 얼마인지
+          stRateTxt:stkRate.toLocaleString()+'원',
           hasExReq:exReq.length>0,
           exReqV:exReq.map(x=>{const e=x.e||'🌟';const star=e==='🌟';const have=star?stkN:(kTypes[e]||0);
             // 아이 신청은 모은 만큼만 - 모자라면 수락할 수 없다 (땡겨주기는 「스티커 차감」에서 부모님이 직접)
