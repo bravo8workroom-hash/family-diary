@@ -541,7 +541,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <div style="margin-top:9px;background:#F1EDFF;border-radius:{{radM}};padding:9px 11px;font-size:11.5px;color:#7C5CE6;font-weight:700;line-height:1.5">위 달력에서 맞은 날을 누르세요.&#32;<span style="display:inline-block">다시 누르면 빠집니다.</span></div>
           </sc-if>
           <div style="margin-top:12px;background:{{chipBg}};border-radius:{{radM}};padding:13px;text-align:center">
-            <div style="font-size:11px;color:#8B887C;font-weight:600">1펜 맞던 날부터 누계</div>
+            <div style="font-size:11px;color:#8B887C;font-weight:600">{{shotDropLabel}}</div>
             <div style="font-size:24px;font-weight:800;margin-top:2px;color:{{shotDropColor}};font-variant-numeric:tabular-nums">{{shotDropText}}</div>
             <div style="font-size:11px;color:#8B887C;margin-top:3px">{{shotDropSub}}</div>
           </div>
@@ -1626,12 +1626,17 @@ class Component extends DCLogic {
      이미 쓰고 계신 기기에도 한 번만 심고, 사장님이 달력에서 고치신 값은 다시 안 덮는다. */
   SHOT_VER=1;
   SHOTS_SEED={'2026-08-26':true,'2026-09-02':true,'2026-09-09':'오전','2026-09-15':'15:00'};
+  /* ⚠ 누계의 기준은 「1펜」이 아니라 「체중을 잴 수 있는 가장 이른 펜」이다 (2026-09-15 실측으로 고침).
+       사장님 기록에 1펜 날(8/26) 체중이 없어서 w0 가 null 이 되자 누계가 통째로 죽고 네 줄이 전부
+       「기준」으로 찍혔다 — 사장님이 보고 싶어 하신 숫자가 하나도 안 나왔다.
+       ⛔ 「기준」은 base 인 그 줄에만 쓴다. 값을 못 잰 줄은 「—」다. */
   shotList(){const M=this.state.shots||{};const ks=Object.keys(M).sort();
-    const w0=ks.length?this.wAt(ks[0]):null;
-    return ks.map((d,i)=>{const w=this.wAt(d),pw=i?this.wAt(ks[i-1]):null;
-      return {n:i+1,d,w,t:typeof M[d]==='string'?M[d]:'',
-        diff:(w!=null&&pw!=null)?+(w-pw).toFixed(1):null,
-        total:(i>0&&w!=null&&w0!=null)?+(w-w0).toFixed(1):null}})}
+    const rows=ks.map((d,i)=>({n:i+1,d,w:this.wAt(d),t:typeof M[d]==='string'?M[d]:''}));
+    const base=rows.find(r=>r.w!=null)||null;
+    return rows.map((r,i)=>{const pw=i?rows[i-1].w:null;
+      return {...r,base:!!(base&&base.d===r.d),
+        diff:(r.w!=null&&pw!=null)?+(r.w-pw).toFixed(1):null,
+        total:(base&&r.w!=null&&base.d!==r.d)?+(r.w-base.w).toFixed(1):null}})}
   shotToggle(ds){const M={...(this.state.shots||{})};
     if(M[ds]){delete M[ds];this.toast('💉 '+this.lbl(ds)+' 주사 기록을 뺐어요')}
     else{M[ds]=true;this.toast('💉 '+this.lbl(ds)+' 주사 맞은 날로 적었어요')}
@@ -2464,7 +2469,8 @@ class Component extends DCLogic {
       calCells.push({num:dd,bg:isT?th.accent:th.chipBg,border:shotPickOn&&shN?'#7C5CE6':isT?th.accent:'transparent',numColor:isT?'#fff':fut?'#D8D5CB':'#5C594E',kcal:sm.kcal>0?fmt(sm.kcal):'',kcalColor:isT?'#fff':th.accent,w:(v=>v!=null&&v!==''?(+v).toFixed(1)+'kg':'')((S.weights[ds]||{}).a),wColor:isT?'#fff':'#5C594E',mark:(al.length?'🍺':'')+(shN?('💉'+shN):''),wo:woMin(ds)>0?'💪'+fmtT(woMin(ds)):'',woColor:isT?'#fff':th.accent,cursor:fut?'default':'pointer',opacity:fut?.55:1,go:fut?null:shotPickOn?(()=>this.shotToggle(ds)):(()=>this.setState({selDate:ds,tab:'log'}))})}
     /* 💉 마운자로 카드 — 펜 번호 = 주차, 그날 체중·전주 대비·1펜부터 누계. 재료는 shotList() 하나다. */
     const shotLast=shotAll.length?shotAll[shotAll.length-1]:null;
-    const wNow=this.wAt(this.TODAY),shotW0=shotAll.length?this.wAt(shotAll[0].d):null;
+    const shotBase=shotAll.find(x=>x.base)||null;
+    const wNow=this.wAt(this.TODAY),shotW0=shotBase?shotBase.w:null;
     const shotDrop=(wNow!=null&&shotW0!=null)?+(shotW0-wNow).toFixed(1):null;
     const kg1=v=>(v<0?'+':'-')+Math.abs(v).toFixed(1)+'kg';
     const shotRows=shotAll.slice().reverse().map(x=>({
@@ -2473,7 +2479,7 @@ class Component extends DCLogic {
       w:x.w!=null?x.w.toFixed(1)+'kg':'—',
       diff:x.diff!=null?((x.diff<=0?'▼ ':'▲ ')+Math.abs(x.diff).toFixed(1)):'—',
       diffColor:x.diff==null?'#B5B2A6':x.diff<=0?'#17A673':'#E5484D',
-      total:x.total!=null?kg1(-x.total):'기준',   /* total 은 「변화량」(빠지면 음수)이고 kg1 은 「빠진 양」을 받는다 — 부호를 뒤집어 넘긴다 */
+      total:x.base?'기준':(x.total!=null?kg1(-x.total):'—'),   /* total 은 「변화량」(빠지면 음수)이고 kg1 은 「빠진 양」을 받는다 — 부호를 뒤집어 넘긴다 */
       totalColor:x.total==null?'#8B887C':x.total<=0?'#17A673':'#E5484D',
       bg:x.d===this.TODAY?'#F1EDFF':th.chipBg}));
     const shotHead=shotLast?(shotLast.n+'펜째 · '+shotLast.n+'주차'):'아직 기록 없음';
@@ -2481,9 +2487,12 @@ class Component extends DCLogic {
       ?(this.lbl(shotLast.d)+(shotLast.t?(' '+shotLast.t):'')+' 맞음 · 다음 '+this.lbl(this.addDays(shotLast.d,7)))
       :'아래 버튼을 켜고 달력에서 맞은 날을 눌러 주세요';
     const shotDropText=shotDrop!=null?kg1(shotDrop):'—';
-    const shotDropSub=(shotAll.length&&shotW0!=null&&wNow!=null)
-      ?(this.lbl(shotAll[0].d)+' '+shotW0.toFixed(1)+'kg → 지금 '+wNow.toFixed(1)+'kg')
+    const shotDropSub=(shotBase&&shotW0!=null&&wNow!=null)
+      ?(this.lbl(shotBase.d)+' '+shotW0.toFixed(1)+'kg → 지금 '+wNow.toFixed(1)+'kg')
       :'체중을 적으시면 여기에 누계가 나옵니다';
+    /* 기준이 1펜이 아니면 그 사실을 제목에 밝힌다 — 안 밝히면 「1펜부터」라고 적힌 숫자가 거짓말이 된다. */
+    const shotDropLabel=!shotBase?'맞은 날부터 누계'
+      :(shotBase.n===1?'1펜 맞던 날부터 누계':(shotBase.n+'펜 맞던 날부터 누계 (그 앞은 체중 기록 없음)'));
     /* ── 52kg 절대선·물·주평균·컨디션·근력·일지·조합식·재고 ────────────── */
     const R52=this.RULE();
     const mkAbs=ds=>{const rows=this.absLines(ds);const kept=rows.filter(a=>a.ok).length;const judged=rows.filter(a=>!a.na).length;
@@ -2808,7 +2817,7 @@ class Component extends DCLogic {
       isHome:S.tab==='home',isLog:S.tab==='log',isFeed:S.tab==='feed',isSet:S.tab==='set',isCal:S.tab==='cal',isJournal:S.tab==='jr',
       shellCls:S.wide?(S.tab==='set'?'wide wide-set':'wide'):'',
       calLabel:cy+'년 '+cmn+'월',calCells,
-      shotHead,shotSub,shotRows,shotDropText,shotDropSub,shotPickOn,
+      shotHead,shotSub,shotRows,shotDropText,shotDropSub,shotDropLabel,shotPickOn,
       shotDropColor:shotDrop==null?'#8B887C':shotDrop>=0?'#17A673':'#E5484D',
       shotPickLabel:shotPickOn?'✓ 다 골랐어요':'💉 주사 날짜 고르기',
       shotPickBg:shotPickOn?'#7C5CE6':th.chipBg,
