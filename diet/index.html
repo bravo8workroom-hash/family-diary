@@ -422,6 +422,19 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <sc-if value="{{m.empty}}" hint-placeholder-val="{{ false }}">
               <div style="padding:8px 0 4px;color:#B5B2A6;font-size:13px">{{emptyMealMsg}}</div>
             </sc-if>
+            <sc-if value="{{m.roughShow}}" hint-placeholder-val="{{ false }}">
+              <div style="border-top:1px dashed #E7E4DA;margin-top:7px;padding-top:9px">
+                <div style="font-size:11.5px;font-weight:700;color:#8B887C;margin-bottom:7px">{{m.roughTitle}}</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{m.roughChips}}" as="r" hint-placeholder-count="4">
+                    <button onClick="{{r.tap}}" style="flex:1 1 calc(50% - 3px);min-width:0;border:1px solid {{cardBorder}};background:{{r.bg}};color:{{r.color}};border-radius:{{radM}};padding:8px 10px;font-size:12.5px;font-weight:800;cursor:pointer;text-align:left">{{r.label}}<span style="display:block;font-size:10px;font-weight:700;color:{{r.subColor}};margin-top:2px;line-height:1.4">{{r.sub}}</span></button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{m.roughOn}}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{m.roughClear}}" style="width:100%;margin-top:8px;border:0;background:none;color:#B5B2A6;font-size:11px;font-weight:700;cursor:pointer;padding:6px">대략 기록 지우기</button>
+                </sc-if>
+              </div>
+            </sc-if>
             <sc-for list="{{m.items}}" as="it" hint-placeholder-count="2">
               <div onClick="{{it.open}}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #F7F6F2;cursor:pointer">
                 <div style="min-width:0">
@@ -1560,12 +1573,44 @@ class Component extends DCLogic {
   safeOn(ds){return !!((this.state.safe||{})[ds])}
   /* 술은 기록에서 저절로 센다 (2026-09-09) — 예전 「🍀 금주 성공 / 🍺 실패」 손 버튼은 없앴다. 맥주를 기록에 적으면 그날이 곧 🍺다. */
   ALCO=/맥주|생맥|소주|와인|막걸리|하이볼|위스키|칵테일|사케|청주|양주|술$/;
-  alcoOf(ds){return (this.state.foods[ds]||[]).filter(x=>this.ALCO.test(String(x.name||'').replace(/\s/g,'')))}
+  alcoOf(ds){return (this.state.foods[ds]||[]).filter(x=>!x.est&&this.ALCO.test(String(x.name||'').replace(/\s/g,'')))}
   carbUpOf(ds){const R=this.RULE();const allow=+((R.carbUp||{})[new Date(ds+'T00:00:00').getDay()])||0;const used=+((this.state.carbUp||{})[ds])||0;return {allow,used,left:Math.max(0,allow-used)}}
+  /* 「대략」 — 기록 못 한 끼니를 한 줄로 메운다 (2026-09-12 사장님 지시 「어제 먹은 걸 기록 못할 때가 있다 — 예상 칼로리를 대충 적게 하자」,
+     2026-09-15 지시 「아침 점심 저녁 기준으로 체크할 수 있게 · 저녁에 맥주2캔+소주반병, 점심 외식, 가벼운 안주, 건강식단 — 그것에 맞게」).
+     칩 하나로 그 끼니에 est:true 한 줄이 들어간다. 그러면 주 평균·달력·막대가 전부 따라온다 — 빈 날은 「모른다」라
+     주 평균에서 통째로 빠져 하루 빼먹은 주의 평균이 흔들렸다.
+     ⛔ 추정값으로 꾸짖지 마라 (사장님 선택 2026-09-12 「평균엔 넣고 굶김 판정에선 뺀다」):
+       · underRun 은 est 가 있는 날을 끊지도 세지도 않고 지나간다
+       · absLines 의 식사창·kcal·단백질은 「모름」(na) — 시각도 실제 양도 모른다
+       · favAuto·favPool 은 est 줄을 ⭐에 안 올린다 (음식 이름이 아니다)
+       · alcoOf 가 est 를 뺀다 — 「맥주·안주」는 확정이 아니라 짐작이다
+     addFoods·mergeInbox 가 진짜 음식을 넣을 때 그 끼니의 est 줄을 지운다 — 「est 가 있는 끼니 = est 만 있는 끼니」.
+     단어에서 자책어를 뺐다 — 이 앱의 뿌리가 「굶기지 말자」라 「과식」 같은 말이 다음 날 굶기를 부른다.
+     칸 값을 바꾸려면 set.rough[키]=kcal 하나만 넣으면 탄단지가 같은 비율로 따라온다(roughFor). */
+  ROUGH=[{k:'light', e:'🥗',t:'가볍게',   s:'평소보다 적게',    kcal:350, c:30, p:30,f:12, m:['아침','점심','저녁']},
+         {k:'normal',e:'🍽',t:'평소대로', s:'계획대로',        kcal:500, c:45, p:38,f:18, m:['아침','점심','저녁']},
+         {k:'clean', e:'🥦',t:'건강식단', s:'채소·단백질 위주', kcal:400, c:30, p:45,f:12, m:['아침','점심','저녁']},
+         {k:'hearty',e:'🍚',t:'든든히',   s:'평소보다 많이',    kcal:700, c:70, p:40,f:26, m:['점심','저녁']},
+         {k:'eatout',e:'🍱',t:'외식',     s:'밖에서',          kcal:850, c:90, p:38,f:34, m:['점심','저녁']},
+         {k:'beer',  e:'🍺',t:'맥주·안주',s:'가볍게 한잔',      kcal:900, c:75, p:30,f:48, m:['저녁']},
+         {k:'drink', e:'🍻',t:'술자리',   s:'맥주+소주',        kcal:1250,c:105,p:35,f:68, m:['저녁']}];
+  ROUGH_MEALS=['아침','점심','저녁'];
+  roughFor(meal){const cs=(this.state.set||{}).rough||{};
+    return this.ROUGH.filter(r=>r.m.indexOf(meal)>=0).map(r=>{const kc=+cs[r.k]>0?Math.round(+cs[r.k]):r.kcal,q=kc/r.kcal;
+      return {...r,kcal:kc,c:+(r.c*q).toFixed(1),p:+(r.p*q).toFixed(1),f:+(r.f*q).toFixed(1)}})}
+  roughOf(ds,meal){return (this.state.foods[ds]||[]).find(x=>x.est&&x.meal===meal)||null}
+  roughAny(ds){return (this.state.foods[ds]||[]).some(x=>x.est)}
+  roughAdd(ds,meal,k){const R=this.roughFor(meal).find(x=>x.k===k);if(!R)return;
+    const F={...this.state.foods};
+    F[ds]=[...(F[ds]||[]).filter(x=>!(x.est&&x.meal===meal)),{id:'f'+(this.seq++),meal,time:null,est:true,rk:R.k,
+      name:R.t+' (대략)',amt:0,unit:'',kcal:R.kcal,c:R.c,p:R.p,f:R.f}];
+    this.setState({foods:F});this.toast('≈ '+meal+' '+R.t+' — 대략으로 적었어요')}
+  roughClear(ds,meal){const F={...this.state.foods};F[ds]=(F[ds]||[]).filter(x=>!(x.est&&x.meal===meal));
+    if(!F[ds].length)delete F[ds];this.setState({foods:F});this.toast('대략 기록을 지웠어요')}
   /* 칼로리 하한은 하루로 판정하지 않는다 (사장님 지시 2026-08-31) — 어제·그저께 잘 먹었으면 하루 적게 먹은 것은
      문제가 아니다. 연속 미달이 UNDER_RUN 일에 닿았을 때만 경고한다. 기록이 없는 날은 「모른다」이므로 줄을 끊는다.
      ⛔ 안전 신호(어지러움·손떨림 등)는 이 규칙과 무관하게 하루도 즉시 경고다 — safe 배너를 건드리지 마라. */
-  underRun(ds){const R=this.RULE();let n=0;for(let i=0;i<8;i++){const k=this.addDays(ds,-i);if(!(this.state.foods[k]||[]).length)break;if(this.sums(k).kcal>=R.kcalMin)break;n++}return n}
+  underRun(ds){const R=this.RULE();let n=0;for(let i=0;i<8;i++){const k=this.addDays(ds,-i);const it=this.state.foods[k]||[];if(!it.length)break;if(it.some(x=>x.est))continue;if(this.sums(k).kcal>=R.kcalMin)break;n++}return n}
   /* 💊 오늘의 약 — 절대선이 아니다. 절대선 다섯은 늘리지 않는다(협상 불가 목록이라 항목이 늘면 무게가 흐려진다).
      여기는 판정이 아니라 체크리스트다. ⛔ absLines·코치 댓글에 끌어들이지 마라 — 영양제를 빠뜨린 날이
      식사창을 어긴 날과 같은 무게로 보이면 안 된다. 목록 정본은 PILLS 한 곳이고 코드라서
@@ -1581,17 +1626,17 @@ class Component extends DCLogic {
   pillsOf(ds){return (this.state.pills||{})[ds]||{}}
   pillDue(p,ds){if(p.cyc==='day')return true;if(p.cyc==='opt')return false;return !this.pillsOf(this.addDays(ds,-1))[p.k]}
   absLines(ds){
-    const R=this.RULE(),s=this.sums(ds),items=this.state.foods[ds]||[],has=items.length>0;
+    const R=this.RULE(),s=this.sums(ds),items=this.state.foods[ds]||[],has=items.length>0,est=items.some(x=>x.est);
     const UNDER_RUN=4,uRun=this.underRun(ds);
     const timed=this.timedFoods(ds),out=this.outsideWindow(ds),first=timed[0]||null,water=this.waterOf(ds),wRaw=(this.state.water||{})[ds];
     const f=n=>this.fmt(Math.round(n));
     return [
       {k:'win',icon:'🕙',name:'식사창 '+R.winS+'-'+R.winE,ok:has&&timed.length>0&&out.length===0,na:!has||!timed.length,
-       val:!has?'기록 없음':!timed.length?'시각 미입력':out.length?(out.length+'끼 창 밖 ('+out.map(x=>x.time).join(', ')+')'):'모두 창 안'},
-      {k:'kcal',icon:'🔥',name:'칼로리 하한 '+f(R.kcalMin)+' ('+UNDER_RUN+'일 연속)',ok:s.kcal>=R.kcalMin||uRun<UNDER_RUN,na:!has,
-       val:f(s.kcal)+' kcal'+(has&&s.kcal<R.kcalMin?(' · '+f(R.kcalMin-s.kcal)+' 미달'+(uRun>1?(' · '+uRun+'일째'):'')):'')},
-      {k:'p',icon:'🍗',name:'단백질 '+R.pG+'g',ok:s.p>=R.pG,na:false,
-       val:f(s.p)+' / '+R.pG+'g'+(s.p<R.pG?(' · '+f(R.pG-s.p)+'g 남음'):'')},
+       val:!has?'기록 없음':est?'대략만 적음 — 시각 모름':!timed.length?'시각 미입력':out.length?(out.length+'끼 창 밖 ('+out.map(x=>x.time).join(', ')+')'):'모두 창 안'},
+      {k:'kcal',icon:'🔥',name:'칼로리 하한 '+f(R.kcalMin)+' ('+UNDER_RUN+'일 연속)',ok:(s.kcal>=R.kcalMin||uRun<UNDER_RUN)&&!est,na:!has||est,
+       val:(est?'≈ ':'')+f(s.kcal)+' kcal'+(est?' (대략)':'')+(has&&!est&&s.kcal<R.kcalMin?(' · '+f(R.kcalMin-s.kcal)+' 미달'+(uRun>1?(' · '+uRun+'일째'):'')):'')},
+      {k:'p',icon:'🍗',name:'단백질 '+R.pG+'g',ok:s.p>=R.pG&&!est,na:est,
+       val:est?('≈ '+f(s.p)+'g (대략)'):(f(s.p)+' / '+R.pG+'g'+(s.p<R.pG?(' · '+f(R.pG-s.p)+'g 남음'):''))},
       {k:'fat1',icon:'🥑',name:'첫 끼 지방 (담석)',ok:!!first&&(+first.f||0)>=R.firstFatG,na:!first,
        val:first?(f(first.f)+'g · '+first.name):'첫 끼 시각을 적어 주세요'},
       {k:'water',icon:'💧',name:'물 '+(R.waterMl/1000)+'L (커피 제외)',ok:water>=R.waterMl,na:wRaw==null,
@@ -1616,7 +1661,7 @@ class Component extends DCLogic {
      영양값은 ⭐ 줄의 값이 정본이다 — 기록의 값은 그날 먹은 양이라 들쭉날쭉하다. */
   favPool(meal){const F=this.state.foods||{},hit={},FAV_FRESH=14,DAYS=90;
     for(let i=0;i<DAYS;i++){const ds=this.addDays(this.TODAY,-i);for(const x of (F[ds]||[])){
-      const k=this.foodKey(x.name);if(!k)continue;
+      if(x.est)continue;const k=this.foodKey(x.name);if(!k)continue;
       const h=hit[k]||(hit[k]={n:0,m:0,d:i,last:ds,it:x});h.n++;if(x.meal===meal)h.m++}}
     const sc=h=>h?h.n+h.m*3+Math.max(0,FAV_FRESH-h.d)*2:0;
     const mute=new Set((this.state.favMute||[]).map(n=>this.foodKey(n)));
@@ -1629,7 +1674,7 @@ class Component extends DCLogic {
   /* 기록에 새 음식이 들어오면 ⭐에 자동으로 넣는다. 별명표에 걸리면 별명(정리된 이름)으로 넣는다. 돌려주는 값은 새 favs 배열(바뀐 게 없으면 null). */
   favAuto(items,favs0){const L=(favs0||this.state.favs||[]).slice(),mute=new Set((this.state.favMute||[]).map(n=>this.foodKey(n)));
     const has=new Set(L.map(v=>this.foodKey(v.name)));let n=0;
-    for(const x of (items||[])){const raw=String(x.name||'').trim(),k=this.foodKey(raw);if(!k||has.has(k)||mute.has(k))continue;
+    for(const x of (items||[])){if(x.est)continue;const raw=String(x.name||'').trim(),k=this.foodKey(raw);if(!k||has.has(k)||mute.has(k))continue;
       has.add(k);n++;const nm=k===raw.replace(/\s/g,'')?raw:k;
       L.push({id:'v'+(this.seq++),name:nm,amt:+x.amt||0,unit:x.unit||'g',kcal:+x.kcal||0,c:+x.c||0,p:+x.p||0,f:+x.f||0,meal:x.meal||'간식'})}
     return n?L:null}
@@ -1715,9 +1760,9 @@ class Component extends DCLogic {
     {const phB=this.phaseOf(),c3=this.healthWatch(3),hb=c3.hit||{};
      if((!phB||phB.k!=='bloat')&&t.w!=null&&y.w!=null&&(t.w-y.w)>=0.3&&(hb['생리']||hb['배 꾸르륵·설사']))
        add('🩸','부종 신호예요 — 체중이 올랐고 생리·배 불편이 함께 있어요. 트레이너와 이번 주 모드를 확인하세요.','#8B5CF6')}
-    if(y.n){const yRun=this.underRun(this.addDays(this.TODAY,-1));
-      if(y.kcal<R.kcalMin&&yRun>=3)add('🍚','어제까지 '+yRun+'일 연속 하한 '+fmt(R.kcalMin)+' 아래였어요. 오늘 더 줄이면 근육이 먼저 빠집니다.','#E5484D');
-      else if(y.kcal>=Math.round(R.kcalMin*1.5))add('🍚','어제 '+fmt(y.kcal)+'kcal로 많았어요. 오늘은 평소대로 하한 '+fmt(R.kcalMin)+' 근처면 됩니다 — 굶는 건 금지.','#E9A23B')}
+    if(y.n){const yd=this.addDays(this.TODAY,-1),yRun=this.underRun(yd),yR=(this.state.foods[yd]||[]).find(x=>x.est),yRt=yR?String(yR.name).replace(' (대략)',''):'';
+      if(y.kcal<R.kcalMin&&yRun>=3&&!yR)add('🍚','어제까지 '+yRun+'일 연속 하한 '+fmt(R.kcalMin)+' 아래였어요. 오늘 더 줄이면 근육이 먼저 빠집니다.','#E5484D');
+      else if(y.kcal>=Math.round(R.kcalMin*1.5))add('🍚',(yR?('어제는 「'+yRt+'」로 적어 두셨어요 (≈'+fmt(y.kcal)+'kcal).'):('어제 '+fmt(y.kcal)+'kcal로 많았어요.'))+' 오늘은 하한 '+fmt(R.kcalMin)+' 근처로 줄이면 됩니다. 첫 끼는 지방만 챙기고 가볍게 — 건너뛰진 마세요.','#E9A23B')}
     const pd=[t,y,b].filter(x=>x.n),pAvg=pd.length?Math.round(pd.reduce((a,x)=>a+x.p,0)/pd.length):0;
     if(pd.length&&pAvg<R.pG)add('🍗','최근 '+pd.length+'일 단백질 평균 '+pAvg+'g — 하루 '+R.pG+'g에서 '+(R.pG-pAvg)+'g 모자라요. 계란·닭가슴살부터 채우세요.','#E4618C');
     const left=Math.max(0,R.kcalMin-t.kcal),need=Math.max(0,R.pG-t.p);
@@ -1801,8 +1846,17 @@ class Component extends DCLogic {
     return out}
   winSave(){const o=this.winScan();if(JSON.stringify(o)!==JSON.stringify(this.state.wins||{}))this.setState({wins:o})}
   /* 얼려 둔 2차 목표(tier 0)는 달성이 아니라 목표라서 뺀다. 주 기준 요일을 바꾸면 같은 달성이 두 주에 걸쳐 두 번 적힐 수 있어 「같은 날·같은 차수」는 한 줄로 접는다. */
-  winList(){const W=this.state.wins||{},at={},out=[];
+  /* 🏆 달성 목록 — 한 곳에서만 판정한다(홈 카드·호출장·말판이 전부 이걸 본다).
+     winList()      = 이번 주 목표 달성만 — 2026-09-15 사장님 지시 「새로운 목표가 설정되면 지난 목표달성은 안보이고,
+                      이번 목표가 달성되면 보여줘」. 그래서 새 주가 시작되면 홈 🏆 카드가 비고, 이번 주 목표를 이루면 다시 뜬다.
+     winList(true)  = 지나온 전부 — 🎲 달성 말판은 걸어온 길이라 계속 쌓인다.
+     ⛔ 지금 체중이 그 목표 위로 올라갔으면 달성이 아니다 (2026-09-12 사장님 지시 「다시 올라오면 달성 못한걸로해」).
+        기록은 지우지 않는다 — 다시 그 아래로 내려가면 그때 같은 줄이 되살아난다. */
+  winList(all){const W=this.state.wins||{},at={},out=[];
+    const cur=this.wAt(this.TODAY),wk=all?null:this.weekPlan();
     for(const k of Object.keys(W)){const x=W[k];if(!x||(x.tier!==1&&x.tier!==2))continue;
+      if(cur==null||+cur>+x.goal+0.001)continue;
+      if(wk&&(x.d<wk.ws||x.d>wk.we))continue;
       const id=x.d+'|'+x.tier;if(at[id]==null){at[id]=out.length;out.push(x)}else if(+x.goal<+out[at[id]].goal)out[at[id]]=x}
     return out.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.tier-a.tier))}
   rollGoal(){const g=this.state.set||{};const n={},P={};
@@ -1823,14 +1877,20 @@ class Component extends DCLogic {
   /* 받은 것을 기록에 합치는 자리 — 검사기가 fetch 없이 이 함수를 직접 부른다. */
   mergeInbox(o){
     if(!o||o.app!=='dietgram-inbox'||!o.stamp)return;
-    let seen=null;try{seen=localStorage.getItem('dgm_inboxSeen')}catch(_){}
-    if(seen===o.stamp)return;
+    /* 「이미 받았다」 도장은 공용 자료 안(set.inboxSeen)에 둔다 — 2026-09-12 사장님 지시 「설정한 목표체중과 페이스가 자꾸 옛기록으로 업데이트 된다」.
+       옛 코드는 도장을 그 기기 localStorage 에만 두었는데, 고쳐 쓰는 자료는 가족 저장소(모든 기기 공용)라
+       다른 기기·다른 브라우저·캐시를 지운 뒤 열면 같은 입력함이 다시 적용돼 사장님이 방금 바꾼 값을 덮었다.
+       ⛔ localStorage 로 되돌리지 마라. 옛 기기가 남긴 localStorage 도장은 읽기만 해서 공용 도장으로 옮긴다. */
+    const St0=this.state.set||{};
+    let seen=St0.inboxSeen||null;
+    if(!seen){try{seen=localStorage.getItem('dgm_inboxSeen')}catch(_){}}
+    if(seen===o.stamp){if(St0.inboxSeen!==o.stamp)this.setState({set:{...St0,inboxSeen:o.stamp}});return}
     const S=this.state,P={},add=[];
     if(o.weights&&Object.keys(o.weights).length){const W={...S.weights};
       for(const d of Object.keys(o.weights))W[d]={...(W[d]||{}),...o.weights[d]};  /* 목표(t) 칸을 지우지 않는다 */
       P.weights=W;add.push('체중')}
     if(o.foods){const F={...S.foods},DM={...S.dayMode};let n=0;const newF=[];
-      for(const d of Object.keys(o.foods)){const day=(F[d]||[]).slice();
+      for(const d of Object.keys(o.foods)){const rm=new Set((o.foods[d]||[]).map(x=>x.meal));const day=(F[d]||[]).filter(x=>!(x.est&&rm.has(x.meal)));
         for(const x of o.foods[d]){if(day.some(y=>y.name===x.name&&(y.time||'')===(x.time||'')))continue;
           day.push({...x,id:'f'+(this.seq++)});newF.push(x);n++}
         F[d]=day;if(!DM[d])DM[d]=S.mode}
@@ -1881,7 +1941,9 @@ class Component extends DCLogic {
       const hit=(TD.items||[]).filter(x=>ids.has(x.id)||ids.has(String(x.t||'')));
       if(hit.length){P.todo={items:(TD.items||[]).filter(x=>!(ids.has(x.id)||ids.has(String(x.t||'')))),done:[...hit.map(x=>({...x,at:this.TODAY})),...(TD.done||[])].slice(0,100)};add.push('작업대기 '+hit.length+'건 정리')}}
     try{localStorage.setItem('dgm_inboxSeen',o.stamp)}catch(_){}
-    if(!add.length)return;
+    /* 도장을 공용 자료에도 함께 적는다 — 넣은 것이 없어도 적어야 다른 기기가 다시 적용하지 않는다. */
+    P.set={...(P.set||S.set||{}),inboxSeen:o.stamp};
+    if(!add.length){this.setState(P);return}
     this.setState(P,()=>{this.persist();this.toast('🏋️ 트레이너가 '+(o.note||'기록')+'을 넣었어요 — '+add.join(' · '))})}
   /* 기록을 다 읽은 뒤 한 번 — 목표일 굴리기 + 트레이너 입력함 받기. 두 mount(폰·웹)가 함께 부른다. */
   afterLoad(){this.rollGoal();this.pullInbox()}
@@ -1910,7 +1972,7 @@ class Component extends DCLogic {
     /* 2차 목표 (2026-09-11 사장님 지시): 이번 주 목표를 이미 이뤘으면, 이룬 날부터 마감까지 남은 날수만큼 같은 페이스로 하나 더 건다. 1차 목표(goal)는 안 건드린다 — 2차를 못 이뤄도 1차는 해낸 것이다. */
     const W1=(this.state.wins||{})[ws+'|1']||{};let ach=W1.d||null,achW=W1.w!=null?+W1.w:null;
     if(!ach)for(let d=ws;d<=we&&d<=this.TODAY;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null&&+w.a<=goal+0.001){ach=d;achW=+w.a;break}}
-    const done=ach!=null;let bonus=null,bonusNeed=null;
+    const done=cur<=goal+0.001;let bonus=null,bonusNeed=null;
     /* 페이스 0(유지·근력 주간)에는 2차를 안 건다 — 「이번 주는 안 줄인다」는 모드와 어긋난다. */
     /* 기준은 목표 체중이 아니라 **달성한 그날 실제로 잰 체중**이다 (2026-09-11 사장님 정정 「목표체중에서 200g 빠지는 게 아니라 마지막 달성한 체중에서 200g」).
        목표를 크게 넘겨 이루셨으면 2차도 그만큼 아래에서 시작한다. 달성 체중은 wins 에 얼어붙어 있어 2차 목표가 날마다 도망가지 않는다. */
@@ -2019,7 +2081,7 @@ class Component extends DCLogic {
     if(cur)out.push(cur);
     return out.map(x=>x.trim()).filter(Boolean).map(x=>({t:x}))}
   lbl(ds){const dt=new Date(ds+'T00:00:00');return (dt.getMonth()+1)+'.'+dt.getDate()+' ('+['일','월','화','수','목','금','토'][dt.getDay()]+')'}
-  addFoods(dt,items){const F={...this.state.foods};const DM={...this.state.dayMode};if(!(F[dt]||[]).length&&!DM[dt])DM[dt]=this.state.mode;F[dt]=[...(F[dt]||[]),...items];let P=this.state.posts;if(!P.some(p=>p.date===dt)){P=[{id:'p'+(this.seq++),date:dt,photos:[],text:'',auto:true,starred:false,comments:[]},...P]}const patch={foods:F,dayMode:DM,posts:P};const fv=this.favAuto(items);if(fv)patch.favs=fv;this.setState(patch)}
+  addFoods(dt,items){const F={...this.state.foods};const DM={...this.state.dayMode};if(!(F[dt]||[]).length&&!DM[dt])DM[dt]=this.state.mode;const rm=new Set((items||[]).map(x=>x.meal));F[dt]=[...(F[dt]||[]).filter(x=>!(x.est&&rm.has(x.meal))),...items];let P=this.state.posts;if(!P.some(p=>p.date===dt)){P=[{id:'p'+(this.seq++),date:dt,photos:[],text:'',auto:true,starred:false,comments:[]},...P]}const patch={foods:F,dayMode:DM,posts:P};const fv=this.favAuto(items);if(fv)patch.favs=fv;this.setState(patch)}
   openDayFeed(ds){let P=this.state.posts;let post=P.find(p=>p.date===ds);if(!post){post={id:'p'+(this.seq++),date:ds,photos:[],text:'',auto:true,starred:false,comments:[]};P=[post,...P]}this.setState({tab:'feed',posts:P,pm:{id:post.id,editing:false,isNew:false,menu:false,confirm:false,draft:null},replyTo:null,cInput:''})}
   commitW(ds,f,v){const n=parseFloat(String(v).replace(/,/g,''));const W={...this.state.weights};W[ds]=Object.assign({t:null,a:null},W[ds],{[f]:isNaN(n)?null:n});this.setState({weights:W,editW:null});setTimeout(()=>this.winSave(),0);if(!isNaN(n))this.toast(this.say('저장했어요 ✓','저장했사와요 👑'))}
   shiftDay(n){const dt=new Date(this.state.selDate+'T00:00:00');dt.setDate(dt.getDate()+n);const z=x=>String(x).padStart(2,'0');const ds=dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate());if(ds<=this.TODAY)this.setState({selDate:ds})}
@@ -2248,8 +2310,17 @@ class Component extends DCLogic {
     const phBg=ph=>!ph?'linear-gradient(135deg,#F3F1EA,#E7E4DA)':ph.src?('url("'+ph.src+'") center/cover no-repeat'):('linear-gradient(135deg,'+ph.c1+','+ph.c2+')');
     const mkThumb=p=>({emoji:p.photos[0]?(p.photos[0].src?'':p.photos[0].e):'📝',bg:phBg(p.photos[0]),textOnly:!p.photos.length,preview:p.text||'글 게시물',open:()=>this.openPost(p.id)});
     const dSum=this.sums(S.selDate),dSc=this.score(S.selDate),dGoal=this.goalFor(S.selDate);
-    const meals=['아침','점심','저녁','간식'].map(nm=>{const items=(S.foods[S.selDate]||[]).filter(x=>x.meal===nm);const k=items.reduce((a,x)=>a+(+x.kcal||0),0);const qp=this.favPool(nm);
-      return {name:nm,kcalLabel:fmt(k)+' kcal',empty:!items.length,quick:qp.slice(0,3).map(v=>({label:v.name,amt:fmt(v.amt)+(v.unit||''),tap:()=>this.favPut(nm,v),...this.giVals(v.name)})),favOpen:()=>this.setState({fv:{meal:nm}}),combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
+    const meals=['아침','점심','저녁','간식'].map(nm=>{const all=(S.foods[S.selDate]||[]).filter(x=>x.meal===nm);
+      const items=all.filter(x=>!x.est),mRough=all.find(x=>x.est)||null;const k=all.reduce((a,x)=>a+(+x.kcal||0),0);const qp=this.favPool(nm);
+      /* 대략 칩은 그 끼니에 진짜 음식이 없을 때만 보인다 — 대략은 빈 끼니를 메우는 것이다. 칩은 계속 보여 다른 칸으로 바꿀 수 있다. */
+      const rShow=!items.length&&this.ROUGH_MEALS.indexOf(nm)>=0;
+      const rChips=rShow?this.roughFor(nm).map(r=>{const on=!!mRough&&mRough.rk===r.k;
+        return {label:r.e+' '+r.t,sub:r.s+' · '+fmt(r.kcal)+' kcal',
+          bg:on?th.accent:th.chipBg,color:on?'#FFFFFF':'#5C594E',subColor:on?'rgba(255,255,255,.82)':'#8B887C',
+          tap:()=>this.roughAdd(S.selDate,nm,r.k)}}):[];
+      return {name:nm,kcalLabel:(mRough?'≈ ':'')+fmt(k)+' kcal',empty:!items.length&&!mRough,
+        roughShow:rShow,roughOn:!!mRough,roughChips:rChips,roughClear:()=>this.roughClear(S.selDate,nm),
+        roughTitle:mRough?('≈ 「'+String(mRough.name).replace(' (대략)','')+'」로 적혀 있어요 — 바꾸려면 누르세요'):(nm+'을 기록 못 하셨나요? 대략만 눌러 주세요'),quick:qp.slice(0,3).map(v=>({label:v.name,amt:fmt(v.amt)+(v.unit||''),tap:()=>this.favPut(nm,v),...this.giVals(v.name)})),favOpen:()=>this.setState({fv:{meal:nm}}),combo:()=>this.setState({cm:{mode:'pick',meal:nm}}),add:()=>this.setState({fm:{id:null,meal:nm,name:'',amt:'',unit:'g',kcal:'',c:'',p:'',f:'',time:this.nowHM(),confirm:false,nameErr:false}}),
         items:items.map(it=>({name:it.name,timeLabel:it.time?(it.time+'  '):'',timeColor:this.outTime(it.time)?'#E5484D':'#B5B2A6',amt:fmt(it.amt)+it.unit,c:fmt(it.c),p:fmt(it.p),f:fmt(it.f),kcal:fmt(it.kcal),open:()=>this.setState({fm:{...it,base:{amt:it.amt,unit:it.unit,kcal:it.kcal,c:it.c,p:it.p,f:it.f},confirm:false,nameErr:false}}),del:e=>{e.stopPropagation();const F={...S.foods};F[S.selDate]=(F[S.selDate]||[]).filter(x=>x.id!==it.id);this.setState({foods:F});this.toast(this.say('삭제했어요','삭제했사와요'))}}))}});
     const dayPosts=S.posts.filter(p=>p.date===S.selDate).map(mkThumb);
     const fm=S.fm;
@@ -2325,8 +2396,8 @@ class Component extends DCLogic {
       calCells.push({num:dd,bg:isT?th.accent:th.chipBg,border:isT?th.accent:'transparent',numColor:isT?'#fff':fut?'#D8D5CB':'#5C594E',kcal:sm.kcal>0?fmt(sm.kcal):'',kcalColor:isT?'#fff':th.accent,w:(v=>v!=null&&v!==''?(+v).toFixed(1)+'kg':'')((S.weights[ds]||{}).a),wColor:isT?'#fff':'#5C594E',mark:al.length?'🍺':'',wo:woMin(ds)>0?'💪'+fmtT(woMin(ds)):'',woColor:isT?'#fff':th.accent,cursor:fut?'default':'pointer',opacity:fut?.55:1,go:fut?null:()=>this.setState({selDate:ds,tab:'log'})})}
     /* ── 52kg 절대선·물·주평균·컨디션·근력·일지·조합식·재고 ────────────── */
     const R52=this.RULE();
-    const mkAbs=ds=>{const rows=this.absLines(ds);const kept=rows.filter(a=>a.ok).length;
-      return {kept,color:kept>=rows.length?'#17A673':kept>=rows.length-2?th.accent:'#E5484D',
+    const mkAbs=ds=>{const rows=this.absLines(ds);const kept=rows.filter(a=>a.ok).length;const judged=rows.filter(a=>!a.na).length;
+      return {kept,color:!judged?'#B5B2A6':kept>=judged?'#17A673':kept>=judged-2?th.accent:'#E5484D',
         rows:rows.map(a=>({icon:a.icon,name:a.name,val:a.val,
           valColor:a.ok?'#17A673':a.na?'#B5B2A6':'#E5484D',
           mark:a.ok?'✓':a.na?'·':'✕',
@@ -2411,7 +2482,7 @@ class Component extends DCLogic {
     const BD_ROW=8,BD_MAX=56;
     const bdPace=wkp.pace>0?wkp.pace:0.5;
     const bdLeft=Math.min(BD_MAX,Math.max(1,Math.ceil((rmCur-rmGoalW)/bdPace)));
-    const bdPast=winL.slice().reverse();
+    const bdPast=this.winList(true).slice().reverse();
     /* 🗺 로드맵 5단계를 앞으로 갈 칸에 ⭐ 체크포인트로 박는다 — 말판과 로드맵이 같은 지점을 가리키게.
        마지막 단계(완주)는 결승선 칸과 겹치므로 뺀다. */
     const bdCP={};
@@ -2703,7 +2774,7 @@ class Component extends DCLogic {
           mk('지방'+(fGoal<RB.fG?(' (탄수 +'+fmt(Math.round(cOver))+'g 반영)'):''),'#5B8DEF','#5B8DEF',dSum.f,fGoal,'g',true)];
         B[1].div='1px solid '+th.cardBorder;return B})(),
       dayModeBg:modeB(dGoal.m),dayModeColor:modeC(dGoal.m),dayModeLabel:modeL(dGoal.m),
-      dayHasLog:dSc!=null,dayNoLog:dSc==null,dayScore:dSc,
+      dayHasLog:dSc!=null,dayNoLog:dSc==null,dayScore:dSc==null?dSc:((this.roughAny(S.selDate)?'≈ ':'')+dSc),
       meals,dayPosts,newPostLog:()=>this.newPost(S.selDate),
       fmOn:!!fm,fmTitle:fm&&fm.id?'음식 수정':'음식 추가',fmIsEdit:!!(fm&&fm.id),fmConfirm:!!(fm&&fm.confirm),
       fmMeals:['아침','점심','저녁','간식'].map(nm=>({name:nm,pick:()=>this.setState({fm:{...this.state.fm,meal:nm}}),bg:fm&&fm.meal===nm?th.cardBg:'transparent',color:fm&&fm.meal===nm?th.accent:'#8B887C',shadow:fm&&fm.meal===nm?'0 1px 4px rgba(0,0,0,.12)':'none'})),
