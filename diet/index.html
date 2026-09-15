@@ -2479,7 +2479,7 @@ class Component extends DCLogic {
       w:x.w!=null?x.w.toFixed(1)+'kg':'—',
       diff:x.diff!=null?((x.diff<=0?'▼ ':'▲ ')+Math.abs(x.diff).toFixed(1)):'—',
       diffColor:x.diff==null?'#B5B2A6':x.diff<=0?'#17A673':'#E5484D',
-      total:x.base?'기준':(x.total!=null?kg1(-x.total):'—'),   /* total 은 「변화량」(빠지면 음수)이고 kg1 은 「빠진 양」을 받는다 — 부호를 뒤집어 넘긴다 */
+      total:x.base?'0.0kg':(x.total!=null?kg1(-x.total):'—'),   /* 기준 줄도 「기준」이 아니라 kg 으로 적는다 (2026-09-15 사장님 지시 「기준이 뭔데 킬로그램으로 적어야지」) */   /* total 은 「변화량」(빠지면 음수)이고 kg1 은 「빠진 양」을 받는다 — 부호를 뒤집어 넘긴다 */
       totalColor:x.total==null?'#8B887C':x.total<=0?'#17A673':'#E5484D',
       bg:x.d===this.TODAY?'#F1EDFF':th.chipBg}));
     const shotHead=shotLast?(shotLast.n+'펜째 · '+shotLast.n+'주차'):'아직 기록 없음';
