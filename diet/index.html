@@ -526,7 +526,46 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             </sc-for>
           </div>
           <div style="display:flex;gap:12px;margin-top:12px;font-size:11px;color:#8B887C;font-weight:600;flex-wrap:wrap">
-            <span>🍺 술 마신 날</span><span>💪 운동시간</span><span>숫자 = 총 kcal</span>
+            <span>🍺 술 마신 날</span><span>💉 마운자로 (숫자 = 몇 펜째)</span><span>💪 운동시간</span><span>숫자 = 총 kcal</span>
+          </div>
+        </div>
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div style="min-width:0">
+              <div style="font-size:15px;font-weight:800">💉 마운자로 <span style="color:#7C5CE6">{{shotHead}}</span></div>
+              <div style="font-size:11.5px;color:#8B887C;margin-top:3px;line-height:1.5">{{shotSub}}</div>
+            </div>
+            <button onClick="{{shotPickTap}}" style="border:1px solid {{shotPickBorder}};background:{{shotPickBg}};color:{{shotPickColor}};border-radius:10px;padding:8px 12px;font-size:11.5px;font-weight:700;cursor:pointer;min-height:36px;white-space:nowrap">{{shotPickLabel}}</button>
+          </div>
+          <sc-if value="{{shotPickOn}}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:9px;background:#F1EDFF;border-radius:{{radM}};padding:9px 11px;font-size:11.5px;color:#7C5CE6;font-weight:700;line-height:1.5">위 달력에서 맞은 날을 누르세요.&#32;<span style="display:inline-block">다시 누르면 빠집니다.</span></div>
+          </sc-if>
+          <div style="margin-top:12px;background:{{chipBg}};border-radius:{{radM}};padding:13px;text-align:center">
+            <div style="font-size:11px;color:#8B887C;font-weight:600">1펜 맞던 날부터 누계</div>
+            <div style="font-size:24px;font-weight:800;margin-top:2px;color:{{shotDropColor}};font-variant-numeric:tabular-nums">{{shotDropText}}</div>
+            <div style="font-size:11px;color:#8B887C;margin-top:3px">{{shotDropSub}}</div>
+          </div>
+          <div style="margin-top:12px;overflow-x:auto">
+            <div style="min-width:308px;max-width:560px">
+              <div style="display:flex;align-items:center;gap:8px;padding:0 8px 6px">
+                <div style="font-size:10.5px;font-weight:700;color:#8B887C;min-width:40px">펜</div>
+                <div style="flex:1;min-width:0;font-size:10.5px;font-weight:700;color:#8B887C">맞은 날</div>
+                <div style="font-size:10.5px;font-weight:700;color:#8B887C;min-width:50px;text-align:right">체중</div>
+                <div style="font-size:10.5px;font-weight:700;color:#8B887C;min-width:46px;text-align:right">전주 대비</div>
+                <div style="font-size:10.5px;font-weight:700;color:#8B887C;min-width:52px;text-align:right">누계</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <sc-for list="{{shotRows}}" as="s" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:9px;background:{{s.bg}}">
+                    <div style="font-size:11.5px;font-weight:800;min-width:40px;color:#7C5CE6">{{s.n}}</div>
+                    <div style="flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#5C594E">{{s.d}}</div>
+                    <div style="font-size:12px;font-weight:800;min-width:50px;text-align:right;font-variant-numeric:tabular-nums">{{s.w}}</div>
+                    <div style="font-size:11.5px;font-weight:800;min-width:46px;text-align:right;color:{{s.diffColor}};font-variant-numeric:tabular-nums">{{s.diff}}</div>
+                    <div style="font-size:11.5px;font-weight:800;min-width:52px;text-align:right;color:{{s.totalColor}};font-variant-numeric:tabular-nums">{{s.total}}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
           </div>
         </div>
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
@@ -1343,7 +1382,7 @@ class Component extends DCLogic {
         rule:{winS:'10:00',winE:'18:00',kcalMin:1200,cG:130,pG:100,fG:45,waterMl:2000,firstFatG:8,carbUp:{1:2,6:1}}},
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,favs:FV,carbUp:{},safe:{},todo:{items:[],done:[]},
-      stock:{shop:[],home:[]},weekGoals:{},favMute:[],wins:{},
+      stock:{shop:[],home:[]},weekGoals:{},favMute:[],wins:{},shots:{},shotPick:false,
       cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,ntOpen:-1,ntKind:'전체',ntMore:false,jOpen:null,bdSel:null,
       editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
@@ -1573,7 +1612,30 @@ class Component extends DCLogic {
   safeOn(ds){return !!((this.state.safe||{})[ds])}
   /* 술은 기록에서 저절로 센다 (2026-09-09) — 예전 「🍀 금주 성공 / 🍺 실패」 손 버튼은 없앴다. 맥주를 기록에 적으면 그날이 곧 🍺다. */
   ALCO=/맥주|생맥|소주|와인|막걸리|하이볼|위스키|칵테일|사케|청주|양주|술$/;
-  alcoOf(ds){return (this.state.foods[ds]||[]).filter(x=>!x.est&&this.ALCO.test(String(x.name||'').replace(/\s/g,'')))}
+  /* 대략 기록(est)의 「🍺 맥주·안주」·「🍻 술자리」도 술로 센다 (2026-09-15 사장님 지적 「기록에 맥주+안주 클릭했는데
+     달력에는 술먹은걸로 표시가 안돼」). 2026-09-12 에 「짐작이라 빼자」고 정한 것은 사장님 지시가 아니라 내 판단이었다.
+     est 줄은 이름이 「술자리 (대략)」처럼 정규식에 안 걸리므로 rk(칩 종류)로 본다.
+     ⛔ 굶김 판정(underRun)·절대선(absLines)에서 est 를 빼는 것은 그대로다 — 그건 「꾸짖지 마라」쪽이다. */
+  ALCO_RK={beer:1,drink:1};
+  alcoOf(ds){return (this.state.foods[ds]||[]).filter(x=>x.est?!!this.ALCO_RK[x.rk]:this.ALCO.test(String(x.name||'').replace(/\s/g,'')))}
+  /* 💉 마운자로 — 맞은 날을 세고 그날 기준으로 체중을 견준다 (2026-09-15 사장님 지시 「맞은날 기준으로 체중이
+     얼마나 빠졌는지 달력으로 주사 맞은날과 몇주차인지 누계체중 한눈에 보고싶어」).
+     저장은 shots 하나 — {'2026-09-15':'15:00'} 처럼 날짜 → 시각(모르면 true)이다.
+     ⛔ 펜 번호를 저장하지 마라 — 날짜순으로 세면 나온다. 중간에 빠뜨린 것을 나중에 넣어도 번호가 저절로 맞는다.
+     씨앗 네 줄은 사장님이 말씀하신 것이다(1~3펜 수요일, 4펜만 2026-09-15 화 15시). SHOT_VER 도장은 GOALW 와 같은 방식 —
+     이미 쓰고 계신 기기에도 한 번만 심고, 사장님이 달력에서 고치신 값은 다시 안 덮는다. */
+  SHOT_VER=1;
+  SHOTS_SEED={'2026-08-26':true,'2026-09-02':true,'2026-09-09':'오전','2026-09-15':'15:00'};
+  shotList(){const M=this.state.shots||{};const ks=Object.keys(M).sort();
+    const w0=ks.length?this.wAt(ks[0]):null;
+    return ks.map((d,i)=>{const w=this.wAt(d),pw=i?this.wAt(ks[i-1]):null;
+      return {n:i+1,d,w,t:typeof M[d]==='string'?M[d]:'',
+        diff:(w!=null&&pw!=null)?+(w-pw).toFixed(1):null,
+        total:(i>0&&w!=null&&w0!=null)?+(w-w0).toFixed(1):null}})}
+  shotToggle(ds){const M={...(this.state.shots||{})};
+    if(M[ds]){delete M[ds];this.toast('💉 '+this.lbl(ds)+' 주사 기록을 뺐어요')}
+    else{M[ds]=true;this.toast('💉 '+this.lbl(ds)+' 주사 맞은 날로 적었어요')}
+    this.setState({shots:M})}
   carbUpOf(ds){const R=this.RULE();const allow=+((R.carbUp||{})[new Date(ds+'T00:00:00').getDay()])||0;const used=+((this.state.carbUp||{})[ds])||0;return {allow,used,left:Math.max(0,allow-used)}}
   /* 「대략」 — 기록 못 한 끼니를 한 줄로 메운다 (2026-09-12 사장님 지시 「어제 먹은 걸 기록 못할 때가 있다 — 예상 칼로리를 대충 적게 하자」,
      2026-09-15 지시 「아침 점심 저녁 기준으로 체크할 수 있게 · 저녁에 맥주2캔+소주반병, 점심 외식, 가벼운 안주, 건강식단 — 그것에 맞게」).
@@ -1866,6 +1928,8 @@ class Component extends DCLogic {
     const we=this.weekEnd(this.TODAY,n.weekDow);
     if(g.goalDate!==we)n.goalDate=we;
     const fv=this.favMigrate();if(fv){P.favs=fv;n.favVer=this.FAV_VER}
+    /* 💉 주사 씨앗 — 사장님이 말씀하신 네 번을 한 번만 심는다. 이미 적힌 날짜가 이긴다. */
+    if(+g.shotVer!==this.SHOT_VER){P.shots={...this.SHOTS_SEED,...(this.state.shots||{})};n.shotVer=this.SHOT_VER}
     if(Object.keys(n).length)P.set={...g,...n};
     if(Object.keys(P).length)this.setState(P);
     /* ⛔ 이 줄을 위 setState 의 콜백으로 옮기지 마라 — 2026-09-11 실측으로 goalDate 갱신이 날아가 홈 D-day 가 D+32 로 찍혔다. 달성 스캔은 따로 뒤에 돌린다. */
@@ -2203,7 +2267,7 @@ class Component extends DCLogic {
       this.toast(this.say('호출 '+used+'회로 '+n+'건 처리 · 코치 피드백까지 완료 ⚡','호출 '+used+'회로 '+n+'건 처리했답니다 ⚡'));
     }catch(err){this.setState({aiBusy:false});this.toast('AI 처리 중 문제가 생겼어요 · '+(err.message||'네트워크'))}
   }
-  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo','pills','favMute','wins','coach'];
+  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo','pills','favMute','wins','coach','shots'];
   idb(){return new Promise((res,rej)=>{const q=indexedDB.open('dietgram',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
   async dbGet(k){try{const db=await this.idb();return await new Promise((res,rej)=>{const t=db.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error)})}catch(_){try{const s=localStorage.getItem('dgm_'+k);return s?JSON.parse(s):null}catch(e){return null}}}
   // 기록은 가족 저장소(Supabase)에 둔다 — family_state 문서의 diet 칸 하나를 쓴다.
@@ -2391,9 +2455,35 @@ class Component extends DCLogic {
     const mdays=new Date(cy,cmn,0).getDate(),fdow=new Date(cy,cmn-1,1).getDay();
     const calCells=[];for(let i=0;i<fdow;i++)calCells.push({num:'',bg:'transparent',border:'transparent',kcal:'',w:'',wColor:'#8B887C',mark:'',wo:'',woColor:'#B5B2A6',numColor:'#B5B2A6',kcalColor:'#8B887C',cursor:'default',opacity:1,go:null});
     let mKcal=0,mLogged=0,sOk=0,sNo=0,mAlco=0;
-    for(let dd=1;dd<=mdays;dd++){const ds=cy+'-'+pad2(cmn)+'-'+pad2(dd);const sm=this.sums(ds);const al=this.alcoOf(ds);const fut=ds>this.TODAY;const isT=ds===this.TODAY;
+    /* 💉 주사 — 칸 표시는 mark 한 줄에 🍺 와 함께 얹는다(칸에 새 키를 늘리면 빈 칸에도 전부 넣어야 한다).
+       고르기 모드(shotPick)면 칸을 눌러도 기록 탭으로 안 가고 그날 주사를 켜고 끈다. */
+    const shotAll=this.shotList(),shotMap={};shotAll.forEach(x=>shotMap[x.d]=x.n);
+    const shotPickOn=!!S.shotPick;
+    for(let dd=1;dd<=mdays;dd++){const ds=cy+'-'+pad2(cmn)+'-'+pad2(dd);const sm=this.sums(ds);const al=this.alcoOf(ds);const fut=ds>this.TODAY;const isT=ds===this.TODAY;const shN=shotMap[ds]||0;
       if(sm.kcal>0){mKcal+=sm.kcal;mLogged++;if(al.length){sNo++;mAlco+=al.reduce((a,x)=>a+(+x.kcal||0),0)}else sOk++}
-      calCells.push({num:dd,bg:isT?th.accent:th.chipBg,border:isT?th.accent:'transparent',numColor:isT?'#fff':fut?'#D8D5CB':'#5C594E',kcal:sm.kcal>0?fmt(sm.kcal):'',kcalColor:isT?'#fff':th.accent,w:(v=>v!=null&&v!==''?(+v).toFixed(1)+'kg':'')((S.weights[ds]||{}).a),wColor:isT?'#fff':'#5C594E',mark:al.length?'🍺':'',wo:woMin(ds)>0?'💪'+fmtT(woMin(ds)):'',woColor:isT?'#fff':th.accent,cursor:fut?'default':'pointer',opacity:fut?.55:1,go:fut?null:()=>this.setState({selDate:ds,tab:'log'})})}
+      calCells.push({num:dd,bg:isT?th.accent:th.chipBg,border:shotPickOn&&shN?'#7C5CE6':isT?th.accent:'transparent',numColor:isT?'#fff':fut?'#D8D5CB':'#5C594E',kcal:sm.kcal>0?fmt(sm.kcal):'',kcalColor:isT?'#fff':th.accent,w:(v=>v!=null&&v!==''?(+v).toFixed(1)+'kg':'')((S.weights[ds]||{}).a),wColor:isT?'#fff':'#5C594E',mark:(al.length?'🍺':'')+(shN?('💉'+shN):''),wo:woMin(ds)>0?'💪'+fmtT(woMin(ds)):'',woColor:isT?'#fff':th.accent,cursor:fut?'default':'pointer',opacity:fut?.55:1,go:fut?null:shotPickOn?(()=>this.shotToggle(ds)):(()=>this.setState({selDate:ds,tab:'log'}))})}
+    /* 💉 마운자로 카드 — 펜 번호 = 주차, 그날 체중·전주 대비·1펜부터 누계. 재료는 shotList() 하나다. */
+    const shotLast=shotAll.length?shotAll[shotAll.length-1]:null;
+    const wNow=this.wAt(this.TODAY),shotW0=shotAll.length?this.wAt(shotAll[0].d):null;
+    const shotDrop=(wNow!=null&&shotW0!=null)?+(shotW0-wNow).toFixed(1):null;
+    const kg1=v=>(v<0?'+':'-')+Math.abs(v).toFixed(1)+'kg';
+    const shotRows=shotAll.slice().reverse().map(x=>({
+      n:x.n+'펜',week:x.n+'주차',
+      d:this.lbl(x.d)+(x.t?(' '+x.t):''),
+      w:x.w!=null?x.w.toFixed(1)+'kg':'—',
+      diff:x.diff!=null?((x.diff<=0?'▼ ':'▲ ')+Math.abs(x.diff).toFixed(1)):'—',
+      diffColor:x.diff==null?'#B5B2A6':x.diff<=0?'#17A673':'#E5484D',
+      total:x.total!=null?kg1(-x.total):'기준',   /* total 은 「변화량」(빠지면 음수)이고 kg1 은 「빠진 양」을 받는다 — 부호를 뒤집어 넘긴다 */
+      totalColor:x.total==null?'#8B887C':x.total<=0?'#17A673':'#E5484D',
+      bg:x.d===this.TODAY?'#F1EDFF':th.chipBg}));
+    const shotHead=shotLast?(shotLast.n+'펜째 · '+shotLast.n+'주차'):'아직 기록 없음';
+    const shotSub=shotLast
+      ?(this.lbl(shotLast.d)+(shotLast.t?(' '+shotLast.t):'')+' 맞음 · 다음 '+this.lbl(this.addDays(shotLast.d,7)))
+      :'아래 버튼을 켜고 달력에서 맞은 날을 눌러 주세요';
+    const shotDropText=shotDrop!=null?kg1(shotDrop):'—';
+    const shotDropSub=(shotAll.length&&shotW0!=null&&wNow!=null)
+      ?(this.lbl(shotAll[0].d)+' '+shotW0.toFixed(1)+'kg → 지금 '+wNow.toFixed(1)+'kg')
+      :'체중을 적으시면 여기에 누계가 나옵니다';
     /* ── 52kg 절대선·물·주평균·컨디션·근력·일지·조합식·재고 ────────────── */
     const R52=this.RULE();
     const mkAbs=ds=>{const rows=this.absLines(ds);const kept=rows.filter(a=>a.ok).length;const judged=rows.filter(a=>!a.na).length;
@@ -2718,6 +2808,13 @@ class Component extends DCLogic {
       isHome:S.tab==='home',isLog:S.tab==='log',isFeed:S.tab==='feed',isSet:S.tab==='set',isCal:S.tab==='cal',isJournal:S.tab==='jr',
       shellCls:S.wide?(S.tab==='set'?'wide wide-set':'wide'):'',
       calLabel:cy+'년 '+cmn+'월',calCells,
+      shotHead,shotSub,shotRows,shotDropText,shotDropSub,shotPickOn,
+      shotDropColor:shotDrop==null?'#8B887C':shotDrop>=0?'#17A673':'#E5484D',
+      shotPickLabel:shotPickOn?'✓ 다 골랐어요':'💉 주사 날짜 고르기',
+      shotPickBg:shotPickOn?'#7C5CE6':th.chipBg,
+      shotPickColor:shotPickOn?'#fff':'#5C594E',
+      shotPickBorder:shotPickOn?'#7C5CE6':th.cardBorder,
+      shotPickTap:()=>this.setState({shotPick:!shotPickOn}),
       calPrev:()=>this.setState({calM:(cmn===1?cy-1:cy)+'-'+pad2(cmn===1?12:cmn-1)}),
       calNext:()=>this.setState({calM:(cmn===12?cy+1:cy)+'-'+pad2(cmn===12?1:cmn+1)}),
       calDows:['일','월','화','수','목','금','토'].map((t,i)=>({t,color:i===0?'#E5484D':i===6?'#5B8DEF':'#8B887C'})),
