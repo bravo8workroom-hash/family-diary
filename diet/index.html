@@ -198,6 +198,16 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
             <div style="font-size:15px;font-weight:800;color:{{dgColor}}">{{dgBig}}</div>
           </div>
           <div style="font-size:11px;color:#8B887C;line-height:1.6">{{dgSub}}</div>
+          <sc-if value="{{dgAskOn}}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:8px">
+              <div style="font-size:11px;font-weight:700;color:#C97A16;line-height:1.55">{{dgAskText}}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">
+                <sc-for list="{{dgAskChips}}" as="ac" hint-placeholder-count="6">
+                  <button onClick="{{ac.pick}}" style="border:0;cursor:pointer;border-radius:{{radS}};padding:8px 10px;font-size:11px;font-weight:800;background:{{chipBg}};color:#5C594E">{{ac.t}}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
           <sc-if value="{{dgWhyOn}}" hint-placeholder-val="{{ true }}">
             <div style="font-size:10.5px;color:#B5B2A6;margin-top:3px;line-height:1.55">{{dgWhy}}</div>
           </sc-if>
@@ -1823,20 +1833,42 @@ class Component extends DCLogic {
   digK(){return Object.assign({b:1,l:1,d:1,nb:0,nl:0,nd:0,sleep:null,period:null},(this.state.set||{}).digestK||{})}
   digHM(t){const m=((t%1440)+1440)%1440,z=n=>String(n).padStart(2,'0');return z(Math.floor(m/60))+':'+z(m%60)}
   digAlco(x){return x.est?!!this.ALCO_RK[x.rk]:this.ALCO.test(String(x.name||'').replace(/\s/g,''))}
-  /* 오늘 첫 끼 타이머는 어제 마지막 끼니를 봐야 한다 — 자정을 넘는다. 어제분은 at 이 음수다. */
-  digLast(ds){const D=this.DIG(),mk=(k,off)=>{const it=this.timedFoods(k);if(!it.length)return null;
-      const lm=this.mins(it[it.length-1].time),grp=it.filter(x=>this.mins(x.time)>=lm-D.group);
-      return {ds:k,off,at:lm+off*1440,slot:this.digSlot(lm),n:grp.length,
-        kcal:grp.reduce((a,x)=>a+(+x.kcal||0),0),carb:grp.reduce((a,x)=>a+(+x.c||0),0),
-        est:grp.some(x=>x.est),alco:grp.some(x=>this.digAlco(x))}};
-    return mk(ds,0)||mk(this.addDays(ds,-1),-1)}
+  /* 오늘 첫 끼 타이머는 어제 마지막 끼니를 봐야 한다 — 자정을 넘는다. 어제분은 at 이 음수다.
+     ⚠ 마지막 끼니만 보면 안 된다 (사장님 지적 2026-09-18 「앞서 먹은게 너무 많은 경우에는 더 많은
+     소화할 시간이 필요하니까」) — 점심에 1,200kcal 드신 뒤 저녁에 200kcal만 드셔도 위에는 점심이
+     아직 남아 있다. 그래서 끼니를 시각순으로 걸어가며 「위에 남은 kcal(잔량)」을 셈한다.
+     🔥 지방 시계도 끼니마다 재서 가장 늦게 끝나는 것을 쓴다 — 탄수 많던 앞 끼니가 뒤를 끌고 간다. */
+  digWalk(ds){const D=this.DIG(),K=this.digK(),R=this.RULE(),mealC=(+R.cG||130)/3,L=[];
+    for(const p of [[this.addDays(ds,-1),-1],[ds,0]])
+      for(const x of this.timedFoods(p[0])) L.push({at:this.mins(x.time)+p[1]*1440,x});
+    if(!L.length)return null;
+    L.sort((a,b)=>a.at-b.at);
+    const rateAt=(m,res)=>{const k=this.digSlot(((m%1440)+1440)%1440);
+      return D.rate*this.digMul(k)*(K[k]||1)+(res>D.bigFrom?D.bigAdd:0)};
+    let res=0,prev=null,fatAbs=-1e9;
+    for(const it of L){
+      if(prev!=null)res=Math.max(0,res-rateAt(prev,res)*(it.at-prev));
+      it.res0=Math.round(res);                       /* 이 끼니가 들어오기 직전의 잔량 */
+      res+=(+it.x.kcal||0);
+      const over=Math.max(0,(+it.x.c||0)-mealC);
+      it.fatMin=D.fatBase+Math.min(D.fatCap,Math.round(over/10*D.fatPer10))+(this.digAlco(it.x)?D.alco:0);
+      fatAbs=Math.max(fatAbs,it.at+it.fatMin);
+      prev=it.at;
+    }
+    return {list:L,res:Math.round(res),fatAbs}}
+  digState(ds){const D=this.DIG(),K=this.digK(),W=this.digWalk(ds);if(!W)return null;
+    const L=W.list,last=L[L.length-1].at,grp=L.filter(v=>v.at>=last-D.group);
+    const slot=this.digSlot(((last%1440)+1440)%1440);
+    let rate=D.rate*this.digMul(slot)*(K[slot]||1);if(W.res>D.bigFrom)rate+=D.bigAdd;
+    const gk=grp.reduce((a,v)=>a+(+v.x.kcal||0),0);
+    return {at:last,off:last<0?-1:0,slot,rate:Math.round(rate*100)/100,n:grp.length,
+      kcal:gk,carb:grp.reduce((a,v)=>a+(+v.x.c||0),0),
+      est:grp.some(v=>!!v.x.est),alco:grp.some(v=>this.digAlco(v.x)),
+      res:W.res,carry:Math.max(0,W.res-gk),
+      gut:Math.round(W.res/rate),fatAbs:W.fatAbs}}
   digestUntil(ds){const D=this.DIG();if(!D.on)return null;
-    const L=this.digLast(ds);if(!L)return {none:1};
-    const R=this.RULE(),K=this.digK();
-    let rate=D.rate*this.digMul(L.slot)*(K[L.slot]||1);if(L.kcal>D.bigFrom)rate+=D.bigAdd;
-    const gut=Math.round(L.kcal/rate);
-    const over=Math.max(0,L.carb-(+R.cG||130)/3);
-    const fat=D.fatBase+Math.min(D.fatCap,Math.round(over/10*D.fatPer10))+(L.alco?D.alco:0);
+    const L=this.digState(ds);if(!L)return {none:1};
+    const R=this.RULE(),K=this.digK(),rate=L.rate,gut=L.gut,fat=L.fatAbs-L.at;
     const c=this.condOf(ds),pull=[];let cut=0;
     if(c.sleep!=null&&c.sleep!==''&&+c.sleep<D.sleepLow){cut+=(K.sleep!=null?K.sleep:D.pullSleep);pull.push('잠 '+(+c.sleep)+'h')}
     if(c.period){cut+=(K.period!=null?K.period:D.pullPeriod);pull.push('생리')}
@@ -1848,15 +1880,17 @@ class Component extends DCLogic {
     /* 2일 연속 하한 미달이면 타이머를 멈춘다 — 앱이 스스로 굶김을 만들면 안 된다. */
     const stop=this.underRun(this.addDays(ds,-1))>=D.stopRun;
     return {at:L.at,off:L.off,kcal:L.kcal,carb:Math.round(L.carb*10)/10,alco:L.alco,est:L.est,slot:L.slot,
-            rate:Math.round(rate*100)/100,gut,fat,cut,pull,raw,out,why,stop,win:gut>=fat?'gut':'fat'}}
-  digPred(s){const D=this.DIG(),R=this.RULE();
-    let rate=D.rate*this.digMul(s.slot);if(s.kcal>D.bigFrom)rate+=D.bigAdd;
+            res:L.res,carry:L.carry,rate:Math.round(rate*100)/100,gut,fat,cut,pull,raw,out,why,stop,win:gut>=fat?'gut':'fat'}}
+  digPred(s){const D=this.DIG(),R=this.RULE(),load=(+s.res0||0)+s.kcal;
+    let rate=D.rate*this.digMul(s.slot);if(load>D.bigFrom)rate+=D.bigAdd;
     const over=Math.max(0,s.carb-(+R.cG||130)/3);
-    return Math.max(Math.round(s.kcal/rate),D.fatBase+Math.min(D.fatCap,Math.round(over/10*D.fatPer10))+(s.alco?D.alco:0))}
+    return Math.max(Math.round(load/rate),D.fatBase+Math.min(D.fatCap,Math.round(over/10*D.fatPer10))+(s.alco?D.alco:0))}
   /* 학습 재료 — 버튼을 안 누르셔도 「실제로 다음 끼니를 드신 시각」이 신호다. 버튼은 정밀 신호로 더한다.
      ⛔ 대략 기록(est)·작은 간식은 학습에 안 쓴다. 최근 learnDays 일만 본다(몸이 바뀌면 옛 학습이 발목을 잡는다). */
   digScan(){const D=this.DIG(),F=this.state.foods||{},C=this.state.cond||{},out=[],from=this.addDays(this.TODAY,-D.learnDays);
     const low=ds=>{const c=C[ds]||{};return c.sleep!=null&&c.sleep!==''&&+c.sleep<D.sleepLow};
+    const resOf=(ds,m)=>{const W=this.digWalk(ds);if(!W)return 0;
+      const hit=W.list.find(v=>v.at===m);return hit?hit.res0:0};
     for(const ds of Object.keys(F).sort()){if(ds<from||ds>this.TODAY)continue;
       const it=this.timedFoods(ds);
       for(let i=0;i<it.length;i++){const lm=this.mins(it[i].time);let j=i;
@@ -1866,7 +1900,7 @@ class Component extends DCLogic {
         if(grp.some(x=>x.est)||kcal<D.snackMin)continue;
         const real=this.mins(nx.time)-this.mins(grp[grp.length-1].time);
         if(real<=0||real>600)continue;
-        out.push({ds,slot:this.digSlot(lm),kcal,carb:grp.reduce((a,x)=>a+(+x.c||0),0),real,
+        out.push({ds,slot:this.digSlot(lm),kcal,carb:grp.reduce((a,x)=>a+(+x.c||0),0),real,res0:resOf(ds,lm),
                   low:low(ds),per:!!(C[ds]||{}).period,alco:grp.some(x=>this.digAlco(x))})}}
     for(const ds of Object.keys(C).sort()){if(ds<from||ds>this.TODAY)continue;
       const dg=(C[ds]||{}).dig;if(!Array.isArray(dg))continue;const it=this.timedFoods(ds);
@@ -1875,7 +1909,7 @@ class Component extends DCLogic {
         const lm=this.mins(prev[prev.length-1].time),grp=prev.filter(x=>this.mins(x.time)>=lm-D.group);
         const kcal=grp.reduce((a,x)=>a+(+x.kcal||0),0);
         if(grp.some(x=>x.est)||kcal<D.snackMin||gm-lm<=0||gm-lm>600)continue;
-        out.push({ds,slot:this.digSlot(lm),kcal,carb:grp.reduce((a,x)=>a+(+x.c||0),0),real:gm-lm,
+        out.push({ds,slot:this.digSlot(lm),kcal,carb:grp.reduce((a,x)=>a+(+x.c||0),0),real:gm-lm,res0:resOf(ds,lm),
                   low:low(ds),per:!!(C[ds]||{}).period,alco:grp.some(x=>this.digAlco(x)),sig:1})}}
     return out}
   /* ⚠ 잠부족·생리 날 신호를 슬롯 계수에 섞으면 「내 위가 빠르다」로 잘못 배운다(2026-09-18 실측: 점심 계수가
@@ -1909,6 +1943,22 @@ class Component extends DCLogic {
             best:ok.length>=3?(Math.min.apply(null,ok)+'~'+Math.max.apply(null,ok)+' kcal'):null,
             carbNote:(hi.length>=3&&lo.length>=3)?Math.round(av(hi)-av(lo)):null,
             sleep:K.sleep,period:K.period}}
+  /* 시각 없는 끼니 중 가장 나중 것을 찾는다 — 앞 끼니에 시각이 없어도 마지막 끼니만 적히면 타이머가 돈다
+     (사장님 지시 2026-09-18 「마지막끼니는 시간이 있고, 두끼는 시간이 없는경우, 마지막 끼니 기준으로 잡으면돼」). */
+  MEAL_ORD={'아침':0,'점심':1,'저녁':2,'간식':3};
+  digNeedTime(){const F=this.state.foods||{},Y=this.addDays(this.TODAY,-1);
+    for(const ds of [this.TODAY,Y]){const it=F[ds]||[];
+      const no=it.filter(x=>!x.est&&this.mins(x.time)==null);if(!no.length)continue;
+      let meal=null,ord=-1;
+      for(const x of no){const o=(this.MEAL_ORD[x.meal]!=null?this.MEAL_ORD[x.meal]:9);if(o>=ord){ord=o;meal=x.meal}}
+      const rows=no.filter(x=>x.meal===meal);
+      return {ds,meal,names:rows.map(x=>x.name).slice(0,3).join(', ')+(rows.length>3?(' 외 '+(rows.length-3)+'개'):''),n:rows.length}}
+    return null}
+  digSetTime(ds,meal,hm){const F={...this.state.foods};
+    F[ds]=(F[ds]||[]).map(x=>(x.meal===meal&&!x.est&&this.mins(x.time)==null)?{...x,time:hm}:x);
+    this.setState({foods:F},()=>{const K=this.digSave();
+      if(K)this.setState({set:Object.assign({},this.state.set||{},{digestK:K})})});
+    this.toast(meal+'을 '+hm+'으로 적었어요 — 소화 타이머가 돕니다')}
   digTap(k){const ds=this.TODAY,C=Object.assign({},this.state.cond||{}),d=Object.assign({},C[ds]||{});
     if(k==='dizzy'){d.dizzy=true;C[ds]=d;const SF=Object.assign({},this.state.safe||{});SF[ds]=true;
       this.setState({cond:C,safe:SF});this.toast('안전 예외 — 타이머 무시하고 지금 드세요');return}
@@ -2874,11 +2924,21 @@ class Component extends DCLogic {
       dgColor=rd?'#17A673':th.accent;
       dgSub='🍽 위 '+this.digHM(dg.at+dg.gut)+' · 🔥 지방 '+this.digHM(dg.at+dg.fat)+' → '+this.digHM(dg.out);
       dgWhy=(dg.win==='gut'?'위 시계':'지방 시계')+'가 기준 · 마지막 '+dg.kcal+'kcal · 탄 '+dg.carb+'g'
+           +(dg.carry>0?(' · 앞 끼니가 '+dg.carry+'kcal 남아 위에 모두 '+dg.res+'kcal'):'')
            +(dg.alco?' · 술':'')+(dg.est?' · 대략 기록':'')+(dg.why?' · '+dg.why:'')}
     const dgPull=(dg&&dg.cut>0)?('💤🩸 '+dg.pull.join(' · ')+' → '+dg.cut+'분 당김'):'';
     const dgBtns=[{k:'hungry',t:'🔥 배고파'},{k:'full',t:'😐 아직'},{k:'ok',t:'👍 딱맞아'},{k:'dizzy',t:'😵 어지러워'}]
       .map(b=>({t:b.t,bg:b.k==='dizzy'?'#FDECEC':th.chipBg,color:b.k==='dizzy'?'#E5484D':'#5C594E',tap:()=>this.digTap(b.k)}));
     const dgLearn=dgR.n?('사장님께 맞추는 중 · 신호 '+dgR.n+'회 · '+dgR.stage):'신호가 쌓이면 사장님 시계로 바뀝니다';
+    /* 시각이 없어 타이머가 못 도는 날 — 사장님이 시각을 고르실 수 있게 칩을 내민다. */
+    const dgNeed=(!dg||dg.none)?this.digNeedTime():null;
+    const z2=n=>String(n).padStart(2,'0');
+    const dgAskChips=dgNeed?[0,1,2,3,4,5].map(h=>{
+      const t=new Date();t.setMinutes(t.getMinutes()-h*60);
+      const hm=z2(t.getHours())+':'+z2(t.getMinutes());
+      return {t:(h===0?'지금':h+'시간 전')+' '+hm,
+              pick:()=>this.digSetTime(dgNeed.ds,dgNeed.meal,hm)}}):[];
+    const dgAskText=dgNeed?('마지막 끼니 시각을 골라 주세요 — '+this.lbl(dgNeed.ds)+' '+dgNeed.meal+' 「'+dgNeed.names+'」'):'';
     const dgSwOn=!!this.DIG().on;
     const dgSw=()=>{const g={...(S.set||{})},R={...(g.rule||{})};
       R.digest=Object.assign({},R.digest||{},{on:dgSwOn?0:1});g.rule=R;
@@ -3265,6 +3325,7 @@ class Component extends DCLogic {
       dgSw,dgSwLabel:dgSwOn?'켜짐':'꺼짐',dgSwBg:dgSwOn?'#EAF7F1':th.chipBg,dgSwColor:dgSwOn?'#17A673':'#8B887C',
       dgSetHint:'많이 드신 다음 끼니는 저절로 늦춰지고, 잠이 모자라거나 생리 기간이면 앞당겨져요. 안 맞으면 학습 초기화로 처음부터 다시 배웁니다.',
       dgNote,dgStageColor:dgR.ready?'#17A673':'#B5B2A6',
+      dgAskOn:!!dgNeed,dgAskText,dgAskChips,
       pillRows,pillKept:pillKeptN,pillDue:pillDueN,pillColor:pillKeptN>=pillDueN?'#17A673':th.accent,
       selLabel:this.lbl(S.selDate),selDate:S.selDate,todayStr:this.TODAY,
       prevDay:()=>this.shiftDay(-1),nextDay:()=>this.shiftDay(1),
