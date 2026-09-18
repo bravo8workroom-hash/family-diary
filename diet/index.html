@@ -128,43 +128,43 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           </div>
         </sc-if>
 
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-            <div style="font-size:13px;font-weight:700;color:#8B887C">🛡 오늘의 절대선</div>
-            <div style="font-size:14px;font-weight:800;color:{{absColor}}">{{absKept}} / {{absTotal}}</div>
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:11px 13px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:12px;font-weight:700;color:#8B887C">🛡 오늘의 절대선</div>
+            <div style="font-size:13px;font-weight:800;color:{{absColor}}">{{absKept}} / {{absTotal}}</div>
           </div>
           <sc-if value="{{safeToday}}" hint-placeholder-val="{{ false }}">
-            <div style="background:#FDECEC;border-radius:{{radS}};padding:11px 13px;margin-bottom:11px">
-              <div style="font-size:12.5px;font-weight:800;color:#E5484D;line-height:1.5">🚨 안전 예외 — 지금은 클린보다 「먹는 것」이 먼저예요</div>
-              <div style="font-size:11.5px;color:#8B887C;margin-top:5px;line-height:1.6">손에 잡히는 것으로 즉시 채우세요. 하한 아래로 내려가는 건 다이어트가 아니라 손해예요.</div>
+            <div style="background:#FDECEC;border-radius:{{radS}};padding:9px 11px;margin-bottom:8px">
+              <div style="font-size:11.5px;font-weight:800;color:#E5484D;line-height:1.45">🚨 안전 예외 — 지금은 클린보다 「먹는 것」이 먼저예요</div>
+              <div style="font-size:11px;color:#8B887C;margin-top:4px;line-height:1.55">손에 잡히는 것으로 즉시 채우세요. 하한 아래로 내려가는 건 다이어트가 아니라 손해예요.</div>
             </div>
           </sc-if>
-          <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;flex-direction:column;gap:6px">
             <sc-for list="{{absRows}}" as="a" hint-placeholder-count="6">
-              <div style="display:flex;align-items:center;gap:9px">
-                <span style="font-size:14px;width:19px;text-align:center;flex:none">{{a.icon}}</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:13px;width:17px;text-align:center;flex:none">{{a.icon}}</span>
                 <div style="flex:1;min-width:0">
-                  <div style="font-size:12.5px;font-weight:700;color:#1F1E1A">{{a.name}}</div>
-                  <div style="font-size:11px;color:{{a.valColor}};margin-top:2px;line-height:1.45">{{a.val}}</div>
+                  <div style="font-size:11.5px;font-weight:700;color:#1F1E1A">{{a.name}}</div>
+                  <div style="font-size:10.5px;color:{{a.valColor}};margin-top:1px;line-height:1.4">{{a.val}}</div>
                 </div>
-                <span style="font-size:14px;font-weight:800;flex:none;color:{{a.markColor}}">{{a.mark}}</span>
+                <span style="font-size:13px;font-weight:800;flex:none;color:{{a.markColor}}">{{a.mark}}</span>
               </div>
             </sc-for>
           </div>
-          <button onClick="{{safeToggle}}" style="width:100%;margin-top:13px;border:0;border-radius:{{radM}};padding:11px;font-size:12.5px;font-weight:800;cursor:pointer;background:{{safeBtnBg}};color:{{safeBtnColor}}">{{safeBtnLabel}}</button>
-          <div style="font-size:10.5px;color:#B5B2A6;margin-top:8px;line-height:1.55;text-align:center">어지럽거나 못 먹은 날엔 클린을 안 따져요</div>
+          <button onClick="{{safeToggle}}" style="width:100%;margin-top:9px;border:0;border-radius:{{radM}};padding:8px;font-size:11.5px;font-weight:800;cursor:pointer;background:{{safeBtnBg}};color:{{safeBtnColor}}">{{safeBtnLabel}}</button>
+          <div style="font-size:10px;color:#B5B2A6;margin-top:6px;line-height:1.5;text-align:center">어지럽거나 못 먹은 날엔 클린을 안 따져요</div>
         </div>
 
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:11px 13px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-            <div style="font-size:12.5px;font-weight:700;color:#8B887C">💊 오늘의 약 <span style="font-weight:600;color:#B5B2A6">· 절대선 아님</span></div>
-            <div style="font-size:14px;font-weight:800;color:{{pillColor}}">{{pillKept}} / {{pillDue}}</div>
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:9px 11px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:11.5px;font-weight:700;color:#8B887C">💊 오늘의 약 <span style="font-weight:600;color:#B5B2A6">· 절대선 아님</span></div>
+            <div style="font-size:13px;font-weight:800;color:{{pillColor}}">{{pillKept}} / {{pillDue}}</div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
             <sc-for list="{{pillRows}}" as="p" hint-placeholder-count="8">
-              <div onClick="{{p.tap}}" style="cursor:pointer;text-align:center;padding:5px 2px 4px;border-radius:{{radS}};background:{{p.bg}};border:1px solid {{p.border}};opacity:{{p.op}}">
-                <div style="font-size:14px;line-height:1.15">{{p.e}}</div>
-                <div style="font-size:8.5px;font-weight:700;margin-top:2px;color:{{p.nameColor}};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{p.t}}</div>
+              <div onClick="{{p.tap}}" style="cursor:pointer;text-align:center;padding:4px 2px 3px;border-radius:{{radS}};background:{{p.bg}};border:1px solid {{p.border}};opacity:{{p.op}}">
+                <div style="font-size:13px;line-height:1.1">{{p.e}}</div>
+                <div style="font-size:8px;font-weight:700;margin-top:1px;color:{{p.nameColor}};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{p.t}}</div>
               </div>
             </sc-for>
           </div>
@@ -190,17 +190,17 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
           <div style="font-size:10px;color:#B5B2A6;margin-top:7px;text-align:center">{{dgLearn}}</div>
         </div>
 
-        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:11px 13px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-            <div style="font-size:12.5px;font-weight:700;color:#8B887C">💧 물 <span style="font-weight:600;color:#B5B2A6">· 커피 빼고</span></div>
-            <div style="font-size:16px;font-weight:800;color:{{waterColor}}">{{waterText}}</div>
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:9px 11px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:11.5px;font-weight:700;color:#8B887C">💧 물 <span style="font-weight:600;color:#B5B2A6">· 커피 빼고</span></div>
+            <div style="font-size:14px;font-weight:800;color:{{waterColor}}">{{waterText}}</div>
           </div>
-          <div style="height:7px;border-radius:99px;background:{{chipBg}};overflow:hidden">
+          <div style="height:6px;border-radius:99px;background:{{chipBg}};overflow:hidden">
             <div style="height:100%;width:{{waterPct}}%;background:{{waterColor}};border-radius:99px"></div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:7px">
             <sc-for list="{{waterBtns}}" as="wb" hint-placeholder-count="4">
-              <button onClick="{{wb.tap}}" style="border:0;cursor:pointer;border-radius:{{radS}};padding:8px 0;font-size:12px;font-weight:800;background:{{wb.bg}};color:{{wb.color}}">{{wb.label}}</button>
+              <button onClick="{{wb.tap}}" style="border:0;cursor:pointer;border-radius:{{radS}};padding:6px 0;font-size:11px;font-weight:800;background:{{wb.bg}};color:{{wb.color}}">{{wb.label}}</button>
             </sc-for>
           </div>
         </div>
