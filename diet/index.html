@@ -172,6 +172,26 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:11px 13px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+            <div style="font-size:12.5px;font-weight:700;color:#8B887C">⏳ 다음 끼니까지 <span style="font-weight:600;color:#B5B2A6">· 절대선 아님</span></div>
+            <div style="font-size:15px;font-weight:800;color:{{dgColor}}">{{dgBig}}</div>
+          </div>
+          <div style="font-size:11px;color:#8B887C;line-height:1.6">{{dgSub}}</div>
+          <sc-if value="{{dgWhyOn}}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:10.5px;color:#B5B2A6;margin-top:3px;line-height:1.55">{{dgWhy}}</div>
+          </sc-if>
+          <sc-if value="{{dgPullOn}}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:10.5px;color:#C97A16;font-weight:700;margin-top:4px">{{dgPull}}</div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px">
+            <sc-for list="{{dgBtns}}" as="db" hint-placeholder-count="4">
+              <button onClick="{{db.tap}}" style="border:0;cursor:pointer;border-radius:{{radS}};padding:8px 0;font-size:11px;font-weight:800;background:{{db.bg}};color:{{db.color}}">{{db.t}}</button>
+            </sc-for>
+          </div>
+          <div style="font-size:10px;color:#B5B2A6;margin-top:7px;text-align:center">{{dgLearn}}</div>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:11px 13px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
             <div style="font-size:12.5px;font-weight:700;color:#8B887C">💧 물 <span style="font-weight:600;color:#B5B2A6">· 커피 빼고</span></div>
             <div style="font-size:16px;font-weight:800;color:{{waterColor}}">{{waterText}}</div>
           </div>
@@ -725,6 +745,34 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 
 
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:13px;font-weight:700;color:#8B887C">🕰 내 소화 시계</div>
+            <div style="font-size:11.5px;font-weight:700;color:{{dgStageColor}}">{{dgStage}}</div>
+          </div>
+          <sc-for list="{{dgRows}}" as="dr" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:7px;padding:7px 0;border-top:1px solid #F7F6F2">
+              <span style="font-size:12px;font-weight:700;color:#5C594E;width:32px;flex:none">{{dr.t}}</span>
+              <span style="font-size:11px;color:#B5B2A6;flex:none;font-variant-numeric:tabular-nums">{{dr.base}}</span>
+              <span style="font-size:11px;color:#B5B2A6;flex:none">→</span>
+              <span style="font-size:13.5px;font-weight:800;color:{{dr.color}};flex:none;font-variant-numeric:tabular-nums">{{dr.mine}}</span>
+              <span style="font-size:10.5px;color:#8B887C;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">kcal/분 · {{dr.note}}</span>
+              <span style="font-size:10.5px;color:#B5B2A6;flex:none">{{dr.cnt}}</span>
+            </div>
+          </sc-for>
+          <div style="border-top:1px solid #F7F6F2;margin-top:4px;padding-top:8px;font-size:11.5px;color:#8B887C;line-height:1.7">
+            <div>{{dgSleepT}}</div>
+            <div>{{dgPeriodT}}</div>
+            <sc-if value="{{dgBestOn}}" hint-placeholder-val="{{ true }}">
+              <div style="font-weight:700;color:#17A673;margin-top:3px">{{dgBest}}</div>
+            </sc-if>
+            <sc-if value="{{dgCarbOn}}" hint-placeholder-val="{{ true }}">
+              <div style="font-weight:700;color:#C97A16">{{dgCarb}}</div>
+            </sc-if>
+          </div>
+          <div style="font-size:10.5px;color:#B5B2A6;margin-top:8px;line-height:1.55">{{dgNote}}</div>
+        </div>
+
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
           <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">📚 지난 일지</div>
           <sc-if value="{{jNoRecent}}" hint-placeholder-val="{{ true }}">
             <div style="padding:8px 0;color:#B5B2A6;font-size:13px">아직 적은 일지가 없어요</div>
@@ -921,6 +969,14 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
               </sc-for>
             </div>
             <div style="font-size:11px;color:#B5B2A6;margin-top:7px;line-height:1.55">{{phaseHint}}</div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#8B887C;margin-bottom:5px">⏳ 소화 타이머</div>
+            <div style="display:flex;gap:8px">
+              <button onClick="{{dgSw}}" style="flex:1;border:0;cursor:pointer;padding:11px 0;border-radius:{{radS}};font-size:12.5px;font-weight:700;background:{{dgSwBg}};color:{{dgSwColor}}">{{dgSwLabel}}</button>
+              <button onClick="{{dgReset}}" style="flex:1;border:0;cursor:pointer;padding:11px 0;border-radius:{{radS}};font-size:12.5px;font-weight:700;background:{{chipBg}};color:#5C594E">학습 초기화</button>
+            </div>
+            <div style="font-size:11px;color:#B5B2A6;margin-top:7px;line-height:1.55">{{dgSetHint}}</div>
           </div>
         </div>
 
@@ -1728,6 +1784,119 @@ class Component extends DCLogic {
      문제가 아니다. 연속 미달이 UNDER_RUN 일에 닿았을 때만 경고한다. 기록이 없는 날은 「모른다」이므로 줄을 끊는다.
      ⛔ 안전 신호(어지러움·손떨림 등)는 이 규칙과 무관하게 하루도 즉시 경고다 — safe 배너를 건드리지 마라. */
   underRun(ds){const R=this.RULE();let n=0;for(let i=0;i<8;i++){const k=this.addDays(ds,-i);const it=this.state.foods[k]||[];if(!it.length)break;if(it.some(x=>x.est))continue;if(this.sums(k).kcal>=R.kcalMin)break;n++}return n}
+  /* ─── ⏳ 소화 타이머 — 두 시계 + 사장님에게 학습 (2026-09-18 신설) ──────────────────
+     사장님 지시 2026-09-18: 「한끼에 많은 양을 먹었을때 다음 끼니의 공복시간을 더 주는걸로 하자」
+     「내 몸에 신호를 나는 아니까 그걸 확인해보면서 유동적으로 맞추어가며, 나에게 맞추어지는 소화타이머」
+     시계가 둘이다 — 🍽 위(kcal 로 비운다, 2.5kcal/분) · 🔥 지방(탄수·술이 인슐린으로 지방분해를 막는다).
+     다음 끼니 = 둘 중 늦은 쪽. 잠·생리는 「당기기만」 한다(늦추지 않는다).
+     ⛔ absLines·코치 댓글·점수에 끌어들이지 마라 — 보여주는 자리지 꾸짖는 자리가 아니다.
+     저장은 set.rule.digest(다이얼) · set.digestK(학습) · cond[날짜].dig(신호) 뿐 — DBK 새 키 없음. */
+  DIG_D={on:1,rate:2.5,mB:1,mL:.85,mD:.65,bigFrom:600,bigAdd:.5,fatBase:240,fatPer10:20,fatCap:180,alco:120,
+         sleepLow:6,pullSleep:30,pullPeriod:30,pullCap:60,grace:120,tail:60,stopRun:2,snackMin:150,learnDays:60,group:90};
+  DIG(){return Object.assign({},this.DIG_D,(this.RULE().digest)||{})}
+  digSlot(m){return m<11*60?'b':m<15*60?'l':'d'}
+  digMul(k){const D=this.DIG();return k==='b'?D.mB:k==='l'?D.mL:D.mD}
+  digK(){return Object.assign({b:1,l:1,d:1,nb:0,nl:0,nd:0,sleep:null,period:null},(this.state.set||{}).digestK||{})}
+  digHM(t){const m=((t%1440)+1440)%1440,z=n=>String(n).padStart(2,'0');return z(Math.floor(m/60))+':'+z(m%60)}
+  digAlco(x){return x.est?!!this.ALCO_RK[x.rk]:this.ALCO.test(String(x.name||'').replace(/\s/g,''))}
+  /* 오늘 첫 끼 타이머는 어제 마지막 끼니를 봐야 한다 — 자정을 넘는다. 어제분은 at 이 음수다. */
+  digLast(ds){const D=this.DIG(),mk=(k,off)=>{const it=this.timedFoods(k);if(!it.length)return null;
+      const lm=this.mins(it[it.length-1].time),grp=it.filter(x=>this.mins(x.time)>=lm-D.group);
+      return {ds:k,off,at:lm+off*1440,slot:this.digSlot(lm),n:grp.length,
+        kcal:grp.reduce((a,x)=>a+(+x.kcal||0),0),carb:grp.reduce((a,x)=>a+(+x.c||0),0),
+        est:grp.some(x=>x.est),alco:grp.some(x=>this.digAlco(x))}};
+    return mk(ds,0)||mk(this.addDays(ds,-1),-1)}
+  digestUntil(ds){const D=this.DIG();if(!D.on)return null;
+    const L=this.digLast(ds);if(!L)return {none:1};
+    const R=this.RULE(),K=this.digK();
+    let rate=D.rate*this.digMul(L.slot)*(K[L.slot]||1);if(L.kcal>D.bigFrom)rate+=D.bigAdd;
+    const gut=Math.round(L.kcal/rate);
+    const over=Math.max(0,L.carb-(+R.cG||130)/3);
+    const fat=D.fatBase+Math.min(D.fatCap,Math.round(over/10*D.fatPer10))+(L.alco?D.alco:0);
+    const c=this.condOf(ds),pull=[];let cut=0;
+    if(c.sleep!=null&&c.sleep!==''&&+c.sleep<D.sleepLow){cut+=(K.sleep!=null?K.sleep:D.pullSleep);pull.push('잠 '+(+c.sleep)+'h')}
+    if(c.period){cut+=(K.period!=null?K.period:D.pullPeriod);pull.push('생리')}
+    cut=Math.min(cut,D.pullCap);
+    const raw=L.at+Math.max(gut,fat)-cut,a=this.mins(R.winS),b=this.mins(R.winE);
+    let out=raw,why='';
+    if(L.off<0){if(raw<a){out=a;why='창 열림까지 기다려요'}else if(raw>a+D.grace){out=a+D.grace;why='첫 끼 상한 — 창을 지켜요'}}
+    else if(raw>b-D.tail){out=null;why='오늘 창은 여기까지'}
+    /* 2일 연속 하한 미달이면 타이머를 멈춘다 — 앱이 스스로 굶김을 만들면 안 된다. */
+    const stop=this.underRun(this.addDays(ds,-1))>=D.stopRun;
+    return {at:L.at,off:L.off,kcal:L.kcal,carb:Math.round(L.carb*10)/10,alco:L.alco,est:L.est,slot:L.slot,
+            rate:Math.round(rate*100)/100,gut,fat,cut,pull,raw,out,why,stop,win:gut>=fat?'gut':'fat'}}
+  digPred(s){const D=this.DIG(),R=this.RULE();
+    let rate=D.rate*this.digMul(s.slot);if(s.kcal>D.bigFrom)rate+=D.bigAdd;
+    const over=Math.max(0,s.carb-(+R.cG||130)/3);
+    return Math.max(Math.round(s.kcal/rate),D.fatBase+Math.min(D.fatCap,Math.round(over/10*D.fatPer10))+(s.alco?D.alco:0))}
+  /* 학습 재료 — 버튼을 안 누르셔도 「실제로 다음 끼니를 드신 시각」이 신호다. 버튼은 정밀 신호로 더한다.
+     ⛔ 대략 기록(est)·작은 간식은 학습에 안 쓴다. 최근 learnDays 일만 본다(몸이 바뀌면 옛 학습이 발목을 잡는다). */
+  digScan(){const D=this.DIG(),F=this.state.foods||{},C=this.state.cond||{},out=[],from=this.addDays(this.TODAY,-D.learnDays);
+    const low=ds=>{const c=C[ds]||{};return c.sleep!=null&&c.sleep!==''&&+c.sleep<D.sleepLow};
+    for(const ds of Object.keys(F).sort()){if(ds<from||ds>this.TODAY)continue;
+      const it=this.timedFoods(ds);
+      for(let i=0;i<it.length;i++){const lm=this.mins(it[i].time);let j=i;
+        while(j+1<it.length&&this.mins(it[j+1].time)<lm+D.group)j++;
+        const grp=it.slice(i,j+1),nx=it[j+1];i=j;if(!nx)break;
+        const kcal=grp.reduce((a,x)=>a+(+x.kcal||0),0);
+        if(grp.some(x=>x.est)||kcal<D.snackMin)continue;
+        const real=this.mins(nx.time)-this.mins(grp[grp.length-1].time);
+        if(real<=0||real>600)continue;
+        out.push({ds,slot:this.digSlot(lm),kcal,carb:grp.reduce((a,x)=>a+(+x.c||0),0),real,
+                  low:low(ds),per:!!(C[ds]||{}).period,alco:grp.some(x=>this.digAlco(x))})}}
+    for(const ds of Object.keys(C).sort()){if(ds<from||ds>this.TODAY)continue;
+      const dg=(C[ds]||{}).dig;if(!Array.isArray(dg))continue;const it=this.timedFoods(ds);
+      for(const g of dg){if(g.k!=='hungry')continue;const gm=this.mins(g.t);if(gm==null)continue;
+        const prev=it.filter(x=>this.mins(x.time)<=gm);if(!prev.length)continue;
+        const lm=this.mins(prev[prev.length-1].time),grp=prev.filter(x=>this.mins(x.time)>=lm-D.group);
+        const kcal=grp.reduce((a,x)=>a+(+x.kcal||0),0);
+        if(grp.some(x=>x.est)||kcal<D.snackMin||gm-lm<=0||gm-lm>600)continue;
+        out.push({ds,slot:this.digSlot(lm),kcal,carb:grp.reduce((a,x)=>a+(+x.c||0),0),real:gm-lm,
+                  low:low(ds),per:!!(C[ds]||{}).period,alco:grp.some(x=>this.digAlco(x)),sig:1})}}
+    return out}
+  /* ⚠ 잠부족·생리 날 신호를 슬롯 계수에 섞으면 「내 위가 빠르다」로 잘못 배운다(2026-09-18 실측: 점심 계수가
+     1.075(빠름)↔0.975(느림) 로 부호까지 뒤집혔다). 깨끗한 날로만 계수를 배우고, 그 날들은 따로 당김값을 배운다. */
+  digLearn(){const D=this.DIG();if(!D.on)return null;
+    const S=this.digScan();if(!S.length)return null;
+    const K={b:1,l:1,d:1,nb:0,nl:0,nd:0,sleep:null,period:null};
+    for(const s of S){if(s.low||s.per)continue;const p=this.digPred(s);if(!p||!s.real)continue;
+      const step=Math.max(.95,Math.min(1.05,(p/s.real)/K[s.slot]));
+      K[s.slot]=Math.max(.7,Math.min(1.3,K[s.slot]*step));K['n'+s.slot]++}
+    const gapOf=f=>{const g=S.filter(f);return g.length?Math.round(g.reduce((a,s)=>a+(this.digPred(s)-s.real),0)/g.length):null};
+    const sl=gapOf(s=>s.low),pr=gapOf(s=>s.per);
+    if(sl!=null&&sl>0)K.sleep=Math.min(90,sl);
+    if(pr!=null&&pr>0)K.period=Math.min(90,pr);
+    return K}
+  digSave(){const K=this.digLearn();if(!K)return null;
+    return JSON.stringify(K)===JSON.stringify((this.state.set||{}).digestK||{})?null:K}
+  /* 🕰 결과물 — 체크가 쌓여 「사장님의 시계」가 된다. 신호가 모자라면 결론을 안 낸다(거짓 결론 방지).
+     15회 이상이라야 확정이고, 그 전에는 「배우는 중」으로만 보여준다. */
+  digReport(){const D=this.DIG(),K=this.digK(),S=this.digScan();
+    const n=(K.nb|0)+(K.nl|0)+(K.nd|0),stage=n>=15?'확정':n>=5?'임시':'배우는 중';
+    const rows=[['b','아침'],['l','점심'],['d','저녁']].map(kt=>{const k=kt[0];
+      const base=D.rate*this.digMul(k),mine=base*(K[k]||1),p=Math.round(((K[k]||1)-1)*100);
+      return {k,t:kt[1],base:base.toFixed(2),mine:mine.toFixed(2),cnt:(K['n'+k]|0)+'회',
+              note:p>0?(p+'% 빠름'):p<0?((-p)+'% 느림'):'같음',
+              color:p>0?'#17A673':p<0?'#C97A16':'#8B887C'}});
+    const ok=S.filter(s=>Math.abs(this.digPred(s)-s.real)<=30&&s.kcal<900).map(s=>s.kcal);
+    const hi=S.filter(s=>s.carb>=45&&!s.low&&!s.per),lo=S.filter(s=>s.carb<45&&!s.low&&!s.per);
+    const av=a=>a.length?a.reduce((x,s)=>x+(s.real-this.digPred(s)),0)/a.length:0;
+    return {n,all:S.length,stage,ready:n>=15,rows,
+            best:ok.length>=3?(Math.min.apply(null,ok)+'~'+Math.max.apply(null,ok)+' kcal'):null,
+            carbNote:(hi.length>=3&&lo.length>=3)?Math.round(av(hi)-av(lo)):null,
+            sleep:K.sleep,period:K.period}}
+  digTap(k){const ds=this.TODAY,C=Object.assign({},this.state.cond||{}),d=Object.assign({},C[ds]||{});
+    if(k==='dizzy'){d.dizzy=true;C[ds]=d;const SF=Object.assign({},this.state.safe||{});SF[ds]=true;
+      this.setState({cond:C,safe:SF});this.toast('안전 예외 — 타이머 무시하고 지금 드세요');return}
+    const z=n=>String(n).padStart(2,'0'),nw=new Date(),t=z(nw.getHours())+':'+z(nw.getMinutes());
+    const arr=(Array.isArray(d.dig)?d.dig:[]).filter(x=>x.t!==t);arr.push({t,k});d.dig=arr.slice(-12);C[ds]=d;
+    this.setState({cond:C},()=>{const K=this.digSave();
+      if(K)this.setState({set:Object.assign({},this.state.set||{},{digestK:K})})});
+    this.toast(k==='hungry'?'배고픔을 적었어요 — 시계가 배웁니다':k==='full'?'아직 안 꺼진 걸로 적었어요':'딱 맞았다고 적었어요 ✓')}
+  digReset(){const g=Object.assign({},this.state.set||{});delete g.digestK;
+    const C=Object.assign({},this.state.cond||{});
+    for(const k of Object.keys(C))if(C[k]&&C[k].dig){C[k]=Object.assign({},C[k]);delete C[k].dig}
+    this.setState({set:g,cond:C});this.toast('시계를 처음부터 다시 배웁니다')}
   /* 💊 오늘의 약 — 절대선이 아니다. 절대선 다섯은 늘리지 않는다(협상 불가 목록이라 항목이 늘면 무게가 흐려진다).
      여기는 판정이 아니라 체크리스트다. ⛔ absLines·코치 댓글에 끌어들이지 마라 — 영양제를 빠뜨린 날이
      식사창을 어긴 날과 같은 무게로 보이면 안 된다. 목록 정본은 PILLS 한 곳이고 코드라서
@@ -1999,6 +2168,7 @@ class Component extends DCLogic {
     const we=this.weekEnd(this.TODAY,n.weekDow);
     if(g.goalDate!==we)n.goalDate=we;
     const fv=this.favMigrate();if(fv){P.favs=fv;n.favVer=this.FAV_VER}
+    const dgK=this.digSave();if(dgK)n.digestK=dgK;
     /* 💉 주사 씨앗 — 사장님이 말씀하신 네 번을 한 번만 심는다. 이미 적힌 날짜가 이긴다. */
     if(+g.shotVer!==this.SHOT_VER){P.shots={...this.SHOTS_SEED,...(this.state.shots||{})};n.shotVer=this.SHOT_VER}
     /* 🧬 인바디 씨앗 — 사장님이 주신 7회를 한 번만 심는다. 이미 적힌 같은 날짜가 이긴다. */
@@ -2198,6 +2368,20 @@ class Component extends DCLogic {
        '- 잠(최근 7일): '+(slAvg!=null?(slAvg+'시간 · 잰 날 '+sl.length+'일'+(slAvg<6.5?'   ⚠ 6.5시간 아래 — 같은 칼로리에서 지방 대신 근육이 빠진다':'')):'(기록 없음 — 사장님께 한 번 여쭤라)'),
        '- 허리둘레: '+(wst?(wst.v+'cm ('+this.lbl(wst.d)+')'):'(기록 없음 — 눈바디는 저울이 못 보는 것을 본다)'),
        '- 정체기: '+(PL?(PL.on?('⚠ 7일 평균이 3주 전보다 '+PL.drop+'kg — 정체기다. 볼 순서는 잠 → 미기록 → 단백질 배분 → 근력 → 물 → 유지 주간. ⛔ 「덜 먹자」로 답하지 마라'):('아니다 — 3주간 '+PL.drop+'kg 내려왔다')):'(3주치 기록이 아직 없다)'))}
+    /* ⏳ 소화 타이머 · 🕰 내 시계 — 사장님 몸이 실제로 어떻게 움직이는지. ⛔ 이 칸으로 꾸짖지 마라. */
+    {const dg=this.digestUntil(T),dr=this.digReport();
+     L.push('','## ⏳ 소화 타이머 · 🕰 내 시계','',
+       '- 지금: '+(!dg||dg.none?'(시각이 적힌 기록이 없다 — 음식에 time 을 함께 넣어라)'
+         :dg.stop?'타이머 정지 — 이틀 연속 하한 아래다. 「지금 드세요」가 떠 있다'
+         :dg.out==null?('오늘 창 밖 — '+dg.why)
+         :('마지막 '+dg.kcal+'kcal · 탄 '+dg.carb+'g'+(dg.alco?' · 술':'')+' → 🍽 위 '+this.digHM(dg.at+dg.gut)
+           +' · 🔥 지방 '+this.digHM(dg.at+dg.fat)+' → 다음 끼니 '+this.digHM(dg.out)
+           +' ('+(dg.win==='gut'?'위':'지방')+' 시계'+(dg.cut>0?(' · '+dg.pull.join('·')+' '+dg.cut+'분 당김'):'')+(dg.why?' · '+dg.why:'')+')')),
+       '- 내 시계: '+dr.stage+' · 신호 '+dr.n+'회'+(dr.ready?' (확정)':' (15회 넘어야 확정 — 그 전 값으로 결론 내지 마라)'),
+       '  '+dr.rows.map(r=>r.t+' '+r.base+'→'+r.mine+' ('+r.note+', '+r.cnt+')').join(' · '),
+       '- 당김: '+(dr.sleep!=null?('잠 부족 '+dr.sleep+'분'):'잠 부족 기본 30분')+' · '+(dr.period!=null?('생리 '+dr.period+'분'):'생리 기본 30분'),
+       ...(dr.best?['- 한 끼 최적 크기: '+dr.best+' (예측이 ±30분 안에 맞은 끼니)']:[]),
+       ...(dr.carbNote!=null&&dr.carbNote>0?['- 탄수 민감도: 탄수 45g↑ 끼니는 평소보다 '+dr.carbNote+'분 더 걸린다']:[]))}
     L.push('','## 컨디션·운동','',
       '- 컨디션: '+(ck.length?ck.join(', '):'(없음)')+(cd.note?(' / 메모: '+cd.note):''),
       '- 근력: '+((this.liftsOf(T)||[]).map(x=>x.name+' '+(x.sets||0)+'x'+(x.reps||0)+(x.kg?(' '+x.kg+'kg'):'')).join(', ')||'(없음)'),
@@ -2207,6 +2391,7 @@ class Component extends DCLogic {
       '1. 위 기록만 보고 「지금 무엇을 먹어야 하나」를 3~6줄로 답해라. 칼로리는 초과가 아니라 미달을 지적한다.',
       '2. 이번 주 목표 체중은 트레이너가 정한다 — 입력함의 rule.weekPace(주 페이스 kg) 또는 weekGoals({"주 시작일":kg}) 칸으로 넣어라. 주 시작일은 위 「이번 주 목표」의 앞 날짜다(설정 「주 기준 요일」, 기본은 목요일). 사장님께 설정 화면에 적으시라고 하지 마라.',
       '3. 사장님이 화면·기능을 고쳐 달라고 하시면 그때 앱을 고쳐라.',
+      '3-1. 위 🕰 내 시계는 사장님 몸이 실제로 어떻게 움직이는지다. 신호가 15회를 넘겨 「확정」일 때만 그 값으로 말해라 — 그 전에는 기본값에 가까우니 결론 내지 마라.',
       '4. 사장님이 말씀하신 음식은 ⭐ 자주 먹는 음식과 같은 이름으로 적어라(별명표 FOOD_ALIAS). 처음 나온 음식은 저절로 ⭐에 오르니, 영양값이 미덥지 않으면 입력함 favs 칸으로 표준값을 함께 보내라.',
       '5. 이번 주 모드가 없거나 「기한 지남」이면 위 「지난 7일」과 사장님 말씀으로 진단하고, 대화로 확정한 뒤 입력함 phase 칸으로 보내라 — {"k":"cut2|cut1|bloat|build|maint","to":"YYYY-MM-DD","why":"한 줄"}. 모드 출발값을 그대로 쓰지 말고 이번 주 계획(운동 유무·일정·컨디션)에 맞춰 g 를 다시 정해 rule 칸으로 함께 보내라. 절대선 다섯은 어느 모드에서도 안 바꾼다.',
       '6. 위 「⚙ 바뀐 설정」 칸이 있으면 그 값 기준으로 이번 주 계획을 다시 보고, 반영한 뒤 입력함에 chgAck:true 를 함께 보내라 — 그래야 그 칸이 비워지고 다음 호출장에 또 안 뜬다.');
@@ -2587,6 +2772,35 @@ class Component extends DCLogic {
           valColor:a.ok?'#17A673':a.na?'#B5B2A6':'#E5484D',
           mark:a.ok?'✓':a.na?'·':'✕',
           markColor:a.ok?'#17A673':a.na?'#D8D5CB':'#E5484D'}))}};
+    /* ⏳ 소화 타이머 — 화면 값만 만든다. ⛔ 여기서 절대선을 판정하지 마라(absLines 가 유일한 판정 자리). */
+    const dg=this.digestUntil(this.TODAY),dgR=this.digReport();
+    const nowM=(()=>{const n=new Date();return n.getHours()*60+n.getMinutes()})();
+    let dgBig='—',dgSub='',dgWhy='',dgColor=th.accent;
+    if(!dg||dg.none){dgSub='시각이 적힌 기록이 없어요 — 음식에 드신 시각을 함께 적어 주세요'}
+    else if(dg.stop){dgBig='지금 드세요';dgColor='#E5484D';dgSub='이틀 연속 하한 아래예요 — 타이머를 멈췄어요'}
+    else if(dg.out==null){dgBig='오늘은 여기까지';dgColor='#8B887C';dgSub='다음 끼니가 식사창을 넘어가요 · '+dg.why}
+    else{const left=dg.out-nowM,rd=left<=0;
+      dgBig=rd?'이제 드셔도 돼요':(Math.floor(left/60)+'시간 '+(left%60)+'분');
+      dgColor=rd?'#17A673':th.accent;
+      dgSub='🍽 위 '+this.digHM(dg.at+dg.gut)+' · 🔥 지방 '+this.digHM(dg.at+dg.fat)+' → '+this.digHM(dg.out);
+      dgWhy=(dg.win==='gut'?'위 시계':'지방 시계')+'가 기준 · 마지막 '+dg.kcal+'kcal · 탄 '+dg.carb+'g'
+           +(dg.alco?' · 술':'')+(dg.est?' · 대략 기록':'')+(dg.why?' · '+dg.why:'')}
+    const dgPull=(dg&&dg.cut>0)?('💤🩸 '+dg.pull.join(' · ')+' → '+dg.cut+'분 당김'):'';
+    const dgBtns=[{k:'hungry',t:'🔥 배고파'},{k:'full',t:'😐 아직'},{k:'ok',t:'👍 딱맞아'},{k:'dizzy',t:'😵 어지러워'}]
+      .map(b=>({t:b.t,bg:b.k==='dizzy'?'#FDECEC':th.chipBg,color:b.k==='dizzy'?'#E5484D':'#5C594E',tap:()=>this.digTap(b.k)}));
+    const dgLearn=dgR.n?('사장님께 맞추는 중 · 신호 '+dgR.n+'회 · '+dgR.stage):'신호가 쌓이면 사장님 시계로 바뀝니다';
+    const dgSwOn=!!this.DIG().on;
+    const dgSw=()=>{const g={...(S.set||{})},R={...(g.rule||{})};
+      R.digest=Object.assign({},R.digest||{},{on:dgSwOn?0:1});g.rule=R;
+      this.setState({set:g});this.toast(dgSwOn?'소화 타이머를 껐어요':'소화 타이머를 켰어요')};
+    const dgNote=dgR.ready?'신호 15회를 넘겨 확정됐어요 — 홈 타이머가 이 값으로 움직입니다.'
+      :'신호가 15회를 넘으면 확정돼요. 그 전에는 기본값에 가깝습니다. 음식 시각만 적으셔도 저절로 배웁니다.';
+    /* 🕰 내 시계 — 결과물. 신호가 모자라면 결론 줄을 아예 안 낸다. */
+    const dgStage=dgR.stage+' · 신호 '+dgR.n+'회',
+      dgBest=dgR.best?('한 끼 최적 크기 '+dgR.best):'',
+      dgCarb=(dgR.carbNote!=null&&dgR.carbNote>0)?('탄수 45g↑ 끼니는 평소보다 '+dgR.carbNote+'분 더 걸려요'):'',
+      dgSleepT=(dgR.sleep!=null?'잠 부족 → '+dgR.sleep+'분 당김':'잠 부족 → 기본 30분'),
+      dgPeriodT=(dgR.period!=null?'생리 → '+dgR.period+'분 당김':'생리 → 기본 30분');
     const absT=mkAbs(this.TODAY);
     const pillT=this.pillsOf(this.TODAY);
     const pillRows=this.PILLS.map(p=>{const on=!!pillT[p.k],due=this.pillDue(p,this.TODAY);
@@ -2950,6 +3164,12 @@ class Component extends DCLogic {
         if(v==='')delete WG[wkp.ws];else WG[wkp.ws]=+v||0;
         this.setState({weekGoals:WG});this.toast(v===''?'이번 주 목표를 자동으로 되돌렸어요 ✓':('이번 주 목표를 '+v+'kg으로 두었어요 ✓'))},
       wStats,a3Rows,a3Lines:a3.lines.map(x=>({...x,ts:this.sents(x.t)})),wRows,
+      dgBig,dgSub,dgWhy,dgColor,dgPull,dgBtns,dgLearn,dgWhyOn:!!dgWhy,dgPullOn:!!dgPull,
+      dgRows:dgR.rows,dgStage,dgBest,dgCarb,dgSleepT,dgPeriodT,dgReady:!!dgR.ready,
+      dgBestOn:!!dgBest,dgCarbOn:!!dgCarb,dgReset:()=>this.digReset(),
+      dgSw,dgSwLabel:dgSwOn?'켜짐':'꺼짐',dgSwBg:dgSwOn?'#EAF7F1':th.chipBg,dgSwColor:dgSwOn?'#17A673':'#8B887C',
+      dgSetHint:'많이 드신 다음 끼니는 저절로 늦춰지고, 잠이 모자라거나 생리 기간이면 앞당겨져요. 안 맞으면 학습 초기화로 처음부터 다시 배웁니다.',
+      dgNote,dgStageColor:dgR.ready?'#17A673':'#B5B2A6',
       pillRows,pillKept:pillKeptN,pillDue:pillDueN,pillColor:pillKeptN>=pillDueN?'#17A673':th.accent,
       selLabel:this.lbl(S.selDate),selDate:S.selDate,todayStr:this.TODAY,
       prevDay:()=>this.shiftDay(-1),nextDay:()=>this.shiftDay(1),
