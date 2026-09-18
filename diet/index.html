@@ -75,11 +75,12 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 .hedit [data-panel] *{pointer-events:none}
 .hdragging .hjig{animation:none}
 .hslide{transition:transform .18s cubic-bezier(.2,.8,.2,1)}
-.hgrab{position:relative;z-index:60;opacity:.97;transition:none;box-shadow:0 10px 28px rgba(31,30,26,.22);max-height:none!important}
-/* Edit mode folds every panel down to its title row: all of them fit on one screen, so
-   touch-action:none (which has to be set before the finger lands) costs no scrolling. */
-.hedit{gap:8px!important}
-.hedit [data-panel]{touch-action:none;max-height:38px;overflow:hidden;display:block!important;padding:8px 12px!important}
+.hgrab{position:relative;z-index:60;opacity:.97;transition:none;box-shadow:0 10px 28px rgba(31,30,26,.22)}
+/* Panels keep their real size in edit mode - the boss rejected shrinking them. */
+.hedit [data-panel]{touch-action:none}
+/* The wide board is column-count, where `order` is ignored, so edit mode drops to one
+   column: a vertical drag is enough, and the new DOM order shows up in the board on 완료. */
+.app-shell.wide .dash>[data-screen-label='홈'].hedit{column-count:1!important;display:flex!important;flex-direction:column;gap:14px;max-width:820px}
 </style>
 </helmet>
 <div class="app-shell {{shellCls}}" style="max-width:var(--appw,430px);margin:0 auto;height:100dvh;background:{{appBg}};--accent:{{accent}};--line:{{cardBorder}};--chip:{{chipBg}};position:relative;display:flex;flex-direction:column;overflow:hidden;color:#1F1E1A">
@@ -100,14 +101,14 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
     <sc-if value="{{isHome}}" hint-placeholder-val="{{ true }}">
       <div data-screen-label="홈" class="{{homeCls}}" style="display:flex;flex-direction:column;gap:14px">
         <sc-if value="{{homeEdit}}" hint-placeholder-val="{{ true }}">
-          <div style="order:-1;background:{{accent}};border-radius:{{radL}};padding:9px 11px;display:flex;align-items:center;gap:7px">
+          <div data-editbar="1" style="order:-1;background:{{accent}};border-radius:{{radL}};padding:9px 11px;display:flex;align-items:center;gap:7px">
             <div style="flex:1;min-width:0;font-size:11px;font-weight:800;color:#FFFFFF;line-height:1.45"><span style="display:inline-block">✏️ 칸 옮기는 중이에요.</span>&#32;<span style="display:inline-block;font-weight:600;opacity:.88">칸을 꾹 눌러 위아래로 끌어 주세요.</span></div>
             <button onClick="{{homeReset}}" style="flex:none;border:0;cursor:pointer;border-radius:{{radM}};padding:7px 9px;font-size:10.5px;font-weight:800;background:rgba(255,255,255,.24);color:#FFFFFF">처음 순서로</button>
             <button onClick="{{homeDone}}" style="flex:none;border:0;cursor:pointer;border-radius:{{radM}};padding:7px 12px;font-size:10.5px;font-weight:800;background:#FFFFFF;color:{{accent}}">완료</button>
           </div>
         </sc-if>
         <sc-if value="{{homeEditOff}}" hint-placeholder-val="{{ false }}">
-          <button onClick="{{homeEditOn}}" style="order:99;border:1px dashed {{cardBorder}};background:transparent;cursor:pointer;border-radius:{{radL}};padding:9px;font-size:10.5px;font-weight:700;color:#B5B2A6">✏️ 칸 순서 바꾸기</button>
+          <button onClick="{{homeEditOn}}" data-editbtn="1" style="order:99;border:1px dashed {{cardBorder}};background:transparent;cursor:pointer;border-radius:{{radL}};padding:9px;font-size:10.5px;font-weight:700;color:#B5B2A6">✏️ 칸 순서 바꾸기</button>
         </sc-if>
         <div data-panel="dday" class="{{jigCls}}" style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;order:{{oDday}}">
           <sc-if value="{{hasGoal}}" hint-placeholder-val="{{ true }}">
@@ -2640,7 +2641,7 @@ class Component extends DCLogic {
     for(const p of (o.posts||[]))for(const ph of (p.photos||[]))if(ph&&ph.src)ph.src=await up(ph.src);
     if(o.avatar)o.avatar=await up(o.avatar);
     return o}
-  componentDidUpdate(){this.persist()}
+  componentDidUpdate(){this.persist();this.homeApplyOrder()}
   backupObj(){const o={app:'dietgram',savedAt:new Date().toISOString(),seq:this.seq};for(const k of this.DBK)o[k]=this.state[k];if(o.set)o.set={...o.set,geminiKey:'',claudeKey:''};return o}
   exportBackup(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(this.backupObj())],{type:'application/json'}));a.download='dietgram-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);this.toast(this.say('백업 파일을 내려받았어요 ⬇','백업 파일을 내려받았사와요 👑'))}
   applyBackup(o){const p={};for(const k of this.DBK)if(o[k]!==undefined)p[k]=o[k];if(p.set){const c=this.state.set||{};p.set={...p.set,geminiKey:c.geminiKey||'',claudeKey:c.claudeKey||'',apiPass:c.apiPass||p.set.apiPass||'0000'}}if(+o.seq>this.seq)this.seq=+o.seq;this.setState(p,()=>{this._loaded=true;this.persist()})}
@@ -2651,38 +2652,93 @@ class Component extends DCLogic {
   /* Home panel reorder. Long-press a panel -> jiggle (edit mode) -> drag to move. Saved in set.homeOrder. */
   homeOrd(){const D=this.HOME_ORDER0,s=(this.state.set&&this.state.set.homeOrder)||[];const o=s.filter(k=>D.indexOf(k)>=0);for(const k of D)if(o.indexOf(k)<0)o.push(k);return o}
   homeSetOrd(a){this.setState({set:{...this.state.set,homeOrder:a}})}
+  /* The wide board uses CSS column-count, which ignores `order` completely. So the real
+     source of truth on screen is the DOM order - this puts the children in homeOrd() order
+     and leaves the edit bar first and the opener last. Called from componentDidUpdate, and
+     skipped while a drag is in flight (moving nodes mid-drag would tear the transform). */
+  homeApplyOrder(){
+    if(typeof document==='undefined'||this._dragging)return;
+    const c=document.querySelector('div[data-screen-label]');
+    if(!c||c.getAttribute('data-screen-label')!=='\uD648')return;
+    const map={};let bar=null,btn=null;
+    for(const x of Array.from(c.children)){
+      if(!x.getAttribute)continue;
+      const k=x.getAttribute('data-panel');
+      if(k)map[k]=x;
+      else if(x.getAttribute('data-editbar'))bar=x;
+      else if(x.getAttribute('data-editbtn'))btn=x}
+    const want=[];if(bar)want.push(bar);
+    for(const k of this.homeOrd())if(map[k])want.push(map[k]);
+    if(btn)want.push(btn);
+    let prev=null;
+    for(const el of want){
+      const at=prev?prev.nextSibling:c.firstChild;
+      if(el!==at)c.insertBefore(el,at);
+      prev=el}
+  }
   homeDrag(){
     if(this._hdOn||typeof document==='undefined')return;this._hdOn=true;
-    const self=this;let T=null,P=null,S=null;
+    const self=this;let T=null,P=null,S=null,raf=null;
     const kids=c=>Array.from(c.children).filter(x=>x.getAttribute&&x.getAttribute('data-panel'));
     const stop=()=>{if(T){clearTimeout(T);T=null}};
-    /* Freeze the layout at grab time: slot mid-points come from that snapshot, so reordering never moves the panel out from under the finger. */
+    const dash=()=>document.querySelector('.dash');
+    /* Freeze the layout at grab time: slot mid-points come from that snapshot, so reordering
+       never moves the panel out from under the finger. Auto-scroll shifts the snapshot too. */
     function begin(el,y){
-      const c=el.parentNode;if(!c)return;c.classList.add('hdragging');
+      const c=el.parentNode;if(!c)return;
+      /* Entering edit mode re-lays the board out (the wide one drops to a single column), so the
+         grabbed panel can land at the very bottom - right inside the auto-scroll edge, which then
+         drags the board the wrong way. Bring it to the middle first and move the finger's
+         reference point with it, so the panel still hangs under the same spot of the finger. */
+      const d0=dash();
+      if(d0){const r0=el.getBoundingClientRect(),rel=y-r0.top,dr=d0.getBoundingClientRect();
+        const want=dr.top+(d0.clientHeight-r0.height)/2,diff=r0.top-want;
+        if(Math.abs(diff)>30){const b4=d0.scrollTop;d0.scrollTop+=diff;
+          if(d0.scrollTop!==b4)y=el.getBoundingClientRect().top+rel}}
+      c.classList.add('hdragging');
       const ps=kids(c).map(p=>{const r=p.getBoundingClientRect();return{el:p,k:p.getAttribute('data-panel'),mid:r.top+r.height/2,h:r.height}});
       ps.sort((a,b)=>a.mid-b.mid);
       const from=ps.findIndex(p=>p.el===el);if(from<0){c.classList.remove('hdragging');return}
-      S={c,el,ps,from,to:from,y0:y,h:ps[from].h+14};
+      S={c,el,ps,from,to:from,y0:y,lastY:y,edge:0,h:ps[from].h+14};
+      self._dragging=true;
       el.classList.add('hgrab');el.style.touchAction='none';
       ps.forEach(p=>{if(p.el!==el)p.el.classList.add('hslide')});
       try{navigator.vibrate&&navigator.vibrate(22)}catch(_){}
+      if(!raf)raf=requestAnimationFrame(tick);
+    }
+    /* Auto-scroll near the top/bottom edge; without it the board is taller than the screen
+       and a panel could never be dragged past one screenful. */
+    function tick(){
+      raf=null;if(!S)return;
+      const d=dash();
+      if(d&&S.edge){
+        const b4=d.scrollTop;d.scrollTop+=S.edge;const dd=d.scrollTop-b4;
+        if(dd){S.ps.forEach(p=>{p.mid-=dd});S.y0-=dd;move(S.lastY)}}
+      raf=requestAnimationFrame(tick);
     }
     function move(y){
-      if(!S)return;const dy=y-S.y0;S.el.style.transform='translateY('+dy+'px)';
+      if(!S)return;S.lastY=y;
+      const dy=y-S.y0;S.el.style.transform='translateY('+dy+'px)';
+      const d=dash();
+      if(d){const r=d.getBoundingClientRect(),M=60;
+        S.edge=y<r.top+M?-Math.min(14,(r.top+M-y)/6):(y>r.bottom-M?Math.min(14,(y-(r.bottom-M))/6):0)}
       const cy=S.ps[S.from].mid+dy;let to=0;
       for(let i=0;i<S.ps.length;i++)if(cy>=S.ps[i].mid)to=i;
       if(to===S.to)return;S.to=to;
       S.ps.forEach((p,i)=>{if(i===S.from)return;
-        let d=0;
-        if(S.to>S.from&&i>S.from&&i<=S.to)d=-S.h;
-        else if(S.to<S.from&&i>=S.to&&i<S.from)d=S.h;
-        p.el.style.transform=d?'translateY('+d+'px)':''});
+        let d2=0;
+        if(S.to>S.from&&i>S.from&&i<=S.to)d2=-S.h;
+        else if(S.to<S.from&&i>=S.to&&i<S.from)d2=S.h;
+        p.el.style.transform=d2?'translateY('+d2+'px)':''});
     }
     function end(){
       stop();P=null;if(!S)return;const s=S;S=null;
+      if(raf){cancelAnimationFrame(raf);raf=null}
       s.c.classList.remove('hdragging');
       s.ps.forEach(p=>{p.el.classList.remove('hslide','hgrab');p.el.style.transform='';p.el.style.touchAction=''});
+      self._dragging=false;
       if(s.to!==s.from){const a=s.ps.map(p=>p.k),m=a.splice(s.from,1)[0];a.splice(s.to,0,m);self.homeSetOrd(a)}
+      else self.homeApplyOrder();
     }
     /* touch and mouse events, never pointer ones: Chrome fires pointercancel as soon as it
        claims the gesture for scrolling, which used to kill the long-press before it fired. */
@@ -2693,8 +2749,8 @@ class Component extends DCLogic {
       const y=yOf(e);
       if(self.state.homeEdit){if(e.cancelable)e.preventDefault();begin(el,y);return}
       /* No button/input escape hatch: on iOS a long press works on the icons themselves.
-         A short tap still reaches the button; only holding still for LONG_MS opens edit mode,
-         and .hedit kills pointer-events inside panels so the release cannot fire the button. */
+         A short tap still reaches the button; only holding still opens edit mode, and
+         .hedit kills pointer-events inside panels so the release cannot fire the button. */
       stop();P={y};
       T=setTimeout(()=>{T=null;const k=el.getAttribute('data-panel');
         self.setState({homeEdit:true},()=>{const n=document.querySelector('[data-panel='+k+']')||el;begin(n,y)})},600);
