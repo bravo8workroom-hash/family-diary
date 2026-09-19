@@ -11,5 +11,5 @@ This is a pointer for AIs other than Claude Code. The real skill lives at:
     ..\..\..\.claude\skills\family-diary\SKILL.md   (= <프로젝트>\.claude\skills\family-diary\SKILL.md)
 
 Read that file now and follow it exactly. Do not redesign the procedure.
-Global rules for every AI: %USERPROFILE%\.claude\CLAUDE.md (section 0-0 = translation table for non-Claude AIs).
+Global rules for every AI: %USERPROFILE%\.claude\CLAUDE.md (entry; work-rules\0-절대규칙.md = the absolute rules every AI reads first; section 2 routes to work-rules\ per stage and job type; work-rules\0-다른AI.md = translation table for non-Claude AIs).
 Answer the owner in Korean.
