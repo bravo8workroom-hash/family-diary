@@ -1932,14 +1932,21 @@ class Component extends DCLogic {
             best:ok.length>=3?(Math.min.apply(null,ok)+'~'+Math.max.apply(null,ok)+' kcal'):null,
             carbNote:(hi.length>=3&&lo.length>=3)?Math.round(av(hi)-av(lo)):null,
             sleep:K.sleep,period:K.period}}
-  /* 시각 없는 끼니 중 가장 나중 것을 찾는다 — 앞 끼니에 시각이 없어도 마지막 끼니만 적히면 타이머가 돈다
-     (사장님 지시 2026-09-18 「마지막끼니는 시간이 있고, 두끼는 시간이 없는경우, 마지막 끼니 기준으로 잡으면돼」). */
   MEAL_ORD={'아침':0,'점심':1,'저녁':2,'간식':3};
-  digNeedTime(){const F=this.state.foods||{},Y=this.addDays(this.TODAY,-1);
-    for(const ds of [this.TODAY,Y]){const it=F[ds]||[];
-      const no=it.filter(x=>!x.est&&this.mins(x.time)==null);if(!no.length)continue;
-      let meal=null,ord=-1;
-      for(const x of no){const o=(this.MEAL_ORD[x.meal]!=null?this.MEAL_ORD[x.meal]:9);if(o>=ord){ord=o;meal=x.meal}}
+  /* 타이머가 이미 돌고 있으면 시각을 묻지 않는다 (사장님 지시 2026-09-22
+     「최근거 기록되었으면 선택사항이 없어야하는거잖아 … 하루 기록이 없으면 있어야겠지」).
+     시각이 적힌 마지막 끼니가 기준이고, 그보다 나중 끼니에 시각이 없을 때만 묻는다.
+     오늘·어제에 시각 있는 기록이 한 건도 없을 때만 예전처럼 고르라고 내민다. */
+  digNeedTime(){const F=this.state.foods||{},DS=[this.addDays(this.TODAY,-1),this.TODAY];
+    const ord=x=>(this.MEAL_ORD[x.meal]!=null?this.MEAL_ORD[x.meal]:9);
+    let aI=-1,aO=-1;
+    DS.forEach((ds,i)=>{(F[ds]||[]).forEach(x=>{if(!x.est&&this.mins(x.time)!=null){const o=ord(x);
+      if(i>aI||(i===aI&&o>aO)){aI=i;aO=o}}})});
+    for(let i=DS.length-1;i>=0;i--){const ds=DS[i];
+      const no=(F[ds]||[]).filter(x=>!x.est&&this.mins(x.time)==null&&(aI<0||i>aI||(i===aI&&ord(x)>aO)));
+      if(!no.length)continue;
+      let meal=null,o1=-1;
+      for(const x of no){const o=ord(x);if(o>=o1){o1=o;meal=x.meal}}
       const rows=no.filter(x=>x.meal===meal);
       return {ds,meal,names:rows.map(x=>x.name).slice(0,3).join(', ')+(rows.length>3?(' 외 '+(rows.length-3)+'개'):''),n:rows.length}}
     return null}
