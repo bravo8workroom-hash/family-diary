@@ -71,15 +71,20 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 .bd-sel{outline:2px solid #1F1E1A;outline-offset:2px}
 .bd-pad{visibility:hidden}
 @keyframes bdhop{0%,100%{transform:translateY(-2px)}50%{transform:translateY(-7px)}}
-/* 🔍 웹 인터페이스 지침 검사로 잡은 것 (2026-09-23) — 폰에서 실제로 걸리던 것만 더한다.
-   ⛔ 판정·모양·색·자리는 한 곳도 안 건드렸다. 전부 보태기만 하는 규칙이라 기존 화면이 그대로다. */
-html{color-scheme:light}                                                    /* 폰 다크모드가 입력칸·select를 뒤집는 것을 막는다 */
-.app-shell{touch-action:manipulation;-webkit-tap-highlight-color:rgba(31,30,26,.08)}  /* 두 번 눌러 확대 지연(300ms) 제거 + 누른 자리 표시를 정해 둔다 */
-.tabbar{padding-bottom:calc(20px + env(safe-area-inset-bottom))!important}  /* 폰 아래 홈바에 탭바가 깔리지 않게 */
-.dash{padding-bottom:calc(110px + env(safe-area-inset-bottom))!important}   /* 같은 만큼 스크롤 칸도 늘린다 */
-.sheet,.dash{overscroll-behavior:contain}                                   /* 바닥 시트를 끝까지 내려도 뒤 화면이 같이 안 밀린다 */
-:focus-visible{outline:2px solid var(--accent,#E4618C);outline-offset:2px}  /* 키보드로 옮겨 다닐 때 어디 있는지 보이게 */
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}  /* 「움직임 줄이기」를 켜면 말판 말·점 세 개가 멈춘다 */
+/* 🔍 웹 인터페이스 지침 검사로 보탠 것 (2026-09-23) — 보태기만 하므로 기존 화면·판정은 그대로다.
+   ⚠ 2026-09-23 실측으로 값을 다시 쟀다. 아래 넷은 일하는 무게가 서로 다르다 — 부풀려 적지 마라:
+     overscroll-behavior  조건 없이 일한다 (바닥 시트 4곳)
+     prefers-reduced-motion  폰에서 「움직임 줄이기」를 켜셨을 때만
+     :focus-visible  넓은 판에서 키보드로 옮길 때만
+     touch-action  viewport 에 width=device-width 가 이미 있어 두 번 눌러 확대 지연은 원래 없었다 — 보험일 뿐
+     color-scheme  안드로이드 크롬 「강제 다크 테마」가 켜졌을 때만 — 보험일 뿐
+   ⛔ env(safe-area-inset-*) 줄 둘은 뺐다. viewport 에 viewport-fit=cover 가 없으면 env() 는 늘 0 이라
+      아무 일도 안 하는 죽은 코드였다. 되살리려면 viewport 부터 고치고 머리띠 여백도 같이 다시 잡아야 한다. */
+html{color-scheme:light}
+.app-shell{touch-action:manipulation;-webkit-tap-highlight-color:rgba(31,30,26,.08)}
+.sheet,.dash{overscroll-behavior:contain}
+:focus-visible{outline:2px solid var(--accent,#E4618C);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </helmet>
 <div class="app-shell {{shellCls}}" style="max-width:var(--appw,430px);margin:0 auto;height:100dvh;background:{{appBg}};--accent:{{accent}};--line:{{cardBorder}};--chip:{{chipBg}};position:relative;display:flex;flex-direction:column;overflow:hidden;color:#1F1E1A">
