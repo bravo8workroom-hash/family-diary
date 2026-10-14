@@ -318,6 +318,31 @@ html{color-scheme:light}
           </div>
         </div>
 
+        <sc-if value="{{pnShow}}" hint-placeholder-val="{{ false }}">
+        <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
+          <div style="font-size:13px;font-weight:700;color:#8B887C;margin-bottom:10px">📋 트레이너 식단 <span style="font-weight:600;color:#B5B2A6">· {{pnRange}}</span></div>
+          <div style="display:flex;gap:5px;margin-bottom:12px">
+            <sc-for list="{{pnDays}}" as="pd" hint-placeholder-count="5">
+              <button onClick="{{pd.pick}}" style="flex:1;min-width:0;min-height:44px;border:0;cursor:pointer;border-radius:12px;padding:6px 0;background:{{pd.bg}};box-shadow:{{pd.ring}};font-family:inherit;font-size:12px;font-weight:700;color:{{pd.color}}">{{pd.dow}}<span style="display:block;font-size:10px;font-weight:600;opacity:.8;margin-top:1px;font-variant-numeric:tabular-nums">{{pd.kcal}}</span></button>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:6px">
+            <sc-for list="{{pnKpi}}" as="pk" hint-placeholder-count="4">
+              <div style="background:{{chipBg}};border-radius:10px;text-align:center;padding:6px 0;font-size:10px;color:#8B887C;font-weight:600">{{pk.l}}<div style="font-size:14px;font-weight:800;color:#2B2A26;margin-top:1px;font-variant-numeric:tabular-nums">{{pk.v}}</div></div>
+            </sc-for>
+          </div>
+          <sc-for list="{{pnMeals}}" as="pm" hint-placeholder-count="4">
+            <div style="display:flex;gap:10px;padding:7px 2px;border-bottom:1px solid #F3EFEA;font-size:12px;line-height:1.6">
+              <span style="flex:none;width:56px;white-space:nowrap;color:#B5B2A6;font-weight:700;font-size:11px">{{pm.t}}</span>
+              <span style="flex:1;min-width:0;color:#2B2A26">{{pm.f}}</span>
+            </div>
+          </sc-for>
+          <sc-if value="{{pnNoteShow}}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:11px;color:#8B887C;line-height:1.6;margin-top:9px;background:{{chipBg}};border-radius:10px;padding:8px 10px"><sc-for list="{{pnNote}}" as="pn1" hint-placeholder-count="2"><span style="display:inline-block">{{pn1.t}}</span>&#32;</sc-for></div>
+          </sc-if>
+        </div>
+        </sc-if>
+
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:11px 13px">
           <div style="font-size:12.5px;font-weight:700;color:#8B887C;margin-bottom:7px">📊 주 평균 · 7일 중 {{wkDays}}일</div>
           <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">
@@ -1125,6 +1150,20 @@ html{color-scheme:light}
     </sc-if>
   </div>
 
+  <sc-if value="{{mmOpen}}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;right:14px;bottom:146px;width:290px;max-width:calc(100% - 28px);box-sizing:border-box;background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:16px;padding:11px;box-shadow:0 6px 22px rgba(0,0,0,.14);z-index:15">
+      <div style="font-size:11.5px;font-weight:700;color:#8B887C;margin-bottom:7px">💬 트레이너에게 물어볼 것</div>
+      <sc-for list="{{mmList}}" as="mq" hint-placeholder-count="1">
+        <div style="display:flex;gap:4px;align-items:flex-start;font-size:11.5px;color:#5C594E;line-height:1.55;margin-bottom:4px"><span style="flex:1;min-width:0">· {{mq.t}}</span><button onClick="{{mq.del}}" aria-label="지우기" style="flex:none;border:0;background:none;color:#B5B2A6;cursor:pointer;font-size:12px;width:28px;height:28px">✕</button></div>
+      </sc-for>
+      <textarea value="{{mmDraft}}" onChange="{{mmOnDraft}}" rows="3" placeholder="예: 토요일 저녁 외식 괜찮을까?" style="width:100%;box-sizing:border-box;border:1.5px solid {{accent}};border-radius:10px;padding:8px;font-family:inherit;font-size:13px;line-height:1.55;outline:none;resize:none"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px">
+        <span style="font-size:10.5px;color:#B5B2A6">트레이너를 부르면 먼저 읽어요</span>
+        <button onClick="{{mmAdd}}" style="flex:none;border:0;background:{{accent}};color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;border-radius:10px;padding:0 14px;min-height:36px;cursor:pointer">남기기</button>
+      </div>
+    </div>
+  </sc-if>
+  <button onClick="{{mmToggle}}" aria-label="트레이너에게 메모" style="position:absolute;right:16px;bottom:84px;width:52px;height:52px;border-radius:50%;border:0;background:{{accent}};color:#fff;font-size:22px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.18);z-index:15">💬<sc-if value="{{mmBadge}}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-3px;right:-3px;background:#2B2A26;color:#fff;font-size:10px;font-weight:800;border-radius:9px;padding:1px 5px">{{mmCount}}</span></sc-if></button>
   <div class="tabbar" style="position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-top:1px solid {{cardBorder}};display:grid;grid-template-columns:repeat({{tabCols}},1fr);padding:8px 6px 20px;z-index:20">
     <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
       <button onClick="{{t.go}}" style="border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0">
@@ -1499,7 +1538,7 @@ class Component extends DCLogic {
       ai:{spent:0,calls:0},foods:F,weights:W,dayMode:DM,posts:P,workouts:WO,woOpen:null,woD:'',
       water:{},cond:{},lifts:{},journal:{},combos:CB,favs:FV,carbUp:{},safe:{},todo:{items:[],done:[]},
       stock:{shop:[],home:[]},weekGoals:{},favMute:[],wins:{},shots:{},shotPick:false,
-      cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],woDate:null,ntOpen:-1,ntKind:'전체',ntMore:false,jOpen:null,bdSel:null,
+      cm:null,fv:null,liftM:null,stockAdd:{shop:'',home:''},tdDraft:'',tdPh:[],pnSel:null,mmOpen:false,mmDraft:'',plan:null,woDate:null,ntOpen:-1,ntKind:'전체',ntMore:false,jOpen:null,bdSel:null,
       editW:null,fm:null,aiBusy:false,pm:null,toastMsg:null,replyTo:null,cInput:'',aiReplying:false,aiQueue:[],avatar:null,apiOpen:false,apiUnlocked:false,apiPassInput:'',apiPassErr:false};
   }
   fmt(n){return (n==null||n===''||isNaN(+n))?'—':(+n).toLocaleString('ko-KR')}
@@ -2307,6 +2346,7 @@ class Component extends DCLogic {
     /* 📌 트레이너 지침 — 통째로 갈아끼운다(합치면 지난주 지침이 이번 주에 남는다).
        기한 지난 줄은 받는 그 자리에서 버려 쌓이지 않는다 — 빠져나갈 칸을 만들 때 같이 만든다. */
     if(o.coach){const T0=this.TODAY;P.coach=(o.coach||[]).filter(x=>x&&x.t&&(!x.until||x.until>=T0));add.push('트레이너 지침')}
+    if(o.plan){P.plan=o.plan;add.push('트레이너 식단')}
     if(o.lifts){const L={...S.lifts};let n=0;
       for(const d of Object.keys(o.lifts)){const day=(L[d]||[]).slice();
         for(const x of o.lifts[d]){if(day.some(y=>y.name===x.name))continue;day.push({...x,id:'l'+(this.seq++)});n++}
@@ -2639,7 +2679,7 @@ class Component extends DCLogic {
       this.toast(this.say('호출 '+used+'회로 '+n+'건 처리 · 코치 피드백까지 완료 ⚡','호출 '+used+'회로 '+n+'건 처리했답니다 ⚡'));
     }catch(err){this.setState({aiBusy:false});this.toast('AI 처리 중 문제가 생겼어요 · '+(err.message||'네트워크'))}
   }
-  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo','pills','favMute','wins','coach','shots','inbody'];
+  DBK=['mode','sober','set','ai','foods','weights','dayMode','posts','workouts','avatar','water','cond','lifts','journal','combos','favs','carbUp','safe','stock','weekGoals','todo','plan','pills','favMute','wins','coach','shots','inbody'];
   idb(){return new Promise((res,rej)=>{const q=indexedDB.open('dietgram',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
   async dbGet(k){try{const db=await this.idb();return await new Promise((res,rej)=>{const t=db.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error)})}catch(_){try{const s=localStorage.getItem('dgm_'+k);return s?JSON.parse(s):null}catch(e){return null}}}
   // 기록은 가족 저장소(Supabase)에 둔다 — family_state 문서의 diet 칸 하나를 쓴다.
@@ -2717,6 +2757,23 @@ class Component extends DCLogic {
       ph:(x.ph||[]).map(src=>({bg:phUrl(src),zoom:()=>this.setState({lb:{bg:phUrl(src),e:''}})})),
       done:()=>{this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:[{...x,at:this.TODAY},...tdDone].slice(0,100)}});this.toast('처리됨으로 옮겼어요 ✓')},
       del:()=>this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:tdDone}})}));
+    /* 📋 트레이너 식단 — 입력함 plan 칸으로 온 하루별 식단표를 그대로 그린다 (2026-10-14 사장님 지시 「제안했던것도 표에 보이게」).
+       ⛔ 여기서 판정하지 마라. 기간(to)이 지나면 저절로 안 보인다. pnSel 은 화면 상태라 DBK 에 넣지 않는다. */
+    const PN=S.plan||null,pnD=(PN&&PN.days)||{},pnKeys=Object.keys(pnD).sort();
+    const pnOn=!!(pnKeys.length&&(!PN.to||PN.to>=this.TODAY));
+    const pnSel=pnD[S.pnSel]?S.pnSel:(pnD[this.TODAY]?this.TODAY:(pnKeys.find(d=>d>=this.TODAY)||pnKeys[0]));
+    const pnCur=pnD[pnSel]||{},pnG=v=>v==null?'-':this.fmt(v)+'g',pnMD=d=>d?(+d.slice(5,7))+'/'+(+d.slice(8,10)):'';
+    const pnDays=pnKeys.map(d=>{const on=d===pnSel,now=d===this.TODAY;
+      return{dow:'일월화수목금토'[new Date(d+'T00:00:00').getDay()],kcal:pnD[d].kcal!=null?this.fmt(pnD[d].kcal):'',
+        bg:on?th.accent:(th.chipBg||'#F5F3EF'),color:on?'#fff':'#8B887C',ring:(now&&!on)?('inset 0 0 0 1.5px '+th.accent):'none',pick:()=>this.setState({pnSel:d})}});
+    const pnKpi=[{l:'칼로리',v:pnCur.kcal==null?'-':this.fmt(pnCur.kcal)},{l:'탄수',v:pnG(pnCur.c)},{l:'단백질',v:pnG(pnCur.p)},{l:'지방',v:pnG(pnCur.f)}];
+    const pnRange=pnMD(PN&&PN.from||pnKeys[0])+' ~ '+pnMD(PN&&PN.to||pnKeys[pnKeys.length-1])+(PN&&PN.title?' · '+PN.title:'');
+    /* 💬 트레이너에게 물어볼 메모 — 작업대기(todo)에 who:'트레이너' 로 담는다. 트레이너가 불리면 node d.mjs 가 이것부터 읽는다. */
+    const mmItems=tdItems.filter(x=>x.who==='트레이너');
+    const mmAdd=()=>{const t=String(this.state.mmDraft||'').trim();if(!t)return;
+      this.setState({todo:{items:[...tdItems,{id:'t'+(this.seq++),t,who:'트레이너',ph:[],ts:this.TODAY+' '+this.nowHM()}],done:tdDone},mmDraft:''});
+      this.toast('트레이너에게 남겼어요 💬')};
+    const mmList=mmItems.map(x=>({t:x.t,del:()=>this.setState({todo:{items:tdItems.filter(y=>y.id!==x.id),done:tdDone}})}));
     const wkp=this.weekPlan();
     const wkColor=(wkp.need<=0||wkp.done)?'#17A673':th.accent;
     /* 🏆 달성 기록 — 홈 카드와 🗺 로드맵이 같은 목록(winList)을 본다. 새로 판정하지 마라. */
@@ -3276,6 +3333,8 @@ class Component extends DCLogic {
       woPick:e=>{const v=e.target.value;if(v&&v<=this.TODAY)this.setState({woDate:v,woOpen:null})},
       woToday:()=>this.setState({woDate:this.TODAY,woOpen:null}),
       famUrl:this.famUrl(),callTrainer:()=>this.callTrainer(),
+      pnShow:pnOn,pnRange,pnDays,pnKpi,pnMeals:(pnCur.meals||[]).map(m=>({t:m.t||'',f:m.f||''})),pnNoteShow:!!pnCur.note,pnNote:this.sents(pnCur.note||''),
+      mmOpen:!!S.mmOpen,mmToggle:()=>this.setState({mmOpen:!this.state.mmOpen}),mmDraft:S.mmDraft||'',mmOnDraft:e=>this.setState({mmDraft:e.target.value}),mmAdd,mmList,mmBadge:mmItems.length>0,mmCount:mmItems.length,
       tdRows,tdCount:tdItems.length+'건'+(tdDone.length?(' · 처리됨 '+tdDone.length):''),tdColor:tdItems.length?th.accent:'#B5B2A6',tdEmpty:!tdItems.length,
       tdDraft:S.tdDraft||'',tdOnDraft:e=>this.setState({tdDraft:e.target.value}),
       tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,tdPaste,tdPhDraft,tdHasPh:!!tdPh.length,
