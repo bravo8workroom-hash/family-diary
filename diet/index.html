@@ -350,6 +350,7 @@ html{color-scheme:light}
             <div style="background:{{chipBg}};border-radius:{{radM}};padding:8px;text-align:center"><div style="font-size:10.5px;color:#8B887C;font-weight:600">평균 단백질</div><div style="font-size:15px;font-weight:800;margin-top:2px;color:{{wkPColor}}">{{wkP}} <span style="font-size:10.5px;color:#8B887C">g</span></div></div>
           </div>
           <div style="font-size:10.5px;color:#8B887C;margin-top:8px;line-height:1.55"><span style="display:inline-block">「오늘 많이 먹었으니 내일 굶자」는 하지 않아요.</span>&#32;<span style="display:inline-block"><b style="color:#1F1E1A">하루가 아니라 주 평균</b>으로 봅니다.</span></div>
+          <sc-if value="{{sbShow}}" hint-placeholder-val="{{ false }}"><div style="font-size:10.5px;color:#5C594E;margin-top:7px;line-height:1.55;background:{{chipBg}};border-radius:{{radM}};padding:7px 9px"><sc-for list="{{sbS}}" as="sb1" hint-placeholder-count="2"><span style="display:inline-block">{{sb1.t}}</span>&#32;</sc-for></div></sc-if>
         </div>
 
 
@@ -631,7 +632,7 @@ html{color-scheme:light}
             </sc-for>
           </div>
           <div style="display:flex;gap:12px;margin-top:12px;font-size:11px;color:#8B887C;font-weight:600;flex-wrap:wrap">
-            <span>🍺 술 마신 날</span><span>💉 마운자로 (숫자 = 몇 펜째)</span><span>💪 운동시간</span><span>숫자 = 총 kcal</span>
+            <span>🍺 술 마신 날</span><span>💉 마운자로 (숫자 = 몇 펜째)</span><span>💪 운동시간</span><span>🏋 근력한 날 (뒤 1~3일 체중은 흐리게 = 운동 체중)</span><span>숫자 = 총 kcal</span>
           </div>
         </div>
         <div style="background:{{cardBg}};border:1px solid {{cardBorder}};border-radius:{{radL}};padding:16px 18px">
@@ -2395,6 +2396,21 @@ class Component extends DCLogic {
   /* 기록을 다 읽은 뒤 한 번 — 목표일 굴리기 + 트레이너 입력함 받기. 두 mount(폰·웹)가 함께 부른다. */
   afterLoad(){this.rollGoal();this.pullInbox()}
   wAt(ds){for(let i=0;i<28;i++){const w=(this.state.weights||{})[this.addDays(ds,-i)];if(w&&w.a!=null)return +w.a}return null}
+  /* ⚖ 운동체중 시작 — 근력(lifts) 뒤 1~3일의 저울은 글리코겐·물이 얹힌 「운동 체중」, 그 밖은 「민낯」. 새 상태 키 없음(lifts·weights 로만 센다). 예상 폭은 기본 +0.5~1.0, 표본 3개부터 사장님 중앙값. 시험: node 시험/운동체중-시험.mjs */
+  liftBefore(ds){const L=this.state.lifts||{};for(let i=0;i<=3;i++){const d=this.addDays(ds,-i);if((L[d]||[]).length)return {d,n:i,name:L[d].map(x=>x.name).join('·')}}return null}
+  nakedAt(ds){const W=this.state.weights||{};for(let i=0;i<28;i++){const d=this.addDays(ds,-i),w=W[d],l=this.liftBefore(d);if(w&&w.a!=null&&!(l&&l.n>0))return {d,w:+w.a}}return null}
+  scaleKind(ds){const W=this.state.weights||{},L=this.state.lifts||{},lb=this.liftBefore(ds),samp=[];
+    for(const ld of Object.keys(L)){if(!(L[ld]||[]).length||ld>=ds)continue;let after=null;for(let i=1;i<=2;i++){const w=W[this.addDays(ld,i)];if(w&&w.a!=null){after=+w.a;break}}const base=this.nakedAt(ld);if(after!=null&&base)samp.push(+(after-base.w).toFixed(1))}
+    samp.sort((a,b)=>a-b);const mine=samp.length>=3?samp[Math.floor(samp.length/2)]:null;const naked=this.nakedAt(ds);
+    return {kind:lb&&lb.n>0?'운동':'민낯',lift:lb,naked,prev:naked?this.nakedAt(this.addDays(naked.d,-1)):null,today:(W[ds]&&W[ds].a!=null)?+W[ds].a:null,n:samp.length,
+      band:mine!=null?{lbl:'내 평균',txt:(mine>=0?'+':'')+mine.toFixed(1)}:{lbl:'예상',txt:'+0.5~1.0'}}}
+  sbText(ds){const L=this.state.lifts||{};if(!Object.keys(L).some(d=>(L[d]||[]).length))return '';
+    const k=this.scaleKind(ds),md=d=>(+d.slice(5,7))+'/'+(+d.slice(8,10)),nk=k.naked?' 민낯은 '+k.naked.w.toFixed(1)+' ('+md(k.naked.d)+').':'';
+    if(k.lift&&k.lift.n>0)return k.today!=null?'⚖ 오늘 '+k.today.toFixed(1)+' = 운동 체중 ('+k.lift.name+' +'+k.lift.n+'일, '+k.band.lbl+' '+k.band.txt+').'+nk:'⚖ 오늘은 운동 체중 날이에요 ('+k.lift.name+' +'+k.lift.n+'일, 저울 '+k.band.txt+' 떠요).'+nk;
+    if(k.lift)return '⚖ 오늘 근력 — 내일·모레 저울은 '+k.band.txt+' 떠요.'+nk;
+    if(k.today!=null)return '⚖ 오늘 '+k.today.toFixed(1)+' = 민낯.'+(k.prev?' 지난 민낯('+md(k.prev.d)+')보다 '+((k.today-k.prev.w)>=0?'+':'')+(k.today-k.prev.w).toFixed(1)+'.':'');
+    return k.naked?'⚖ 마지막 민낯 '+k.naked.w.toFixed(1)+' ('+md(k.naked.d)+').':''}
+  /* ⚖ 운동체중 끝 */
   /* 이번 주에 실제로 잰 첫 기록. 옛 기록으로 거슬러 올라가지 않는다 — 낡은 숫자로 목표를 잡으면 허수 「달성」이 나온다. */
   wIn(a,b){for(let d=a;d<=b;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null)return +w.a}return null}
   weekPlan(){const R=this.RULE(),g=this.state.set,ws=this.weekStart(this.TODAY),we=this.addDays(ws,6);
@@ -2888,9 +2904,9 @@ class Component extends DCLogic {
        고르기 모드(shotPick)면 칸을 눌러도 기록 탭으로 안 가고 그날 주사를 켜고 끈다. */
     const shotAll=this.shotList(),shotMap={};shotAll.forEach(x=>shotMap[x.d]=x.n);
     const shotPickOn=!!S.shotPick;
-    for(let dd=1;dd<=mdays;dd++){const ds=cy+'-'+pad2(cmn)+'-'+pad2(dd);const sm=this.sums(ds);const al=this.alcoOf(ds);const fut=ds>this.TODAY;const isT=ds===this.TODAY;const shN=shotMap[ds]||0;
+    for(let dd=1;dd<=mdays;dd++){const ds=cy+'-'+pad2(cmn)+'-'+pad2(dd);const sm=this.sums(ds);const al=this.alcoOf(ds);const fut=ds>this.TODAY;const isT=ds===this.TODAY;const shN=shotMap[ds]||0;const sk=this.liftBefore(ds);
       if(sm.kcal>0){mKcal+=sm.kcal;mLogged++;if(al.length){sNo++;mAlco+=al.reduce((a,x)=>a+(+x.kcal||0),0)}else sOk++}
-      calCells.push({num:dd,bg:isT?th.accent:th.chipBg,border:shotPickOn&&shN?'#7C5CE6':isT?th.accent:'transparent',numColor:isT?'#fff':fut?'#D8D5CB':'#5C594E',kcal:sm.kcal>0?fmt(sm.kcal):'',kcalColor:isT?'#fff':th.accent,w:(v=>v!=null&&v!==''?(+v).toFixed(1)+'kg':'')((S.weights[ds]||{}).a),wColor:isT?'#fff':'#5C594E',mark:(al.length?'🍺':'')+(shN?('💉'+shN):''),wo:woMin(ds)>0?'💪'+fmtT(woMin(ds)):'',woColor:isT?'#fff':th.accent,cursor:fut?'default':'pointer',opacity:fut?.55:1,go:fut?null:shotPickOn?(()=>this.shotToggle(ds)):(()=>this.setState({selDate:ds,tab:'log'}))})}
+      calCells.push({num:dd,bg:isT?th.accent:th.chipBg,border:shotPickOn&&shN?'#7C5CE6':isT?th.accent:'transparent',numColor:isT?'#fff':fut?'#D8D5CB':'#5C594E',kcal:sm.kcal>0?fmt(sm.kcal):'',kcalColor:isT?'#fff':th.accent,w:(v=>v!=null&&v!==''?(+v).toFixed(1)+'kg':'')((S.weights[ds]||{}).a),wColor:isT?'#fff':(sk&&sk.n>0)?'#B5B2A6':'#5C594E',mark:(al.length?'🍺':'')+(shN?('💉'+shN):'')+((sk&&sk.n===0)?'🏋':''),wo:woMin(ds)>0?'💪'+fmtT(woMin(ds)):'',woColor:isT?'#fff':th.accent,cursor:fut?'default':'pointer',opacity:fut?.55:1,go:fut?null:shotPickOn?(()=>this.shotToggle(ds)):(()=>this.setState({selDate:ds,tab:'log'}))})}
     /* 💉 마운자로 카드 — 펜 번호 = 주차, 그날 체중·전주 대비·1펜부터 누계. 재료는 shotList() 하나다. */
     const shotLast=shotAll.length?shotAll[shotAll.length-1]:null;
     const shotBase=shotAll.find(x=>x.base)||null;
@@ -3182,6 +3198,8 @@ class Component extends DCLogic {
       wkDays:wk.days,wkKcal:fmt(wk.kcal),wkP:fmt(wk.p),
       wkKcalColor:wk.days&&wk.kcal<R52.kcalMin?'#E5484D':'#1F1E1A',
       wkPColor:wk.days&&wk.p<R52.pG?'#E5484D':'#1F1E1A',
+      /* ⚖ 운동 체중 / 민낯 — 글은 sbText() 한 곳에서 만든다 */
+      sbShow:!!this.sbText(this.TODAY),sbS:this.sents(this.sbText(this.TODAY)),
       /* 식사창 · 탄수 얹기 */
       winLabel:!timedSel.length?('식사창 '+R52.winS+'-'+R52.winE):outSel.length?(outSel.length+'끼 창 밖'):'식사창 안',
       winBg:!timedSel.length?th.chipBg:outSel.length?'#FDECEC':'#DDF2E9',
