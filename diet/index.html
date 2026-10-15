@@ -2296,7 +2296,7 @@ class Component extends DCLogic {
      ⛔ 지금 체중이 그 목표 위로 올라갔으면 달성이 아니다 (2026-09-12 사장님 지시 「다시 올라오면 달성 못한걸로해」).
         기록은 지우지 않는다 — 다시 그 아래로 내려가면 그때 같은 줄이 되살아난다. */
   winList(all){const W=this.state.wins||{},at={},out=[];
-    const cur=this.wAt(this.TODAY),wk=all?null:this.weekPlan();
+    const cur=this.nakedNow(),wk=all?null:this.weekPlan();   /* ⚖ 달성 판정도 민낯으로 (2026-10-15) */
     for(const k of Object.keys(W)){const x=W[k];if(!x||(x.tier!==1&&x.tier!==2))continue;
       if(cur==null||+cur>+x.goal+0.001)continue;
       if(wk&&(x.d<wk.ws||x.d>wk.we))continue;
@@ -2416,14 +2416,19 @@ class Component extends DCLogic {
     if(k.today!=null)return '⚖ 오늘 '+k.today.toFixed(1)+' = 민낯.'+(k.prev?' 지난 민낯('+md(k.prev.d)+')보다 '+((k.today-k.prev.w)>=0?'+':'')+(k.today-k.prev.w).toFixed(1)+'.':'');
     return k.naked?'⚖ 마지막 민낯 '+k.naked.w.toFixed(1)+' ('+md(k.naked.d)+').':''}
   kindTag(ds){const L=this.state.lifts||{};if(!ds||!Object.keys(L).some(d=>(L[d]||[]).length))return {kindShow:false,kind:'',kindBg:'',kindColor:''};const lb=this.liftBefore(ds);return lb&&lb.n>0?{kindShow:true,kind:'운동 체중',kindBg:'#EDE7FF',kindColor:'#7C5CE6'}:{kindShow:true,kind:'민낯',kindBg:'#E9E7E1',kindColor:'#5C594E'}}
-  nowSub(){const W=this.state.weights||{};let d=null;for(let i=0;i<28;i++){const x=this.addDays(this.TODAY,-i);if(W[x]&&W[x].a!=null){d=x;break}}const k=this.kindTag(d);if(!k.kindShow)return {subShow:false,sub:'',subColor:''};const nk=this.nakedAt(this.TODAY);return {subShow:true,sub:k.kind==='운동 체중'?('운동 체중 · 민낯 '+(nk?nk.w.toFixed(1):'—')):'민낯',subColor:k.kindColor}}
+  /* 목표·달성 판정용 「지금 체중」 = 민낯(근력 뒤 1~3일 운동 체중은 건너뛴 마지막 체중). 사장님 2026-10-15 「민낯 체중으로 목표 도달하면 성공했다 하자」 */
+  nakedNow(){const n=this.nakedAt(this.TODAY);return n?n.w:null}
+  /* 「지금」 칸 큰 숫자는 민낯(weekPlan().cur)이고, 저울 그대로는 그 밑 작은 글로 */
+  nowSub(){const W=this.state.weights||{};let d=null;for(let i=0;i<28;i++){const x=this.addDays(this.TODAY,-i);if(W[x]&&W[x].a!=null){d=x;break}}const k=this.kindTag(d);if(!k.kindShow)return {subShow:false,sub:'',subColor:''};return {subShow:true,sub:k.kind==='운동 체중'?('저울 '+(+W[d].a).toFixed(1)+' · 운동 체중'):'민낯',subColor:k.kindColor}}
   /* ⚖ 운동체중 끝 */
   /* 이번 주에 실제로 잰 첫 기록. 옛 기록으로 거슬러 올라가지 않는다 — 낡은 숫자로 목표를 잡으면 허수 「달성」이 나온다. */
   wIn(a,b){for(let d=a;d<=b;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null)return +w.a}return null}
   weekPlan(){const R=this.RULE(),g=this.state.set,ws=this.weekStart(this.TODAY),we=this.addDays(ws,6);
     /* 페이스 0 은 「이번 주는 안 줄인다」는 뜻이라 그대로 쓴다 (근력·유지 모드). 빈 값일 때만 0.5 로 되돌린다. */
     const pace=(R.weekPace!=null&&R.weekPace!==''&&!isNaN(+R.weekPace))?Math.max(0,+R.weekPace):0.5;
-    const cur=this.wAt(this.TODAY)!=null?this.wAt(this.TODAY):+g.startW;
+    const now=this.wAt(this.TODAY)!=null?this.wAt(this.TODAY):+g.startW;
+    /* ⚖ 목표·달성 판정은 민낯 체중으로 — 근력 뒤 1~3일 물이 얹힌 날은 그 전 민낯을 쓴다 (사장님 2026-10-15 「민낯 체중으로 목표 도달하면 성공했다 하자」). now = 저울 그대로(민낯이 없을 때 대신). */
+    const nk=this.nakedNow(),cur=nk!=null?nk:now;
     const swRaw=this.wIn(ws,this.TODAY),sw=swRaw!=null?swRaw:cur;
     const daysLeft=Math.max(0,Math.round((new Date(we+'T00:00:00')-new Date(this.TODAY+'T00:00:00'))/864e5)+1);
     /* 남은 날수만큼만 요구한다. 주 페이스(1kg)를 남은 하루에 통째로 물리면 그건 굶으라는 말이고, 이 앱이 막으려는 바로 그 짓이다. */
@@ -2441,7 +2446,7 @@ class Component extends DCLogic {
     const weeksText=weeksLeft==null?'—':('약 '+weeksLeft+'주');
     /* 2차 목표 (2026-09-11 사장님 지시): 이번 주 목표를 이미 이뤘으면, 이룬 날부터 마감까지 남은 날수만큼 같은 페이스로 하나 더 건다. 1차 목표(goal)는 안 건드린다 — 2차를 못 이뤄도 1차는 해낸 것이다. */
     const W1=(this.state.wins||{})[ws+'|1']||{};let ach=W1.d||null,achW=W1.w!=null?+W1.w:null;
-    if(!ach)for(let d=ws;d<=we&&d<=this.TODAY;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null&&+w.a<=goal+0.001){ach=d;achW=+w.a;break}}
+    if(!ach)for(let d=ws;d<=we&&d<=this.TODAY;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null&&+w.a<=goal+0.001&&!((l=>l&&l.n>0)(this.liftBefore(d)))){ach=d;achW=+w.a;break}}   /* 운동 체중 날은 달성으로 안 센다 (2026-10-15) */
     const done=cur<=goal+0.001;let bonus=null,bonusNeed=null;
     /* 페이스 0(유지·근력 주간)에는 2차를 안 건다 — 「이번 주는 안 줄인다」는 모드와 어긋난다. */
     /* 기준은 목표 체중이 아니라 **달성한 그날 실제로 잰 체중**이다 (2026-09-11 사장님 정정 「목표체중에서 200g 빠지는 게 아니라 마지막 달성한 체중에서 200g」).
