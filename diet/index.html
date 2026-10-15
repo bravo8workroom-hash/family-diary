@@ -268,6 +268,7 @@ html{color-scheme:light}
               <div style="background:{{chipBg}};border-radius:{{radS}};padding:9px 4px;text-align:center">
                 <div style="font-size:10.5px;color:#8B887C;font-weight:600">{{k.label}}</div>
                 <div style="font-size:14px;font-weight:800;margin-top:3px;color:{{k.color}}">{{k.val}}</div>
+                <sc-if value="{{k.subShow}}" hint-placeholder-val="{{ false }}"><div style="font-size:9.5px;font-weight:700;margin-top:3px;color:{{k.subColor}}">{{k.sub}}</div></sc-if>
               </div>
             </sc-for>
           </div>
@@ -302,6 +303,7 @@ html{color-scheme:light}
                 <sc-if value="{{r.wShow}}" hint-placeholder-val="{{ true }}">
                   <div onClick="{{r.wTap}}" style="font-size:16px;font-weight:800;margin-top:6px;cursor:pointer;color:{{r.wColor}};text-decoration:underline dotted #D8D5CB;text-underline-offset:3px">{{r.w}}<span style="font-size:10px;color:#B5B2A6;font-weight:600"> kg</span></div>
                 </sc-if>
+                <sc-if value="{{r.kindShow}}" hint-placeholder-val="{{ false }}"><div style="display:inline-block;margin-top:5px;font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:999px;background:{{r.kindBg}};color:{{r.kindColor}}">{{r.kind}}</div></sc-if>
                 <div style="font-size:10.5px;color:#8B887C;font-weight:600;margin-top:6px">{{r.kcal}}</div>
                 <div style="font-size:10.5px;color:{{r.pColor}};font-weight:700;margin-top:2px">{{r.p}}</div>
               </div>
@@ -656,16 +658,16 @@ html{color-scheme:light}
               <div style="display:flex;align-items:center;gap:8px;padding:0 8px 6px">
                 <div style="font-size:10.5px;font-weight:700;color:#8B887C;min-width:40px">펜</div>
                 <div style="flex:1;min-width:0;font-size:10.5px;font-weight:700;color:#8B887C">맞은 날</div>
-                <div style="font-size:10.5px;font-weight:700;color:#8B887C;min-width:50px;text-align:right">체중</div>
-                <div style="font-size:10.5px;font-weight:700;color:#8B887C;min-width:46px;text-align:right">전주 대비</div>
+                <div style="font-size:10.5px;font-weight:700;color:#8B887C;min-width:50px;text-align:right">끝 체중</div>
+                <div style="font-size:10.5px;font-weight:700;color:#8B887C;min-width:46px;text-align:right">이 펜에서</div>
                 <div style="font-size:10.5px;font-weight:700;color:#8B887C;min-width:52px;text-align:right">누계</div>
               </div>
               <div style="display:flex;flex-direction:column;gap:4px">
                 <sc-for list="{{shotRows}}" as="s" hint-placeholder-count="4">
                   <div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:9px;background:{{s.bg}}">
                     <div style="font-size:11.5px;font-weight:800;min-width:40px;color:#7C5CE6">{{s.n}}</div>
-                    <div style="flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#5C594E">{{s.d}}</div>
-                    <div style="font-size:12px;font-weight:800;min-width:50px;text-align:right;font-variant-numeric:tabular-nums">{{s.w}}</div>
+                    <div style="flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#5C594E">{{s.d}}<div style="font-size:9.5px;color:#B5B2A6;font-weight:600">{{s.d2}}</div></div>
+                    <div style="font-size:12px;font-weight:800;min-width:50px;text-align:right;font-variant-numeric:tabular-nums">{{s.w}}<div style="font-size:9.5px;color:#7C5CE6;font-weight:700">{{s.w2}}</div></div>
                     <div style="font-size:11.5px;font-weight:800;min-width:46px;text-align:right;color:{{s.diffColor}};font-variant-numeric:tabular-nums">{{s.diff}}</div>
                     <div style="font-size:11.5px;font-weight:800;min-width:52px;text-align:right;color:{{s.totalColor}};font-variant-numeric:tabular-nums">{{s.total}}</div>
                   </div>
@@ -1826,12 +1828,15 @@ class Component extends DCLogic {
        「기준」으로 찍혔다 — 사장님이 보고 싶어 하신 숫자가 하나도 안 나왔다.
        ⛔ 「기준」은 base 인 그 줄에만 쓴다. 값을 못 잰 줄은 「—」다. */
   shotList(){const M=this.state.shots||{};const ks=Object.keys(M).sort();
-    const rows=ks.map((d,i)=>({n:i+1,d,w:this.wAt(d),t:typeof M[d]==='string'?M[d]:''}));
-    const base=rows.find(r=>r.w!=null)||null;
-    return rows.map((r,i)=>{const pw=i?rows[i-1].w:null;
-      return {...r,base:!!(base&&base.d===r.d),
-        diff:(r.w!=null&&pw!=null)?+(r.w-pw).toFixed(1):null,
-        total:(base&&r.w!=null&&base.d!==r.d)?+(r.w-base.w).toFixed(1):null}})}
+    const rows=ks.map((d,i)=>({n:i+1,d,w0:this.wAt(d),t:typeof M[d]==='string'?M[d]:''}));
+    const base=rows.find(r=>r.w0!=null)||null;
+    /* 각 줄은 「그 펜의 결과」다 — w0 = 맞던 날 아침(맞기 전) 체중, w = 다음 펜 맞던 날 아침 체중(= 이 펜의 끝), 진행 중인 마지막 펜은 지금 체중(live).
+       diff = 이 펜에서 변한 양(w − w0) · total = 기준 펜 맞던 날 체중 대비(w − base.w0). 기준 앞 줄은 잴 수 없어 null.
+       (사장님 2026-10-15 「8펜 맞기 시작해서 9펜 맞기 전까지의 체중이 기록되어야지 — 그 펜의 체중이 얼마나 뺐는지 알 수가 없잖아」) */
+    return rows.map((r,i)=>{const live=i===rows.length-1;const w=live?this.wAt(this.TODAY):this.wAt(rows[i+1].d);
+      return {...r,w,live,base:!!(base&&base.d===r.d),
+        diff:(w!=null&&r.w0!=null)?+(w-r.w0).toFixed(1):null,
+        total:(base&&w!=null&&r.d>=base.d)?+(w-base.w0).toFixed(1):null}})}
   shotToggle(ds){const M={...(this.state.shots||{})};
     if(M[ds]){delete M[ds];this.toast('💉 '+this.lbl(ds)+' 주사 기록을 뺐어요')}
     else{M[ds]=true;this.toast('💉 '+this.lbl(ds)+' 주사 맞은 날로 적었어요')}
@@ -2164,7 +2169,7 @@ class Component extends DCLogic {
         n:list.length,late:list.some(x=>x.time&&this.outTime(x.time))}};
     const t=day(0),y=day(1),b=day(2);
     const rows=[b,y,t].map((x,i)=>({label:['그저께','어제','오늘'][i],date:this.lbl(x.ds),ds:x.ds,wRaw:x.w!=null?x.w:'',
-      w:x.w!=null?x.w.toFixed(1):'—',kcal:x.n?(fmt(x.kcal)+' kcal'):'기록 없음',p:x.n?('단백질 '+x.p+'g'):'—',today:i===2}));
+      w:x.w!=null?x.w.toFixed(1):'—',kcal:x.n?(fmt(x.kcal)+' kcal'):'기록 없음',p:x.n?('단백질 '+x.p+'g'):'—',today:i===2,...this.kindTag(x.w!=null?x.ds:null)}));
     const L=[],add=(icon,txt,color)=>L.push({icon,t:txt,color:color||'#1F1E1A'});
     const hw=this.healthWatch(3);
     if(hw.alarm)add('🚨','최근 3일 '+hw.text+' — 지금은 클린보다 「먹는 것」이 먼저예요. 단백질과 지방부터 채우세요.','#E5484D');
@@ -2410,6 +2415,8 @@ class Component extends DCLogic {
     if(k.lift)return '⚖ 오늘 근력 — 내일·모레 저울은 '+k.band.txt+' 떠요.'+nk;
     if(k.today!=null)return '⚖ 오늘 '+k.today.toFixed(1)+' = 민낯.'+(k.prev?' 지난 민낯('+md(k.prev.d)+')보다 '+((k.today-k.prev.w)>=0?'+':'')+(k.today-k.prev.w).toFixed(1)+'.':'');
     return k.naked?'⚖ 마지막 민낯 '+k.naked.w.toFixed(1)+' ('+md(k.naked.d)+').':''}
+  kindTag(ds){const L=this.state.lifts||{};if(!ds||!Object.keys(L).some(d=>(L[d]||[]).length))return {kindShow:false,kind:'',kindBg:'',kindColor:''};const lb=this.liftBefore(ds);return lb&&lb.n>0?{kindShow:true,kind:'운동 체중',kindBg:'#EDE7FF',kindColor:'#7C5CE6'}:{kindShow:true,kind:'민낯',kindBg:'#E9E7E1',kindColor:'#5C594E'}}
+  nowSub(){const W=this.state.weights||{};let d=null;for(let i=0;i<28;i++){const x=this.addDays(this.TODAY,-i);if(W[x]&&W[x].a!=null){d=x;break}}const k=this.kindTag(d);if(!k.kindShow)return {subShow:false,sub:'',subColor:''};const nk=this.nakedAt(this.TODAY);return {subShow:true,sub:k.kind==='운동 체중'?('운동 체중 · 민낯 '+(nk?nk.w.toFixed(1):'—')):'민낯',subColor:k.kindColor}}
   /* ⚖ 운동체중 끝 */
   /* 이번 주에 실제로 잰 첫 기록. 옛 기록으로 거슬러 올라가지 않는다 — 낡은 숫자로 목표를 잡으면 허수 「달성」이 나온다. */
   wIn(a,b){for(let d=a;d<=b;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null)return +w.a}return null}
@@ -2799,7 +2806,8 @@ class Component extends DCLogic {
         tierBg:x.tier===2?'#EAF7F1':th.chipBg,tierColor:x.tier===2?'#17A673':'#8B887C',
         wTxt:'그날 '+fmt(x.w)+'kg',whenTxt:gap>0?('마감 '+gap+'일 전'):(gap===0?'마감 당일':'마감 뒤')}});
     const winTop=winRows[0],winRest=winRows.slice(1,5);
-    const wkStats=[{label:'주 시작('+this.DOW_KO[this.weekDow()]+')',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:wkp.bonus!=null?'2차까지':'남은 감량',val:wkp.bonus!=null?fmt(Math.max(0,wkp.bonusNeed)):(wkp.need>0?fmt(wkp.need):'달성 ✓'),color:wkp.bonus!=null?th.accent:(wkp.need>0?'#E5484D':'#17A673')}];
+    const wkStats0=[{label:'주 시작('+this.DOW_KO[this.weekDow()]+')',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:wkp.bonus!=null?'2차까지':'남은 감량',val:wkp.bonus!=null?fmt(Math.max(0,wkp.bonusNeed)):(wkp.need>0?fmt(wkp.need):'달성 ✓'),color:wkp.bonus!=null?th.accent:(wkp.need>0?'#E5484D':'#17A673')}];
+    const wkStats=wkStats0.map(k=>({subShow:false,sub:'',subColor:'',...k,...(k.label==='지금'?this.nowSub():{})}));   /* ⚖ 「지금」 밑에 운동 체중/민낯 한 줄 */
     const noDow=ds=>this.lbl(ds).replace(/\s*\(.\)$/,'');
     const a3=this.advice3();
     const ewA=S.editW;
@@ -2907,19 +2915,19 @@ class Component extends DCLogic {
     for(let dd=1;dd<=mdays;dd++){const ds=cy+'-'+pad2(cmn)+'-'+pad2(dd);const sm=this.sums(ds);const al=this.alcoOf(ds);const fut=ds>this.TODAY;const isT=ds===this.TODAY;const shN=shotMap[ds]||0;const sk=this.liftBefore(ds);
       if(sm.kcal>0){mKcal+=sm.kcal;mLogged++;if(al.length){sNo++;mAlco+=al.reduce((a,x)=>a+(+x.kcal||0),0)}else sOk++}
       calCells.push({num:dd,bg:isT?th.accent:th.chipBg,border:shotPickOn&&shN?'#7C5CE6':isT?th.accent:'transparent',numColor:isT?'#fff':fut?'#D8D5CB':'#5C594E',kcal:sm.kcal>0?fmt(sm.kcal):'',kcalColor:isT?'#fff':th.accent,w:(v=>v!=null&&v!==''?(+v).toFixed(1)+'kg':'')((S.weights[ds]||{}).a),wColor:isT?'#fff':(sk&&sk.n>0)?'#B5B2A6':'#5C594E',mark:(al.length?'🍺':'')+(shN?('💉'+shN):'')+((sk&&sk.n===0)?'🏋':''),wo:woMin(ds)>0?'💪'+fmtT(woMin(ds)):'',woColor:isT?'#fff':th.accent,cursor:fut?'default':'pointer',opacity:fut?.55:1,go:fut?null:shotPickOn?(()=>this.shotToggle(ds)):(()=>this.setState({selDate:ds,tab:'log'}))})}
-    /* 💉 마운자로 카드 — 펜 번호 = 주차, 그날 체중·전주 대비·1펜부터 누계. 재료는 shotList() 하나다. */
+    /* 💉 마운자로 카드 — 펜 번호 = 주차, 각 줄은 그 펜의 결과(끝 체중·이 펜에서 변한 양·기준부터 누계). 재료는 shotList() 하나다. */
     const shotLast=shotAll.length?shotAll[shotAll.length-1]:null;
     const shotBase=shotAll.find(x=>x.base)||null;
-    const wNow=this.wAt(this.TODAY),shotW0=shotBase?shotBase.w:null;
+    const wNow=this.wAt(this.TODAY),shotW0=shotBase?shotBase.w0:null;
     const shotDrop=(wNow!=null&&shotW0!=null)?+(shotW0-wNow).toFixed(1):null;
     const kg1=v=>(v<0?'+':'-')+Math.abs(v).toFixed(1)+'kg';
     const shotRows=shotAll.slice().reverse().map(x=>({
       n:x.n+'펜',week:x.n+'주차',
       d:this.lbl(x.d)+(x.t?(' '+x.t):''),
-      w:x.w!=null?x.w.toFixed(1)+'kg':'—',
+      w:x.w!=null?x.w.toFixed(1)+'kg':'—',d2:x.w0!=null?('맞던 날 '+x.w0.toFixed(1)+'kg'):'',w2:x.live?'지금':'',
       diff:x.diff!=null?((x.diff<=0?'▼ ':'▲ ')+Math.abs(x.diff).toFixed(1)):'—',
       diffColor:x.diff==null?'#B5B2A6':x.diff<=0?'#17A673':'#E5484D',
-      total:x.base?'0.0kg':(x.total!=null?kg1(-x.total):'—'),   /* 기준 줄도 「기준」이 아니라 kg 으로 적는다 (2026-09-15 사장님 지시 「기준이 뭔데 킬로그램으로 적어야지」) */   /* total 은 「변화량」(빠지면 음수)이고 kg1 은 「빠진 양」을 받는다 — 부호를 뒤집어 넘긴다 */
+      total:x.total!=null?kg1(-x.total):'—',   /* 기준 줄도 제 펜의 결과를 적는다 (2026-10-15) */   /* 기준 줄도 「기준」이 아니라 kg 으로 적는다 (2026-09-15 사장님 지시 「기준이 뭔데 킬로그램으로 적어야지」) */   /* total 은 「변화량」(빠지면 음수)이고 kg1 은 「빠진 양」을 받는다 — 부호를 뒤집어 넘긴다 */
       totalColor:x.total==null?'#8B887C':x.total<=0?'#17A673':'#E5484D',
       bg:x.d===this.TODAY?'#F1EDFF':th.chipBg}));
     const shotHead=shotLast?(shotLast.n+'펜째 · '+shotLast.n+'주차'):'아직 기록 없음';
