@@ -136,10 +136,11 @@ html{color-scheme:light}
           <div style="background:{{cardBg}};border:1px solid #BFE8D6;border-radius:{{radL}};padding:16px 18px">
             <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
               <div style="font-size:13px;font-weight:800;color:#17A673">🏆 달성 기록</div>
-              <div style="font-size:11.5px;font-weight:700;color:#8B887C">{{winN}}번째</div>
+              <div style="font-size:11.5px;font-weight:700;color:#8B887C">{{winNTxt}}</div>
             </div>
             <div style="font-size:15.5px;font-weight:800;color:#17A673;margin-top:9px;line-height:1.45">{{winTopLine}}</div>
             <div style="font-size:11.5px;color:#8B887C;margin-top:3px;line-height:1.55">{{winTopSub}}</div>
+            <sc-if value="{{lwWinLine}}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font-size:12px;font-weight:800;color:#17A673">{{lwWinTxt}}</div></sc-if>
             <sc-if value="{{winHasRest}}" hint-placeholder-val="{{ false }}">
               <div style="margin-top:10px;padding-top:9px;border-top:1px solid #F4F2ED">
                 <sc-for list="{{winRest}}" as="wv" hint-placeholder-count="2">
@@ -272,6 +273,7 @@ html{color-scheme:light}
               </div>
             </sc-for>
           </div>
+          <div style="display:flex;align-items:center;gap:9px;margin-top:10px;padding:8px 10px;border-radius:{{radM}};background:{{lwBg}}"><div style="flex:none;font-size:12px;font-weight:800;color:{{lwColor}};letter-spacing:1px">💪 {{lwStamps}}</div><div style="flex:1;min-width:0;font-size:11px;color:#5C594E;line-height:1.5"><sc-for list="{{lwTextS}}" as="lw1" hint-placeholder-count="2"><span style="display:inline-block">{{lw1.t}}</span>&#32;</sc-for></div></div>
           <div style="font-size:11px;color:#B5B2A6;margin-top:10px;line-height:1.55;text-align:center"><sc-for list="{{wkNoteS}}" as="wn" hint-placeholder-count="2"><span style="display:inline-block">{{wn.t}}</span>&#32;</sc-for></div>
           <sc-if value="{{phaseOn}}" hint-placeholder-val="{{ true }}">
             <div style="margin-top:10px;padding-top:10px;border-top:1px solid {{cardBorder}};line-height:1.6">
@@ -2420,6 +2422,11 @@ class Component extends DCLogic {
   nakedNow(){const n=this.nakedAt(this.TODAY);return n?n.w:null}
   /* 「지금」 칸 큰 숫자는 민낯(weekPlan().cur)이고, 저울 그대로는 그 밑 작은 글로 */
   nowSub(){const W=this.state.weights||{};let d=null;for(let i=0;i<28;i++){const x=this.addDays(this.TODAY,-i);if(W[x]&&W[x].a!=null){d=x;break}}const k=this.kindTag(d);if(!k.kindShow)return {subShow:false,sub:'',subColor:''};return {subShow:true,sub:k.kind==='운동 체중'?('저울 '+(+W[d].a).toFixed(1)+' · 운동 체중'):'민낯',subColor:k.kindColor}}
+  /* 💪 근력 도장 — 주 2회(트레이닝 스킬 §6 유지 처방)면 저울과 상관없이 「근육 지킴」, 3회는 보너스 ★. 주는 목표와 같은 주(weekStart). 사장님 2026-10-15 「운동을 한 주에 2번, 3번 했을 때 목표 도달을 못해도 상을 받는 기분이 들게」 */
+  liftDays(ws,we){const L=this.state.lifts||{};return Object.keys(L).filter(d=>d>=ws&&d<=we&&(L[d]||[]).length).sort()}
+  liftWeek(ds){const ws=this.weekStart(ds||this.TODAY),we=this.addDays(ws,6),days=this.liftDays(ws,we),n=days.length;return {ws,we,days,n,done:n>=2,bonus:n>=3}}
+  liftStreak(){let k=0,w=this.liftWeek(this.TODAY);if(!w.done)w=this.liftWeek(this.addDays(w.ws,-1));for(let i=0;i<52&&w.done;i++){k++;w=this.liftWeek(this.addDays(w.ws,-1))}return k}
+  liftText(){const w=this.liftWeek(),s=this.liftStreak(),st=s>=2?(' '+s+'주 연속!'):'';if(w.n>=3)return '이번 주 '+w.n+'회 — 근육 지킴 ✓ 보너스 ★. 저울이 뭐라든 이번 주 근육은 확실히 지켰어요.'+st;if(w.n===2)return '이번 주 2회 — 근육 지킴 ✓. 저울이 뭐라든 이번 주 근육은 지켰어요.'+st;if(w.n===1)return '이번 주 1회. 한 번만 더 하면 근육 지킴 도장이에요.';return '이번 주 0회. 2회면 근육 지킴 도장이에요.'}
   /* ⚖ 운동체중 끝 */
   /* 이번 주에 실제로 잰 첫 기록. 옛 기록으로 거슬러 올라가지 않는다 — 낡은 숫자로 목표를 잡으면 허수 「달성」이 나온다. */
   wIn(a,b){for(let d=a;d<=b;d=this.addDays(d,1)){const w=(this.state.weights||{})[d];if(w&&w.a!=null)return +w.a}return null}
@@ -2810,6 +2817,7 @@ class Component extends DCLogic {
       return {dTxt:this.lbl(x.d),goalTxt:fmt(x.goal)+'kg',tierTxt:x.tier===2?'2차':'1차',
         tierBg:x.tier===2?'#EAF7F1':th.chipBg,tierColor:x.tier===2?'#17A673':'#8B887C',
         wTxt:'그날 '+fmt(x.w)+'kg',whenTxt:gap>0?('마감 '+gap+'일 전'):(gap===0?'마감 당일':'마감 뒤')}});
+    const lw=this.liftWeek(),lwS=this.liftStreak();   /* 💪 근력 도장 */
     const winTop=winRows[0],winRest=winRows.slice(1,5);
     const wkStats0=[{label:'주 시작('+this.DOW_KO[this.weekDow()]+')',val:fmt(wkp.sw),color:'#1F1E1A'},{label:'지금',val:fmt(wkp.cur),color:th.accent},{label:wkp.bonus!=null?'2차까지':'남은 감량',val:wkp.bonus!=null?fmt(Math.max(0,wkp.bonusNeed)):(wkp.need>0?fmt(wkp.need):'달성 ✓'),color:wkp.bonus!=null?th.accent:(wkp.need>0?'#E5484D':'#17A673')}];
     const wkStats=wkStats0.map(k=>({subShow:false,sub:'',subColor:'',...k,...(k.label==='지금'?this.nowSub():{})}));   /* ⚖ 「지금」 밑에 운동 체중/민낯 한 줄 */
@@ -3055,8 +3063,12 @@ class Component extends DCLogic {
       const row={id:m.id||'l'+(this.seq++),name:nm,sets:+m.sets||0,reps:+m.reps||0,kg:+m.kg||0};
       const L={...(S.lifts||{})};const day=(L[S.selDate]||[]).slice();
       const at=day.findIndex(x=>x.id===row.id);if(at>=0)day[at]=row;else day.push(row);
-      L[S.selDate]=day;this.setState({lifts:L,liftM:null});
-      this.toast(this.say(nm+' 기록했어요 💪',nm+' 기록했사와요 💪'))};
+      const lwB=this.liftWeek(S.selDate).n;L[S.selDate]=day;this.setState({lifts:L,liftM:null});
+      /* 💪 이번 주 근력이 2일째·3일째가 되는 순간 도장 토스트 — 같은 날 두 번째 종목은 날수가 안 늘어 평소 말로 */
+      const lwWs=this.weekStart(S.selDate),lwWe=this.addDays(lwWs,6),lwA=Object.keys(L).filter(d=>d>=lwWs&&d<=lwWe&&(L[d]||[]).length).length;
+      if(lwA===2&&lwB<2)this.toast('💪 이번 주 근력 2회 — 근육 지킴 도장! 저울이 뭐라든 근육은 지켰어요');
+      else if(lwA===3&&lwB<3)this.toast('💪 이번 주 3회 — 보너스 ★ 근육은 확실히 지켰어요');
+      else this.toast(this.say(nm+' 기록했어요 💪',nm+' 기록했사와요 💪'))};
     const jKeys=Object.keys(S.journal||{}).filter(k=>{const v=S.journal[k]||{};return v.decide||v.plan||v.memo}).sort().reverse().slice(0,8);
     /* 🗺 트레이너 — 로드맵은 시작 체중과 목표 체중 사이를 5단계로 나눈다 */
     const md=ds=>(+ds.slice(5,7))+'월 '+(+ds.slice(8,10))+'일';
@@ -3213,6 +3225,8 @@ class Component extends DCLogic {
       wkPColor:wk.days&&wk.p<R52.pG?'#E5484D':'#1F1E1A',
       /* ⚖ 운동 체중 / 민낯 — 글은 sbText() 한 곳에서 만든다 */
       sbShow:!!this.sbText(this.TODAY),sbS:this.sents(this.sbText(this.TODAY)),
+      /* 💪 근력 도장 — 주 2회면 저울과 상관없이 「근육 지킴」, 3회는 보너스 ★ (사장님 2026-10-15) */
+      lwStamps:lw.n>=3?'●●★':lw.n===2?'●●':lw.n===1?'●○':'○○',lwBg:lw.done?'#DDF2E9':th.chipBg,lwColor:lw.done?'#17A673':'#8B887C',lwTextS:this.sents(this.liftText()),lwWinLine:!!winTop&&lw.done,lwWinTxt:'💪 이번 주 근력 '+lw.n+'회 — 근육 지킴 도장'+(lwS>=2?(' · '+lwS+'주 연속'):''),
       /* 식사창 · 탄수 얹기 */
       winLabel:!timedSel.length?('식사창 '+R52.winS+'-'+R52.winE):outSel.length?(outSel.length+'끼 창 밖'):'식사창 안',
       winBg:!timedSel.length?th.chipBg:outSel.length?'#FDECEC':'#DDF2E9',
@@ -3369,9 +3383,9 @@ class Component extends DCLogic {
       tdRows,tdCount:tdItems.length+'건'+(tdDone.length?(' · 처리됨 '+tdDone.length):''),tdColor:tdItems.length?th.accent:'#B5B2A6',tdEmpty:!tdItems.length,
       tdDraft:S.tdDraft||'',tdOnDraft:e=>this.setState({tdDraft:e.target.value}),
       tdOnKey:e=>{if(e.key==='Enter')tdAdd()},tdAdd,tdPaste,tdPhDraft,tdHasPh:!!tdPh.length,
-      winOn:!!winTop,winN:winRows.length,winRest,winHasRest:winRest.length>0,
-      winTopLine:winTop?('🎉 '+winTop.dTxt+' · '+winTop.goalTxt+' 목표 달성!'):'',
-      winTopSub:winTop?(winTop.tierTxt+' · '+winTop.whenTxt+'에 해냈어요 · '+winTop.wTxt):'',
+      winOn:!!winTop||lw.done,winNTxt:winRows.length?(winRows.length+'번째'):'💪 근력',winRest,winHasRest:winRest.length>0,
+      winTopLine:winTop?('🎉 '+winTop.dTxt+' · '+winTop.goalTxt+' 목표 달성!'):(lw.done?('💪 이번 주 근력 '+lw.n+'회 — 근육 지킴 도장!'):''),
+      winTopSub:winTop?(winTop.tierTxt+' · '+winTop.whenTxt+'에 해냈어요 · '+winTop.wTxt):(lw.done?('저울이 뭐라든 이번 주 근육은 지켰어요'+(lwS>=2?(' · '+lwS+'주 연속'):'')):''),
       wkRange:noDow(wkp.ws)+'~'+this.lbl(wkp.we),wkGoalText:(wkp.bonus!=null?(fmt(wkp.goal)+' ✓ → 2차 '+fmt(wkp.bonus)+' kg'):(fmt(wkp.goal)+' kg')),wkColor,wkPct:wkp.pct,wkStats,
       wkNoteS:this.sents(this.paceNote(wkp)+(wkp.done?('🎉 '+fmt(wkp.goal)+'kg 달성! '+(wkp.bonus!=null?('2차 '+fmt(wkp.bonus)+'kg — '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.bonusNeed))+'kg 더. 못 해도 1차는 해냈어요'):'마감까지 유지만 해도 충분해요')+' · 마감 '+this.lbl(wkp.we)):(wkp.pace>0?('남은 '+wkp.daysLeft+'일에 '+fmt(Math.max(0,wkp.need))+'kg · 최종 '+fmt(+gset.goalW)+'kg까지 '+wkp.weeksText):('줄이지 않는 주간이에요 · '+wkp.daysLeft+'일 남음')))),
       sWeekGoal:wkp.manual?wkp.goal:'',sWeekPace:wkp.pace,onWeekPace:setRule('weekPace'),
