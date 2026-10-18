@@ -27,7 +27,7 @@ button,input,textarea{ font:inherit; color:inherit; }
 .chips{ display:flex; flex-wrap:wrap; gap:6px; padding:0 12px 8px; }
 .chip{ border:0; min-height:38px; padding:0 12px; border-radius:999px; background:var(--card); box-shadow:0 0 0 1px var(--line); font-weight:700; font-size:14px; cursor:pointer; }
 .chip.on{ background:var(--sea); color:#fff; box-shadow:none; }
-.mapbox{ position:relative; margin:0 12px; border-radius:16px; overflow:hidden; box-shadow:0 0 0 1px var(--line); background:var(--sea); touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+.mapbox{ position:relative; margin:0 12px; border-radius:16px; overflow:hidden; box-shadow:0 0 0 1px var(--line); background:var(--sea); touch-action:pan-y; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
 .zin{ position:relative; transform-origin:0 0; --k:1; }
 .mapbox img{ display:block; width:100%; user-select:none; -webkit-user-drag:none; pointer-events:none; }
 .zin .dot,.zin .me{ transform:translate(-50%,-50%) scale(calc(1 / var(--k))); }
@@ -156,7 +156,7 @@ function zoomable(box,key,onStamp){
   const zin=box.querySelector('.zin'); const z=ZOOM[key]||(ZOOM[key]={k:1,x:0,y:0});
   const W=()=>box.clientWidth, H=()=>box.clientHeight;
   const apply=()=>{z.k=Math.min(4,Math.max(1,z.k));z.x=Math.min(0,Math.max(W()-W()*z.k,z.x));z.y=Math.min(0,Math.max(H()-H()*z.k,z.y));
-    zin.style.transform=`translate(${z.x}px,${z.y}px) scale(${z.k})`;zin.style.setProperty('--k',z.k);};
+    zin.style.transform=`translate(${z.x}px,${z.y}px) scale(${z.k})`;box.style.touchAction=z.k>1.01?'none':'pan-y';zin.style.setProperty('--k',z.k);};
   const zoomAt=(nk,cx,cy)=>{nk=Math.min(4,Math.max(1,nk));const px=(cx-z.x)/z.k,py=(cy-z.y)/z.k;z.k=nk;z.x=cx-px*nk;z.y=cy-py*nk;apply();};
   const local=e=>{const r=box.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];};
   apply();
