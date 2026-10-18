@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<title>우리 포인트 지도 · 출조 일기</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🎣</text></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<!--
+  Fishing point map + trip diary (사장님 10-18: 「위성지도에 우리가 간 포인트를 찍고 꽝인지 좋았는지 남기기 · 일기 · 낚시판과 연결」).
+  Data: family_state.doc.fishtrips (same shared store as cook/ money/) — [{id,by,d,map,area,sea,diary,photos[],pts[{id,lat,lng,res,name,how,bait,fish,size,tm,memo}]}]
+  Maps: fishmap/maps/*.jpg + maps.json (corner lat/lng, made by tools/위성지도.py) -> a GPS fix lands on the right pixel.
+  Sea info for the day comes from the fishing board's data.js (bravo8workroom.github.io/fishing) and is snapshotted into the trip.
+  ?test=1 = local mock store (no login), for headless checks.
+-->
+<style>
+:root{ --sea:#0E2A3F; --sand:#FBF8F2; --ink:#20242B; --sub:#6B7280; --line:#E8E1D4; --soft:#F2EEE6; --ok:#F0568C; --mid:#F5B800; --bad:#4FA8E0; --card:#fff; }
+*{ box-sizing:border-box; } html,body{ margin:0; }
+body{ background:#EDE9E1; font-family:Pretendard,'Noto Sans KR',system-ui,sans-serif; color:var(--ink); word-break:keep-all; overflow-wrap:break-word; line-height:1.6; }
+button,input,textarea{ font:inherit; color:inherit; }
+.app{ max-width:430px; margin:0 auto; min-height:100vh; background:var(--sand); padding-bottom:30px; }
+.top{ display:flex; align-items:center; gap:8px; padding:12px 12px 8px; }
+.top h1{ font-size:18px; margin:0; flex:1; }
+.btn{ border:0; min-height:44px; padding:0 14px; border-radius:12px; background:var(--card); box-shadow:0 0 0 1px var(--line); font-weight:700; cursor:pointer; }
+.btn.dark{ background:var(--sea); color:#fff; box-shadow:none; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; padding:0 12px 8px; }
+.chip{ border:0; min-height:38px; padding:0 12px; border-radius:999px; background:var(--card); box-shadow:0 0 0 1px var(--line); font-weight:700; font-size:14px; cursor:pointer; }
+.chip.on{ background:var(--sea); color:#fff; box-shadow:none; }
+.mapbox{ position:relative; margin:0 12px; border-radius:16px; overflow:hidden; box-shadow:0 0 0 1px var(--line); background:var(--sea); touch-action:manipulation; }
+.mapbox img{ display:block; width:100%; user-select:none; -webkit-user-drag:none; }
+.maphint{ position:absolute; left:8px; top:8px; background:rgba(14,42,63,.85); color:#fff; font-size:12.5px; padding:5px 10px; border-radius:999px; pointer-events:none; }
+.credit{ position:absolute; right:6px; bottom:4px; font-size:10px; color:#fff; text-shadow:0 1px 2px #000; pointer-events:none; }
+.dot{ position:absolute; transform:translate(-50%,-50%); border-radius:50%; border:2.5px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:12px; cursor:pointer; }
+.d-ok{ background:var(--ok); } .d-mid{ background:var(--mid); color:#3A2C00; } .d-bad{ background:var(--bad); } .d-new{ background:#fff; color:var(--sea); }
+.dot.sel{ outline:3px solid #fff; outline-offset:2px; }
+.me{ position:absolute; width:16px; height:16px; border-radius:50%; background:#2B7BFF; border:3px solid #fff; box-shadow:0 0 0 8px rgba(43,123,255,.25); transform:translate(-50%,-50%); pointer-events:none; }
+.legend{ display:flex; flex-wrap:wrap; gap:10px; padding:6px 14px 0; font-size:12.5px; color:var(--sub); }
+.legend i{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; vertical-align:-1px; }
+.acts{ display:flex; gap:8px; padding:10px 12px 0; } .acts .btn{ flex:1; }
+h2{ font-size:16px; margin:18px 14px 8px; }
+.card{ margin:0 12px 8px; background:var(--card); border-radius:14px; box-shadow:0 0 0 1px var(--line); padding:12px; }
+.trip{ display:flex; gap:10px; align-items:center; cursor:pointer; }
+.trip .d{ font-weight:800; font-variant-numeric:tabular-nums; min-width:62px; } .trip .s{ flex:1; font-size:14px; color:#3B4049; }
+.tally{ display:flex; gap:4px; } .tally span{ font-size:12px; font-weight:800; padding:1px 8px; border-radius:999px; }
+.p-ok{ background:#FDE3EC; color:#B3124C; } .p-mid{ background:#FFF2C2; color:#7A5A00; } .p-bad{ background:#DDF0FB; color:#1E6E9E; }
+.sea{ margin:0 12px 10px; padding:10px 12px; border-radius:14px; background:var(--sea); color:#fff; display:flex; flex-wrap:wrap; gap:4px 14px; font-size:13.5px; }
+.sea b{ font-size:15px; } .sea .src{ flex-basis:100%; font-size:11.5px; opacity:.75; }
+.pt{ display:grid; grid-template-columns:32px 1fr auto; gap:2px 10px; align-items:start; cursor:pointer; }
+.pt .no{ width:30px; height:30px; border-radius:50%; color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.pt .t{ font-weight:800; } .pt .x{ grid-column:2/4; font-size:14px; color:#3B4049; }
+.pill{ font-size:12.5px; font-weight:800; padding:2px 10px; border-radius:999px; }
+textarea{ width:100%; min-height:110px; border:0; border-radius:12px; background:var(--soft); padding:10px 12px; font-size:15px; line-height:1.7; resize:vertical; }
+.photos{ display:flex; flex-wrap:wrap; gap:8px; } .photos img{ width:84px; height:84px; object-fit:cover; border-radius:12px; cursor:zoom-in; }
+.addph{ width:84px; height:84px; border-radius:12px; border:2px dashed var(--line); display:flex; align-items:center; justify-content:center; color:var(--sub); font-weight:700; cursor:pointer; }
+.row{ display:flex; gap:6px; margin-bottom:8px; } .row input{ flex:1; min-width:0; min-height:44px; border:0; border-radius:12px; background:var(--soft); padding:0 12px; font-size:15px; }
+.lbl{ font-size:12.5px; color:var(--sub); margin:2px 2px 4px; }
+.seg{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px; }
+.seg button{ min-height:46px; border:0; border-radius:12px; font-weight:800; background:var(--soft); cursor:pointer; }
+.seg .on.ok{ background:var(--ok); color:#fff; } .seg .on.mid{ background:var(--mid); } .seg .on.bad{ background:var(--bad); color:#fff; }
+.seg2{ display:flex; gap:6px; margin-bottom:8px; } .seg2 button{ flex:1; min-height:42px; border:0; border-radius:12px; background:var(--soft); font-weight:700; cursor:pointer; } .seg2 .on{ background:var(--sea); color:#fff; }
+.sheet{ position:fixed; left:0; right:0; bottom:0; z-index:20; max-width:430px; margin:0 auto; max-height:78vh; overflow-y:auto; background:var(--card); border-radius:20px 20px 0 0; box-shadow:0 -8px 30px rgba(0,0,0,.25); padding:12px 16px 22px; }
+.sheet[hidden]{ display:none; }
+.sheet h3{ margin:4px 0 10px; font-size:17px; display:flex; align-items:center; gap:8px; } .sheet h3 span{ flex:1; }
+.stat{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px; } .stat div{ border-radius:12px; padding:6px 10px; } .stat b{ display:block; font-size:20px; }
+.visit{ padding:9px 0; border-top:1px solid #F0EBE1; font-size:14.5px; cursor:pointer; } .visit .dt{ font-weight:800; margin-right:6px; }
+.empty{ text-align:center; color:var(--sub); font-size:14px; padding:18px 10px; }
+.toast{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--sea); color:#fff; padding:10px 16px; border-radius:999px; font-weight:700; z-index:40; }
+.toast[hidden]{ display:none; }
+.lb{ position:fixed; inset:0; background:rgba(0,0,0,.85); display:flex; align-items:center; justify-content:center; z-index:50; }
+.lb[hidden]{ display:none; } .lb img{ max-width:100%; max-height:100%; }
+.nb{ display:inline-block; }
+.danger{ color:#B3124C; font-weight:700; }
+</style>
+</head>
+<body>
+<div class="app" id="app"><div class="empty">불러오는 중…</div></div>
+<div class="sheet" id="sheet" hidden></div>
+<div class="toast" id="toast" hidden></div>
+<div class="lb" id="lb" hidden><img id="lbimg" alt=""></div>
+<script>
+(function(){
+const TEST=/[?&]test=1/.test(location.search);
+const FISH_URL='https://bravo8workroom.github.io/fishing/';
+const AREA={ '사천진-북':'사천진','사천진-남':'사천진','동호':'동호해변','물치':'물치항','지경':'지경해변' };
+const RES={ok:'잡음',mid:'입질만',bad:'꽝'};
+const WD='일월화수목금토';
+let MAPS={}, doc={fishtrips:[]}, view={screen:'map', map:localStorage.getItem('fmMap')||'사천진-북', how:'전체', trip:null, gps:null};
+const $=id=>document.getElementById(id);
+const esc=t=>String(t??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const hhmm=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
+const dlabel=d=>{const x=new Date(d+'T00:00:00');return `${x.getMonth()+1}/${x.getDate()} (${WD[x.getDay()]})`;};
+function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,1900);}
+
+// ---- map maths (Web Mercator; corners from maps.json) ----
+const merc=(lng,lat)=>{const s=Math.sin(lat*Math.PI/180);return [(lng+180)/360,0.5-Math.log((1+s)/(1-s))/(4*Math.PI)];};
+const unmerc=(x,y)=>[x*360-180,Math.atan(Math.sinh(Math.PI*(1-2*y)))*180/Math.PI];
+function toFrac(m,lng,lat){const a=merc(...m.nw),b=merc(...m.se),p=merc(lng,lat);return [(p[0]-a[0])/(b[0]-a[0]),(p[1]-a[1])/(b[1]-a[1])];}
+function fromFrac(m,fx,fy){const a=merc(...m.nw),b=merc(...m.se);return unmerc(a[0]+fx*(b[0]-a[0]),a[1]+fy*(b[1]-a[1]));}
+const inside=f=>f[0]>=0&&f[0]<=1&&f[1]>=0&&f[1]<=1;
+function meters(a,b){const R=6371000,t=Math.PI/180,dl=(b[1]-a[1])*t,dg=(b[0]-a[0])*t;const h=Math.sin(dl/2)**2+Math.cos(a[1]*t)*Math.cos(b[1]*t)*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+
+// ---- store ----
+const store={
+  async start(){
+    if(TEST){const s=JSON.parse(localStorage.getItem('fmTestDoc')||'{"fishtrips":[]}');return s;}
+    await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');await loadScript('../config.js');await loadScript('../store.js');
+    return await window.FamilyStore.start({seed:()=>({}),onRemote:d=>{doc=d||{};doc.fishtrips=doc.fishtrips||[];render();}});
+  },
+  async save(apply){ // apply(d) mutates a doc; replayed on a fresh copy if someone else saved first
+    apply(doc);render();
+    if(TEST){localStorage.setItem('fmTestDoc',JSON.stringify(doc));return;}
+    await window.FamilyStore.save(doc,fresh=>{fresh.fishtrips=fresh.fishtrips||[];apply(fresh);});
+  },
+  async photo(dataUrl){ if(TEST)return dataUrl; return await window.FamilyStore.putPhoto(dataUrl); }
+};
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s);});}
+function compress(file,max=1280){return new Promise(r=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.82));};im.src=fr.result;};fr.readAsDataURL(file);});}
+
+// ---- fishing board link: that day's sea for that area ----
+function seaFor(d,mapKey){
+  const F=window.FISH; const area=AREA[mapKey]; if(!F||!F.score||!F.score[area]||!F.score[area][d])return null;
+  const x=F.score[area][d], sp=F.spots.find(s=>s.area===area), t=(F.tide[String(sp?.st)]||{})[d]||{};
+  return {mul:t.mul||'',wN:x['원투']?.info?.w??null,wD:x['루어']?.info?.w??null,ws:x['원투']?.info?.ws??null,sky:x['원투']?.info?.sky||'',wt:x.wt??null,
+    s1:x['원투']?.g==='위험'?'매우 위험':(x['원투']?x['원투'].g+' '+x['원투'].s+'점':''),s2:x['루어']?.g==='위험'?'매우 위험':(x['루어']?x['루어'].g+' '+x['루어'].s+'점':''),at:F.built};
+}
+function seaHTML(s){
+  if(!s)return `<div class="sea"><span>이날 바다 정보 없음</span><span class="src">낚시판 예보는 오늘부터 한 달 앞까지만 있어요 — 그날 기록하면 저절로 남아요</span></div>`;
+  return `<div class="sea"><span class="nb">물때 <b>${esc(s.mul||'-')}</b></span><span class="nb">밤 파도 <b>${s.wN!=null?s.wN+'m':'-'}</b></span><span class="nb">새벽 파도 <b>${s.wD!=null?s.wD+'m':'-'}</b></span><span class="nb">바람 <b>${s.ws!=null?Math.round(s.ws)+'m/s':'-'}</b></span><span class="nb">수온 <b>${s.wt!=null?s.wt+'도':'-'}</b></span><span class="nb">원투 <b>${esc(s.s1)}</b></span><span class="nb">루어 <b>${esc(s.s2)}</b></span><span class="src">낚시판 예보 (${esc((s.at||'').slice(5))} 받음)에서 저절로 · <a href="${FISH_URL}" style="color:#fff">낚시판 열기</a></span></div>`;
+}
+
+// ---- all points (with trip) on a map ----
+function allPts(mapKey){const out=[];for(const t of doc.fishtrips||[])for(const p of t.pts||[]){const m=MAPS[mapKey];if(!m)continue;const f=toFrac(m,p.lng,p.lat);if(inside(f)&&(view.how==='전체'||p.how===view.how))out.push({p,t,f});}return out;}
+function clusters(list){ // same spot = within 25 m
+  const cs=[];for(const it of list){const c=cs.find(c=>meters([c.lng,c.lat],[it.p.lng,it.p.lat])<25);if(c){c.items.push(it);}else cs.push({lng:it.p.lng,lat:it.p.lat,f:it.f,items:[it]});}
+  for(const c of cs){const n={ok:0,mid:0,bad:0};c.items.forEach(i=>n[i.p.res]=(n[i.p.res]||0)+1);c.n=n;c.top=n.ok>=n.mid&&n.ok>=n.bad&&n.ok?'ok':n.mid>=n.bad&&n.mid?'mid':'bad';}
+  return cs;
+}
+
+// ---- screens ----
+function render(){ if(view.screen==='trip')return renderTrip(); renderMap(); }
+function mapTabs(){return Object.entries(MAPS).map(([k,m])=>`<button class="chip ${k===view.map?'on':''}" data-map="${esc(k)}">${esc(k)}</button>`).join('');}
+function renderMap(){
+  const m=MAPS[view.map]; const cs=clusters(allPts(view.map));
+  const trips=(doc.fishtrips||[]).slice().sort((a,b)=>b.d.localeCompare(a.d));
+  $('app').innerHTML=`
+  <div class="top"><button class="btn" onclick="location.href='../'">← 다이어리</button><h1>우리 포인트 지도</h1></div>
+  <div class="chips">${mapTabs()}</div>
+  <div class="chips">${['전체','원투','루어'].map(h=>`<button class="chip ${h===view.how?'on':''}" data-how="${h}">${h}</button>`).join('')}</div>
+  <div class="mapbox" id="mapbox"><img src="maps/${encodeURIComponent(m.img)}" alt="${esc(m.title)} 위성 사진" id="mapimg">
+    ${cs.map((c,i)=>{const n=c.items.length,sz=Math.min(40,22+n*4);return `<div class="dot d-${c.top}" data-c="${i}" style="left:${c.f[0]*100}%;top:${c.f[1]*100}%;width:${sz}px;height:${sz}px">${n>1?n:''}</div>`;}).join('')}
+    ${view.gps&&inside(toFrac(m,view.gps[0],view.gps[1]))?(()=>{const f=toFrac(m,view.gps[0],view.gps[1]);return `<div class="me" style="left:${f[0]*100}%;top:${f[1]*100}%"></div>`;})():''}
+    <div class="credit">${esc(m.credit)}</div>
+    ${cs.length?'':'<div class="maphint">아직 이 지도에 기록이 없어요</div>'}
+  </div>
+  <div class="legend"><span><i style="background:var(--ok)"></i>잡음</span><span><i style="background:var(--mid)"></i>입질만</span><span><i style="background:var(--bad)"></i>꽝</span><span>숫자 = 같은 자리에 간 횟수</span></div>
+  <div class="acts"><button class="btn" id="gps">지금 여기 찍기</button><button class="btn dark" id="newTrip">오늘 출조 기록</button></div>
+  <h2>출조 일기</h2>
+  ${trips.length?trips.map(t=>{const n={ok:0,mid:0,bad:0};(t.pts||[]).forEach(p=>n[p.res]++);return `<div class="card trip" data-trip="${esc(t.id)}"><span class="d">${dlabel(t.d)}</span><span class="s">${esc((MAPS[t.map]?.title||t.map).split(' — ')[0])}${t.diary?' — '+esc(t.diary.slice(0,24))+(t.diary.length>24?'…':''):''}</span><span class="tally">${n.ok?`<span class="p-ok">${n.ok}</span>`:''}${n.mid?`<span class="p-mid">${n.mid}</span>`:''}${n.bad?`<span class="p-bad">${n.bad}</span>`:''}</span></div>`;}).join(''):'<div class="card empty">아직 출조 일기가 없어요 — 「오늘 출조 기록」을 눌러 시작하세요</div>'}`;
+  document.querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>{view.map=b.dataset.map;localStorage.setItem('fmMap',view.map);render();});
+  document.querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>{view.how=b.dataset.how;render();});
+  document.querySelectorAll('[data-trip]').forEach(b=>b.onclick=()=>openTrip(b.dataset.trip));
+  document.querySelectorAll('#mapbox .dot').forEach(dt=>dt.onclick=e=>{e.stopPropagation();spotSheet(cs[+dt.dataset.c]);});
+  $('newTrip').onclick=()=>newTrip(view.map);
+  $('gps').onclick=()=>locate(true);
+}
+function spotSheet(c){
+  const items=c.items.slice().sort((a,b)=>b.t.d.localeCompare(a.t.d));
+  const name=items.find(i=>i.p.name)?.p.name||'이 자리';
+  $('sheet').innerHTML=`<h3><span>${esc(name)}</span><button class="btn" id="shClose">닫기</button></h3>
+   <div class="lbl">${items.length}번 기록</div>
+   <div class="stat"><div class="p-ok"><b>${c.n.ok||0}</b>잡음</div><div class="p-mid"><b>${c.n.mid||0}</b>입질만</div><div class="p-bad"><b>${c.n.bad||0}</b>꽝</div></div>
+   ${items.map(i=>`<div class="visit" data-trip="${esc(i.t.id)}"><span class="dt">${dlabel(i.t.d)}</span><span class="pill p-${i.p.res}">${RES[i.p.res]}</span> ${esc([i.p.how,i.p.bait,i.p.tm].filter(Boolean).join(' · '))}<div>${esc([i.p.fish,i.p.size&&(i.p.size+'cm'),i.p.memo].filter(Boolean).join(' — '))}</div>${i.t.sea?`<div class="lbl">물때 ${esc(i.t.sea.mul||'-')} · 밤 파도 ${i.t.sea.wN??'-'}m · 새벽 파도 ${i.t.sea.wD??'-'}m</div>`:''}</div>`).join('')}
+   <button class="btn dark" style="width:100%;margin-top:10px" id="here">이 자리에 오늘 기록 남기기</button>`;
+  $('sheet').hidden=false;
+  $('shClose').onclick=()=>$('sheet').hidden=true;
+  $('sheet').querySelectorAll('[data-trip]').forEach(v=>v.onclick=()=>{$('sheet').hidden=true;openTrip(v.dataset.trip);});
+  $('here').onclick=async()=>{$('sheet').hidden=true;const t=await newTrip(view.map,true);addPoint(t,c.lng,c.lat,name);};
+}
+function locate(fromMap){
+  if(!navigator.geolocation){toast('이 폰은 위치를 못 읽어요');return;}
+  toast('위치 찾는 중…');
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const g=[pos.coords.longitude,pos.coords.latitude]; view.gps=g;
+    const key=Object.keys(MAPS).find(k=>inside(toFrac(MAPS[k],g[0],g[1])));
+    if(!key){toast(`지도 밖이에요 (정확도 ±${Math.round(pos.coords.accuracy)}m)`);render();return;}
+    view.map=key;
+    const t=view.screen==='trip'&&view.trip?tripById(view.trip):await newTrip(key,true);
+    addPoint(t,g[0],g[1],'',`위치 정확도 ±${Math.round(pos.coords.accuracy)}m`);
+  },()=>toast('위치 허락이 필요해요 — 폰 설정에서 브라우저 위치를 켜 주세요'),{enableHighAccuracy:true,timeout:15000});
+}
+const tripById=id=>(doc.fishtrips||[]).find(t=>t.id===id);
+async function newTrip(mapKey,quiet){
+  const d=today(); let t=(doc.fishtrips||[]).find(x=>x.d===d&&x.map===mapKey);
+  if(!t){t={id:uid(),by:(localStorage.getItem('famdiary_who')||''),d,map:mapKey,area:AREA[mapKey],sea:seaFor(d,mapKey),diary:'',photos:[],pts:[]};
+    const nt=JSON.parse(JSON.stringify(t));await store.save(dd=>{dd.fishtrips=dd.fishtrips||[];if(!dd.fishtrips.some(x=>x.id===nt.id))dd.fishtrips.unshift(nt);});}
+  if(!quiet)openTrip(t.id); else {view.screen='trip';view.trip=t.id;render();}
+  return tripById(t.id)||t;
+}
+function openTrip(id){view.screen='trip';view.trip=id;$('sheet').hidden=true;render();scrollTo({top:0});}
+function saveTrip(id,fn){return store.save(dd=>{const t=(dd.fishtrips||[]).find(x=>x.id===id);if(t)fn(t);});}
+function renderTrip(){
+  const t=tripById(view.trip); if(!t){view.screen='map';return renderMap();}
+  if(!t.sea){const s=seaFor(t.d,t.map);if(s)saveTrip(t.id,x=>{x.sea=s;});}
+  const m=MAPS[t.map];
+  $('app').innerHTML=`
+  <div class="top"><button class="btn" id="back">← 지도</button><h1>${esc(m?.title?.split(' — ')[0]||t.map)} 출조</h1><span class="lbl">${dlabel(t.d)}</span></div>
+  ${seaHTML(t.sea)}
+  <div class="mapbox" id="tripmap"><img src="maps/${encodeURIComponent(m.img)}" alt="${esc(m.title)} 위성 사진">
+    ${(t.pts||[]).map((p,i)=>{const f=toFrac(m,p.lng,p.lat);return `<div class="dot d-${p.res}" data-p="${esc(p.id)}" style="left:${f[0]*100}%;top:${f[1]*100}%;width:30px;height:30px">${i+1}</div>`;}).join('')}
+    <div class="maphint">찍은 곳을 눌러 포인트 추가</div><div class="credit">${esc(m.credit)}</div></div>
+  <div class="acts"><button class="btn" id="gps">지금 여기 찍기</button></div>
+  <h2>포인트</h2>
+  ${(t.pts||[]).length?(t.pts||[]).map((p,i)=>`<div class="card pt" data-p="${esc(p.id)}"><div class="no d-${p.res}">${i+1}</div><div class="t">${esc(p.name||'이름 없는 자리')}</div><span class="pill p-${p.res}">${RES[p.res]}</span><div class="x">${esc([p.how,p.bait,p.tm].filter(Boolean).join(' · '))}${p.fish||p.size?' — '+esc([p.fish,p.size&&(p.size+'cm')].filter(Boolean).join(' ')):''}${p.memo?'<br>'+esc(p.memo):''}</div></div>`).join(''):'<div class="card empty">위성 사진에서 낚시한 곳을 눌러 보세요</div>'}
+  <h2>일기</h2>
+  <div class="card"><textarea id="diary" placeholder="오늘 어땠는지 — 다음에 볼 나에게">${esc(t.diary||'')}</textarea></div>
+  <div class="card"><div class="photos" id="photos">${(t.photos||[]).map((u,i)=>`<img src="${esc(u)}" data-i="${i}" alt="출조 사진">`).join('')}<label class="addph">사진 +<input type="file" accept="image/*" multiple hidden id="ph"></label></div></div>
+  <div class="acts"><button class="btn" id="delTrip">이 출조 지우기</button></div>`;
+  $('back').onclick=()=>{view.screen='map';render();};
+  $('gps').onclick=()=>locate(false);
+  $('tripmap').onclick=e=>{if(e.target.closest('.dot'))return;const r=$('tripmap').getBoundingClientRect();const g=fromFrac(m,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);addPoint(t,g[0],g[1]);};
+  document.querySelectorAll('[data-p]').forEach(el=>el.onclick=e=>{e.stopPropagation();pointSheet(t,el.dataset.p);});
+  let dt;$('diary').oninput=e=>{clearTimeout(dt);const v=e.target.value;dt=setTimeout(()=>saveTrip(t.id,x=>{x.diary=v;}),700);};
+  $('ph').onchange=async e=>{const fs=[...e.target.files];toast('사진 올리는 중…');const urls=[];for(const f of fs)urls.push(await store.photo(await compress(f)));await saveTrip(t.id,x=>{x.photos=(x.photos||[]).concat(urls);});toast('사진을 붙였어요');};
+  document.querySelectorAll('#photos img').forEach(im=>im.onclick=()=>{$('lbimg').src=im.src;$('lb').hidden=false;});
+  $('delTrip').onclick=async()=>{await store.save(dd=>{dd.fishtrips=(dd.fishtrips||[]).filter(x=>x.id!==t.id);});view.screen='map';toast('출조를 지웠어요');render();};
+}
+async function addPoint(t,lng,lat,name='',memo=''){
+  const p={id:uid(),lat:+lat.toFixed(7),lng:+lng.toFixed(7),res:'ok',name,how:'원투',bait:'',fish:'',size:'',tm:hhmm(),memo};
+  await saveTrip(t.id,x=>{x.pts=x.pts||[];if(!x.pts.some(y=>y.id===p.id))x.pts.push(p);});
+  pointSheet(tripById(t.id)||t,p.id,true);
+}
+function pointSheet(t,pid,isNew){
+  const p=(t.pts||[]).find(x=>x.id===pid); if(!p)return; const i=t.pts.indexOf(p)+1;
+  $('sheet').innerHTML=`<h3><span>${i}번 포인트${isNew?' — 새로':''}</span><button class="btn" id="shClose">저장</button></h3>
+   <div class="seg">${['ok','mid','bad'].map(k=>`<button class="${k} ${p.res===k?'on':''}" data-res="${k}">${RES[k]}</button>`).join('')}</div>
+   <div class="seg2">${['원투','루어'].map(h=>`<button class="${p.how===h?'on':''}" data-how="${h}">${h}</button>`).join('')}</div>
+   <div class="lbl">자리 이름 · 시각</div><div class="row"><input id="pName" value="${esc(p.name)}" placeholder="예: 등대 앞"><input id="pTm" value="${esc(p.tm)}" placeholder="19:40" style="max-width:96px"></div>
+   <div class="lbl">미끼·루어 · 어종 · 크기(cm)</div><div class="row"><input id="pBait" value="${esc(p.bait)}" placeholder="개불 / 메탈 30g"><input id="pFish" value="${esc(p.fish)}" placeholder="감성돔"><input id="pSize" value="${esc(p.size)}" placeholder="41" inputmode="numeric" style="max-width:70px"></div>
+   <div class="lbl">메모</div><div class="row"><input id="pMemo" value="${esc(p.memo)}" placeholder="예: 해 지고 첫 입질"></div>
+   <button class="btn" id="pDel" style="width:100%">이 포인트 지우기</button>`;
+  $('sheet').hidden=false;
+  const cur={...p};
+  $('sheet').querySelectorAll('[data-res]').forEach(b=>b.onclick=()=>{cur.res=b.dataset.res;$('sheet').querySelectorAll('[data-res]').forEach(x=>x.classList.toggle('on',x===b));});
+  $('sheet').querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>{cur.how=b.dataset.how;$('sheet').querySelectorAll('[data-how]').forEach(x=>x.classList.toggle('on',x===b));});
+  $('shClose').onclick=async()=>{const v={...cur,name:$('pName').value.trim(),tm:$('pTm').value.trim(),bait:$('pBait').value.trim(),fish:$('pFish').value.trim(),size:$('pSize').value.trim(),memo:$('pMemo').value.trim()};
+    $('sheet').hidden=true;await saveTrip(t.id,x=>{const y=(x.pts||[]).find(z=>z.id===pid);if(y)Object.assign(y,v);});toast('저장했어요');};
+  $('pDel').onclick=async()=>{$('sheet').hidden=true;await saveTrip(t.id,x=>{x.pts=(x.pts||[]).filter(z=>z.id!==pid);});toast('포인트를 지웠어요');};
+}
+$('lb').onclick=()=>$('lb').hidden=true;
+
+(async function boot(){
+  MAPS=await (await fetch('maps/maps.json',{cache:'no-store'})).json();
+  if(!MAPS[view.map])view.map=Object.keys(MAPS)[0];
+  loadScript(FISH_URL+'data.js?t='+Date.now()).then(()=>render()).catch(()=>{});
+  const d=await store.start(); doc=d||{}; doc.fishtrips=doc.fishtrips||[]; render();
+  if(TEST){const h=location.hash.slice(1).split('=');if(h[0]==='trip')openTrip(h[1]);if(h[0]==='spot')document.querySelectorAll('#mapbox .dot')[+h[1]]?.click();if(h[0]==='pt'){openTrip('t1');document.querySelector('.pt')?.click();}}
+})();
+})();
+</script>
+</body>
+</html>

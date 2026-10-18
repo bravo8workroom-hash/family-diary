@@ -1,0 +1,51 @@
+<!-- @dsCard group="낚시일기" 시안 B: 우리 포인트 지도 — 다녀온 모든 날의 포인트가 한 지도에 쌓인다 (가짜 자료) -->
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>시안 B · 우리 포인트 지도</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{ --sea:#0E2A3F; --sand:#FBF8F2; --ink:#20242B; --sub:#6B7280; --line:#E8E1D4; --ok:#F0568C; --mid:#F5B800; --bad:#4FA8E0; --card:#fff; }
+*{ box-sizing:border-box; } body{ margin:0; background:#EDE9E1; font-family:Pretendard,'Noto Sans KR',system-ui,sans-serif; color:var(--ink); word-break:keep-all; overflow-wrap:break-word; }
+.phone{ max-width:430px; margin:0 auto; min-height:100vh; background:var(--sand); position:relative; }
+.mapwrap{ position:relative; height:62vh; min-height:420px; overflow:hidden; background:var(--sea); }
+.mapwrap img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.bar{ position:absolute; left:10px; right:10px; top:10px; display:flex; gap:6px; }
+.bar .chip{ border:0; min-height:38px; padding:0 12px; border-radius:999px; background:rgba(255,255,255,.94); font:inherit; font-weight:700; font-size:13.5px; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+.bar .chip.on{ background:var(--sea); color:#fff; }
+.here{ position:absolute; right:12px; bottom:14px; border:0; min-height:50px; padding:0 18px; border-radius:999px; background:var(--sea); color:#fff; font:inherit; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(0,0,0,.35); display:flex; align-items:center; gap:6px; }
+.dot{ position:absolute; transform:translate(-50%,-50%); border-radius:50%; border:2.5px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:12px; }
+.d-ok{ background:var(--ok); } .d-mid{ background:var(--mid); color:#3A2C00; } .d-bad{ background:var(--bad); }
+.dot.sel{ outline:3px solid #fff; outline-offset:2px; }
+.me{ position:absolute; left:58%; top:58%; width:16px; height:16px; border-radius:50%; background:#2B7BFF; border:3px solid #fff; box-shadow:0 0 0 8px rgba(43,123,255,.25); }
+.sheet{ position:relative; margin-top:-18px; background:var(--card); border-radius:20px 20px 0 0; box-shadow:0 -6px 20px rgba(0,0,0,.12); padding:10px 14px 24px; }
+.grab{ width:40px; height:4px; border-radius:4px; background:#D6D0C4; margin:0 auto 10px; }
+.sheet h2{ margin:0; font-size:18px; } .sheet .sub{ font-size:13px; color:var(--sub); margin:2px 0 10px; }
+.stat{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:12px; }
+.stat div{ border-radius:12px; padding:8px 10px; } .stat b{ display:block; font-size:20px; font-variant-numeric:tabular-nums; } .stat span{ font-size:12.5px; }
+.s-ok{ background:#FDE3EC; color:#B3124C; } .s-mid{ background:#FFF2C2; color:#7A5A00; } .s-bad{ background:#DDF0FB; color:#1E6E9E; }
+.visit{ display:grid; grid-template-columns:auto 1fr auto; gap:2px 10px; padding:10px 0; border-top:1px solid #F0EBE1; font-size:14.5px; }
+.visit .dt{ font-weight:800; font-variant-numeric:tabular-nums; } .visit .m{ grid-column:2/4; color:#4A505A; font-size:14px; }
+.pill{ font-size:12.5px; font-weight:800; padding:2px 10px; border-radius:999px; }
+.p-ok{ background:#FDE3EC; color:#B3124C; } .p-mid{ background:#FFF2C2; color:#7A5A00; } .p-bad{ background:#DDF0FB; color:#1E6E9E; }
+.add{ width:100%; min-height:50px; margin-top:10px; border:0; border-radius:14px; background:var(--sea); color:#fff; font:inherit; font-weight:800; font-size:16px; }
+.note{ font-size:12px; color:var(--sub); margin-top:8px; }
+</style></head><body><div class="phone">
+<div class="mapwrap"><img src="위성-사천진.jpg" alt="사천진 일대 위성 사진">
+  <div class="bar"><button class="chip on">전체</button><button class="chip">원투</button><button class="chip">루어</button><button class="chip">감성돔</button></div>
+  <div class="dot d-ok sel" style="left:54%;top:44%;width:34px;height:34px">5</div>
+  <div class="dot d-bad" style="left:38%;top:22%;width:28px;height:28px">3</div>
+  <div class="dot d-mid" style="left:66%;top:66%;width:24px;height:24px">2</div>
+  <div class="dot d-ok" style="left:72%;top:80%;width:24px;height:24px">1</div>
+  <div class="dot d-bad" style="left:30%;top:52%;width:22px;height:22px">1</div>
+  <div class="me" title="지금 내 위치"></div>
+  <button class="here"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>지금 여기 찍기</button>
+</div>
+<div class="sheet"><div class="grab"></div>
+  <h2>사천진해변 등대 앞</h2><div class="sub">5번 갔어요 · 동그라미 크기 = 간 횟수, 색 = 가장 많았던 결과</div>
+  <div class="stat"><div class="s-ok"><b>3</b><span>잡음</span></div><div class="s-mid"><b>1</b><span>입질만</span></div><div class="s-bad"><b>1</b><span>꽝</span></div></div>
+  <div class="visit"><span class="dt">10/19</span><span>원투 · 개불 · 밤 1물</span><span class="pill p-ok">감성돔 41</span><span class="m">파도 1.8m — 해 지고 한 마리</span></div>
+  <div class="visit"><span class="dt">10/13</span><span>원투 · 개불 · 10물</span><span class="pill p-ok">감성돔 35</span><span class="m">파도 0.7m</span></div>
+  <div class="visit"><span class="dt">10/03</span><span>원투 · 조금</span><span class="pill p-bad">꽝</span><span class="m">잔잔, 복어만</span></div>
+  <button class="add">이 자리에 오늘 기록 남기기</button>
+  <div class="note">지도는 움직이고 키울 수 있는 위성 지도로 만들 예정 (시안은 사진으로 대신)</div>
+</div>
+</div></body></html>

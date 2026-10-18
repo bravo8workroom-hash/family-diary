@@ -1,0 +1,71 @@
+<!-- @dsCard group="낚시일기" 시안 A: 출조 한 장 — 위성 사진 위에 포인트를 찍고 결과를 남긴다 (가짜 자료) -->
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>시안 A · 출조 한 장</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{ --sea:#0E2A3F; --sand:#FBF8F2; --ink:#20242B; --sub:#6B7280; --line:#E8E1D4; --ok:#F0568C; --mid:#F5B800; --bad:#4FA8E0; --card:#fff; }
+*{ box-sizing:border-box; } body{ margin:0; background:#EDE9E1; font-family:Pretendard,'Noto Sans KR',system-ui,sans-serif; color:var(--ink); word-break:keep-all; overflow-wrap:break-word; }
+.phone{ max-width:430px; margin:0 auto; min-height:100vh; background:var(--sand); }
+.top{ display:flex; align-items:center; gap:10px; padding:14px 16px 8px; }
+.top .back{ border:0; background:var(--card); box-shadow:0 0 0 1px var(--line); border-radius:12px; min-height:40px; padding:0 12px; font:inherit; font-weight:700; }
+.top h1{ font-size:19px; margin:0; flex:1; } .top .date{ font-size:13px; color:var(--sub); }
+.sea{ margin:6px 12px 0; padding:10px 12px; border-radius:14px; background:var(--sea); color:#fff; display:flex; flex-wrap:wrap; gap:6px 14px; font-size:13.5px; }
+.sea b{ font-size:15px; } .sea .src{ flex-basis:100%; font-size:11.5px; opacity:.7; }
+.map{ position:relative; margin:10px 12px 0; border-radius:16px; overflow:hidden; box-shadow:0 0 0 1px var(--line); touch-action:manipulation; }
+.map img{ display:block; width:100%; }
+.hint{ position:absolute; left:10px; top:10px; background:rgba(14,42,63,.82); color:#fff; font-size:12.5px; padding:6px 10px; border-radius:999px; }
+.pin{ position:absolute; transform:translate(-50%,-100%); width:30px; height:38px; }
+.pin span{ position:absolute; left:50%; top:0; transform:translateX(-50%); width:30px; height:30px; border-radius:50% 50% 50% 0; rotate:-45deg; box-shadow:0 2px 6px rgba(0,0,0,.35); border:2px solid #fff; }
+.pin i{ position:absolute; left:0; right:0; top:4px; line-height:22px; text-align:center; font-style:normal; font-weight:800; font-size:13px; color:#fff; }
+.k-ok span{ background:var(--ok); } .k-mid span{ background:var(--mid); } .k-mid i{ color:#3A2C00; } .k-bad span{ background:var(--bad); }
+.legend{ display:flex; gap:12px; padding:8px 16px 0; font-size:12.5px; color:var(--sub); }
+.legend i{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; vertical-align:-1px; }
+h2{ font-size:16px; margin:18px 16px 8px; }
+.pt{ margin:0 12px 8px; background:var(--card); border-radius:14px; box-shadow:0 0 0 1px var(--line); padding:12px; display:grid; grid-template-columns:34px 1fr auto; gap:4px 10px; align-items:start; }
+.pt .no{ width:30px; height:30px; border-radius:50%; color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.pt .t{ font-weight:800; font-size:15px; } .pt .d{ grid-column:2/4; font-size:14px; color:#3B4049; line-height:1.6; }
+.pill{ font-size:12.5px; font-weight:800; padding:3px 10px; border-radius:999px; }
+.p-ok{ background:#FDE3EC; color:#B3124C; } .p-mid{ background:#FFF2C2; color:#7A5A00; } .p-bad{ background:#DDF0FB; color:#1E6E9E; }
+.diary{ margin:0 12px; background:var(--card); border-radius:14px; box-shadow:0 0 0 1px var(--line); padding:12px 14px; font-size:15px; line-height:1.75; min-height:90px; }
+.photos{ display:flex; gap:8px; margin:10px 12px 0; } .photos div{ width:76px; height:76px; border-radius:12px; background:#D9E4EA; }
+.sheet{ position:fixed; left:0; right:0; bottom:0; max-width:430px; margin:0 auto; background:var(--card); border-radius:20px 20px 0 0; box-shadow:0 -8px 30px rgba(0,0,0,.2); padding:14px 16px 20px; }
+.sheet[hidden]{ display:none; }
+.sheet h3{ margin:0 0 10px; font-size:16px; }
+.seg{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px; }
+.seg button{ min-height:46px; border:0; border-radius:12px; font:inherit; font-weight:800; background:#F2EEE6; }
+.seg .on.ok{ background:var(--ok); color:#fff; } .seg .on.mid{ background:var(--mid); } .seg .on.bad{ background:var(--bad); color:#fff; }
+.row{ display:flex; gap:6px; margin-bottom:8px; } .row input{ flex:1; min-width:0; min-height:44px; border:0; border-radius:12px; background:#F2EEE6; padding:0 12px; font:inherit; font-size:15px; }
+.save{ width:100%; min-height:50px; border:0; border-radius:14px; background:var(--sea); color:#fff; font:inherit; font-weight:800; font-size:16px; }
+.pad{ height:90px; }
+</style></head><body><div class="phone">
+<div class="top"><button class="back">← 낚시도감</button><h1>사천진 출조</h1><span class="date">10월 19일 (월) 밤</span></div>
+<div class="sea"><span>물때 <b>1물</b></span><span>밤 파도 <b>1.8m</b></span><span>바람 <b>2m/s</b></span><span>수온 <b>19.1도</b></span><span>원투 <b>92점</b></span><span class="src">낚시판에서 그날 예보를 저절로 가져와요</span></div>
+<div class="map" id="map"><img src="위성-사천진.jpg" alt="사천진 위성 사진"><div class="hint">찍은 곳을 눌러 포인트 추가</div>
+  <div class="pin k-ok" style="left:52%;top:46%"><span></span><i>1</i></div>
+  <div class="pin k-bad" style="left:37%;top:24%"><span></span><i>2</i></div>
+  <div class="pin k-mid" style="left:64%;top:66%"><span></span><i>3</i></div>
+</div>
+<div class="legend"><span><i style="background:var(--ok)"></i>잡음</span><span><i style="background:var(--mid)"></i>입질만</span><span><i style="background:var(--bad)"></i>꽝</span></div>
+<h2>포인트</h2>
+<div class="pt"><div class="no" style="background:var(--ok)">1</div><div class="t">사천진해변 등대 앞</div><span class="pill p-ok">잡음</span><div class="d">원투 · 개불 · 19:40 — 감성돔 41cm 1마리</div></div>
+<div class="pt"><div class="no" style="background:var(--bad)">2</div><div class="t">하평 쪽 모래밭</div><span class="pill p-bad">꽝</span><div class="d">원투 · 오징어 · 18:30~19:20 — 복어만</div></div>
+<div class="pt"><div class="no" style="background:var(--mid);color:#3A2C00">3</div><div class="t">바위섬 왼쪽</div><span class="pill p-mid">입질만</span><div class="d">루어 · 메탈 30g · 06:10 — 따라오다 돌아감</div></div>
+<h2>일기</h2>
+<div class="diary">파도가 생각보다 셌는데 해 지고 나서 등대 앞에서 한 마리. 다음엔 1번 자리 먼저.</div>
+<div class="photos"><div></div><div></div><div></div></div>
+<div class="pad"></div>
+<div class="sheet" id="sheet" hidden><h3>새 포인트 <span id="pno"></span></h3>
+  <div class="seg"><button class="ok" data-k="ok">잡음</button><button class="mid" data-k="mid">입질만</button><button class="bad" data-k="bad">꽝</button></div>
+  <div class="row"><input placeholder="자리 이름 (예: 등대 앞)"><input placeholder="원투 / 루어"></div>
+  <div class="row"><input placeholder="미끼·루어"><input placeholder="어종·크기"></div>
+  <button class="save" id="save">이 포인트 저장</button></div>
+</div>
+<script>
+// mockup only: tap the photo -> a pin appears -> pick result -> it is coloured
+const map=document.getElementById('map'),sheet=document.getElementById('sheet');let n=3,cur=null,k='ok';
+map.addEventListener('click',e=>{if(e.target.closest('.pin'))return;const r=map.getBoundingClientRect();n++;
+  cur=document.createElement('div');cur.className='pin k-mid';cur.style.left=((e.clientX-r.left)/r.width*100)+'%';cur.style.top=((e.clientY-r.top)/r.height*100+3)+'%';
+  cur.innerHTML='<span></span><i>'+n+'</i>';map.appendChild(cur);document.getElementById('pno').textContent=n+'번';sheet.hidden=false;});
+sheet.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{k=b.dataset.k;sheet.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b));if(cur)cur.className='pin k-'+k;});
+document.getElementById('save').onclick=()=>{sheet.hidden=true;cur=null;};
+</script></body></html>
