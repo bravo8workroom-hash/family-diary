@@ -47,6 +47,15 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
 .rec input:focus,.rec textarea:focus{outline:2px solid var(--accent);background:#fff}
 .unit{position:relative}.unit input{padding-right:52px}.unit em{position:absolute;right:12px;bottom:12px;font-style:normal;color:var(--mute);font-size:14px}
 .sync{font-size:13px;color:var(--mute);margin:0 0 8px}.sync b{color:var(--accent)}.sync a{color:var(--accent)}
+.player{margin:4px 0 4px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.player iframe{width:100%;height:100%;border:0;display:block}
+.poster{width:100%;height:100%;border:0;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.poster span{background:rgba(0,0,0,.65);color:#fff;padding:10px 16px;border-radius:999px;font-weight:800;font-size:15px}
+.pcap{font-size:12.5px;color:var(--mute);margin:0 0 6px}
+ol.sk{list-style:none;padding:0;margin:6px 0}
+ol.sk li{padding:7px 0;border-top:1px dashed var(--line);line-height:1.55}
+ol.sk li:first-child{border-top:0}
+.seek{min-height:36px;padding:0 11px;margin-right:4px;border:0;border-radius:999px;background:#E3F0EC;color:var(--accent);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap}
 .src{font-size:13px;color:var(--mute)}.src li{margin:3px 0}
 </style>
 </head>
@@ -87,9 +96,8 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
     </div></details>
   </div>
   <div class="item">
-    <label class="ck"><input type="checkbox" class="core"><span>끊어진 커튼·방충망 줄 갈기</span></label>
-    <details class="how"><summary>방법 + 영상 장면</summary><div class="d">
-      <figure>
+    <label class="ck"><input type="checkbox" class="core"><span>커튼·방충망 줄 다시 걸기</span></label>
+    <details class="how"><summary>방법 + 영상 (이 자리에서 재생)</summary><div class="d"><div class="player" id="p-b"><button class="poster" type="button" data-k="b" data-v="xhW-oJn2sOw" data-t="0" style="background-image:url(https://i.ytimg.com/vi/xhW-oJn2sOw/hqdefault.jpg)"><span>▶ 재생</span></button></div><div class="pcap">영국 부부의 <b>도메틱 미디 헤키</b> 커튼 수리 (11분). 미디 헤키가 700×500 크기라 우리 창과 가장 비슷해요. 시간 단추를 누르면 위 화면이 그 장면부터 재생돼요.</div><ol class="sk"><li><button class="seek" type="button" data-k="b" data-v="xhW-oJn2sOw" data-t="26">▶ 0:26</button> 줄이 제자리에서 빠지면 커튼·방충망이 삐뚤어져요. 줄 하나가 둘 다 팽팽하게 잡아 줘요</li><li><button class="seek" type="button" data-k="b" data-v="xhW-oJn2sOw" data-t="54">▶ 0:54</button> 틀 빼기 — 홈에 손가락 넣고 당기면 빠져요(나사 없음)</li><li><button class="seek" type="button" data-k="b" data-v="xhW-oJn2sOw" data-t="129">▶ 2:09</button> 안 빠지는 쪽은 안쪽을 손으로 받치고 비틀어 빼기 — 그냥 당기면 부러져요</li><li><button class="seek" type="button" data-k="b" data-v="xhW-oJn2sOw" data-t="155">▶ 2:35</button> 원인: 줄 거는 L자 걸이의 작은 턱이 부러짐</li><li><button class="seek" type="button" data-k="b" data-v="xhW-oJn2sOw" data-t="208">▶ 3:28</button> 1.5mm 드릴로 구멍 → 작은 나사를 박아 턱 대신</li><li><button class="seek" type="button" data-k="b" data-v="xhW-oJn2sOw" data-t="316">▶ 5:16</button> 둘이서: 한 명이 스프링을 잡아 줄을 느슨하게 → 나사에 줄 걸기</li><li><button class="seek" type="button" data-k="b" data-v="xhW-oJn2sOw" data-t="421">▶ 7:01</button> <b>줄을 다 빼지 마세요</b> — 다시 꿰기가 복잡해져요</li><li><button class="seek" type="button" data-k="b" data-v="xhW-oJn2sOw" data-t="446">▶ 7:26</button> 줄에 실리콘 그리스 살짝 → 훨씬 부드러워져요</li><li><button class="seek" type="button" data-k="b" data-v="xhW-oJn2sOw" data-t="525">▶ 8:45</button> 홈의 작은 턱을 맞춰 틀 다시 끼우기</li></ol><b>줄이 아예 끊어졌으면</b> — 1.2mm 줄 + 크림프로 새로 꿰야 해요. 줄은 모서리마다 2가닥, 대각선 반대 모서리로 지그재그(아래 그림). <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=355s" target="_blank" rel="noopener">새로 꿰는 영상 (유튜브에서 열림)</a><div class="pcap">이 영상만 주인이 다른 사이트 재생을 막아 둬서 유튜브로 열려요.</div><figure>
         <svg viewBox="0 0 340 220" xmlns="http://www.w3.org/2000/svg" font-family="Pretendard,sans-serif" font-size="12">
           <rect x="20" y="20" width="300" height="180" rx="10" fill="#fff" stroke="#C9C2B8" stroke-width="2"/>
           <rect x="30" y="30" width="280" height="66" fill="#EEE9E2"/><text x="170" y="62" text-anchor="middle" fill="#7A746C">주름 커튼</text>
@@ -103,17 +111,7 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
           <text x="44" y="16" font-size="11" fill="#22201D">● 노랑 = 스프링 (커튼 쪽)</text>
           <text x="44" y="214" font-size="11" fill="#22201D">● 검정 = 크림프(매듭) 고정</text>
         </svg>
-      </figure>
-      줄은 모서리마다 2가닥, 대각선 반대 모서리로 지그재그.
-      <ol>
-        <li>틀 가장자리 손톱으로 당겨 빼기 <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=61s" target="_blank" rel="noopener">▶ 1:01</a></li>
-        <li>줄 걸린 모양 사진 찍고 헌 줄 빼기 (스프링은 다시 씀) <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=192s" target="_blank" rel="noopener">▶ 3:12</a></li>
-        <li>새 줄 2가닥 → 크림프(또는 매듭) → 스프링에 꿰기 <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=355s" target="_blank" rel="noopener">▶ 5:55</a></li>
-        <li>한 가닥은 커튼 막대, 한 가닥은 방충망 막대 지나 반대 모서리로 <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=590s" target="_blank" rel="noopener">▶ 9:50</a></li>
-        <li>반대쪽도 같게 → 수평 맞춰짐 → 틀 끼우기 <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=888s" target="_blank" rel="noopener">▶ 14:48</a></li>
-      </ol>
-      요령: 커튼을 <b>거의 닫은 상태</b>에서 줄 길이 맞추기.
-    </div></details>
+      </figure></div></details>
   </div>
 </section>
 
@@ -121,19 +119,11 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
   <h2>🛞 바퀴 쪽</h2>
   <div class="item">
     <label class="ck"><input type="checkbox" class="core"><span>깨진 곳 우레탄 폼으로 메우고 커터로 깎기</span></label>
-    <details class="how"><summary>방법 + 영상 장면</summary><div class="d">
-      <ol>
-        <li>흙 걷고 말리기</li>
-        <li>떨어진 조각은 나무 꼬치를 핀처럼 꽂고 폼으로 붙이기 <a class="t" href="https://www.youtube.com/watch?v=RYxr7sKBXYA&t=29s" target="_blank" rel="noopener">▶ 0:29</a></li>
-        <li>폼은 조금씩 여러 번 (한 번에 많이 쏘면 속이 안 굳음) <a class="t" href="https://www.youtube.com/watch?v=RYxr7sKBXYA&t=167s" target="_blank" rel="noopener">▶ 2:47</a></li>
-        <li>1시간 뒤 커터로 평평하게 <a class="t" href="https://www.youtube.com/watch?v=RYxr7sKBXYA&t=196s" target="_blank" rel="noopener">▶ 3:16</a></li>
-      </ol>
-      <span class="warn">⚠ 일반 FRP 수지·빠데·신너·락카·고무 본드 금지</span> — 스티로폼이 녹아요.
-    </div></details>
+    <details class="how"><summary>방법 + 영상 (이 자리에서 재생)</summary><div class="d"><div class="player" id="p-f"><button class="poster" type="button" data-k="f" data-v="RYxr7sKBXYA" data-t="0" style="background-image:url(https://i.ytimg.com/vi/RYxr7sKBXYA/hqdefault.jpg)"><span>▶ 재생</span></button></div><div class="pcap">미국 특수효과 학교의 스티로폼 붙이기 (6분). 카라반용 영상은 없어서 가장 가까운 걸 골랐어요.</div><ol class="sk"><li>흙 걷고 완전히 말리기</li><li><button class="seek" type="button" data-k="f" data-v="RYxr7sKBXYA" data-t="29">▶ 0:29</button> 떨어진 조각은 나무 꼬치를 핀처럼 꽂아 뼈대 만들기</li><li><button class="seek" type="button" data-k="f" data-v="RYxr7sKBXYA" data-t="108">▶ 1:48</button> 우레탄 폼은 조금만 — 부풀어요</li><li><button class="seek" type="button" data-k="f" data-v="RYxr7sKBXYA" data-t="167">▶ 2:47</button> 한 번에 많이 쏘면 속이 안 굳어요 → 여러 번 나눠서, 1시간 굳히기</li><li><button class="seek" type="button" data-k="f" data-v="RYxr7sKBXYA" data-t="196">▶ 3:16</button> 커터로 평평하게 — 사포는 폼이 뜯겨요</li></ol><span class="warn">⚠ 일반 FRP 수지·빠데·신너·락카·고무 본드 금지</span> — 스티로폼이 녹아요.</div></details>
   </div>
   <div class="item">
     <label class="ck"><input type="checkbox" class="core"><span>에폭시 + 유리섬유 천으로 얇게 덮기</span></label>
-    <details class="how"><summary>주의</summary><div class="d">스티로폼에는 <b>에폭시만</b> <a class="t" href="https://www.youtube.com/watch?v=gf8k7DbocGY&t=26s" target="_blank" rel="noopener">▶ 0:26</a>. 두껍게 한 번에 바르면 열 나서 녹아요 → 얇게 2~3겹.</div></details>
+    <details class="how"><summary>주의 + 영상</summary><div class="d"><div class="player" id="p-e"><button class="poster" type="button" data-k="e" data-v="gf8k7DbocGY" data-t="0" style="background-image:url(https://i.ytimg.com/vi/gf8k7DbocGY/hqdefault.jpg)"><span>▶ 재생</span></button></div><div class="pcap">서핑보드 수리점 (42초)</div><ol class="sk"><li><button class="seek" type="button" data-k="e" data-v="gf8k7DbocGY" data-t="0">▶ 0:00</button> 스티로폼에는 <b>에폭시만</b> — 폴리에스터 수지는 구멍이 녹아요</li></ol>두껍게 한 번에 바르면 열 나서 녹아요 → 얇게 2~3겹, 그늘에서.</div></details>
   </div>
   <div class="item">
     <label class="ck"><input type="checkbox" class="core"><span>얇은 판 덧대기 + 흙받이 달기 (또 안 깨지게)</span></label>
@@ -143,7 +133,7 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
 <section>
   <h2>🧰 챙겨 갈 것</h2>
   <div class="item"><label class="ck"><input type="checkbox" class="core"><span><b>줄자</b> · 커터칼 · 펜치 · 장갑</span></label></div>
-  <div class="item"><label class="ck"><input type="checkbox" class="core"><span>줄 1.2mm · 크림프 4개 · 플라스틱 헤라</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox" class="core"><span>작은 나사 · 가는 드릴(1.5mm) · 실리콘 그리스 · 플라스틱 헤라</span></label></div>
   <div class="item"><label class="ck"><input type="checkbox" class="core"><span>우레탄 폼 + 나무 꼬치</span></label></div>
   <div class="item"><label class="ck"><input type="checkbox" class="core"><span>에폭시 + 유리섬유 천 · 얇은 판 · 흙받이</span></label></div>
 </section>
@@ -158,7 +148,6 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
   <h3>창 관리</h3>
   <div class="item"><label class="ck"><input type="checkbox"><span>고무 패킹·레일에 실리콘 스프레이</span></label></div>
   <div class="item"><label class="ck"><input type="checkbox"><span>커튼 천이 찢어졌으면 새로 사기 (알리에 700×500 커튼만은 없음, 창 통째 약 45만원)</span></label></div>
-  <div class="item"><label class="ck"><input type="checkbox"><span>줄 걸던 플라스틱 고리 부러졌으면 작은 나사로 대신 <a class="t" href="https://www.youtube.com/watch?v=KXjbXED5iNU&t=28s" target="_blank" rel="noopener">▶ 0:28</a></span></label></div>
 
   <h3>바퀴 쪽 호스</h3>
   <div class="item"><label class="ck"><input type="checkbox"><span>겨울 전 물 빼기 (호스가 밖에 드러남)</span></label></div>
@@ -171,10 +160,11 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
   <h3>더 챙길 것</h3>
   <div class="item"><label class="ck"><input type="checkbox"><span>드라이버 · 헤드랜턴 · 사다리 · 마스킹 테이프 · 낚싯줄</span></label></div>
   <div class="item"><label class="ck"><input type="checkbox"><span>실리콘 · 실리콘 스프레이 · 중성세제 · 큰 가방</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>(줄이 아예 끊겼으면) 줄 1.2mm · 크림프 4개 · 펜치</span></label></div>
 
   <h3>출처 (2026-10-18)</h3>
   <ul class="src">
-    <li>줄 갈기: <a href="https://www.youtube.com/watch?v=6mtnv9hvF7g" target="_blank" rel="noopener">Gonk and Moody</a> · 고리 나사: <a href="https://www.youtube.com/watch?v=KXjbXED5iNU" target="_blank" rel="noopener">Van Life Guidebook</a></li>
+    <li>커튼 줄: <a href="https://www.youtube.com/watch?v=xhW-oJn2sOw" target="_blank" rel="noopener">Emma and Shaun Explore</a> · 새로 꿰기: <a href="https://www.youtube.com/watch?v=6mtnv9hvF7g" target="_blank" rel="noopener">Gonk and Moody</a></li>
     <li>스티로폼: <a href="https://www.youtube.com/watch?v=RYxr7sKBXYA" target="_blank" rel="noopener">Stan Winston School</a> · 에폭시만: <a href="https://www.youtube.com/watch?v=gf8k7DbocGY" target="_blank" rel="noopener">Rogue Wave</a></li>
     <li>굳은 우레탄 본드는 기계 제거: <a href="https://forums.ybw.com/threads/cleaning-off-sikaflex.149323" target="_blank" rel="noopener">ybw 포럼</a></li>
   </ul>
@@ -182,6 +172,13 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
 </details>
 
 </main>
+<script>
+// play that video from that second inside the page (phone: playsinline)
+document.addEventListener('click',function(ev){var b=ev.target.closest('[data-v]');if(!b)return;
+  var p=document.getElementById('p-'+b.dataset.k);
+  p.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+b.dataset.v+'?start='+b.dataset.t+'&autoplay=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  if(!b.classList.contains('poster'))p.scrollIntoView({behavior:'smooth',block:'center'});});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config.js"></script>
 <script>
