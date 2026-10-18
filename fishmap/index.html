@@ -307,6 +307,7 @@ document.addEventListener('click',e=>{const im=e.target.closest('img.ph');if(!im
   if(!MAPS[view.map])view.map=Object.keys(MAPS)[0];
   loadScript(FISH_URL+'data.js?t='+Date.now()).then(()=>render()).catch(()=>{});
   const d=await store.start(); doc=d||{}; doc.fishtrips=doc.fishtrips||[]; render();
+  {const h=location.hash.slice(1).split('=');if(h[0]==='trip'&&tripById(h[1]))openTrip(h[1]);if(h[0]==='new')newTrip(view.map);history.replaceState(null,'',location.pathname+location.search);}
   if(TEST){const h=location.hash.slice(1).split('=');if(h[0]==='trip')openTrip(h[1]);if(h[0]==='spot')document.querySelectorAll('#mapbox .dot')[+h[1]]?.click();if(h[0]==='pt'){openTrip('t1');document.querySelector('.pt')?.click();}}
 })();
 })();
