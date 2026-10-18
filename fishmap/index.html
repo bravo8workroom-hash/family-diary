@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <!--
   Fishing point map + trip diary (사장님 10-18: 「위성지도에 우리가 간 포인트를 찍고 꽝인지 좋았는지 남기기 · 일기 · 낚시판과 연결」).
-  Data: family_state.doc.fishtrips (same shared store as cook/ money/) — [{id,by,d,map,area,sea,diary,photos[],pts[{id,lat,lng,res,name,how,bait,fish,size,tm,memo}]}]
+  Data: family_state.doc.fishtrips (same shared store as cook/ money/) — [{id,by,d,map,area,sea,diary,photos[],pts[{id,lat,lng,res,name,how,bait,fish,size,tm,memo(=diary),photos[]}]}]  (trip diary/photos = old, shown read-only)
   Maps: fishmap/maps/*.jpg + maps.json (corner lat/lng, made by tools/위성지도.py) -> a GPS fix lands on the right pixel.
   Sea info for the day comes from the fishing board's data.js (bravo8workroom.github.io/fishing) and is snapshotted into the trip.
   ?test=1 = local mock store (no login), for headless checks.
@@ -58,6 +58,7 @@ h2{ font-size:16px; margin:18px 14px 8px; }
 .pill{ font-size:12.5px; font-weight:800; padding:2px 10px; border-radius:999px; }
 textarea{ width:100%; min-height:110px; border:0; border-radius:12px; background:var(--soft); padding:10px 12px; font-size:15px; line-height:1.7; resize:vertical; }
 .photos{ display:flex; flex-wrap:wrap; gap:8px; } .photos img{ width:84px; height:84px; object-fit:cover; border-radius:12px; cursor:zoom-in; }
+.photos.sm{ margin-top:6px; } .photos.sm img{ width:64px; height:64px; }
 .addph{ width:84px; height:84px; border-radius:12px; border:2px dashed var(--line); display:flex; align-items:center; justify-content:center; color:var(--sub); font-weight:700; cursor:pointer; }
 .row{ display:flex; gap:6px; margin-bottom:8px; } .row input{ flex:1; min-width:0; min-height:44px; border:0; border-radius:12px; background:var(--soft); padding:0 12px; font-size:15px; }
 .lbl{ font-size:12.5px; color:var(--sub); margin:2px 2px 4px; }
@@ -94,6 +95,7 @@ const WD='일월화수목금토';
 let MAPS={}, doc={fishtrips:[]}, view={screen:'map', map:localStorage.getItem('fmMap')||'사천진-북', how:'전체', trip:null, gps:null};
 const $=id=>document.getElementById(id);
 const esc=t=>String(t??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const thumbs=a=>(a&&a.length)?`<div class="photos sm">${a.map(u=>`<img class="ph" src="${esc(u)}" alt="사진">`).join('')}</div>`:'';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 const hhmm=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
@@ -205,7 +207,7 @@ function renderMap(){
   <div class="legend"><span><i style="background:var(--ok)"></i>잡음</span><span><i style="background:var(--mid)"></i>입질만</span><span><i style="background:var(--bad)"></i>꽝</span><span>숫자 = 같은 자리에 간 횟수</span></div>
   <div class="acts"><button class="btn" id="gps">지금 여기 찍기</button><button class="btn dark" id="newTrip">오늘 출조 기록</button></div>
   <h2>출조 일기</h2>
-  ${trips.length?trips.map(t=>{const n={ok:0,mid:0,bad:0};(t.pts||[]).forEach(p=>n[p.res]++);return `<div class="card trip" data-trip="${esc(t.id)}"><span class="d">${dlabel(t.d)}</span><span class="s">${esc((MAPS[t.map]?.title||t.map).split(' — ')[0])}${t.diary?' — '+esc(t.diary.slice(0,24))+(t.diary.length>24?'…':''):''}</span><span class="tally">${n.ok?`<span class="p-ok">${n.ok}</span>`:''}${n.mid?`<span class="p-mid">${n.mid}</span>`:''}${n.bad?`<span class="p-bad">${n.bad}</span>`:''}</span></div>`;}).join(''):'<div class="card empty">아직 출조 일기가 없어요 — 「오늘 출조 기록」을 눌러 시작하세요</div>'}`;
+  ${trips.length?trips.map(t=>{const n={ok:0,mid:0,bad:0};(t.pts||[]).forEach(p=>n[p.res]++);return `<div class="card trip" data-trip="${esc(t.id)}"><span class="d">${dlabel(t.d)}</span><span class="s">${esc((MAPS[t.map]?.title||t.map).split(' — ')[0])}${(()=>{const w=(t.pts||[]).map(p=>p.memo).find(Boolean)||t.diary||'';return w?' — '+esc(w.slice(0,24))+(w.length>24?'…':''):'';})()}</span><span class="tally">${n.ok?`<span class="p-ok">${n.ok}</span>`:''}${n.mid?`<span class="p-mid">${n.mid}</span>`:''}${n.bad?`<span class="p-bad">${n.bad}</span>`:''}</span></div>`;}).join(''):'<div class="card empty">아직 출조 일기가 없어요 — 「오늘 출조 기록」을 눌러 시작하세요</div>'}`;
   document.querySelectorAll('[data-map]').forEach(b=>b.onclick=()=>{view.map=b.dataset.map;localStorage.setItem('fmMap',view.map);render();});
   document.querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>{view.how=b.dataset.how;render();});
   document.querySelectorAll('[data-trip]').forEach(b=>b.onclick=()=>openTrip(b.dataset.trip));
@@ -220,7 +222,7 @@ function spotSheet(c){
   $('sheet').innerHTML=`<h3><span>${esc(name)}</span><button class="btn" id="shClose">닫기</button></h3>
    <div class="lbl">${items.length}번 기록</div>
    <div class="stat"><div class="p-ok"><b>${c.n.ok||0}</b>잡음</div><div class="p-mid"><b>${c.n.mid||0}</b>입질만</div><div class="p-bad"><b>${c.n.bad||0}</b>꽝</div></div>
-   ${items.map(i=>`<div class="visit" data-trip="${esc(i.t.id)}"><span class="dt">${dlabel(i.t.d)}</span><span class="pill p-${i.p.res}">${RES[i.p.res]}</span> ${esc([i.p.how,i.p.bait,i.p.tm].filter(Boolean).join(' · '))}<div>${esc([i.p.fish,i.p.size&&(i.p.size+'cm'),i.p.memo].filter(Boolean).join(' — '))}</div>${i.t.sea?`<div class="lbl">물때 ${esc(i.t.sea.mul||'-')} · 밤 파도 ${i.t.sea.wN??'-'}m · 새벽 파도 ${i.t.sea.wD??'-'}m</div>`:''}</div>`).join('')}
+   ${items.map(i=>`<div class="visit" data-trip="${esc(i.t.id)}"><span class="dt">${dlabel(i.t.d)}</span><span class="pill p-${i.p.res}">${RES[i.p.res]}</span> ${esc([i.p.how,i.p.bait,i.p.tm].filter(Boolean).join(' · '))}<div>${esc([i.p.fish,i.p.size&&(i.p.size+'cm')].filter(Boolean).join(' '))}</div>${i.p.memo?`<div>${esc(i.p.memo)}</div>`:''}${thumbs(i.p.photos)}${i.t.sea?`<div class="lbl">물때 ${esc(i.t.sea.mul||'-')} · 밤 파도 ${i.t.sea.wN??'-'}m · 새벽 파도 ${i.t.sea.wD??'-'}m</div>`:''}</div>`).join('')}
    <button class="btn dark" style="width:100%;margin-top:10px" id="here">이 자리에 오늘 기록 남기기</button>`;
   $('sheet').hidden=false;
   $('shClose').onclick=()=>$('sheet').hidden=true;
@@ -262,22 +264,17 @@ function renderTrip(){
     <div class="maphint">손가락 둘로 키우고, 원하는 곳을 꾹 누르면 도장</div><div class="credit">${esc(m.credit)}</div></div>
   <div class="acts"><button class="btn" id="gps">지금 여기 찍기</button></div>
   <h2>포인트</h2>
-  ${(t.pts||[]).length?(t.pts||[]).map((p,i)=>`<div class="card pt" data-p="${esc(p.id)}"><div class="no d-${p.res}">${i+1}</div><div class="t">${esc(p.name||'이름 없는 자리')}</div><span class="pill p-${p.res}">${RES[p.res]}</span><div class="x">${esc([p.how,p.bait,p.tm].filter(Boolean).join(' · '))}${p.fish||p.size?' — '+esc([p.fish,p.size&&(p.size+'cm')].filter(Boolean).join(' ')):''}${p.memo?'<br>'+esc(p.memo):''}</div></div>`).join(''):'<div class="card empty">위성 사진에서 낚시한 곳을 눌러 보세요</div>'}
-  <h2>일기</h2>
-  <div class="card"><textarea id="diary" placeholder="오늘 어땠는지 — 다음에 볼 나에게">${esc(t.diary||'')}</textarea></div>
-  <div class="card"><div class="photos" id="photos">${(t.photos||[]).map((u,i)=>`<img src="${esc(u)}" data-i="${i}" alt="출조 사진">`).join('')}<label class="addph">사진 +<input type="file" accept="image/*" multiple hidden id="ph"></label></div></div>
+  ${(t.pts||[]).length?(t.pts||[]).map((p,i)=>`<div class="card pt" data-p="${esc(p.id)}"><div class="no d-${p.res}">${i+1}</div><div class="t">${esc(p.name||'이름 없는 자리')}</div><span class="pill p-${p.res}">${RES[p.res]}</span><div class="x">${esc([p.how,p.bait,p.tm].filter(Boolean).join(' · '))}${p.fish||p.size?' — '+esc([p.fish,p.size&&(p.size+'cm')].filter(Boolean).join(' ')):''}${p.memo?'<br>'+esc(p.memo):''}${thumbs(p.photos)}</div></div>`).join(''):'<div class="card empty">위성 사진에서 낚시한 곳을 눌러 보세요</div>'}
+  ${t.diary||(t.photos||[]).length?`<h2>그날 메모</h2><div class="card">${esc(t.diary||'')}${thumbs(t.photos)}</div>`:''}
   <div class="acts"><button class="btn" id="delTrip">이 출조 지우기</button></div>`;
   $('back').onclick=()=>{view.screen='map';render();};
   $('gps').onclick=()=>locate(false);
   zoomable($('tripmap'),t.map,(fx,fy)=>{const g=fromFrac(m,fx,fy);addPoint(t,g[0],g[1]);});
   document.querySelectorAll('[data-p]').forEach(el=>el.onclick=e=>{e.stopPropagation();pointSheet(t,el.dataset.p);});
-  let dt;$('diary').oninput=e=>{clearTimeout(dt);const v=e.target.value;dt=setTimeout(()=>saveTrip(t.id,x=>{x.diary=v;}),700);};
-  $('ph').onchange=async e=>{const fs=[...e.target.files];toast('사진 올리는 중…');const urls=[];for(const f of fs)urls.push(await store.photo(await compress(f)));await saveTrip(t.id,x=>{x.photos=(x.photos||[]).concat(urls);});toast('사진을 붙였어요');};
-  document.querySelectorAll('#photos img').forEach(im=>im.onclick=()=>{$('lbimg').src=im.src;$('lb').hidden=false;});
   $('delTrip').onclick=async()=>{await store.save(dd=>{dd.fishtrips=(dd.fishtrips||[]).filter(x=>x.id!==t.id);});view.screen='map';toast('출조를 지웠어요');render();};
 }
 async function addPoint(t,lng,lat,name='',memo=''){
-  const p={id:uid(),lat:+lat.toFixed(7),lng:+lng.toFixed(7),res:'ok',name,how:'원투',bait:'',fish:'',size:'',tm:hhmm(),memo};
+  const p={id:uid(),lat:+lat.toFixed(7),lng:+lng.toFixed(7),res:'ok',name,how:'원투',bait:'',fish:'',size:'',tm:hhmm(),memo,photos:[]};
   await saveTrip(t.id,x=>{x.pts=x.pts||[];if(!x.pts.some(y=>y.id===p.id))x.pts.push(p);});
   pointSheet(tripById(t.id)||t,p.id,true);
 }
@@ -288,7 +285,8 @@ function pointSheet(t,pid,isNew){
    <div class="seg2">${['원투','루어'].map(h=>`<button class="${p.how===h?'on':''}" data-how="${h}">${h}</button>`).join('')}</div>
    <div class="lbl">자리 이름 · 시각</div><div class="row"><input id="pName" value="${esc(p.name)}" placeholder="예: 등대 앞"><input id="pTm" value="${esc(p.tm)}" placeholder="19:40" style="max-width:96px"></div>
    <div class="lbl">미끼·루어 · 어종 · 크기(cm)</div><div class="row"><input id="pBait" value="${esc(p.bait)}" placeholder="개불 / 메탈 30g"><input id="pFish" value="${esc(p.fish)}" placeholder="감성돔"><input id="pSize" value="${esc(p.size)}" placeholder="41" inputmode="numeric" style="max-width:70px"></div>
-   <div class="lbl">메모</div><div class="row"><input id="pMemo" value="${esc(p.memo)}" placeholder="예: 해 지고 첫 입질"></div>
+   <div class="lbl">일기</div><textarea id="pMemo" placeholder="여기서 어땠는지 — 예: 해 지고 첫 입질, 다음엔 여기 먼저" style="margin-bottom:8px">${esc(p.memo)}</textarea>
+   <div class="lbl">사진</div><div class="photos" id="pPh" style="margin-bottom:10px">${(p.photos||[]).map(u=>`<img class="ph" src="${esc(u)}" alt="포인트 사진">`).join('')}<label class="addph">사진 +<input type="file" accept="image/*" multiple hidden id="pPhIn"></label></div>
    <button class="btn" id="pDel" style="width:100%">이 포인트 지우기</button>`;
   $('sheet').hidden=false;
   const cur={...p};
@@ -296,9 +294,13 @@ function pointSheet(t,pid,isNew){
   $('sheet').querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>{cur.how=b.dataset.how;$('sheet').querySelectorAll('[data-how]').forEach(x=>x.classList.toggle('on',x===b));});
   $('shClose').onclick=async()=>{const v={...cur,name:$('pName').value.trim(),tm:$('pTm').value.trim(),bait:$('pBait').value.trim(),fish:$('pFish').value.trim(),size:$('pSize').value.trim(),memo:$('pMemo').value.trim()};
     $('sheet').hidden=true;await saveTrip(t.id,x=>{const y=(x.pts||[]).find(z=>z.id===pid);if(y)Object.assign(y,v);});toast('저장했어요');};
+  $('pPhIn').onchange=async e=>{const fs=[...e.target.files];if(!fs.length)return;toast('사진 올리는 중…');const urls=[];for(const f of fs)urls.push(await store.photo(await compress(f)));
+    cur.photos=(cur.photos||[]).concat(urls);await saveTrip(t.id,x=>{const y=(x.pts||[]).find(z=>z.id===pid);if(y)y.photos=(y.photos||[]).concat(urls);});
+    $('pPh').insertAdjacentHTML('afterbegin',urls.map(u=>`<img class="ph" src="${esc(u)}" alt="포인트 사진">`).join(''));toast('사진을 붙였어요');};
   $('pDel').onclick=async()=>{$('sheet').hidden=true;await saveTrip(t.id,x=>{x.pts=(x.pts||[]).filter(z=>z.id!==pid);});toast('포인트를 지웠어요');};
 }
 $('lb').onclick=()=>$('lb').hidden=true;
+document.addEventListener('click',e=>{const im=e.target.closest('img.ph');if(!im)return;e.stopPropagation();e.preventDefault();$('lbimg').src=im.src;$('lb').hidden=false;},true);
 
 (async function boot(){
   MAPS=await (await fetch('maps/maps.json',{cache:'no-store'})).json();
