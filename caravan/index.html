@@ -39,6 +39,14 @@ figure svg{width:100%;height:auto;display:block;background:#fff;border:1px solid
 details.more{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:12px 0;padding:6px 14px}
 details.more>summary{font-size:16px;color:var(--mute);padding:8px 0}
 details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600}
+.rec{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 10px}
+.rec label{display:block;font-size:13.5px;color:var(--mute)}
+.rec .full{grid-column:1/-1}
+.rec input,.rec textarea{width:100%;margin-top:3px;font:inherit;font-size:17px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#FBFAF8;color:var(--ink)}
+.rec textarea{min-height:84px;resize:vertical;font-size:16px}
+.rec input:focus,.rec textarea:focus{outline:2px solid var(--accent);background:#fff}
+.unit{position:relative}.unit input{padding-right:52px}.unit em{position:absolute;right:12px;bottom:12px;font-style:normal;color:var(--mute);font-size:14px}
+.sync{font-size:13px;color:var(--mute);margin:0 0 8px}.sync b{color:var(--accent)}.sync a{color:var(--accent)}
 .src{font-size:13px;color:var(--mute)}.src li{margin:3px 0}
 </style>
 </head>
@@ -50,6 +58,21 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
   <div class="progt" id="pt">0 / 0</div>
 </header>
 <main>
+
+<section>
+  <h2>📏 재서 적기</h2>
+  <p class="sync" id="sync">불러오는 중…</p>
+  <div class="rec">
+    <label class="unit">창 구멍 가로<input data-n="winW" inputmode="decimal" placeholder="예: 700"><em>mm</em></label>
+    <label class="unit">창 구멍 세로<input data-n="winH" inputmode="decimal" placeholder="예: 500"><em>mm</em></label>
+    <label class="full">창 상표 (테두리 스티커)<input data-n="brand" placeholder="예: Dometic, MPK"></label>
+    <label class="unit">깨진 곳 가로<input data-n="crW" inputmode="decimal" placeholder="예: 20"><em>cm</em></label>
+    <label class="unit">깨진 곳 세로<input data-n="crH" inputmode="decimal" placeholder="예: 15"><em>cm</em></label>
+    <label class="unit">깨진 곳 깊이<input data-n="crD" inputmode="decimal" placeholder="예: 5"><em>cm</em></label>
+    <label class="unit">타이어 위 간격<input data-n="tire" inputmode="decimal" placeholder="예: 2"><em>손가락</em></label>
+    <label class="full">메모 (산 것·가격·다음에 할 것)<textarea data-n="memo" placeholder="예: 줄 1.2mm 15m 알리 주문 10/20"></textarea></label>
+  </div>
+</section>
 
 <section>
   <h2>🪟 루프창</h2>
@@ -128,10 +151,9 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
 <details class="more">
   <summary>나머지 — 필요할 때만 (펼쳐서 체크)</summary>
 
-  <h3>가서 재고 찍기</h3>
-  <div class="item"><label class="ck"><input type="checkbox"><span>창 구멍 가로·세로 재기 (사진상 약 700×500)</span></label></div>
-  <div class="item"><label class="ck"><input type="checkbox"><span>창 상표 스티커 · 지붕 쪽 창 테두리 사진</span></label></div>
-  <div class="item"><label class="ck"><input type="checkbox"><span>타이어 위 ↔ 휠하우스 간격 사진 (아주 좁으면 수리점)</span></label></div>
+  <h3>사진 찍기</h3>
+  <div class="item"><label class="ck"><input type="checkbox"><span>지붕 쪽 창 테두리 사진 (본드 발랐는지)</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>타이어 위 간격 사진 (아주 좁으면 수리점)</span></label></div>
 
   <h3>창 관리</h3>
   <div class="item"><label class="ck"><input type="checkbox"><span>고무 패킹·레일에 실리콘 스프레이</span></label></div>
@@ -156,23 +178,118 @@ details.more h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600
     <li>스티로폼: <a href="https://www.youtube.com/watch?v=RYxr7sKBXYA" target="_blank" rel="noopener">Stan Winston School</a> · 에폭시만: <a href="https://www.youtube.com/watch?v=gf8k7DbocGY" target="_blank" rel="noopener">Rogue Wave</a></li>
     <li>굳은 우레탄 본드는 기계 제거: <a href="https://forums.ybw.com/threads/cleaning-off-sikaflex.149323" target="_blank" rel="noopener">ybw 포럼</a></li>
   </ul>
-  <p class="src">체크는 이 폰에만 저장돼요. <button id="reset" style="background:none;border:0;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer;padding:0">체크 전부 지우기</button></p>
+  <p class="src"><button id="reset" style="background:none;border:0;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer;padding:0">체크 전부 지우기</button></p>
 </details>
 
 </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
 <script>
 (function(){
-  var KEY='caravan-check-v3', boxes=[].slice.call(document.querySelectorAll('label.ck input')), core=boxes.filter(function(b){return b.classList.contains('core')});
-  var saved={}; try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  // Shared record: family_state.doc.caravan = {checks:{i:true}, notes:{name:text}, at:{key:iso}}
+  // Uses the family-diary login already saved on this phone (same site). No login -> this phone only.
+  var LKEY='caravan-v4', ROW='main', sb=null, online=false, rev=0;
+  var data={checks:{},notes:{},at:{}}, dirty={}, timer=null, busy=false;
+  try{var c=JSON.parse(localStorage.getItem(LKEY)||'null'); if(c) data=norm(c);}catch(e){}
+  var boxes=[].slice.call(document.querySelectorAll('label.ck input'));
+  var core=boxes.filter(function(b){return b.classList.contains('core');});
+  var fields=[].slice.call(document.querySelectorAll('[data-n]'));
+  var syncEl=document.getElementById('sync');
+
+  function norm(d){d=d||{};return{checks:d.checks||{},notes:d.notes||{},at:d.at||{}};}
   function paint(){
-    boxes.forEach(function(b){b.parentNode.classList.toggle('done',b.checked)});
-    var n=core.filter(function(b){return b.checked}).length;
+    boxes.forEach(function(b,i){b.checked=!!data.checks[i]; b.parentNode.classList.toggle('done',b.checked);});
+    fields.forEach(function(f){ if(document.activeElement!==f) f.value=data.notes[f.dataset.n]||''; });
+    var n=core.filter(function(b){return b.checked;}).length;
     document.getElementById('bar').style.width=(n/core.length*100)+'%';
     document.getElementById('pt').textContent='보수 '+n+' / '+core.length;
   }
-  boxes.forEach(function(b,i){ b.checked=!!saved[i]; b.addEventListener('change',function(){saved[i]=b.checked; localStorage.setItem(KEY,JSON.stringify(saved)); paint();}); });
-  document.getElementById('reset').addEventListener('click',function(){ if(!confirm('체크를 전부 지울까요?'))return; saved={}; localStorage.removeItem(KEY); boxes.forEach(function(b){b.checked=false}); paint(); });
-  paint();
+  function last(){
+    var t=Object.keys(data.at).map(function(k){return data.at[k];}).sort().pop(); if(!t) return '';
+    var d=new Date(t); return ' · 마지막 기록 '+(d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+('0'+d.getMinutes()).slice(-2);
+  }
+  function status(msg){
+    if(msg){syncEl.innerHTML=msg;return;}
+    syncEl.innerHTML= online ? '<b>✓ 가족 다이어리에 저장 — 남편 폰에서도 보여요</b>'+last()
+      : '이 폰에만 저장 중 · <a href="../">가족 다이어리에 한 번 들어가면</a> 남편과 같이 봐요'+last();
+  }
+  function setVal(key,val){
+    var now=new Date().toISOString();
+    if(key.charAt(0)==='c'){var i=key.slice(1); if(val) data.checks[i]=true; else delete data.checks[i];}
+    else data.notes[key.slice(1)]=val;
+    data.at[key]=now; dirty[key]={val:val,at:now};
+    localStorage.setItem(LKEY,JSON.stringify(data));
+    clearTimeout(timer); timer=setTimeout(push,700);
+  }
+  function apply(base){ // my unsaved changes on top of the server copy
+    base=norm(base);
+    Object.keys(dirty).forEach(function(k){var v=dirty[k];
+      if(k.charAt(0)==='c'){var i=k.slice(1); if(v.val) base.checks[i]=true; else delete base.checks[i];}
+      else base.notes[k.slice(1)]=v.val;
+      base.at[k]=v.at;});
+    return base;
+  }
+  async function row(){var r=await sb.from('family_state').select('doc,rev').eq('id',ROW).maybeSingle(); if(r.error) throw r.error; return r.data;}
+  async function push(){
+    if(!online){status();return;}
+    if(busy||!Object.keys(dirty).length) return;
+    busy=true; status('저장 중…');
+    try{
+      for(var t=0;t<4;t++){
+        var f=await row(); var doc=f.doc||{}; var mine=apply(doc.caravan); var sent=dirty; dirty={};
+        doc.caravan=mine;
+        var r=await sb.from('family_state').update({doc:doc,rev:f.rev+1,updated_at:new Date().toISOString()}).eq('id',ROW).eq('rev',f.rev).select('rev');
+        if(r.error){dirty=Object.assign(sent,dirty); throw r.error;}
+        if(r.data&&r.data.length){rev=r.data[0].rev; data=apply(mine); localStorage.setItem(LKEY,JSON.stringify(data)); break;}
+        dirty=Object.assign(sent,dirty);
+      }
+      status();
+    }catch(e){status('⚠ 저장 못 했어요 — 이 폰에는 남아 있어요. 인터넷 되면 다시 저장돼요');}
+    busy=false;
+    if(Object.keys(dirty).length){clearTimeout(timer); timer=setTimeout(push,1500);}
+  }
+  async function pull(){
+    if(!online||busy) return;
+    try{var f=await row(); if(f&&f.rev!==rev){rev=f.rev; data=apply(f.doc&&f.doc.caravan); localStorage.setItem(LKEY,JSON.stringify(data)); paint(); status();}}catch(e){}
+  }
+  function remembered(){
+    try{var o=JSON.parse(localStorage.getItem('family-diary/login')||'null'); if(!o||!o.e||!o.p) return null;
+      return {email:o.e,pw:decodeURIComponent(escape(atob(o.p)))};}catch(e){return null;}
+  }
+  async function start(){
+    paint(); status();
+    var C=window.FAMILY_CONFIG||{};
+    if(!window.supabase||!C.url) return;
+    try{
+      sb=window.supabase.createClient(C.url,C.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+      var s=await sb.auth.getSession();
+      if(!(s.data&&s.data.session)){var k=remembered(); if(k){var r=await sb.auth.signInWithPassword({email:k.email,password:k.pw}); if(!r.error) s=await sb.auth.getSession();}}
+      online=!!(s.data&&s.data.session);
+      if(online){
+        var f=await row(); rev=f.rev; var server=norm(f.doc&&f.doc.caravan);
+        // carry over anything saved on this phone that is newer than the shared copy
+        Object.keys(data.at).forEach(function(k){
+          if(!server.at[k]||server.at[k]<data.at[k]){
+            var v=k.charAt(0)==='c'?!!data.checks[k.slice(1)]:(data.notes[k.slice(1)]||'');
+            dirty[k]={val:v,at:data.at[k]};
+          }});
+        data=apply(server); paint();
+        if(Object.keys(dirty).length) push(); else status();
+        document.addEventListener('visibilitychange',function(){if(!document.hidden) pull();});
+        setInterval(pull,30000);
+      } else status();
+    }catch(e){online=false; status();}
+  }
+  boxes.forEach(function(b,i){b.addEventListener('change',function(){setVal('c'+i,b.checked); paint();});});
+  fields.forEach(function(f){
+    f.addEventListener('input',function(){setVal('n'+f.dataset.n,f.value);});
+    f.addEventListener('blur',function(){clearTimeout(timer); push();});
+  });
+  document.getElementById('reset').addEventListener('click',function(){
+    if(!confirm('체크를 전부 지울까요? (적은 기록은 그대로)')) return;
+    boxes.forEach(function(b,i){ if(b.checked) setVal('c'+i,false); }); paint();
+  });
+  start();
 })();
 </script>
 </body>
