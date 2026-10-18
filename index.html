@@ -122,6 +122,9 @@ input,button,textarea,select{font-family:inherit;}
     <sc-if value="{{ showCook }}" hint-placeholder-val="{{ true }}">
       <button onClick="{{ goCook }}" title="우리집 레시피" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">🍳</button>
     </sc-if>
+    <sc-if value="{{ showCaravan }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ goCaravan }}" title="카라반 보수" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">🚐</button>
+    </sc-if>
     <sc-if value="{{ showDiet }}" hint-placeholder-val="{{ true }}">
       <button onClick="{{ goDiet }}" title="다이어트 일기" style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;padding:0;">🥗</button>
     </sc-if>
@@ -3336,6 +3339,8 @@ class Component extends DCLogic {
     V.showStudy=u.id==='kid2'||u.id==='junsun';V.goStudy=()=>{location.href='https://bravo8workroom-hash.github.io/study-cat/';};
     // 요리 레시피도 같은 저장소의 별도 페이지(cook/)다 — 엄마·아빠방에서만 보인다
     V.showCook=u.role==='parent';V.goCook=()=>{location.href='cook/';};
+    // 카라반 보수 체크리스트도 같은 저장소의 별도 페이지(caravan/)다 — 엄마·아빠방에서만 보인다
+    V.showCaravan=u.role==='parent';V.goCaravan=()=>{location.href='caravan/';};
     // 가계부도 같은 저장소의 별도 페이지(money/)다 — 엄마·아빠방에서만 보인다
     // (아이 용돈기입장으로 가는 V.goMoney 와는 다른 것이라 이름을 goWallet 으로 둔다)
     V.showWallet=u.role==='parent';V.goWallet=()=>this.goWallet();
