@@ -2,280 +2,241 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>카라반 보수 체크리스트</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{--bg:#F4F2EF;--card:#fff;--ink:#22201D;--mute:#7A746C;--line:#E6E1DA;--accent:#2F7D6D;--warn:#C0453F;--yel:#FFC400;--yelbg:#FFF6D6}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,'Noto Sans KR',system-ui,sans-serif;line-height:1.7;word-break:keep-all;overflow-wrap:break-word;font-size:16px}
-header{background:var(--ink);color:#fff;padding:22px 18px 18px}
-header h1{margin:0;font-size:22px}
-header p{margin:6px 0 0;color:#CFC9C0;font-size:14px}
-.prog{height:8px;background:#45403A;border-radius:99px;margin-top:12px;overflow:hidden}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,'Noto Sans KR',system-ui,sans-serif;line-height:1.65;word-break:keep-all;overflow-wrap:break-word;font-size:16.5px}
+header{background:var(--ink);color:#fff;padding:18px 16px 14px;padding-top:calc(18px + env(safe-area-inset-top))}
+header h1{margin:0;font-size:21px}
+.prog{height:8px;background:#45403A;border-radius:99px;margin-top:10px;overflow:hidden}
 .prog i{display:block;height:100%;width:0;background:var(--yel);transition:width .3s}
 .progt{font-size:13px;color:#CFC9C0;margin-top:4px}
-nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:8px 12px}
-nav a{flex:none;font-size:14px;color:var(--ink);text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 12px}
-main{max-width:760px;margin:0 auto;padding:14px 12px 60px}
-section{background:var(--card);border-radius:14px;padding:16px 16px 10px;margin:14px 0;border:1px solid var(--line)}
-h2{font-size:19px;margin:0 0 4px;display:flex;align-items:center;gap:8px}
-h2 .tag{font-size:12px;font-weight:600;border-radius:99px;padding:2px 9px}
-.t-hi{background:#FCE4E2;color:var(--warn)}.t-ok{background:#DDF0EB;color:var(--accent)}.t-1st{background:var(--yelbg);color:#8A6A00}
-h3{font-size:15.5px;margin:16px 0 6px;color:var(--accent)}
-.sub{color:var(--mute);font-size:14px;margin:0 0 6px}
-label.ck{display:flex;gap:10px;align-items:flex-start;padding:9px 2px;border-bottom:1px dashed var(--line);cursor:pointer;min-height:44px}
-label.ck:last-child{border-bottom:0}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:8px 12px;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:none;font-size:14px;color:var(--ink);text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:99px;padding:7px 13px}
+main{max-width:560px;margin:0 auto;padding:8px 12px 60px}
+section{background:var(--card);border-radius:16px;padding:14px 14px 6px;margin:12px 0;border:1px solid var(--line)}
+h2{font-size:18px;margin:0 0 4px}
+.facts{background:var(--yelbg);border:1px solid #F3E2A6}
+.facts ul{margin:4px 0 8px;padding-left:18px}
+.facts li{margin:3px 0}
+.item{border-bottom:1px dashed var(--line);padding:4px 0}
+.item:last-child{border-bottom:0}
+label.ck{display:flex;gap:10px;align-items:flex-start;padding:7px 0;cursor:pointer;min-height:44px}
 label.ck input{width:22px;height:22px;flex:none;margin-top:2px;accent-color:var(--accent)}
 label.ck.done span{color:var(--mute);text-decoration:line-through}
-.box{border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14.5px}
-.warn{background:#FCECEA;border-left:4px solid var(--warn)}
-.note{background:var(--yelbg);border-left:4px solid var(--yel)}
-.tip{background:#E8F3F0;border-left:4px solid var(--accent)}
-table{width:100%;border-collapse:collapse;font-size:14.5px}
-.tw{overflow-x:auto;margin:8px 0}
-th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--mute);font-weight:600;font-size:13px}
-td.n{white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
-a{color:var(--accent)}
-.links a{display:block;padding:10px 12px;margin:6px 0;background:#F7F5F2;border-radius:10px;text-decoration:none;min-height:44px}
-details{margin:8px 0}summary{cursor:pointer;color:var(--mute);font-size:14px}
-.src{font-size:13px;color:var(--mute)}
-.src li{margin:4px 0}
-.reset{background:none;border:1px solid var(--line);border-radius:99px;padding:8px 14px;color:var(--mute);font-size:13px;cursor:pointer}
-@media print{nav,.reset,.prog,.progt{display:none}section{break-inside:avoid;border:0}body{background:#fff}}
+details{margin:0 0 8px 32px}
+summary{cursor:pointer;color:var(--accent);font-size:14px;font-weight:600;list-style:none;padding:4px 0;min-height:32px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:'＋ '}
+details[open] summary::before{content:'－ '}
+.d{background:#F8F7F4;border-radius:12px;padding:10px 12px;font-size:15px}
+.d ol{margin:4px 0;padding-left:20px}.d ol li{margin:6px 0}
+.d ul{margin:4px 0;padding-left:18px}
+.warn{color:var(--warn);font-weight:600}
+a.t{display:inline-block;font-size:13px;font-weight:600;color:var(--accent);background:#E3F0EC;border-radius:99px;padding:2px 10px;text-decoration:none;margin-left:2px;white-space:nowrap}
+.kit{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0}
+.kit span{background:#fff;border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:13.5px}
+h3{font-size:14px;color:var(--mute);margin:12px 0 0;font-weight:600}
+figure{margin:8px 0}
+figure svg{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--line);border-radius:10px}
+.src{font-size:13px;color:var(--mute)}.src li{margin:3px 0}
+.reset{background:none;border:1px solid var(--line);border-radius:99px;padding:8px 14px;color:var(--mute);font-size:13px;cursor:pointer;margin:6px 0 10px}
 </style>
 </head>
 <body>
 <header>
   <h1>🚐 카라반 보수 체크리스트</h1>
-  <p>루프창 · 바퀴 쪽 스티로폼 · 청소 — 집에서 미리 챙겨 가는 용도 (2026-10-18 작성)</p>
-  <p><a href="guide.html" style="color:#FFC400;font-weight:600">🎬 영상 보며 따라 하는 설명서 →</a></p>
   <div class="prog"><i id="bar"></i></div>
-  <div class="progt" id="pt">0 / 0 체크</div>
+  <div class="progt" id="pt">0 / 0</div>
 </header>
 <nav>
-  <a href="#s0">한눈에</a><a href="#photo">📸 사진 확인</a><a href="#s1">① 재기·찍기</a><a href="#s2">② 창 안 열림</a><a href="#s3">③ 본드 지우기</a><a href="#s4">④ 커튼·방충망</a><a href="#s5">⑤ 스티로폼</a><a href="#s6">⑥ 청소</a><a href="#s7">⑦ 준비물</a>
+  <a href="#first">① 먼저</a><a href="#win">② 창 열기</a><a href="#blind">③ 커튼·방충망</a><a href="#wheel">④ 바퀴 쪽</a><a href="#clean">⑤ 청소</a><a href="#kit">⑥ 준비물</a>
 </nav>
 <main>
 
-<section id="s0">
-  <h2>이번 보수 한눈에</h2>
-  <div class="tw"><table>
-    <tr><th>무엇</th><th>상태</th><th>급</th></tr>
-    <tr><td>루프 창문(천장 창)</td><td>창이 안 열림 · 주름(아코디언) 커튼 찢어짐 · 방충망·커튼 레일이 뻑뻑함</td><td><span class="tag t-hi" style="border-radius:99px;padding:2px 8px;font-size:12px">먼저</span></td></tr>
-    <tr><td>바퀴 쪽 스티로폼</td><td>깨짐 — 메우고, 겉을 덮어서 다시 안 깨지게</td><td><span class="tag t-hi" style="border-radius:99px;padding:2px 8px;font-size:12px">먼저</span></td></tr>
-    <tr><td>청소</td><td>커튼 세탁, 실내 청소</td><td><span class="tag t-ok" style="border-radius:99px;padding:2px 8px;font-size:12px">같이</span></td></tr>
-  </table></div>
-  <div class="box note"><b>순서 추천:</b> ① 이번에 가면 재고 찍기만 → ② 집에서 맞는 부품 주문 → ③ 다음에 가서 교체·보수.<br>창문 상표·크기를 모르고 커튼부터 사면 안 맞을 확률이 높아요. 사진을 아직 못 봐서 <b>상표·크기는 추측</b>이에요.</div>
-  <p class="sub">✔ 체크 표시는 <b>이 폰(브라우저)에만</b> 저장돼요. 남편분 폰과는 따로예요.</p>
+<section class="facts">
+  <h2>사진으로 본 우리 카라반 (10-18)</h2>
+  <ul>
+    <li>창 크기 <b>약 700×500mm</b> (추측 — 줄자로 확인)</li>
+    <li>창은 <b>레버 2개 풀고 막대로 밀어 올리는 방식</b></li>
+    <li>커튼·방충망 <b>줄이 끊어져 늘어짐</b></li>
+    <li>바퀴 쪽 깨진 곳 안으로 <b>물 호스가 드러남</b></li>
+  </ul>
 </section>
 
-<section id="photo">
-  <h2>📸 사진으로 확인한 우리 카라반 <span class="tag t-1st">10-18 사진</span></h2>
-  <div class="tw"><table>
-    <tr><th>무엇</th><th>사진에서 보인 것 → 할 일</th></tr>
-    <tr><td>창 크기</td><td>아이폰 15 프로로 비교하면 <b>약 700×500mm</b>예요(추측, ±10%). 커튼을 사기 전에 줄자로 한 번만 재 주세요</td></tr>
-    <tr><td>창 여는 방식</td><td>손잡이로 돌리는 창이 아니에요. <b>굽은 쇠 받침대 + 검은 잠금 레버 2개</b>가 있어요. 레버 2개를 다 풀고 유리를 밀어 올리는 방식이에요 → 안 열리면 레버·패킹·본드 순서로 보기</td></tr>
-    <tr><td>유리 위 가는 줄</td><td><b>끊어진 커튼·방충망 줄</b>이 늘어져 있어요 → <a href="guide.html#a">설명서 A</a> 방법</td></tr>
-    <tr><td>바퀴 쪽</td><td>깨진 곳 안으로 <b>빨강·파랑 물 호스와 감긴 관</b>이 드러나 있어요. 겨울 전에 <b>물 빼 두기</b>. 타이어와 아주 가까우니 <b>타이어 위 간격</b>(손가락 몇 개 들어가는지) 사진 찍기</td></tr>
-  </table></div>
-  <div class="box warn">타이어가 휠하우스를 쳐서 깨졌을 수 있어요(추측). 그렇다면 폼으로 메워도 또 깨져요. <b>폼으로 메우기 → 얇은 알루미늄·ABS판 덧대기 → 흙받이</b>까지 하고, 간격이 너무 좁으면 카라반 수리점에 보여 주세요.</div>
+<section id="first">
+  <h2>① 가면 먼저 — 재고 찍기</h2>
+  <div class="item"><label class="ck"><input type="checkbox"><span>창 안쪽 구멍 가로·세로 재기 (mm)</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>창 테두리 상표 스티커 찍기</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>지붕에서 창 테두리 찍기 — 본드 덧발랐는지</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>바퀴 쪽 깨진 곳 크기 재기 (cm)</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>타이어 위 ↔ 휠하우스 간격 사진 (손가락 몇 개)</span></label></div>
 </section>
 
-<section id="s1">
-  <h2>① 현장에 가면 가장 먼저 — 재기·찍기 <span class="tag t-1st">10분</span></h2>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>루프 창문 <b>안쪽 테두리 상표 스티커</b> 찍기 (MPK · Dometic · Heki · Seitz · Fiamma 같은 글자)</span></label>
-    <label class="ck"><input type="checkbox"><span>창문 <b>안쪽 구멍 크기</b> 재기 (가로×세로, mm) — 사진으로는 <b>약 700×500</b>(추측)</span></label>
-    <label class="ck"><input type="checkbox"><span>커튼 틀(안쪽 프레임) <b>바깥 크기와 두께</b> 재기</span></label>
-    <label class="ck"><input type="checkbox"><span>커튼 줄(실)이 어디서 끊겼는지, 양 끝 <b>작은 스프링</b>이 남아 있는지 찍기</span></label>
-    <label class="ck"><input type="checkbox"><span>지붕에서 창문 테두리 찍기 — <b>본드(실링)를 덧발랐는지</b> 확인 (③번)</span></label>
-    <label class="ck"><input type="checkbox"><span>바퀴 쪽 깨진 곳 찍기 — 가까이 1장 + 멀리 1장 + 깨진 단면 1장 (스티로폼만인지, 겉에 딱딱한 판이 있는지)</span></label>
-    <label class="ck"><input type="checkbox"><span>깨진 곳 크기 재기 (가로×세로×깊이, cm)</span></label>
-    <label class="ck"><input type="checkbox"><span>커튼 세탁 라벨 찍기</span></label>
+<section id="win">
+  <h2>② 루프창 열기</h2>
+  <div class="item">
+    <label class="ck"><input type="checkbox"><span>검은 레버 2개 다 풀기 → 굽은 막대로 밀어 올리기</span></label>
+    <details><summary>자세히</summary><div class="d">
+      막대를 밀면 몇 단계 높이에 걸려요(같은 방식 제품은 4단: 열림·환기·닫힘·잠김).<br><span class="warn">억지로 밀지 마세요</span> — 걸림 장치가 부러져요.
+    </div></details>
   </div>
+  <div class="item">
+    <label class="ck"><input type="checkbox"><span>안 열리면: 지붕에서 뚜껑 가장자리를 손으로 살살 들기 (패킹 들러붙음)</span></label>
+  </div>
+  <div class="item">
+    <label class="ck"><input type="checkbox"><span>그래도 안 열리면: 본드 확인 → 지우기</span></label>
+    <details><summary>본드 종류별 지우는 법</summary><div class="d">
+      <b>손톱으로 눌러 보고 가르기</b>
+      <ul>
+        <li>말랑·미끈 = <b>실리콘</b> → 실리콘 제거제(젤) + 플라스틱 헤라</li>
+        <li>단단한 고무 = <b>우레탄(시카플렉스 등)</b> → <b>녹이는 약 없음</b>, 칼·헤라로 깎기만</li>
+        <li>계속 끈적 = <b>부틸</b> → 미네랄 스피릿으로 닦기</li>
+      </ul>
+      <b>순서</b>
+      <ol>
+        <li>주변에 마스킹 테이프</li>
+        <li>커터로 덩어리 잘라내기 → 남은 건 플라스틱 헤라</li>
+        <li>뚜껑·몸통 틈은 낚싯줄·치실로 톱질하듯</li>
+        <li>얇게 남은 건 제거제 젤 → 30분 이상 두고 닦기</li>
+        <li>마지막 IPA(이소프로필 알코올)</li>
+      </ol>
+      <span class="warn">⚠ 아세톤·신너는 창(아크릴)에 금지</span> — 뿌옇게 금 가요. 제거제는 구석에 먼저 시험, 비 오는 날 X.<br>
+      <span class="warn">⚠ 뚜껑 틈은 실링으로 막는 곳 아님</span> — 새면 지붕에 붙는 바깥 테두리만 다시 실링(카라반 지붕용 실링재).
+    </div></details>
+  </div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>열린 뒤 고무 패킹에 실리콘 스프레이</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>경첩·막대 걸림쇠에 건식 PTFE(테프론) 스프레이</span></label></div>
 </section>
 
-<section id="s2">
-  <h2>② 루프 창문이 안 열릴 때 — 원인 찾기 <span class="tag t-hi">먼저</span></h2>
-  <div class="box warn">억지로 돌리면 안쪽 톱니가 부러져요. 아래 순서로 하나씩 봐요.</div>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span><b>손잡이(크랭크)가 헛도나?</b> — 손잡이 옆 작은 고정 나사가 풀렸으면 조이기. 헛돌면 손잡이만 따로 사면 돼요</span></label>
-    <label class="ck"><input type="checkbox"><span><b>검은 잠금 레버 2개</b>를 다 풀었나? — 우리 창은 레버를 풀고 유리를 밀어 올려 굽은 쇠 받침대로 받치는 방식이에요</span></label>
-    <label class="ck"><input type="checkbox"><span><b>고무 패킹에 들러붙었나?</b> — 오래 닫아 두면 뚜껑이 패킹에 붙어요. 지붕에서 뚜껑 가장자리를 손으로 살살 들어 보기</span></label>
-    <label class="ck"><input type="checkbox"><span><b>본드로 붙여 버렸나?</b> — 뚜껑과 몸통 사이 틈에 실링재가 발려 있으면 이게 원인 (③번으로)</span></label>
-    <label class="ck"><input type="checkbox"><span>다 아니면 <b>팔(경첩·지지대) 톱니 고장</b> — 그 부품만 교체 (창 전체 교체 아님)</span></label>
+<section id="blind">
+  <h2>③ 커튼·방충망</h2>
+  <div class="item">
+    <label class="ck"><input type="checkbox"><span>끊어진 줄 갈기 (천이 멀쩡하면 이것만)</span></label>
+    <details><summary>방법 + 영상 장면</summary><div class="d">
+      <div class="kit"><span>줄 1.2mm (파라코드)</span><span>알루미늄 크림프 4개</span><span>펜치</span><span>가위·라이터</span></div>
+      <figure>
+        <svg viewBox="0 0 340 220" xmlns="http://www.w3.org/2000/svg" font-family="Pretendard,sans-serif" font-size="12">
+          <rect x="20" y="20" width="300" height="180" rx="10" fill="#fff" stroke="#C9C2B8" stroke-width="2"/>
+          <rect x="30" y="30" width="280" height="66" fill="#EEE9E2"/><text x="170" y="62" text-anchor="middle" fill="#7A746C">주름 커튼</text>
+          <rect x="30" y="124" width="280" height="66" fill="#EAF1EF"/><text x="170" y="162" text-anchor="middle" fill="#7A746C">방충망</text>
+          <rect x="30" y="96" width="280" height="8" fill="#9C9286"/><rect x="30" y="116" width="280" height="8" fill="#9C9286"/>
+          <text x="170" y="113" font-size="10" fill="#5E574F" text-anchor="middle">↑ 커튼 막대 · ↓ 방충망 막대</text>
+          <path d="M36 34 L36 100 L304 100 L304 186" fill="none" stroke="#C0453F" stroke-width="2.5"/>
+          <path d="M304 34 L304 120 L36 120 L36 186" fill="none" stroke="#2F7D6D" stroke-width="2.5"/>
+          <circle cx="36" cy="34" r="6" fill="#FFC400" stroke="#22201D"/><circle cx="304" cy="34" r="6" fill="#FFC400" stroke="#22201D"/>
+          <circle cx="36" cy="186" r="5" fill="#22201D"/><circle cx="304" cy="186" r="5" fill="#22201D"/>
+          <text x="44" y="16" font-size="11" fill="#22201D">● 노랑 = 스프링 (커튼 쪽)</text>
+          <text x="44" y="214" font-size="11" fill="#22201D">● 검정 = 크림프(매듭) 고정</text>
+        </svg>
+      </figure>
+      줄은 모서리마다 2가닥, <b>대각선 반대 모서리로 지그재그</b>. 모두 4가닥.
+      <ol>
+        <li>틀 가장자리에 손톱 넣고 당겨 빼기 <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=61s" target="_blank" rel="noopener">▶ 1:01</a></li>
+        <li>뜯기 전에 줄 걸린 모양 사진 <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=87s" target="_blank" rel="noopener">▶ 1:27</a></li>
+        <li>헌 줄 빼기 — <b>스프링 2개는 다시 씀</b> <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=192s" target="_blank" rel="noopener">▶ 3:12</a></li>
+        <li>새 줄 2가닥(헌 줄 길이+여유) → 크림프 → 스프링에 꿰기 → 크림프. 크림프 대신 매듭도 됨 <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=355s" target="_blank" rel="noopener">▶ 5:55</a></li>
+        <li>스프링을 모서리 홈에 → 한 가닥은 커튼 막대, 한 가닥은 방충망 막대 지나 반대 모서리로 (한쪽만 하면 삐뚤어짐, 정상) <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=590s" target="_blank" rel="noopener">▶ 9:50</a></li>
+        <li>반대쪽도 같게 → 막대가 수평으로 맞춰짐 <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=888s" target="_blank" rel="noopener">▶ 14:48</a></li>
+        <li>끝까지 움직여 보고 남는 줄 자르기 → 틀 끼우기 <a class="t" href="https://www.youtube.com/watch?v=6mtnv9hvF7g&t=968s" target="_blank" rel="noopener">▶ 16:08</a></li>
+      </ol>
+      요령: 줄 길이는 <b>커튼을 거의 닫은 상태</b>에서 맞추면 쉬움.<br>
+      줄 걸던 <b>플라스틱 고리가 부러졌으면</b> 그 자리에 작은 나사 박아 대신 <a class="t" href="https://www.youtube.com/watch?v=KXjbXED5iNU&t=28s" target="_blank" rel="noopener">▶ 0:28</a>
+    </div></details>
   </div>
-  <h3>열린 뒤 관리</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>고무 패킹에 <b>실리콘 스프레이</b> 살짝 (다음에 안 붙게)</span></label>
-    <label class="ck"><input type="checkbox"><span>팔·경첩에 <b>건식 윤활제(PTFE·테프론 스프레이)</b> — 기름 윤활제는 먼지가 붙어서 비추천</span></label>
-    <label class="ck"><input type="checkbox"><span>커튼·방충망 레일 홈 먼지 털고 <b>실리콘 스프레이</b> 살짝 → 왔다 갔다 하는 게 부드러워져요</span></label>
+  <div class="item">
+    <label class="ck"><input type="checkbox"><span>천이 찢어졌으면 → 같은 크기 커튼 틀째 새로 사기</span></label>
+    <details><summary>가격·살 곳</summary><div class="d">
+      <ul>
+        <li>알리에 <b>700×500 커튼만 따로 파는 건 못 찾음</b> (10-18) — 창 통째 약 45만 7천원</li>
+        <li>그래서 천이 심하게 안 찢어졌으면 <b>줄만 갈기</b>가 제일 쌈</li>
+        <li>상표를 찍어 오면 그 상표 부품으로 다시 찾기</li>
+      </ul>
+      <a class="t" href="https://ko.aliexpress.com/w/wholesale-700x500-roof-window-blind.html" target="_blank" rel="noopener">알리 700×500 검색</a>
+      <a class="t" href="https://ko.aliexpress.com/w/wholesale-rv-skylight-pleated-blind-mosquito-net.html" target="_blank" rel="noopener">알리 주름 블라인드·방충망</a>
+    </div></details>
   </div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>커튼·방충망 레일 먼지 털고 실리콘 스프레이</span></label></div>
 </section>
 
-<section id="s3">
-  <h2>③ 본드가 발려 있으면 — 종류부터 가르고 지우기</h2>
-  <p class="sub">손톱으로 눌러 보세요. 종류마다 지우는 법이 달라요.</p>
-  <div class="tw"><table>
-    <tr><th>만져 보면</th><th>종류</th><th>지우는 법</th></tr>
-    <tr><td>말랑, 미끈, 아무것도 안 붙음</td><td>실리콘</td><td>실리콘 제거제(젤) + 플라스틱 헤라</td></tr>
-    <tr><td>단단한 고무, 칼로 잘림</td><td>우레탄 실링 (시카플렉스 등)</td><td><b>녹이는 약품이 없어요.</b> 칼·헤라로 깎는 것만 (시카 공식 안내)</td></tr>
-    <tr><td>계속 끈적, 안 굳음</td><td>부틸(끈적이 테이프형)</td><td>미네랄 스피릿(백등유 계열)으로 닦임</td></tr>
-  </table></div>
-  <h3>지우는 순서</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>주변(창 몸통·지붕)에 <b>마스킹 테이프</b> 붙여 보호</span></label>
-    <label class="ck"><input type="checkbox"><span>커터로 덩어리를 잘라 내고, 남은 건 <b>플라스틱 헤라</b>로 (쇠칼은 창 긁힘)</span></label>
-    <label class="ck"><input type="checkbox"><span>뚜껑과 몸통 사이 틈은 <b>낚싯줄·치실</b>을 넣고 톱질하듯 당기면 잘 끊겨요</span></label>
-    <label class="ck"><input type="checkbox"><span>얇게 남은 건 제거제 젤 → 30분~몇 시간 두고 → 닦기</span></label>
-    <label class="ck"><input type="checkbox"><span>마지막에 <b>이소프로필 알코올(IPA)</b>로 닦기</span></label>
+<section id="wheel">
+  <h2>④ 바퀴 쪽</h2>
+  <div class="item"><label class="ck"><input type="checkbox"><span>겨울 전 물 빼기 (호스가 밖에 드러나 있음)</span></label></div>
+  <div class="item">
+    <label class="ck"><input type="checkbox"><span>호스 새는지 확인 · 바닥 뚫린 구멍은 실리콘으로 막기</span></label>
+    <details><summary>왜</summary><div class="d">공장에서 호스 통과 구멍을 덜 막아 두는 경우가 많아요. 바닥이 눅눅하면 배수관이 원인인 사례도 있어요.</div></details>
   </div>
-  <div class="box warn"><b>아세톤·신너·라카신너는 창(아크릴) 판에 절대 쓰지 마세요.</b> 뿌옇게 금이 가요. 어떤 제거제든 <b>안 보이는 구석에 먼저 시험</b>하세요. 실리콘 제거제는 물에 닿으면 힘이 빠지니 <b>비 안 오는 날</b>에.</div>
-  <div class="box warn"><b>뚜껑(열리는 부분) 틈은 실링으로 막는 곳이 아니에요.</b> 막으면 못 열어요. 비가 새면 몸통 바깥 테두리(지붕에 붙는 부분)만 다시 실링해요.</div>
-  <h3>다시 실링할 때 (새는 경우만)</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>옛 실링 다 걷기 → IPA로 닦기 → 완전히 말리기</span></label>
-    <label class="ck"><input type="checkbox"><span>카라반 지붕용 실링재로 테두리만 (예: 시카플렉스 512 카라반용 / 지붕용 셀프레벨링 실링)</span></label>
+  <div class="item">
+    <label class="ck"><input type="checkbox"><span>깨진 곳 메우기 (폼)</span></label>
+    <details><summary>방법 + 영상 장면</summary><div class="d">
+      <ol>
+        <li>부서진 조각·흙 걷고 완전히 말리기</li>
+        <li>떨어진 조각은 <b>나무 꼬치를 핀처럼 꽂고</b> 발포 폼으로 붙이기 <a class="t" href="https://www.youtube.com/watch?v=RYxr7sKBXYA&t=29s" target="_blank" rel="noopener">▶ 0:29</a></li>
+        <li>없어진 곳은 아이소핑크(XPS) 조각 + 폼 접착제, 작은 틈은 저발포 우레탄 폼</li>
+        <li>폼은 <b>여러 번 나눠서</b> — 한 번에 많이 쏘면 속이 안 굳음 <a class="t" href="https://www.youtube.com/watch?v=RYxr7sKBXYA&t=167s" target="_blank" rel="noopener">▶ 2:47</a></li>
+        <li>1시간 뒤 <b>커터로</b> 평평하게 (사포는 뜯김) <a class="t" href="https://www.youtube.com/watch?v=RYxr7sKBXYA&t=196s" target="_blank" rel="noopener">▶ 3:16</a></li>
+      </ol>
+      <span class="warn">⚠ 스티로폼을 녹이는 것 금지</span> — 일반 FRP 수지(폴리에스터)·차량 빠데·신너·락카 스프레이·고무 본드.
+    </div></details>
   </div>
+  <div class="item">
+    <label class="ck"><input type="checkbox"><span>에폭시 + 유리섬유 천으로 덮기 (얇게 2~3겹)</span></label>
+    <details><summary>주의</summary><div class="d">스티로폼에는 <b>에폭시만</b> <a class="t" href="https://www.youtube.com/watch?v=gf8k7DbocGY&t=26s" target="_blank" rel="noopener">▶ 0:26</a>. 두껍게 한 번에 바르면 열 나서 녹음. 느린 경화제, 그늘에서. 아래쪽은 물 빠질 틈 남기기.</div></details>
+  </div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>얇은 알루미늄·ABS판 덧대기 + 흙받이 달기</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>타이어 간격이 아주 좁으면 → 카라반 수리점</span></label></div>
 </section>
 
-<section id="s4">
-  <h2>④ 아코디언 커튼 · 방충망 — 새로 살지, 고칠지</h2>
-  <div class="box tip"><b>천이 찢어졌으니 커튼은 새로 사는 쪽이 맞아요.</b> 줄만 끊긴 거면 줄만 갈아도 돼요.</div>
-  <h3>A. 커튼·방충망 틀째 교체 (추천)</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>①번에서 찍은 <b>상표 + 크기</b>로 같은 제품 찾기</span></label>
-    <label class="ck"><input type="checkbox"><span>상표가 <b>MPK</b>면 알리에 400×400 · 280×280 방충망/커튼이 따로 있어요 (아래 링크)</span></label>
-    <label class="ck"><input type="checkbox"><span>도메틱 헤키(Heki)면 정품 「안쪽 틀+블라인드」 통째 교체가 가장 확실 (비쌈)</span></label>
-    <label class="ck"><input type="checkbox"><span>상표가 없으면 <b>안쪽 프레임 바깥 크기</b>가 같은 「RV 천장창 주름 블라인드」로</span></label>
-  </div>
-  <h3>B. 줄(실)만 갈기 (천이 멀쩡할 때)</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>커튼 틀을 뺀다 — 많은 제품이 가장자리를 돌아가며 살살 당기면 빠져요</span></label>
-    <label class="ck"><input type="checkbox"><span>양 끝 스프링 쪽 고리를 작은 일자 드라이버로 연다</span></label>
-    <label class="ck"><input type="checkbox"><span><b>꼰 나일론 줄(1~1.5mm)</b>로 같은 길로 다시 꿴다</span></label>
-    <label class="ck"><input type="checkbox"><span>시작 전에 사진부터 — <b>아주 작은 스프링</b> 잃어버리지 않게</span></label>
-  </div>
-  <h3>알리 시세 <span class="sub" style="font-weight:400">(2026-10-18 알리 한국판 검색 화면에서 직접 확인 · 배송비·쿠폰 따라 달라짐)</span></h3>
-  <div class="tw"><table>
-    <tr><th>물건</th><th style="text-align:right">값</th></tr>
-    <tr><td>MPK 400×400 루프 방충망</td><td class="n">약 9,990원</td></tr>
-    <tr><td>MPK 280×280 방충망</td><td class="n">약 9,260원</td></tr>
-    <tr><td>모터홈 창문 주름 블라인드</td><td class="n">약 8,800원</td></tr>
-    <tr><td>RV 천장 창문 차양 커튼 (2개)</td><td class="n">약 13,950원</td></tr>
-    <tr><td>RV 내부 창문 블라인드 (틀 포함)</td><td class="n">약 75,700원</td></tr>
-    <tr><td>블라인드+방충망 든 천장창 통째</td><td class="n">약 26만~66만원</td></tr>
-    <tr><td>700×500 블라인드 달린 천장창 통째</td><td class="n">약 45만7천원</td></tr>
-  </table></div>
-  <div class="links">
-    <a href="https://ko.aliexpress.com/w/wholesale-rv-skylight-pleated-blind-mosquito-net.html" target="_blank" rel="noopener">🔎 알리 — RV 천장창 주름 블라인드·방충망</a>
-    <a href="https://ko.aliexpress.com/w/wholesale-caravan-roof-window-blind.html" target="_blank" rel="noopener">🔎 알리 — 카라반 루프 윈도우 블라인드</a>
-    <a href="https://ko.aliexpress.com/w/wholesale-700x500-roof-window-blind.html" target="_blank" rel="noopener">🔎 알리 — 700×500 루프창 블라인드 (우리 크기 추정)</a>
-    <a href="https://ko.aliexpress.com/w/wholesale-mpk-400x400-roof-window.html" target="_blank" rel="noopener">🔎 알리 — MPK 400×400</a>
-  </div>
-  <div class="box note">알리에서 <b>700×500 커튼만 따로 파는 건 못 찾았어요</b>(2026-10-18, 창 통째만 보임). 커튼 천이 아주 심하게 찢어진 게 아니면 <b>줄만 갈기(설명서 A)</b>가 제일 싸요. 타오바오는 로그인해야 보여서 못 봤어요. 상표·크기가 정해지면 「房车天窗 百叶帘 400×400」로 타오바오도 비교해 보세요. 보통 더 싸요.</div>
+<section id="clean">
+  <h2>⑤ 청소</h2>
+  <div class="item"><label class="ck"><input type="checkbox"><span>커튼 떼기 (고리 사진 먼저) → 라벨 보고 세탁</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>곰팡이 제거제는 구석에 시험 후</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>창 아크릴은 물 + 중성세제 + 부드러운 천만</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>바닥·창틀 청소기 · 환기 · 제습제 교체</span></label></div>
 </section>
 
-<section id="s5">
-  <h2>⑤ 바퀴 쪽 스티로폼 — 메우고, 덮고, 다시 안 깨지게 <span class="tag t-hi">먼저</span></h2>
-  <h3>먼저 가를 것 (①번 사진으로)</h3>
-  <div class="tw"><table>
-    <tr><th>모양</th><th>할 일</th></tr>
-    <tr><td><b>A.</b> 스티로폼 덩어리만</td><td>메우고 겉을 덮는다 (아래 순서)</td></tr>
-    <tr><td><b>B.</b> 겉에 딱딱한 판(FRP·알루미늄) + 안에 스티로폼</td><td>판까지 보수. 차체 구조에 걸리면 카라반 수리점이 안전</td></tr>
-  </table></div>
-  <div class="box warn"><b>스티로폼을 녹이는 것 — 절대 쓰지 마세요</b><br>· 일반 폴리에스터 수지 · 차량용 빠데 · 유리섬유 키트 (스티렌이 스티로폼을 녹여요)<br>· 신너 · 락카 스프레이 · 솔벤트 언더코팅<br>· 고무 본드(본드G 같은 솔벤트 접착제)<br>· 에폭시도 <b>두껍게 한 번에</b> 바르면 굳을 때 열 나서 녹아요 → <b>얇게 여러 번</b></div>
-  <h3>보수 순서 (A 기준)</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>부서진 조각·흙 걷어 내기, 완전히 말리기</span></label>
-    <label class="ck"><input type="checkbox"><span>큰 구멍: <b>압축 스티로폼(아이소핑크·XPS 판)</b>을 모양대로 잘라 <b>우레탄 폼 접착제</b>로 붙이기</span></label>
-    <label class="ck"><input type="checkbox"><span>작은 틈: <b>저발포 우레탄 폼(폼건용)</b> 쏘기 → 굳으면 커터로 깎기</span></label>
-    <label class="ck"><input type="checkbox"><span>사포로 모양 다듬기</span></label>
-    <label class="ck"><input type="checkbox"><span>겉 덮기 (오래 쓰려면 이게 핵심) — <b>에폭시 + 유리섬유 천</b> 얇게 2~3겹 (느린 경화제, 그늘에서) <b>또는</b> 수성 언더코팅/우레아(고무질) 도장 2~3회</span></label>
-    <label class="ck"><input type="checkbox"><span>색 맞춰 도색 (원하면)</span></label>
-  </div>
-  <h3>다시 안 깨지게</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>바퀴 뒤에 <b>머드가드(흙받이)</b> 달기 — 깨진 이유가 대부분 돌 튐</span></label>
-    <label class="ck"><input type="checkbox"><span>잘 맞는 자리에 <b>얇은 알루미늄판·ABS판</b>을 덧대 나사+실링으로 고정</span></label>
-    <label class="ck"><input type="checkbox"><span>다음 점검 때 여기부터 보기</span></label>
-  </div>
-</section>
-
-<section id="s6">
-  <h2>⑥ 청소 <span class="tag t-ok">같이</span></h2>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>커튼 떼기 (고리·레일 사진 먼저 — 다시 걸 때 헷갈림)</span></label>
-    <label class="ck"><input type="checkbox"><span>세탁 라벨 확인 → 가능하면 집에 가져와 세탁 / 아니면 현장 손빨래·건조</span></label>
-    <label class="ck"><input type="checkbox"><span>곰팡이 얼룩: 곰팡이 제거제는 <b>안 보이는 곳에 시험</b> 후</span></label>
-    <label class="ck"><input type="checkbox"><span>커튼 레일 홈 먼지 → 실리콘 스프레이 살짝</span></label>
-    <label class="ck"><input type="checkbox"><span>바닥·창틀 청소기, 창 아크릴은 <b>물 + 중성세제 + 부드러운 천만</b> (유리세정제·강한 알코올 X)</span></label>
-    <label class="ck"><input type="checkbox"><span>환기 · 제습제 교체</span></label>
-  </div>
-</section>
-
-<section id="s7">
-  <h2>⑦ 준비물 — 집에서 챙겨 갈 것</h2>
-  <h3>늘 차에 두기 (없어서 곤란했던 것)</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span><b>줄자</b> (5m) + 작은 쇠자</span></label>
-    <label class="ck"><input type="checkbox"><span>드라이버 세트 (+ / − / 작은 정밀 드라이버)</span></label>
-    <label class="ck"><input type="checkbox"><span>커터칼 + 여분 날</span></label>
-    <label class="ck"><input type="checkbox"><span>장갑 (목장갑 + 니트릴)</span></label>
-    <label class="ck"><input type="checkbox"><span>헤드랜턴</span></label>
-    <label class="ck"><input type="checkbox"><span>사다리 (지붕용) — 지붕은 <b>판 사이 뼈대 위로만</b> 밟기</span></label>
-    <label class="ck"><input type="checkbox"><span>걸레 · 물티슈 · 쓰레기봉투 · 메모할 펜</span></label>
-  </div>
-  <h3>창문용</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>플라스틱 헤라(스크래퍼) 2~3개</span></label>
-    <label class="ck"><input type="checkbox"><span>낚싯줄 또는 치실</span></label>
-    <label class="ck"><input type="checkbox"><span>마스킹 테이프</span></label>
-    <label class="ck"><input type="checkbox"><span>실리콘 제거제 (젤형)</span></label>
-    <label class="ck"><input type="checkbox"><span>이소프로필 알코올(IPA)</span></label>
-    <label class="ck"><input type="checkbox"><span>실리콘 스프레이 (패킹·레일용)</span></label>
-    <label class="ck"><input type="checkbox"><span>건식 PTFE(테프론) 윤활 스프레이 (경첩용)</span></label>
-    <label class="ck"><input type="checkbox"><span>꼰 나일론 줄 1~1.5mm (줄만 갈 때)</span></label>
-    <label class="ck"><input type="checkbox"><span>새 커튼/방충망 (크기 확인 후 주문)</span></label>
-    <label class="ck"><input type="checkbox"><span>(새는 경우) 지붕용 실링재 + 실링건</span></label>
-  </div>
-  <h3>바퀴 스티로폼용</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>아이소핑크(XPS) 판 작은 것 또는 저발포 우레탄 폼 + 폼건</span></label>
-    <label class="ck"><input type="checkbox"><span>우레탄 폼 접착제</span></label>
-    <label class="ck"><input type="checkbox"><span>사포 (#80, #180)</span></label>
-    <label class="ck"><input type="checkbox"><span>에폭시(느린 경화) + 유리섬유 천 <b>또는</b> 수성 언더코팅</span></label>
-    <label class="ck"><input type="checkbox"><span>붓 · 주걱 · 종이컵</span></label>
-    <label class="ck"><input type="checkbox"><span>(선택) 머드가드, 얇은 알루미늄판·ABS판 + 나사</span></label>
-  </div>
-  <h3>청소용</h3>
-  <div class="cl">
-    <label class="ck"><input type="checkbox"><span>중성세제 · 극세사 천</span></label>
-    <label class="ck"><input type="checkbox"><span>곰팡이 제거제</span></label>
-    <label class="ck"><input type="checkbox"><span>커튼 담아 올 큰 가방</span></label>
-  </div>
-  <p><button class="reset" id="reset">체크 전부 지우기</button></p>
+<section id="kit">
+  <h2>⑥ 준비물</h2>
+  <h3>늘 차에</h3>
+  <div class="item"><label class="ck"><input type="checkbox"><span><b>줄자</b> · 드라이버 세트 · 커터칼</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>장갑 · 헤드랜턴 · 사다리 · 걸레·쓰레기봉투</span></label></div>
+  <h3>창</h3>
+  <div class="item"><label class="ck"><input type="checkbox"><span>플라스틱 헤라 · 낚싯줄(치실) · 마스킹 테이프</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>실리콘 제거제(젤) · IPA</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>실리콘 스프레이 · PTFE 스프레이</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>줄 1.2mm · 크림프 4개 · 펜치</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>(새면) 지붕용 실링재 + 실링건</span></label></div>
+  <h3>바퀴 쪽</h3>
+  <div class="item"><label class="ck"><input type="checkbox"><span>아이소핑크 조각 또는 저발포 우레탄 폼 + 폼건</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>폼 접착제 · 나무 꼬치 · 사포</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>에폭시(느린 경화) + 유리섬유 천 · 붓 · 종이컵</span></label></div>
+  <div class="item"><label class="ck"><input type="checkbox"><span>실리콘(구멍 막기) · 알루미늄/ABS판 · 흙받이 · 나사</span></label></div>
+  <h3>청소</h3>
+  <div class="item"><label class="ck"><input type="checkbox"><span>중성세제 · 극세사 천 · 곰팡이 제거제 · 큰 가방</span></label></div>
+  <button class="reset" id="reset">체크 전부 지우기</button>
 </section>
 
 <section>
-  <details>
-    <summary>근거 보기 (2026-10-18 확인)</summary>
-    <ul class="src">
-      <li>굳은 시카플렉스는 기계로만 제거 — <a href="https://forums.ybw.com/threads/cleaning-off-sikaflex.149323" target="_blank" rel="noopener">ybw 포럼</a></li>
-      <li>실리콘 제거제 젤: 플라스틱 가능·나일론 금지·물에 닿으면 약해짐·구석 시험 — <a href="https://www.jewson.co.uk/p/geocel-silicone-sealant-remover-100ml-CMDWCSLR" target="_blank" rel="noopener">Geocel 제품 안내</a></li>
-      <li>루프벤트가 안 열릴 때: 손잡이 고정나사·패킹 들러붙음·톱니, 억지로 돌리지 말 것 — <a href="https://www.winnieowners.com/threads/stuck-roof-vent.709701/" target="_blank" rel="noopener">Winnebago 포럼</a> · <a href="https://www.rvtravel.com/roof-vent-openers-cranky/" target="_blank" rel="noopener">RV Travel</a></li>
-      <li>주름 블라인드 줄 교체: 틀은 당겨서 빼고, 꼰 나일론 줄, 작은 스프링 주의 — <a href="https://clubtogether.caravanclub.co.uk/discussion/comment/311018" target="_blank" rel="noopener">Caravan Club 포럼</a> · <a href="https://www.caravansplus.com.au/internal-frame-with-blind-screen-suits-midi-heki-electric-led-p-16897.html" target="_blank" rel="noopener">Midi Heki 정품 틀</a></li>
-      <li>폴리에스터·유리섬유 키트가 단열 스티로폼을 녹임 → 에폭시 사용 — <a href="https://www.motorhomefun.co.uk/forum/threads/is-there-a-diy-fix-for-this.258502" target="_blank" rel="noopener">Motorhome Fun 포럼</a> · 에폭시도 두꺼우면 열로 녹임 — <a href="https://www.seabreeze.com.au/forums/Stand-Up-Paddle/SUP/Ace-in-need-of-some-lovin" target="_blank" rel="noopener">Seabreeze 포럼</a></li>
-      <li>알리 시세: 알리 한국판 검색 화면 직접 확인 (2026-10-18)</li>
-    </ul>
+  <details style="margin:0 0 8px"><summary>출처 (2026-10-18)</summary>
+  <ul class="src">
+    <li>줄 갈기 영상: <a href="https://www.youtube.com/watch?v=6mtnv9hvF7g" target="_blank" rel="noopener">Gonk and Moody (영국, 2025-12)</a> — 자막 읽고 장면 확인</li>
+    <li>고리 나사 대체: <a href="https://www.youtube.com/watch?v=KXjbXED5iNU" target="_blank" rel="noopener">The Van Life Guidebook</a></li>
+    <li>스티로폼 붙이기: <a href="https://www.youtube.com/watch?v=RYxr7sKBXYA" target="_blank" rel="noopener">Stan Winston School</a> · 에폭시만: <a href="https://www.youtube.com/watch?v=gf8k7DbocGY" target="_blank" rel="noopener">Rogue Wave</a></li>
+    <li>굳은 시카플렉스 기계 제거: <a href="https://forums.ybw.com/threads/cleaning-off-sikaflex.149323" target="_blank" rel="noopener">ybw 포럼</a> · 실리콘 제거제 주의: <a href="https://www.jewson.co.uk/p/geocel-silicone-sealant-remover-100ml-CMDWCSLR" target="_blank" rel="noopener">Geocel</a></li>
+    <li>밀어 올림 창 4단: <a href="https://www.caravansplus.com.au/aussie-traveller-skylight-with-blind-led-700-x-500mm-cut-out-p-22446.html" target="_blank" rel="noopener">700×500 제품 설명</a> · 줄 장력 요령: <a href="https://autosleeper-ownersforum.com/t16888-kitchen-rooflight-on-lancashire" target="_blank" rel="noopener">오토슬리퍼 동호회</a></li>
+    <li>호스 통과 구멍: <a href="https://www.emag.gorv.com.au/gorv-digital-magazine-issue-103/0896139001758690726/p46" target="_blank" rel="noopener">GoRV</a> · 폴리에스터가 스티로폼 녹임: <a href="https://www.motorhomefun.co.uk/forum/threads/is-there-a-diy-fix-for-this.258502" target="_blank" rel="noopener">모터홈펀</a></li>
+  </ul>
   </details>
+  <p class="src">✔ 체크는 이 폰에만 저장돼요. 창 크기는 사진 추측이에요.</p>
 </section>
 </main>
 <script>
 (function(){
-  var KEY='caravan-check-v1', boxes=[].slice.call(document.querySelectorAll('label.ck input'));
+  var KEY='caravan-check-v2', boxes=[].slice.call(document.querySelectorAll('label.ck input'));
   var saved={}; try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
   function paint(){
     var n=0; boxes.forEach(function(b){b.parentNode.classList.toggle('done',b.checked); if(b.checked)n++;});
