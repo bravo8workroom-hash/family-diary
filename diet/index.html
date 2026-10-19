@@ -2567,10 +2567,20 @@ class Component extends DCLogic {
       '5. 이번 주 모드가 없거나 「기한 지남」이면 위 「지난 7일」과 사장님 말씀으로 진단하고, 대화로 확정한 뒤 입력함 phase 칸으로 보내라 — {"k":"cut2|cut1|bloat|build|maint","to":"YYYY-MM-DD","why":"한 줄"}. 모드 출발값을 그대로 쓰지 말고 이번 주 계획(운동 유무·일정·컨디션)에 맞춰 g 를 다시 정해 rule 칸으로 함께 보내라. 절대선 다섯은 어느 모드에서도 안 바꾼다.',
       '6. 위 「⚙ 바뀐 설정」 칸이 있으면 그 값 기준으로 이번 주 계획을 다시 보고, 반영한 뒤 입력함에 chgAck:true 를 함께 보내라 — 그래야 그 칸이 비워지고 다음 호출장에 또 안 뜬다.');
     return L.join('\n')}
-  callTrainer(){const brief=this.trainerBrief();
-    try{navigator.clipboard.writeText(brief)}catch(e){}
+  /* 트레이너 호출 글 — 할 일만 (사장님 2026-10-19 「호출은 각 해야 하는 업무 지시만」). 그날 기록 전부(trainerBrief)는 data 로 따로 보내
+     서버가 diet-diary\\마인드맵-지시.md 에 둔다. 스킬도 첫 동작이 node d.mjs 라 오늘 숫자는 스스로 읽는다. */
+  trainerTask(){const td=((this.state.todo||{}).items)||[],chg=((this.state.set||{}).chg)||[],ph=this.phaseOf();
+    const head='[트레이너 · '+this.TODAY.slice(5).replace('-','/')+' '+this.nowHM()+' · '+(td.length?('작업대기 '+td.length+'건'):'작업대기 없음')+']';
+    const L=['/다이어트',head];
+    td.forEach((x,i)=>L.push((i+1)+'. 〔'+x.id+'〕 '+String(x.t||'(글 없이 사진만)').split('\n')[0].slice(0,60)+((x.ph&&x.ph.length)?(' (📷 '+x.ph.length+'장)'):'')));
+    if(!td.length)L.push('할 일: 오늘 기록 보고 「지금 무엇을 먹어야 하나」 3~6줄');
+    if(chg.length)L.push('⚙ 바뀐 설정 '+chg.length+'건 — 이번 주 계획에 반영 후 chgAck');
+    if(!ph||ph.over)L.push('🔁 이번 주 모드 '+(ph?'기한 지남':'없음')+' — 진단해서 phase');
+    return L.join('\n')}
+  callTrainer(){const task=this.trainerTask(),brief=this.trainerBrief();
+    try{navigator.clipboard.writeText(task+'\n\n'+brief)}catch(e){}
     this.toast('⏳ 트레이너를 부르는 중…');
-    fetch('http://localhost:3000/api/open-any',{method:'POST',mode:'no-cors',body:JSON.stringify({kind:'project',name:'diet-diary',brief})})
+    fetch('http://localhost:3000/api/open-any',{method:'POST',mode:'no-cors',body:JSON.stringify({kind:'project',name:'diet-diary',brief:task,data:brief})})
       .then(()=>this.toast('✓ 트레이너 호출 — VS코드 새 창이 곧 떠요 (호출장은 복사도 해 뒀어요)'))
       .catch(()=>this.toast('✗ 대시보드 서버(3000)가 꺼져 있어요 — 호출장을 복사했으니 VS코드 채팅에 붙여넣으세요'))}
   /* 점수 — 절대선과 같은 눈으로 본다: 칼로리는 하한 미달만 깎고(초과는 안 깎는다), 단백질은 모자란 만큼, 탄수는 넘친 만큼. 지방은 안 본다(설계값). 유지 모드는 kcal 를 위아래 다 본다. */
