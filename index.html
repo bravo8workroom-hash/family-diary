@@ -1302,6 +1302,30 @@ input,button,textarea,select{font-family:inherit;}
         </div>
 
         <sc-if value="{{ pvKids }}" hint-placeholder-val="{{ true }}">
+          <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:10px 16px 12px;">
+            <div style="display:flex;align-items:center;gap:6px;min-height:44px;">
+              <span style="flex:1;font-size:14px;font-weight:800;">🏦 엄마통장 출금액</span>
+              <sc-if value="{{ moView }}" hint-placeholder-val="{{ true }}">
+                <span onClick="{{ moStart }}" title="눌러서 고치기" style="display:inline-flex;align-items:center;min-height:40px;padding:0 4px;cursor:pointer;font-size:17px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--tx,#3F3A33);"><span style="border-bottom:1px dashed var(--sub,#8A8177);">{{ moTxt }}</span></span>
+                <sc-if value="{{ moHas }}" hint-placeholder-val="{{ false }}">
+                  <span onClick="{{ moDel }}" title="지우기" style="display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:40px;cursor:pointer;color:#E0654F;font-size:13px;font-weight:800;">✕</span>
+                </sc-if>
+              </sc-if>
+              <sc-if value="{{ moEditing }}" hint-placeholder-val="{{ false }}">
+                <span style="display:inline-flex;align-items:center;min-height:40px;padding:0 4px;font-size:17px;font-weight:900;font-variant-numeric:tabular-nums;">
+                  <input id="mo_total" value="{{ moVal }}" onInput="{{ moOn }}" onKeyDown="{{ moKey }}" onBlur="{{ moSave }}" inputmode="numeric" placeholder="0" style="width:{{ moW }};box-sizing:content-box;border:none;border-bottom:1px dashed var(--ac,#F59E0B);background:transparent;color:inherit;font:inherit;text-align:right;padding:0;outline:none;">원
+                </span>
+              </sc-if>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+              <input value="{{ moAmtVal }}" onInput="{{ moAmtOn }}" inputmode="numeric" placeholder="금액 (예: 10000)" style="flex:1;min-width:0;min-height:44px;box-sizing:border-box;border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:0 12px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;background:var(--card,#fff);color:var(--tx,#3F3A33);outline:none;">
+              <button onClick="{{ moIn }}" style="min-height:44px;padding:0 14px;border:none;border-radius:12px;background:var(--ac,#F59E0B);color:#fff;font-size:13px;font-weight:900;cursor:pointer;white-space:nowrap;">＋ 넣음</button>
+              <button onClick="{{ moUse }}" style="min-height:44px;padding:0 14px;border:1px solid var(--line,#EFE4CF);border-radius:12px;background:var(--card,#fff);color:#E0654F;font-size:13px;font-weight:900;cursor:pointer;white-space:nowrap;">－ 씀</button>
+            </div>
+            <sc-if value="{{ moHasMsg }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:6px;font-size:12px;font-weight:800;color:var(--sub,#8A8177);font-variant-numeric:tabular-nums;">{{ moMsg }}</div>
+            </sc-if>
+          </div>
           <sc-for list="{{ kidsOV }}" as="ko" hint-placeholder-count="2">
             <div style="background:var(--card,#fff);border:1px solid var(--line,#EFE4CF);border-radius:20px;padding:16px;">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
@@ -1318,20 +1342,6 @@ input,button,textarea,select{font-family:inherit;}
                   </sc-if>
                   <button onClick="{{ ko.openStHist }}" style="display:block;margin-left:auto;margin-top:3px;background:var(--bg,#FAF6EF);border:1px solid var(--line,#EFE4CF);border-radius:99px;padding:2px 8px;cursor:pointer;font-size:10px;font-weight:700;color:var(--sub,#8A8177);">받음 {{ ko.stEarned }} · 사용 {{ ko.stSpent }} ▸</button>
                 </div>
-              </div>
-              <div style="display:flex;align-items:center;gap:6px;border:1px solid var(--line,#EFE4CF);border-radius:12px;padding:2px 6px 2px 12px;margin-bottom:10px;min-height:44px;">
-                <span style="flex:1;font-size:13px;font-weight:800;">🏦 엄마통장 출금액</span>
-                <sc-if value="{{ ko.moView }}" hint-placeholder-val="{{ true }}">
-                  <span onClick="{{ ko.moStart }}" title="눌러서 고치기" style="display:inline-flex;align-items:center;min-height:40px;padding:0 4px;cursor:pointer;font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--tx,#3F3A33);"><span style="border-bottom:1px dashed var(--sub,#8A8177);">{{ ko.moTxt }}</span></span>
-                  <sc-if value="{{ ko.moHas }}" hint-placeholder-val="{{ false }}">
-                    <span onClick="{{ ko.moDel }}" title="지우기" style="display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:40px;cursor:pointer;color:#E0654F;font-size:13px;font-weight:800;">✕</span>
-                  </sc-if>
-                </sc-if>
-                <sc-if value="{{ ko.moEditing }}" hint-placeholder-val="{{ false }}">
-                  <span style="display:inline-flex;align-items:center;min-height:40px;padding:0 4px;font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;">
-                    <input id="{{ ko.moId }}" value="{{ ko.moVal }}" onInput="{{ ko.moOn }}" onKeyDown="{{ ko.moKey }}" onBlur="{{ ko.moSave }}" inputmode="numeric" placeholder="0" style="width:{{ ko.moW }};box-sizing:content-box;border:none;border-bottom:1px dashed var(--ac,#F59E0B);background:transparent;color:inherit;font:inherit;text-align:right;padding:0;outline:none;">원
-                  </span>
-                </sc-if>
               </div>
               <sc-if value="{{ ko.hasStTypesK }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">
@@ -2422,7 +2432,7 @@ input,button,textarea,select{font-family:inherit;}
 const FMOTTOS=['서로 선은 넘지 맙시다. 나는 갯바위에서, 너는 바다 속에서!','오늘의 신사 협정: 찌가 가라앉으면 정당하게 협상 개시.','잡아도 칭찬, 놓쳐도 미소, 꽝 쳐도 품격 유지!','바늘은 거들 뿐, 승부는 신사답게.','물고기는 매너 입질, 낚시꾼은 안전 퇴근!','오늘의 서약: 바늘 끝엔 예의, 발 밑엔 안전.','손맛은 묵직하게, 쓰레기는 싹 다 가볍게!','잡혀줘서 고맙고, 살아서 돌아가니 반갑다!','용왕님도 인정하는 페어플레이 낚시꾼.','바다와의 비즈니스: 꽝 쳐도 절대 투정 금지!','No Trash, No Risk, Just Fishing.','안전 조행 100%, 매너 입질 100%.','물고기에겐 미안함, 바다에겐 고마움.','손맛 낚고, 추억 담고, 무사 귀가.','격식 있는 챔질, 매너 있는 귀가.','바다 위 신사들의 정당한 한판승부.','안전이 우선, 매너가 기본.','바다를 아끼는 진짜 낚시꾼의 품격.','찌끝에 담은 예의, 발끝에 둔 안전.','클린 캐스팅, 리스펙트 조행.','바다가 내어준 선물, 감사함으로 되돌려줍니다.','물고기와 나눈 짧은 대화, 긴 여운으로 남기는 하루.','파도 소리에 감사를, 바람 소리에 안녕을.','자연이 준 소중한 손맛, 내가 지키는 안전한 조행.','바다를 닮은 넓은 마음으로 낚시합니다.','내가 떠난 자리는 바다의 눈물 없이 깨끗하게.','작은 물고기 한 마리에도 경건함을 담아.','바다와 사람이 같이 웃는 소중한 순간.','무사히 집으로 다녀오는 것이 가장 큰 조과입니다.','푸른 바다 위, 나만의 신사적 낭만.','어종 불문, 크기 불문! 안전과 매너는 절대 성역.','발 밑은 조심조심, 바다 속엔 신사답게.','잡는 기쁨보다 지키는 보람을 낚습니다.','바다의 규칙을 지키는 자가 진짜 꾼이다.','나를 지키는 구명조끼, 바다를 지키는 클린마인드.','어린 생명은 놓아주고, 내 쓰레기는 가져오고.','바다 생명과의 약속, 신사적인 라이벌의 대결.','너와 나의 매너가 만날 때 완벽한 조행이 완성된다.','나도 무사히 집으로, 너도 무사히 바다로!','오늘도 신사답게 던지고, 정직하게 낚았습니다.'];
 
 class Component extends DCLogic {
-  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',rwOpen:false,parentOk:false,modal:null,editMode:false,calM:'',tideM:'',tidePick:false,selDate:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',tdPicOpen:'',picZoom:'',picBusy:false,pmDedTab:'ded',goTy:'day',goUnit:'원',goPhoto:'',goBusy:false,svOpen:'',logAll:'',moEdit:''};
+  state = {data:null,f:{},user:null,tab:'home',kview:'todo',pview:'kids',rwOpen:false,parentOk:false,modal:null,editMode:false,calM:'',tideM:'',tidePick:false,selDate:'',stKid:'kid1',ttKid:'kid1',feedPhotos:[],pwErr:'',setMsg:'',stSentMsg:'',meMsg:'',pingTo:'',pingSentMsg:'',tdPicOpen:'',picZoom:'',picBusy:false,pmDedTab:'ded',goTy:'day',goUnit:'원',goPhoto:'',goBusy:false,svOpen:'',logAll:'',moEdit:'',moMsg:''};
   KEY = 'famdiary_v1';
   KART={'가자미':{i:'🐟',a:'#E2D3B4',b:'#7D6746'},'우럭':{i:'🐠',a:'#B9C6AD',b:'#43533F'},'볼락':{i:'🐡',a:'#FFC0AC',b:'#A3392A'},'쥐노래미':{i:'🐟',a:'#DBE4AC',b:'#66743A'},'고등어':{i:'🐟',a:'#C8E7F5',b:'#25587A'},'전갱이':{i:'🐠',a:'#E2F2F8',b:'#54798F'},'학꽁치':{i:'🐟',a:'#EAF5FC',b:'#7691A6'},'보리멸':{i:'🐟',a:'#F6ECD4',b:'#A08554'},'황어':{i:'🐟',a:'#FFE7AD',b:'#94741F'},'삼치':{i:'🐟',a:'#D3E7F2',b:'#37627F'},'붕장어':{i:'🐍',a:'#E0D1B8',b:'#645440'},'장어':{i:'🐍',a:'#DCCFBA',b:'#5B4C3A'},'방어':{i:'🐠',a:'#FFE6B0',b:'#A5761D'},'광어':{i:'🐟',a:'#E6EEF6',b:'#5A6A79'},'감성돔':{i:'🐟',a:'#DFE9F2',b:'#41576B'},'참돔':{i:'🐠',a:'#FFD6D4',b:'#A4413C'}};
   KFISH={'장어':{len:68,diff:5},'삼치':{len:52,diff:3},'방어':{len:74,diff:4},'볼락':{len:24,diff:2},'광어':{len:45,diff:3},'감성돔':{len:31,diff:3},'참돔':{len:38,diff:4}};
@@ -4070,6 +4080,27 @@ class Component extends DCLogic {
       const rwOpen=!!S.rwOpen;V.rwOpen=rwOpen;V.rwArrow=rwOpen?'▾':'▸';V.rwOpenTxt=rwOpen?'접기':'열기';
       V.rwBg=rwOpen?sk.ac:sk.soft;V.rwFg=rwOpen?sk.on:sk.tx;V.rwBd=rwOpen?sk.ac:sk.line;
       V.rwToggle=()=>this.setState({rwOpen:!rwOpen});
+      // 엄마통장 출금액 — 아이별로 따로 있던 칸을 한 칸으로 합침 (옛 momOut 값은 처음 한 번 합계로 읽힌다)
+      {const mo=D.momTotal!==undefined?(Number(D.momTotal)||0):Object.values(D.momOut||{}).reduce((a,v)=>a+(Number(v)||0),0);
+        const mk='mo_total',ed=S.moEdit==='total';
+        const cur=f[mk]!==undefined?String(f[mk]):String(mo||'');
+        const put=v=>this.mut(d=>{d.momTotal=v;delete d.momOut;});
+        const add=sg=>{const n=Math.round(Number(String(f.moAmt||'').replace(/[^0-9]/g,'')))||0;if(!n)return;
+          this.mut(d=>{const b0=d.momTotal!==undefined?(Number(d.momTotal)||0):Object.values(d.momOut||{}).reduce((a,v)=>a+(Number(v)||0),0);d.momTotal=b0+sg*n;delete d.momOut;});
+          this.clearF(['moAmt']);this.setState({moMsg:(sg>0?'＋ ':'－ ')+n.toLocaleString()+'원 → 합계 '+(mo+sg*n).toLocaleString()+'원'});
+          clearTimeout(this.moMsgT);this.moMsgT=setTimeout(()=>this.setState({moMsg:''}),3000);};
+        Object.assign(V,{moHas:mo!==0,moTxt:mo.toLocaleString()+'원',moView:!ed,moEditing:ed,moVal:cur,moW:Math.max(4,cur.length+1)+'ch',
+          moOn:e=>this.setF(mk,e.target.value.replace(/[^0-9]/g,'')),
+          moStart:()=>{this.moCancel=false;this.setState({moEdit:'total',f:{...f,[mk]:mo?String(mo):''}});
+            setTimeout(()=>{const el=document.getElementById(mk);if(el){el.focus();el.select();}},30);},
+          moSave:e=>{if(this.state.moEdit!=='total')return;
+            const raw=e&&e.target&&e.target.value!==undefined?e.target.value:this.state.f[mk];
+            if(!this.moCancel)put(Math.round(Number(String(raw||'').replace(/[^0-9]/g,'')))||0);
+            this.moCancel=false;this.setState({moEdit:''});},
+          moKey:e=>{if(e.key==='Enter')e.target.blur();else if(e.key==='Escape'){this.moCancel=true;e.target.blur();}},
+          moDel:()=>put(0),
+          moAmtVal:f.moAmt||'',moAmtOn:e=>this.setF('moAmt',e.target.value.replace(/[^0-9]/g,'')),
+          moIn:()=>add(1),moUse:()=>add(-1),moHasMsg:!!S.moMsg,moMsg:S.moMsg||''});}
       V.kidsOV=kids.map(kp=>{
         const tds=D.todos.filter(x=>x.k===kp.id);const ck=(D.checks[kp.id]||{})[t]||{};
         const done=tds.filter(x=>ck[x.id]).length;
@@ -4119,20 +4150,6 @@ class Component extends DCLogic {
           dedRate:stkRate,
           stWon:(Math.max(0,stkN)*stkRate).toLocaleString()+'원',   // 남은 스티커를 다 바꾸면 얼마인지
           stRateTxt:stkRate.toLocaleString()+'원',
-          // 엄마통장 출금액 — 아이 계좌로 따로 보낸 돈의 총액 한 칸 (내역 없이 총액만)
-          ...(()=>{const mo=Number((D.momOut||{})[kp.id])||0,mk='mo_'+kp.id,ed=S.moEdit===kp.id;
-            const cur=f[mk]!==undefined?String(f[mk]):String(mo||'');
-            const put=v=>this.mut(d=>{const o=Object.assign({},d.momOut||{});if(v>0)o[kp.id]=v;else delete o[kp.id];d.momOut=o;});
-            return{moHas:mo>0,moTxt:mo.toLocaleString()+'원',moView:!ed,moEditing:ed,moId:mk,moVal:cur,moW:Math.max(4,cur.length+1)+'ch',
-              moOn:e=>this.setF(mk,e.target.value.replace(/[^0-9]/g,'')),
-              moStart:()=>{this.moCancel=false;this.setState({moEdit:kp.id,f:{...f,[mk]:mo?String(mo):''}});
-                setTimeout(()=>{const el=document.getElementById(mk);if(el){el.focus();el.select();}},30);},
-              moSave:e=>{if(this.state.moEdit!==kp.id)return;
-                const raw=e&&e.target&&e.target.value!==undefined?e.target.value:this.state.f[mk];
-                if(!this.moCancel)put(Math.round(Number(String(raw||'').replace(/[^0-9]/g,'')))||0);
-                this.moCancel=false;this.setState({moEdit:''});},
-              moKey:e=>{if(e.key==='Enter')e.target.blur();else if(e.key==='Escape'){this.moCancel=true;e.target.blur();}},
-              moDel:()=>put(0)};})(),
           hasExReq:exReq.length>0,
           exReqV:exReq.map(x=>{const e=x.e||'🌟';const star=e==='🌟';const have=star?stkN:(kTypes[e]||0);
             // 아이 신청은 모은 만큼만 - 모자라면 수락할 수 없다 (땡겨주기는 「스티커 차감」에서 부모님이 직접)
