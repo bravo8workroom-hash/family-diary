@@ -3249,11 +3249,13 @@ class Component extends DCLogic {
     // 다이어트 일기는 같은 저장소의 별도 페이지(diet/)다 — 화면 전환이 아니라 이동
     V.showDiet=u.id==='mom';V.goDiet=()=>{location.href='diet/';};
     // 공부하는 고양이는 별도 저장소(study-cat)의 앱이다 — 준선(kid2, 옛 id junsun) 방에서만
-    V.showStudy=u.id==='kid2'||u.id==='junsun';V.goStudy=()=>{location.href='https://bravo8workroom-hash.github.io/study-cat/';};
+    // study-cat archived and its site taken down (owner 2026-10-31) — hide the button instead of linking to a 404
+    V.showStudy=false;V.goStudy=()=>{location.href='https://bravo8workroom-hash.github.io/study-cat/';};
     // 요리 레시피도 같은 저장소의 별도 페이지(cook/)다 — 엄마·아빠방에서만 보인다
     V.showCook=u.role==='parent';V.goCook=()=>{location.href='cook/';};
     // 동해 낚시판(별도 저장소 bravo8workroom/fishing — 점수·물때·루어 영상·AI 묻기) — 엄마·아빠방에서만 (사장님 10-18)
-    V.showFishBoard=false;V.goFishBoard=()=>{location.href='https://bravo8workroom.github.io/fishing/';};
+    // Back on the header as a small icon (owner 2026-10-31) — parents only, next to caravan
+    V.showFishBoard=u.role==='parent';V.goFishBoard=()=>{location.href='https://bravo8workroom.github.io/fishing/';};
     // 카라반 보수 체크리스트도 같은 저장소의 별도 페이지(caravan/)다 — 엄마·아빠방에서만 보인다
     V.showCaravan=u.role==='parent';V.goCaravan=()=>{location.href='caravan/';};
     // 가계부도 같은 저장소의 별도 페이지(money/)다 — 엄마·아빠방에서만 보인다
