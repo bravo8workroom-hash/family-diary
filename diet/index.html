@@ -2404,26 +2404,28 @@ class Component extends DCLogic {
   afterLoad(){this.rollGoal();this.pullInbox()}
   wAt(ds){for(let i=0;i<28;i++){const w=(this.state.weights||{})[this.addDays(ds,-i)];if(w&&w.a!=null)return +w.a}return null}
   /* ⚖ 운동체중 시작 — 근력(lifts) 뒤 1~3일의 저울은 글리코겐·물이 얹힌 「운동 체중」, 그 밖은 「민낯」. 새 상태 키 없음(lifts·weights 로만 센다). 예상 폭은 기본 +0.5~1.0, 표본 3개부터 사장님 중앙값. 시험: node 시험/운동체중-시험.mjs */
-  liftBefore(ds){const L=this.state.lifts||{};for(let i=0;i<=3;i++){const d=this.addDays(ds,-i);if((L[d]||[]).length)return {d,n:i,name:L[d].map(x=>x.name).join('·')}}return null}
+  /* 근력 기록 = lifts(세트·횟수) + workouts 의 근력 칩(하체·등·가슴+어깨, 분). 사장님은 시간 칩으로 적으시므로 둘 다 센다 (2026-11-02 「민낯 적용 안 됨」) */
+  liftMap(){const L=this.state.lifts||{},O=this.state.workouts||{},M={};for(const d of Object.keys(L))if((L[d]||[]).length)M[d]=L[d].slice();for(const d of Object.keys(O)){const o=O[d]||{};const ks=['하체','등','가슴+어깨'].filter(k=>+o[k]>0);if(ks.length)M[d]=(M[d]||[]).concat(ks.map(k=>({name:k,min:+o[k]})))}return M}
+  liftBefore(ds){const L=this.liftMap();for(let i=0;i<=3;i++){const d=this.addDays(ds,-i);if((L[d]||[]).length)return {d,n:i,name:L[d].map(x=>x.name).join('·')}}return null}
   nakedAt(ds){const W=this.state.weights||{};for(let i=0;i<28;i++){const d=this.addDays(ds,-i),w=W[d],l=this.liftBefore(d);if(w&&w.a!=null&&!(l&&l.n>0))return {d,w:+w.a}}return null}
-  scaleKind(ds){const W=this.state.weights||{},L=this.state.lifts||{},lb=this.liftBefore(ds),samp=[];
+  scaleKind(ds){const W=this.state.weights||{},L=this.liftMap(),lb=this.liftBefore(ds),samp=[];
     for(const ld of Object.keys(L)){if(!(L[ld]||[]).length||ld>=ds)continue;let after=null;for(let i=1;i<=2;i++){const w=W[this.addDays(ld,i)];if(w&&w.a!=null){after=+w.a;break}}const base=this.nakedAt(ld);if(after!=null&&base)samp.push(+(after-base.w).toFixed(1))}
     samp.sort((a,b)=>a-b);const mine=samp.length>=3?samp[Math.floor(samp.length/2)]:null;const naked=this.nakedAt(ds);
     return {kind:lb&&lb.n>0?'운동':'민낯',lift:lb,naked,prev:naked?this.nakedAt(this.addDays(naked.d,-1)):null,today:(W[ds]&&W[ds].a!=null)?+W[ds].a:null,n:samp.length,
       band:mine!=null?{lbl:'내 평균',txt:(mine>=0?'+':'')+mine.toFixed(1)}:{lbl:'예상',txt:'+0.5~1.0'}}}
-  sbText(ds){const L=this.state.lifts||{};if(!Object.keys(L).some(d=>(L[d]||[]).length))return '';
+  sbText(ds){const L=this.liftMap();if(!Object.keys(L).some(d=>(L[d]||[]).length))return '';
     const k=this.scaleKind(ds),md=d=>(+d.slice(5,7))+'/'+(+d.slice(8,10)),nk=k.naked?' 민낯은 '+k.naked.w.toFixed(1)+' ('+md(k.naked.d)+').':'';
     if(k.lift&&k.lift.n>0)return k.today!=null?'⚖ 오늘 '+k.today.toFixed(1)+' = 운동 체중 ('+k.lift.name+' +'+k.lift.n+'일, '+k.band.lbl+' '+k.band.txt+').'+nk:'⚖ 오늘은 운동 체중 날이에요 ('+k.lift.name+' +'+k.lift.n+'일, 저울 '+k.band.txt+' 떠요).'+nk;
     if(k.lift)return '⚖ 오늘 근력 — 내일·모레 저울은 '+k.band.txt+' 떠요.'+nk;
     if(k.today!=null)return '⚖ 오늘 '+k.today.toFixed(1)+' = 민낯.'+(k.prev?' 지난 민낯('+md(k.prev.d)+')보다 '+((k.today-k.prev.w)>=0?'+':'')+(k.today-k.prev.w).toFixed(1)+'.':'');
     return k.naked?'⚖ 마지막 민낯 '+k.naked.w.toFixed(1)+' ('+md(k.naked.d)+').':''}
-  kindTag(ds){const L=this.state.lifts||{};if(!ds||!Object.keys(L).some(d=>(L[d]||[]).length))return {kindShow:false,kind:'',kindBg:'',kindColor:''};const lb=this.liftBefore(ds);return lb&&lb.n>0?{kindShow:true,kind:'운동 체중',kindBg:'#EDE7FF',kindColor:'#7C5CE6'}:{kindShow:true,kind:'민낯',kindBg:'#E9E7E1',kindColor:'#5C594E'}}
+  kindTag(ds){const L=this.liftMap();if(!ds||!Object.keys(L).some(d=>(L[d]||[]).length))return {kindShow:false,kind:'',kindBg:'',kindColor:''};const lb=this.liftBefore(ds);return lb&&lb.n>0?{kindShow:true,kind:'운동 체중',kindBg:'#EDE7FF',kindColor:'#7C5CE6'}:{kindShow:true,kind:'민낯',kindBg:'#E9E7E1',kindColor:'#5C594E'}}
   /* 목표·달성 판정용 「지금 체중」 = 민낯(근력 뒤 1~3일 운동 체중은 건너뛴 마지막 체중). 사장님 2026-10-15 「민낯 체중으로 목표 도달하면 성공했다 하자」 */
   nakedNow(){const n=this.nakedAt(this.TODAY);return n?n.w:null}
   /* 「지금」 칸 큰 숫자는 민낯(weekPlan().cur)이고, 저울 그대로는 그 밑 작은 글로 */
   nowSub(){const W=this.state.weights||{};let d=null;for(let i=0;i<28;i++){const x=this.addDays(this.TODAY,-i);if(W[x]&&W[x].a!=null){d=x;break}}const k=this.kindTag(d);if(!k.kindShow)return {subShow:false,sub:'',subColor:''};return {subShow:true,sub:k.kind==='운동 체중'?('저울 '+(+W[d].a).toFixed(1)+' · 운동 체중'):'민낯',subColor:k.kindColor}}
   /* 💪 근력 도장 — 주 2회(트레이닝 스킬 §6 유지 처방)면 저울과 상관없이 「근육 지킴」, 3회는 보너스 ★. 주는 목표와 같은 주(weekStart). 사장님 2026-10-15 「운동을 한 주에 2번, 3번 했을 때 목표 도달을 못해도 상을 받는 기분이 들게」 */
-  liftDays(ws,we){const L=this.state.lifts||{};return Object.keys(L).filter(d=>d>=ws&&d<=we&&(L[d]||[]).length).sort()}
+  liftDays(ws,we){const L=this.liftMap();return Object.keys(L).filter(d=>d>=ws&&d<=we&&(L[d]||[]).length).sort()}
   liftWeek(ds){const ws=this.weekStart(ds||this.TODAY),we=this.addDays(ws,6),days=this.liftDays(ws,we),n=days.length;return {ws,we,days,n,done:n>=2,bonus:n>=3}}
   liftStreak(){let k=0,w=this.liftWeek(this.TODAY);if(!w.done)w=this.liftWeek(this.addDays(w.ws,-1));for(let i=0;i<52&&w.done;i++){k++;w=this.liftWeek(this.addDays(w.ws,-1))}return k}
   liftText(){const w=this.liftWeek(),s=this.liftStreak(),st=s>=2?(' '+s+'주 연속!'):'';if(w.n>=3)return '이번 주 '+w.n+'회 — 근육 지킴 ✓ 보너스 ★. 저울이 뭐라든 이번 주 근육은 확실히 지켰어요.'+st;if(w.n===2)return '이번 주 2회 — 근육 지킴 ✓. 저울이 뭐라든 이번 주 근육은 지켰어요.'+st;if(w.n===1)return '이번 주 1회. 한 번만 더 하면 근육 지킴 도장이에요.';return '이번 주 0회. 2회면 근육 지킴 도장이에요.'}
